@@ -12,48 +12,46 @@ STATUS_CODES = (
     ("F", "Failure"),
 )
 
+STATE_CODES = (
+    ("C", "Currently being Graded"),
+    ("W", "Waiting to be Graded"),
+    ("F", "Finished" )
+    )
+
 class Submission(models.Model):
     next_grader_type=models.CharField(max_length=2, choices=GRADER_TYPE)
     prompt = models.CharField(max_length=200)
-    date_created = models.DateTimeField('date created')
+    date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    student_id = models.IntegerField()
+    student_id = models.CharField(max_length=200)
     problem_id = models.CharField(max_length=200)
     course_id = models.CharField(max_length=200)
+    state = models.CharField(max_length=1, choices= STATE_CODES)
 
-    #grader type, problem id, prompt, course id, score, student id, state/version blob, and peer grader student id.
+class PeerGrader(Grader):
+    pass
 
-class PeerGrader(models.Model):
-    submission = models.ForeignKey('Submission')
-    peer_grader_id = models.CharField(max_length=200)
-    score = models.IntegerField()
-    status_code = models.CharField(max_length=1,choices=STATUS_CODES)
-    date_created = models.DateTimeField('date created')
-    date_modified= models.DateTimeField(auto_now=True)
+class MLGrader(Grader):
+    confidence=models.DecimalField(max_digits=10, decimal_places=9)
 
-class MLGrader(models.Model):
-    submission = models.ForeignKey('Submission')
-    score=models.IntegerField()
-    ml_confidence=models.DecimalField(max_digits=10, decimal_places=10)
-    status_code = models.CharField(max_length=1,choices=STATUS_CODES)
-    ml_grader_id = models.CharField(max_length=200)
-    date_created = models.DateTimeField('date created')
-    date_modified= models.DateTimeField(auto_now=True)
+class InstructorGrader(Grader):
+    pass
 
-class InstructorGrader(models.Model):
+class SelfAssessmentGrader(Grader):
+    pass
+
+
+class Grader(models.Model):
     submission = models.ForeignKey('Submission')
     score=models.IntegerField()
+    feedback = models.CharField(max_length=2000)
     status_code = models.CharField(max_length=1,choices=STATUS_CODES)
-    instructor_id=models.CharField(max_length=200)
-    date_created = models.DateTimeField('date created')
+    date_created = models.DateTimeField(auto_now_add=True)
     date_modified= models.DateTimeField(auto_now=True)
+    grader_id=models.CharField(max_length=200)
 
-class SelfAssessmentGrader(models.Model):
-    submission = models.ForeignKey('Submission')
-    score=models.IntegerField()
-    status_code = models.CharField(max_length=1,choices=STATUS_CODES)
-    date_created = models.DateTimeField('date created')
-    date_modified= models.DateTimeField(auto_now=True)
+    class Meta:
+        abstract = True
 
 
 
