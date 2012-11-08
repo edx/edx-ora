@@ -1,0 +1,10 @@
+.idea/
+__pycache__/
+models/
+*.pyc
+*~
+*.csv
+*.tsv
+*.conf
+*.db
+essaydb
