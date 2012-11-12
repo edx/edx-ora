@@ -1,17 +1,22 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, url
 
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+# General
+#------------------------------------------------------------
+urlpatterns = patterns('controller.views',
+    url(r'^login/$', 'log_in'),
+    url(r'^logout/$', 'log_out'),
+    url(r'^status/$', 'status'),
+)
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'grading_controller.views.home', name='home'),
-    # url(r'^grading_controller/', include('grading_controller.foo.urls')),
+# Xqueue submission interface (xqueue pull script uses this)
+#------------------------------------------------------------
+urlpatterns += patterns('controller.xqueue_interface',
+    url(r'^submit/$', 'submit'),
+)
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+# Grader pull interface
+#------------------------------------------------------------
+urlpatterns += patterns('controller.grader_interface',
+    url(r'^get_submission/$', 'get_submission'),
+    url(r'^put_result/$', 'put_result'),
 )

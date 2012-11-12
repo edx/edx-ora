@@ -34,6 +34,8 @@ class Command(BaseCommand):
                     log.debug(content)
 
                     #Post to grading controller here!
+                    if return_code==0:
+                        #Post to controller
 
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
@@ -110,7 +112,7 @@ def parse_xobject(xobject):
     try:
         xobject = json.loads(xobject)
 
-        header = json.loads(xobject['xqueue_header'])
+        header= json.loads(xobject['xqueue_header'])
         body=json.loads(xobject['xqueue_body'])
 
         content={'header' : header,
