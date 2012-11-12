@@ -55,16 +55,16 @@ class Command(BaseCommand):
         Get a single submission from xqueue
         """
         try:
-            response = self._http_get(urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submissions/'),
+            response = self._http_get(urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submission/'),
                 {'queue_name' : queue_name})
-        except:
-            return "Error getting response."
+        except Exception as err:
+            return "Error getting response: {0}".format(err)
 
         return response
 
     def _http_get(self,url, data):
         try:
-            r = self.s.get(url, data)
+            r = self.s.get(url, params=data)
         except requests.exceptions.ConnectionError, err:
             log.error(err)
             return (1, 'cannot connect to server')
