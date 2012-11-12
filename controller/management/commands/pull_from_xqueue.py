@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 import requests
 import urlparse
-
+import time
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class Command(BaseCommand):
         Constant loop that pulls from queue and posts to grading controller
         """
         log.info(' [*] Pulling from xqueues...')
+        self.s=requests.session()
 
         flag=True
         error = self.login()
@@ -28,36 +29,42 @@ class Command(BaseCommand):
             for queue_name in args:
                 queue_item=self.get_from_queue(queue_name)
                 log.debug(queue_item)
+                time.sleep(2)
 
-    def login():
+    def login(self):
         '''
         Login to xqueue to pull submissions
         '''
-        full_login_url = urlparse.join(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        full_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
 
-        response = requests.post(login_url,params= {'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
-                                            'password':XQUEUE_INTERFACE['django_auth']['password']})
-        (error,_) = parse_xreply(response.content)
+        response = self.s.post(full_login_url,{'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
+                                            'password': settings.XQUEUE_INTERFACE['django_auth']['password']})
+
+        response.raise_for_status()
+        log.debug("login response: %r", response.json)
+
+        log.debug(response.content)
+        (error,msg)= parse_xreply(response.content)
 
         log.debug(error)
 
         return error
 
-    def get_from_queue(queue_name):
+    def get_from_queue(self,queue_name):
         """
         Get a single submission from xqueue
         """
         try:
-            response = self._http_get(urlparse.join(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submissions/'),
+            response = self._http_get(urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submissions/'),
                 {'queue_name' : queue_name})
         except:
             return "Error getting response."
 
         return response
 
-    def _http_get(self, url, data):
+    def _http_get(self,url, data):
         try:
-            r = requests.get(url, params=data)
+            r = self.s.get(url, data)
         except requests.exceptions.ConnectionError, err:
             log.error(err)
             return (1, 'cannot connect to server')
@@ -96,3 +103,20 @@ class Command(BaseCommand):
 
                 orphaned_submission.retired = True # NOTE: Retiring pushed submissions after one shot regardless of grading_success
                 orphaned_submission.save()
+
+def parse_xreply(xreply):
+    """
+    Parse the reply from xqueue. Messages are JSON-serialized dict:
+        { 'return_code': 0 (success), 1 (fail)
+          'content': Message from xqueue (string)
+        }
+    """
+    try:
+        xreply = json.loads(xreply)
+    except ValueError, err:
+        log.error(err)
+        return (1, 'unexpected reply from server')
+
+    return_code = xreply['return_code']
+    content = xreply['content']
+    return (return_code, content)
