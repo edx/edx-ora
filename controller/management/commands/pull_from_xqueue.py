@@ -16,27 +16,57 @@ class Command(BaseCommand):
     help = "Pull items from given queues and send to grading controller"
 
     def handle(self, *args, **options):
+        """
+        Constant loop that pulls from queue and posts to grading controller
+        """
         log.info(' [*] Pulling from xqueues...')
-        flag=TRUE
 
-        
+        flag=True
+        error = self.login()
+
         while flag:
             for queue_name in args:
-                orphaned_submissions = Submission.objects.filter(queue_name=queue_name, push_time=None, return_time=None, retired=False)
-                self.push_orphaned_submissions(orphaned_submissions)
+                queue_item=self.get_from_queue(queue_name)
+                log.debug(queue_item)
 
     def login():
         '''
-        Test Xqueue login behavior. Particularly important is the response for GET (e.g. by redirect)
+        Login to xqueue to pull submissions
         '''
-        c = Client()
         full_login_url = urlparse.join(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
 
-        response = requests.post(login_url,{'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
+        response = requests.post(login_url,params= {'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
                                             'password':XQUEUE_INTERFACE['django_auth']['password']})
         (error,_) = parse_xreply(response.content)
 
+        log.debug(error)
+
         return error
+
+    def get_from_queue(queue_name):
+        """
+        Get a single submission from xqueue
+        """
+        try:
+            response = self._http_get(urlparse.join(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submissions/'),
+                {'queue_name' : queue_name})
+        except:
+            return "Error getting response."
+
+        return response
+
+    def _http_get(self, url, data):
+        try:
+            r = requests.get(url, params=data)
+        except requests.exceptions.ConnectionError, err:
+            log.error(err)
+            return (1, 'cannot connect to server')
+
+        if r.status_code not in [200]:
+            return (1, 'unexpected HTTP status code [%d]' % r.status_code)
+
+        return parse_xreply(r.text)
+
 
     def push_orphaned_submissions(self, orphaned_submissions):
         for orphaned_submission in orphaned_submissions:
