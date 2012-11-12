@@ -7,6 +7,7 @@ from django.utils import timezone
 import requests
 import urlparse
 import time
+import json
 
 log = logging.getLogger(__name__)
 
@@ -28,9 +29,10 @@ class Command(BaseCommand):
         while flag:
             for queue_name in args:
                 try:
-                    queue_item=self.get_from_queue(queue_name)
-                    log.debug(parse_xreply(queue_item))
-                    
+                    response_code,queue_item=self.get_from_queue(queue_name)
+                    return_code,content=parse_xobject(queue_item)
+                    log.debug(content)
+
                     #Post to grading controller here!
 
                 except Exception as err:
@@ -96,4 +98,26 @@ def parse_xreply(xreply):
 
     return_code = xreply['return_code']
     content = xreply['content']
-    return (return_code, content)
+    return return_code, content
+
+def parse_xobject(xobject):
+    """
+    Parse a queue object from xqueue:
+        { 'return_code': 0 (success), 1 (fail)
+          'content': Message from xqueue (string)
+        }
+    """
+    try:
+        xobject = json.loads(xobject)
+
+        header = json.loads(xobject['xqueue_header'])
+        body=json.loads(xobject['xqueue_body'])
+
+        content={'header' : header,
+            'body' : body
+        }
+    except ValueError, err:
+        log.error(err)
+        return (1, 'unexpected reply from server')
+
+    return 0, content
