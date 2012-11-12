@@ -115,8 +115,8 @@ def parse_xobject(xobject):
         header= json.loads(xobject['xqueue_header'])
         body=json.loads(xobject['xqueue_body'])
 
-        content={'header' : header,
-            'body' : body
+        content={'xqueue_header' : header,
+            'xqueue_body' : body
         }
     except ValueError, err:
         log.error(err)
