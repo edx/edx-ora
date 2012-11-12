@@ -28,7 +28,13 @@ def submit(request):
             try:
                 {'body': {u'student_response': u'Enter essay here.', u'grader_payload': u'{"student_id": "5afe5d9bb03796557ee2614f5c9611fb", "grader": "tests/models/essay_set_1.p", "problem_id": "6.002x/Welcome/OETest"}', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121112162523"}'}, 'header': {u'submission_id': 152, u'submission_key': u'e2c6c41ead3137081f882cc7a86ef461'}}
                 prompt=_value_or_default(body['prompt'],"")
-                student_id=
+                student_id=_value_or_default(body['student_info']['anonymous_student_id'])
+                problem_id=_value_or_default(body['grader_payload']['problem_id'])
+                submission_time_string=_value_or_default(body['student_info']['submission_time'])
+                grader_settings=_value_or_default(body['grader_payload']['grader'],"")
+                student_response=_value_or_default(body['student_response'])
+                xqueue_submission_id=_value_or_default(header['submission_id'])
+                xqueue_submission_key=_value_or_default(header['submission_key'])
 
                 sub = Submission(prompt=)
             except Submission.DoesNotExist:
@@ -62,7 +68,7 @@ def _value_or_default(value,default=None):
         return default
     else:
         error="Needed value not passed by xqueue."
-        #Fix in future to fail in a more robust way
+        #TODO: Fix in future to fail in a more robust way
         raise Exception(error)
 
 def _is_valid_reply(external_reply):

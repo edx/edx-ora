@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 GRADER_TYPE = (
     ('ML', 'ML'),
@@ -23,13 +24,17 @@ CHARFIELD_LEN_SMALL = 128
 
 class Submission(models.Model):
     next_grader=models.CharField(max_length=2, choices=GRADER_TYPE)
-    prompt = models.TextField()
+    prompt = models.TextField(default="")
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     state = models.CharField(max_length=1, choices= STATE_CODES)
+    student_response = models.TextField(default="")
+    student_submission_time=models.DateTimeField(default=datetime.datetime.now)
+    xqueue_submission_id=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
+    xqueue_submission_key=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
 
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}\n".format(
