@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+import datetime
 
 from controller.models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
 
@@ -35,8 +36,22 @@ def submit(request):
                 student_response=_value_or_default(body['student_response'])
                 xqueue_submission_id=_value_or_default(header['submission_id'])
                 xqueue_submission_key=_value_or_default(header['submission_key'])
+                state_code="W"
+                student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
 
-                sub = Submission(prompt=)
+                sub, created = Submission.objects.get_or_create(
+                    prompt=prompt,
+                    student_id=student_id,
+                    problem_id=problem_id,
+                    state=state_code,
+                    student_response=student_response,
+                    student_submission_time=student_submission_time,
+                    xqueue_submission_id=xqueue_submission_id,
+                    xqueue_submission_key=xqueue_submission_key,
+                )
+
+                sub.save()
+
             except Submission.DoesNotExist:
                 log.error("Grader submission_id refers to nonexistent entry in Submission DB: grader: {0}, submission_id: {1}, submission_key: {2}, grader_reply: {3}".format(
                     get_request_ip(request),
