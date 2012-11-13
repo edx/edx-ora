@@ -23,7 +23,9 @@ STATE_CODES = (
 CHARFIELD_LEN_SMALL = 128
 
 class Submission(models.Model):
-    next_grader=models.CharField(max_length=2, choices=GRADER_TYPE)
+    next_grader_type=models.CharField(max_length=2, choices=GRADER_TYPE,default="NA")
+    previous_grader_type=models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
+
     prompt = models.TextField(default="")
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -46,12 +48,19 @@ class Submission(models.Model):
         return sub_row
 
     def get_all_graders(self):
-        pass
+        return self.grader_set.all()
 
     def get_last_grader(self):
-        pass
+        all_graders=self.get_all_graders()
+        grader_times=[x.date_created for x in all_graders]
+        last_grader=all_graders[grader_times.index(max(grader_times))]
+        return last_grader
 
-
+    def set_previous_grader_type(self):
+        last_grader=self.get_last_grader()
+        self.previous_grader_type=last_grader.grader_type
+        self.save()
+        return "Save ok."
 
 class Grader(models.Model):
     submission = models.ForeignKey('Submission')

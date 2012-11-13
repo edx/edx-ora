@@ -62,10 +62,7 @@ def submit(request):
                     location=location,
                 )
 
-                log.debug(sub)
-                log.debug("Created successfully!")
 
-                sub.save()
 
             except Exception as err:
                 xqueue_submission_id=_value_or_default(header['submission_id'])
@@ -79,11 +76,25 @@ def submit(request):
 
             #Handle submission after writing it to db
 
-            return HttpResponse(compose_reply(success=True, content=''))
+            success=handle_submission(sub.id)
 
-def handle_submission(submission_id):
-    sub=Submissions.objects.get(id=submission_id)
-    subs_with_location=Submissions.objects.filter(location=sub.location, final_grader__in=["IN"])
+            return HttpResponse(compose_reply(success=success, content=''))
+
+def handle_submission(sub):
+    try:
+        subs_with_location=Submissions.objects.filter(location=sub.location, previous_grader_type__in=["IN"])
+        if(len(subs_with_location)>MIN_TO_USE_ML):
+            sub.next_grader_type="ML"
+        else:
+            sub.next_grader_type="IN"
+
+        sub.save()
+        log.debug("Created successfully!")
+    except:
+        return False
+
+    return True
+
 
 
 
