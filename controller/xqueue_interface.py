@@ -32,46 +32,48 @@ def submit(request):
             ))
             return HttpResponse(compose_reply(False, 'Incorrect format'))
         else:
-            try:
-                prompt=_value_or_default(body['prompt'],"")
-                student_id=_value_or_default(body['student_info']['anonymous_student_id'])
-                location=_value_or_default(body['grader_payload']['location'])
-                problem_id=_value_or_default(body['grader_payload']['problem_id'],location)
-                grader_settings=_value_or_default(body['grader_payload']['grader'],"")
-                student_response=_value_or_default(body['student_response'])
+            prompt=_value_or_default(body['grader_payload']['prompt'],"")
+            student_id=_value_or_default(body['student_info']['anonymous_student_id'])
+            location=_value_or_default(body['grader_payload']['location'])
+            problem_id=_value_or_default(body['grader_payload']['problem_id'],location)
+            grader_settings=_value_or_default(body['grader_payload']['grader'],"")
+            student_response=_value_or_default(body['student_response'])
+            xqueue_submission_id=_value_or_default(header['submission_id'])
+            xqueue_submission_key=_value_or_default(header['submission_key'])
+            state_code="W"
+            xqueue_queue_name=_value_or_default(header["queue_name"])
+
+            submission_time_string=_value_or_default(body['student_info']['submission_time'])
+            student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
+
+            sub, created = Submission.objects.get_or_create(
+                prompt=prompt,
+                student_id=student_id,
+                problem_id=problem_id,
+                state=state_code,
+                student_response=student_response,
+                student_submission_time=student_submission_time,
+                xqueue_submission_id=xqueue_submission_id,
+                xqueue_submission_key=xqueue_submission_key,
+                xqueue_queue_name=xqueue_queue_name,
+                location=location,
+            )
+
+            log.debug(sub)
+            log.debug("Created successfully!")
+
+            sub.save()
+            """
+            except Exception as err:
                 xqueue_submission_id=_value_or_default(header['submission_id'])
                 xqueue_submission_key=_value_or_default(header['submission_key'])
-                state_code="W"
-                xqueue_queue_name=_value_or_default(header["queue_name"])
-
-                submission_time_string=_value_or_default(body['student_info']['submission_time'])
-                student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
-
-                sub, created = Submission.objects.get_or_create(
-                    prompt=prompt,
-                    student_id=student_id,
-                    problem_id=problem_id,
-                    state=state_code,
-                    student_response=student_response,
-                    student_submission_time=student_submission_time,
-                    xqueue_submission_id=xqueue_submission_id,
-                    xqueue_submission_key=xqueue_submission_key,
-                    xqueue_queue_name=xqueue_queue_name,
-                    location=location,
-                )
-
-                log.debug(sub)
-                log.debug("Created successfully!")
-
-                sub.save()
-
-            except Exception as err:
                 log.error("Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
                     util.get_request_ip(request),
                     xqueue_submission_id,
                     xqueue_submission_key,
                 ))
-                return HttpResponse(compose_reply(False,'Submission does not exist'))
+                return HttpResponse(compose_reply(False,'Unable to create submission.'))
+            """
 
             #Handle submission after writing it to db
 
@@ -102,23 +104,16 @@ def _is_valid_reply(external_reply):
     '''
     fail = (False,-1,'')
 
-    external_reply=json.loads(external_reply)
     try:
         header = json.loads(external_reply['xqueue_header'])
         body = json.loads(external_reply['xqueue_body'])
     except KeyError:
-        log.debug("Can't parse")
         return fail
 
     if not isinstance(header,dict) or not isinstance(body,dict):
-        log.debug("Not dicts")
-        log.debug(header)
-        log.debug(body)
-        log.debug(type(header))
-        log.debug(type(body))
         return fail
 
-    for tag in ['submission_id', 'submission_key']:
+    for tag in ['submission_id', 'submission_key', 'queue_name']:
         if not header.has_key(tag):
             log.debug("{0} not found in header".format(tag))
             return fail
@@ -127,6 +122,12 @@ def _is_valid_reply(external_reply):
         if not body.has_key(tag):
             log.debug("{0} not found in body".format(tag))
             return fail
+
+    try:
+        body['grader_payload']=json.loads(body['grader_payload'])
+        body['student_info']=json.loads(body['student_info'])
+    except:
+        return fail
 
     return True,header,body
 

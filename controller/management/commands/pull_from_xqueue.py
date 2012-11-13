@@ -155,9 +155,9 @@ def parse_xobject(xobject,queue_name):
         header.update({'queue_name' : queue_name})
         body=json.loads(xobject['xqueue_body'])
 
-        content=json.dumps({'xqueue_header' : json.dumps(header),
+        content={'xqueue_header' : json.dumps(header),
             'xqueue_body' : json.dumps(body)
-        })
+        }
     except ValueError, err:
         log.error(err)
         return (1, 'unexpected reply from server')
