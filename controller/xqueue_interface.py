@@ -13,6 +13,8 @@ import json
 
 log = logging.getLogger(__name__)
 
+MIN_TO_USE_ML=100
+
 @csrf_exempt
 @login_required
 def submit(request):
@@ -81,7 +83,7 @@ def submit(request):
 
 def handle_submission(submission_id):
     sub=Submissions.objects.get(id=submission_id)
-    subs_with_problem_id=Submissions.objects.filter(location=sub.location)
+    subs_with_location=Submissions.objects.filter(location=sub.location)
 
 
 
