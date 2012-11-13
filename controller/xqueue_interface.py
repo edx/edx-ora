@@ -35,18 +35,18 @@ def submit(request):
             return HttpResponse(compose_reply(False, 'Incorrect format'))
         else:
             try:
-                prompt=_value_or_default(body['grader_payload']['prompt'],"")
-                student_id=_value_or_default(body['student_info']['anonymous_student_id'])
-                location=_value_or_default(body['grader_payload']['location'])
-                problem_id=_value_or_default(body['grader_payload']['problem_id'],location)
-                grader_settings=_value_or_default(body['grader_payload']['grader'],"")
-                student_response=_value_or_default(body['student_response'])
-                xqueue_submission_id=_value_or_default(header['submission_id'])
-                xqueue_submission_key=_value_or_default(header['submission_key'])
+                prompt=util._value_or_default(body['grader_payload']['prompt'],"")
+                student_id=util._value_or_default(body['student_info']['anonymous_student_id'])
+                location=util._value_or_default(body['grader_payload']['location'])
+                problem_id=util._value_or_default(body['grader_payload']['problem_id'],location)
+                grader_settings=util._value_or_default(body['grader_payload']['grader'],"")
+                student_response=util._value_or_default(body['student_response'])
+                xqueue_submission_id=util._value_or_default(header['submission_id'])
+                xqueue_submission_key=util._value_or_default(header['submission_key'])
                 state_code="W"
-                xqueue_queue_name=_value_or_default(header["queue_name"])
+                xqueue_queue_name=util._value_or_default(header["queue_name"])
 
-                submission_time_string=_value_or_default(body['student_info']['submission_time'])
+                submission_time_string=util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
 
                 sub, created = Submission.objects.get_or_create(
@@ -62,11 +62,9 @@ def submit(request):
                     location=location,
                 )
 
-
-
             except Exception as err:
-                xqueue_submission_id=_value_or_default(header['submission_id'])
-                xqueue_submission_key=_value_or_default(header['submission_key'])
+                xqueue_submission_id=util._value_or_default(header['submission_id'])
+                xqueue_submission_key=util._value_or_default(header['submission_key'])
                 log.error("Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
                     util.get_request_ip(request),
                     xqueue_submission_id,
@@ -74,7 +72,7 @@ def submit(request):
                 ))
                 return HttpResponse(compose_reply(False,'Unable to create submission.'))
 
-            #Handle submission after writing it to db
+            #Handle submission and write to db
 
             success=handle_submission(sub)
 
@@ -104,19 +102,6 @@ def handle_submission(sub):
         return False
 
     return True
-
-
-
-
-def _value_or_default(value,default=None):
-    if value is not None:
-        return value
-    elif default is not None:
-        return default
-    else:
-        error="Needed value not passed by xqueue."
-        #TODO: Fix in future to fail in a more robust way
-        raise Exception(error)
 
 def _is_valid_reply(external_reply):
     '''
