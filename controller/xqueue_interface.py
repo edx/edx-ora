@@ -20,6 +20,7 @@ def submit(request):
     else:
         reply_is_valid, header, body = _is_valid_reply(request.POST)
 
+        log.debug("Header: {0}\n Body: {1}".format(header,body))
         if not reply_is_valid:
             log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
                 get_request_ip(request),
@@ -107,7 +108,7 @@ def _is_valid_reply(external_reply):
         if not header.has_key(tag):
             return fail
 
-    for tag in ['grader_payload', 'student_response', 'student_info']
+    for tag in ['grader_payload', 'student_response', 'student_info']:
         if not body.has_key(tag):
             return fail
 

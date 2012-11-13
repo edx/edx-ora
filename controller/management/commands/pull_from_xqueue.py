@@ -37,8 +37,10 @@ class Command(BaseCommand):
                     #Post to grading controller here!
                     if return_code==0:
                         #Post to controller
+                        log.debug("Trying to post.")
                         self._http_post(urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                            '/grading_controller/submit/'))
+                            '/grading_controller/submit/'),content,settings.REQUESTS_TIMEOUT)
+                        log.debug("Successful post!")
                     else:
                         log.error("Error getting queue item.")
 
@@ -52,6 +54,7 @@ class Command(BaseCommand):
         '''
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
         controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+        log.debug(controller_login_url)
 
         xqueue_response = self.xqueue_session.post(xqueue_login_url,
             {'username': settings.XQUEUE_INTERFACE['django_auth']['username'],

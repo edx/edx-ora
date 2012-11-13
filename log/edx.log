@@ -1,0 +1,134 @@
+2012-11-13 11:58:54,607 ERROR 19991 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 111
+    for tag in ['grader_payload', 'student_response', 'student_info']
+                                                                    ^
+SyntaxError: invalid syntax
+2012-11-13 11:58:54,607 ERROR 19991 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 111
+    for tag in ['grader_payload', 'student_response', 'student_info']
+                                                                    ^
+SyntaxError: invalid syntax
+2012-11-13 12:02:23,330 ERROR 20298 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+    from controller.models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
+ImportError: No module named models
+2012-11-13 12:02:23,330 ERROR 20298 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+    from controller.models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
+ImportError: No module named models
+2012-11-13 12:09:18,435 ERROR 20985 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+ImportError: No module named models
+2012-11-13 12:09:18,435 ERROR 20985 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+ImportError: No module named models
