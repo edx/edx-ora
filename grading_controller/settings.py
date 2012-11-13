@@ -38,6 +38,14 @@ XQUEUE_INTERFACE = {
     "basic_auth": ('anant', 'agarwal'),
 }
 
+GRADING_CONTROLLER_INTERFACE = {
+    url : "http://127.0.0.1:3033",
+    django_auth : {
+        "username" : "xqueue_pull",
+        "password" : "abcd",
+    }
+}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.

@@ -21,7 +21,7 @@ class Command(BaseCommand):
         Constant loop that pulls from queue and posts to grading controller
         """
         log.info(' [*] Pulling from xqueues...')
-        self.s=requests.session()
+        self.xqueue_session=requests.session()
 
         flag=True
         error = self.login()
@@ -36,6 +36,7 @@ class Command(BaseCommand):
                     #Post to grading controller here!
                     if return_code==0:
                         #Post to controller
+                        pass
 
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
@@ -47,7 +48,7 @@ class Command(BaseCommand):
         '''
         full_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
 
-        response = self.s.post(full_login_url,{'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
+        response = self.xqueue_session.post(full_login_url,{'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
                                             'password': settings.XQUEUE_INTERFACE['django_auth']['password']})
 
         response.raise_for_status()
@@ -74,7 +75,7 @@ class Command(BaseCommand):
 
     def _http_get(self,url, data):
         try:
-            r = self.s.get(url, params=data)
+            r = self.xqueue_session.get(url, params=data)
         except requests.exceptions.ConnectionError, err:
             log.error(err)
             return (1, 'cannot connect to server')
