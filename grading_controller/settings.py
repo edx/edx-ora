@@ -17,6 +17,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 REQUESTS_TIMEOUT = 5    # seconds
+TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 
 DATABASES = {
     'default': {

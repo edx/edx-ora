@@ -7,7 +7,7 @@ from datetime import datetime
 from views import compose_reply
 import logging
 
-from models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
+from models import Submission,Grader
 import util
 import json
 
@@ -76,23 +76,23 @@ def submit(request):
 
             #Handle submission after writing it to db
 
-            success=handle_submission(sub.id)
+            success=handle_submission(sub)
 
             return HttpResponse(compose_reply(success=success, content=''))
 
 def handle_submission(sub):
     try:
-        subs_graded_by_instructor=Submissions.objects.filter(location=sub.location,
+        subs_graded_by_instructor=Submission.objects.filter(location=sub.location,
             previous_grader_type__in=["IN"],
             state__in=["F"],
         )
 
-        subs_pending_instructor=Submissions.objects.filter(location=sub.location,
+        subs_pending_instructor=Submission.objects.filter(location=sub.location,
             next_grader_type__in=["IN"],
             state__in=["C","W"],
         )
 
-        if((len(subs_grader_by_instructor)+len(subs_pending_instructor))>=MIN_TO_USE_ML):
+        if((len(subs_graded_by_instructor)+len(subs_pending_instructor))>=MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
             sub.next_grader_type="IN"
@@ -100,6 +100,7 @@ def handle_submission(sub):
         sub.save()
         log.debug("Created successfully!")
     except:
+        log.debug("Creation failed!")
         return False
 
     return True

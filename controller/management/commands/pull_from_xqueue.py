@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
-                time.sleep(2)
+                time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
     def login(self):
         '''
