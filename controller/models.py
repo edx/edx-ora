@@ -44,7 +44,8 @@ class Submission(models.Model):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
             self.student_id,self.course_id,self.problem_id)
         sub_row+= "Submission created at {0} and modified at {1}.  ".format(self.date_created,self.date_modified)
-        sub_row+= "Current state is {0} and next grader is {1}.".format(self.state,self.next_grader)
+        sub_row+= "Current state is {0}, next grader is {1},".format(self.state,self.next_grader_type)
+        sub_row+=" previous grader is {0}".format(self.previous_grader_type)
         return sub_row
 
     def get_all_graders(self):

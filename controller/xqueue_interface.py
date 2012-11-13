@@ -82,8 +82,17 @@ def submit(request):
 
 def handle_submission(sub):
     try:
-        subs_with_location=Submissions.objects.filter(location=sub.location, previous_grader_type__in=["IN"])
-        if(len(subs_with_location)>MIN_TO_USE_ML):
+        subs_graded_by_instructor=Submissions.objects.filter(location=sub.location,
+            previous_grader_type__in=["IN"],
+            state__in=["F"],
+        )
+
+        subs_pending_instructor=Submissions.objects.filter(location=sub.location,
+            next_grader_type__in=["IN"],
+            state__in=["C","W"],
+        )
+
+        if((len(subs_grader_by_instructor)+len(subs_pending_instructor))>=MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
             sub.next_grader_type="IN"
