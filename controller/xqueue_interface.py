@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-import datetime
+from datetime import datetime
 from views import compose_reply
 import logging
 
@@ -32,38 +32,39 @@ def submit(request):
             ))
             return HttpResponse(compose_reply(False, 'Incorrect format'))
         else:
-            prompt=_value_or_default(body['grader_payload']['prompt'],"")
-            student_id=_value_or_default(body['student_info']['anonymous_student_id'])
-            location=_value_or_default(body['grader_payload']['location'])
-            problem_id=_value_or_default(body['grader_payload']['problem_id'],location)
-            grader_settings=_value_or_default(body['grader_payload']['grader'],"")
-            student_response=_value_or_default(body['student_response'])
-            xqueue_submission_id=_value_or_default(header['submission_id'])
-            xqueue_submission_key=_value_or_default(header['submission_key'])
-            state_code="W"
-            xqueue_queue_name=_value_or_default(header["queue_name"])
+            try:
+                prompt=_value_or_default(body['grader_payload']['prompt'],"")
+                student_id=_value_or_default(body['student_info']['anonymous_student_id'])
+                location=_value_or_default(body['grader_payload']['location'])
+                problem_id=_value_or_default(body['grader_payload']['problem_id'],location)
+                grader_settings=_value_or_default(body['grader_payload']['grader'],"")
+                student_response=_value_or_default(body['student_response'])
+                xqueue_submission_id=_value_or_default(header['submission_id'])
+                xqueue_submission_key=_value_or_default(header['submission_key'])
+                state_code="W"
+                xqueue_queue_name=_value_or_default(header["queue_name"])
 
-            submission_time_string=_value_or_default(body['student_info']['submission_time'])
-            student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
+                submission_time_string=_value_or_default(body['student_info']['submission_time'])
+                student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
 
-            sub, created = Submission.objects.get_or_create(
-                prompt=prompt,
-                student_id=student_id,
-                problem_id=problem_id,
-                state=state_code,
-                student_response=student_response,
-                student_submission_time=student_submission_time,
-                xqueue_submission_id=xqueue_submission_id,
-                xqueue_submission_key=xqueue_submission_key,
-                xqueue_queue_name=xqueue_queue_name,
-                location=location,
-            )
+                sub, created = Submission.objects.get_or_create(
+                    prompt=prompt,
+                    student_id=student_id,
+                    problem_id=problem_id,
+                    state=state_code,
+                    student_response=student_response,
+                    student_submission_time=student_submission_time,
+                    xqueue_submission_id=xqueue_submission_id,
+                    xqueue_submission_key=xqueue_submission_key,
+                    xqueue_queue_name=xqueue_queue_name,
+                    location=location,
+                )
 
-            log.debug(sub)
-            log.debug("Created successfully!")
+                log.debug(sub)
+                log.debug("Created successfully!")
 
-            sub.save()
-            """
+                sub.save()
+                
             except Exception as err:
                 xqueue_submission_id=_value_or_default(header['submission_id'])
                 xqueue_submission_key=_value_or_default(header['submission_key'])
@@ -73,7 +74,6 @@ def submit(request):
                     xqueue_submission_key,
                 ))
                 return HttpResponse(compose_reply(False,'Unable to create submission.'))
-            """
 
             #Handle submission after writing it to db
 

@@ -132,3 +132,865 @@ Traceback (most recent call last):
     from controller.views import compose_reply
   File "./controller/controller.py", line 11, in <module>
 ImportError: No module named models
+2012-11-13 12:10:59,717 ERROR 21254 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+ImportError: No module named models
+2012-11-13 12:10:59,717 ERROR 21254 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 7, in <module>
+    from controller.views import compose_reply
+  File "./controller/controller.py", line 11, in <module>
+ImportError: No module named models
+2012-11-13 12:11:50,062 ERROR 21369 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 13, in <module>
+    @statsd.timed('xqueue.ext_interface.put_result.time')
+NameError: name 'statsd' is not defined
+2012-11-13 12:11:50,062 ERROR 21369 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 13, in <module>
+    @statsd.timed('xqueue.ext_interface.put_result.time')
+NameError: name 'statsd' is not defined
+2012-11-13 12:12:18,849 WARNING 21460 [django.request] base.py:142 - Not Found: /accounts/login/
+2012-11-13 12:12:18,849 WARNING 21460 [django.request] base.py:142 - Not Found: /accounts/login/
+2012-11-13 12:14:18,790 WARNING 21460 [django.request] base.py:142 - Not Found: /
+2012-11-13 12:14:18,790 WARNING 21460 [django.request] base.py:142 - Not Found: /
+2012-11-13 12:14:19,111 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:19,111 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:27,835 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller
+2012-11-13 12:14:27,835 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller
+2012-11-13 12:14:27,899 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:27,899 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:32,159 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:32,159 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:36,455 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:14:36,455 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:27,592 WARNING 21460 [django.request] base.py:142 - Not Found: /log_in
+2012-11-13 12:16:27,592 WARNING 21460 [django.request] base.py:142 - Not Found: /log_in
+2012-11-13 12:16:27,839 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:27,839 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:33,849 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller/log_in
+2012-11-13 12:16:33,849 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller/log_in
+2012-11-13 12:16:33,910 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:33,910 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:37,671 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:37,671 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:54,535 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:54,535 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:59,464 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:16:59,464 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:01,736 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller/login/username=xqueue_pull&password=abcd
+2012-11-13 12:17:01,736 WARNING 21460 [django.request] base.py:142 - Not Found: /grading_controller/login/username=xqueue_pull&password=abcd
+2012-11-13 12:17:01,805 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:01,805 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:06,833 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:06,833 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:29,736 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:29,736 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:35,372 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:35,372 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:40,702 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:40,702 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:53,080 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:17:53,080 WARNING 21460 [django.request] base.py:142 - Not Found: /favicon.ico
+2012-11-13 12:21:13,393 WARNING 22430 [django.request] base.py:142 - Not Found: /accounts/login/
+2012-11-13 12:21:13,393 WARNING 22430 [django.request] base.py:142 - Not Found: /accounts/login/
+2012-11-13 13:00:13,571 DEBUG 25293 [controller.views] views.py:30 - User : xqueue_pull trying to log in with request <WSGIRequest
+path:/grading_controller/login/,
+GET:<QueryDict: {}>,
+POST:<QueryDict: {u'username': [u'xqueue_pull'], u'password': [u'abcd']}>,
+COOKIES:{},
+META:{'COLORTERM': 'gnome-terminal',
+ 'COMPIZ_BIN_PATH': '/usr/bin/',
+ 'COMPIZ_CONFIG_PROFILE': 'ubuntu',
+ 'CONTENT_LENGTH': '34',
+ 'CONTENT_TYPE': 'application/x-www-form-urlencoded',
+ 'CSRF_COOKIE': 'dCNH2EbQ9ZS1UD4r2vpHUqhFqahu8KEE',
+ 'DBUS_SESSION_BUS_ADDRESS': 'unix:abstract=/tmp/dbus-6dovqCSOjG,guid=94d73e0911b8823996896bc950882d15',
+ 'DEFAULTS_PATH': '/usr/share/gconf/ubuntu.default.path',
+ 'DESKTOP_SESSION': 'ubuntu',
+ 'DISPLAY': ':0',
+ 'DJANGO_SETTINGS_MODULE': 'grading_controller.settings',
+ 'GATEWAY_INTERFACE': 'CGI/1.1',
+ 'GDMSESSION': 'ubuntu',
+ 'GEM_HOME': '/home/vik/mitx_all/ruby/gems/ruby-1.9.3-p194',
+ 'GEM_PATH': '/home/vik/mitx_all/ruby/gems/ruby-1.9.3-p194:/home/vik/mitx_all/ruby/gems/ruby-1.9.3-p194@global',
+ 'GNOME_DESKTOP_SESSION_ID': 'this-is-deprecated',
+ 'GNOME_KEYRING_CONTROL': '/run/user/vik/keyring-GOlJ3f',
+ 'GNOME_KEYRING_PID': '2211',
+ 'GPG_AGENT_INFO': '/run/user/vik/keyring-GOlJ3f/gpg:0:1',
+ 'GTK_MODULES': 'overlay-scrollbar',
+ 'HOME': '/home/vik',
+ 'HTTP_ACCEPT': '*/*',
+ 'HTTP_ACCEPT_ENCODING': 'gzip, deflate, compress',
+ 'HTTP_HOST': '127.0.0.1:3033',
+ 'HTTP_USER_AGENT': 'python-requests/0.14.1 CPython/2.7.3 Linux/3.5.0-17-generic',
+ 'IRBRC': '/home/vik/mitx_all/ruby/rubies/ruby-1.9.3-p194/.irbrc',
+ 'LANG': 'en_US.UTF-8',
+ 'LESSCLOSE': '/usr/bin/lesspipe %s %s',
+ 'LESSOPEN': '| /usr/bin/lesspipe %s',
+ 'LOGNAME': 'vik',
+ 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:',
+ 'MANDATORY_PATH': '/usr/share/gconf/ubuntu.mandatory.path',
+ 'MY_RUBY_HOME': '/home/vik/mitx_all/ruby/rubies/ruby-1.9.3-p194',
+ 'OLDPWD': '/home/vik/mitx_all/grading_controller/grading_controller',
+ 'PATH': '/home/vik/mitx_all/ruby/gems/ruby-1.9.3-p194/bin:/home/vik/mitx_all/ruby/gems/ruby-1.9.3-p194@global/bin:/home/vik/mitx_all/ruby/rubies/ruby-1.9.3-p194/bin:/home/vik/mitx_all/ruby/bin:/home/vik/mitx_all/python/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/vik/.rvm/bin',
+ 'PATH_INFO': u'/grading_controller/login/',
+ 'PS1': '(python)\\[\\e]0;\\u@\\h: \\w\\a\\]${debian_chroot:+($debian_chroot)}\\u@\\h:\\w\\$ ',
+ 'PWD': '/home/vik/mitx_all/grading_controller',
+ 'QUERY_STRING': '',
+ 'REMOTE_ADDR': '127.0.0.1',
+ 'REMOTE_HOST': '',
+ 'REQUEST_METHOD': 'POST',
+ 'RUBY_VERSION': 'ruby-1.9.3-p194',
+ 'RUN_MAIN': 'true',
+ 'SCRIPT_NAME': u'',
+ 'SERVER_NAME': 'localhost',
+ 'SERVER_PORT': '3033',
+ 'SERVER_PROTOCOL': 'HTTP/1.1',
+ 'SERVER_SOFTWARE': 'WSGIServer/0.1 Python/2.7.3',
+ 'SESSION_MANAGER': 'local/vikp:@/tmp/.ICE-unix/2222,unix/vikp:/tmp/.ICE-unix/2222',
+ 'SHELL': '/bin/bash',
+ 'SHLVL': '1',
+ 'SSH_AGENT_PID': '2261',
+ 'SSH_AUTH_SOCK': '/run/user/vik/keyring-GOlJ3f/ssh',
+ 'TERM': 'xterm',
+ 'TZ': 'America/New_York',
+ 'UBUNTU_MENUPROXY': 'libappmenu.so',
+ 'USER': 'vik',
+ 'VIRTUAL_ENV': '/home/vik/mitx_all/python',
+ 'WINDOWID': '50331840',
+ 'XAUTHORITY': '/home/vik/.Xauthority',
+ 'XDG_CONFIG_DIRS': '/etc/xdg/xdg-ubuntu:/etc/xdg',
+ 'XDG_CURRENT_DESKTOP': 'Unity',
+ 'XDG_DATA_DIRS': '/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/',
+ 'XDG_RUNTIME_DIR': '/run/user/vik',
+ 'XDG_SEAT_PATH': '/org/freedesktop/DisplayManager/Seat0',
+ 'XDG_SESSION_COOKIE': 'd915c4621567fde0e63ac2b950861ff4-1351101717.71094-1056537686',
+ 'XDG_SESSION_PATH': '/org/freedesktop/DisplayManager/Session0',
+ '_': '/home/vik/mitx_all/python/bin/django-admin.py',
+ '__array_start': '0',
+ '_first': '0',
+ '_second': '1',
+ 'escape_flag': '1',
+ 'rvm_bin_path': '/home/vik/mitx_all/ruby/bin',
+ 'rvm_path': '/home/vik/mitx_all/ruby',
+ 'rvm_prefix': '/home/vik/mitx_all',
+ 'rvm_version': '1.15.7 (version)',
+ 'wsgi.errors': <open file '<stderr>', mode 'w' at 0x7f00d3609270>,
+ 'wsgi.file_wrapper': <class wsgiref.util.FileWrapper at 0x14542c0>,
+ 'wsgi.input': <socket._fileobject object at 0x7f00cc317950>,
+ 'wsgi.multiprocess': False,
+ 'wsgi.multithread': True,
+ 'wsgi.run_once': False,
+ 'wsgi.url_scheme': 'http',
+ 'wsgi.version': (1, 0)}>
+2012-11-13 13:08:27,220 DEBUG 26027 [controller.views] views.py:32 - Successful login!
+2012-11-13 13:08:34,496 ERROR 26027 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 23, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+ValueError: too many values to unpack
+2012-11-13 13:08:34,496 ERROR 26027 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 23, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+ValueError: too many values to unpack
+2012-11-13 13:09:31,555 DEBUG 26141 [controller.xqueue_interface] xqueue_interface.py:25 - Header: -1
+ Body: 
+2012-11-13 13:09:31,556 ERROR 26141 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 28, in submit
+    get_request_ip(request),
+NameError: global name 'get_request_ip' is not defined
+2012-11-13 13:09:31,556 ERROR 26141 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 28, in submit
+    get_request_ip(request),
+NameError: global name 'get_request_ip' is not defined
+2012-11-13 13:11:54,264 DEBUG 26395 [controller.xqueue_interface] xqueue_interface.py:26 - Header: -1
+ Body: 
+2012-11-13 13:11:54,265 ERROR 26395 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 29, in submit
+    get_request_ip(request),
+NameError: global name 'get_request_ip' is not defined
+2012-11-13 13:11:54,265 ERROR 26395 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 29, in submit
+    get_request_ip(request),
+NameError: global name 'get_request_ip' is not defined
+2012-11-13 13:12:44,622 DEBUG 26484 [controller.xqueue_interface] xqueue_interface.py:26 - Header: -1
+ Body: 
+2012-11-13 13:12:44,623 ERROR 26484 [controller.xqueue_interface] xqueue_interface.py:30 - Invalid xqueue object added: request_ip: 127.0.0.1 request.POST: <QueryDict: {u'xqueue_header': [u'submission_id', u'submission_key'], u'xqueue_body': [u'student_response', u'grader_payload', u'student_info']}>
+2012-11-13 13:14:04,699 DEBUG 26627 [controller.xqueue_interface] xqueue_interface.py:101 - <QueryDict: {u'xqueue_header': [u'submission_id', u'submission_key'], u'xqueue_body': [u'student_response', u'grader_payload', u'student_info']}>
+2012-11-13 13:14:04,699 DEBUG 26627 [controller.xqueue_interface] xqueue_interface.py:26 - Header: -1
+ Body: 
+2012-11-13 13:14:04,699 ERROR 26627 [controller.xqueue_interface] xqueue_interface.py:30 - Invalid xqueue object added: request_ip: 127.0.0.1 request.POST: <QueryDict: {u'xqueue_header': [u'submission_id', u'submission_key'], u'xqueue_body': [u'student_response', u'grader_payload', u'student_info']}>
+2012-11-13 13:16:11,996 DEBUG 26840 [controller.xqueue_interface] xqueue_interface.py:110 - Not dicts
+2012-11-13 13:16:11,996 DEBUG 26840 [controller.xqueue_interface] xqueue_interface.py:26 - Header: -1
+ Body: 
+2012-11-13 13:16:11,996 ERROR 26840 [controller.xqueue_interface] xqueue_interface.py:30 - Invalid xqueue object added: request_ip: 127.0.0.1 request.POST: <QueryDict: {u'xqueue_header': [u'submission_id', u'submission_key'], u'xqueue_body': [u'student_response', u'grader_payload', u'student_info']}>
+2012-11-13 13:16:39,206 DEBUG 26918 [controller.xqueue_interface] xqueue_interface.py:110 - Not dicts
+2012-11-13 13:16:39,206 DEBUG 26918 [controller.xqueue_interface] xqueue_interface.py:111 - submission_key
+2012-11-13 13:16:39,207 DEBUG 26918 [controller.xqueue_interface] xqueue_interface.py:112 - student_info
+2012-11-13 13:16:39,207 DEBUG 26918 [controller.xqueue_interface] xqueue_interface.py:26 - Header: -1
+ Body: 
+2012-11-13 13:16:39,207 ERROR 26918 [controller.xqueue_interface] xqueue_interface.py:30 - Invalid xqueue object added: request_ip: 127.0.0.1 request.POST: <QueryDict: {u'xqueue_header': [u'submission_id', u'submission_key'], u'xqueue_body': [u'student_response', u'grader_payload', u'student_info']}>
+2012-11-13 13:18:54,737 DEBUG 26999 [controller.views] views.py:34 - Successful login!
+2012-11-13 13:19:03,574 DEBUG 27181 [controller.views] views.py:34 - Successful login!
+2012-11-13 13:19:13,433 ERROR 27181 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 24, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 102, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+NameError: global name 'json' is not defined
+2012-11-13 13:19:13,433 ERROR 27181 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 24, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 102, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+NameError: global name 'json' is not defined
+2012-11-13 13:23:48,813 DEBUG 27783 [controller.views] views.py:34 - Successful login!
+2012-11-13 13:23:57,622 ERROR 27783 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 25, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 105, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:23:57,622 ERROR 27783 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 25, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 105, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:24:03,330 ERROR 27783 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 25, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 105, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:24:03,330 ERROR 27783 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 25, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 105, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:26:37,946 DEBUG 28063 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'{"xqueue_header": "{\\"submission_id\\": 193, \\"queue_name\\": \\"MITx-6.002x\\", \\"submission_key\\": \\"abb7989d2535f643d0773ba325328b0d\\"}", "xqueue_body": "{\\"student_response\\": \\"Enter essay here. khhk\\", \\"grader_payload\\": \\"{\\\\\\"grader\\\\\\": \\\\\\"tests/models/essay_set_1.p\\\\\\", \\\\\\"problem_id\\\\\\": \\\\\\"6.002x/Welcome/OETest\\\\\\", \\\\\\"location\\\\\\": \\\\\\"MITx/6.002x/problem/OETest\\\\\\"}\\", \\"student_info\\": \\"{\\\\\\"anonymous_student_id\\\\\\": \\\\\\"5afe5d9bb03796557ee2614f5c9611fb\\\\\\", \\\\\\"submission_time\\\\\\": \\\\\\"20121113132636\\\\\\"}\\"}"}': [u'']}>
+2012-11-13 13:26:37,946 ERROR 28063 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 26, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 106, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:26:37,946 ERROR 28063 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 26, in submit
+    reply_is_valid, header, body = _is_valid_reply(request.POST)
+  File "./controller/xqueue_interface.py", line 106, in _is_valid_reply
+    external_reply=json.loads(external_reply)
+  File "/usr/lib/python2.7/json/__init__.py", line 328, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 365, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+TypeError: expected string or buffer
+2012-11-13 13:30:15,650 DEBUG 28440 [controller.views] views.py:34 - Successful login!
+2012-11-13 13:30:25,055 DEBUG 28440 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 197, "queue_name": "MITx-6.002x", "submission_key": "44f5a232faf23d5f44b6b039e52fbb89"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133020\\"}"}']}>
+2012-11-13 13:30:25,056 DEBUG 28440 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 197, "queue_name": "MITx-6.002x", "submission_key": "44f5a232faf23d5f44b6b039e52fbb89"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133020\\"}"}']}>
+2012-11-13 13:30:25,056 DEBUG 28440 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 197, u'queue_name': u'MITx-6.002x', u'submission_key': u'44f5a232faf23d5f44b6b039e52fbb89'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133020"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:30:25,057 ERROR 28440 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 73, in submit
+    xqueue_submission_id,
+UnboundLocalError: local variable 'xqueue_submission_id' referenced before assignment
+2012-11-13 13:30:25,057 ERROR 28440 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 73, in submit
+    xqueue_submission_id,
+UnboundLocalError: local variable 'xqueue_submission_id' referenced before assignment
+2012-11-13 13:31:30,840 DEBUG 28575 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 199, "queue_name": "MITx-6.002x", "submission_key": "f77558840d08b7fb1416415015b3f992"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133126\\"}"}']}>
+2012-11-13 13:31:30,840 DEBUG 28575 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 199, "queue_name": "MITx-6.002x", "submission_key": "f77558840d08b7fb1416415015b3f992"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133126\\"}"}']}>
+2012-11-13 13:31:30,841 DEBUG 28575 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 199, u'queue_name': u'MITx-6.002x', u'submission_key': u'f77558840d08b7fb1416415015b3f992'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133126"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:31:30,841 ERROR 28575 [controller.xqueue_interface] xqueue_interface.py:76 - Error creating submission and adding to database: sender: 127.0.0.1, submission_id: 199, submission_key: f77558840d08b7fb1416415015b3f992
+2012-11-13 13:32:32,482 DEBUG 28686 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 202, "queue_name": "MITx-6.002x", "submission_key": "b3d591b8ccaa2c02147ecc11552cda75"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133229\\"}"}']}>
+2012-11-13 13:32:32,482 DEBUG 28686 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 202, "queue_name": "MITx-6.002x", "submission_key": "b3d591b8ccaa2c02147ecc11552cda75"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133229\\"}"}']}>
+2012-11-13 13:32:32,482 DEBUG 28686 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 202, u'queue_name': u'MITx-6.002x', u'submission_key': u'b3d591b8ccaa2c02147ecc11552cda75'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133229"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:32:32,483 ERROR 28686 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:32:32,483 ERROR 28686 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:34:15,729 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 203, "queue_name": "MITx-6.002x", "submission_key": "c6ff93e9f0bb8fd8b8bab29150adb66b"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133412\\"}"}']}>
+2012-11-13 13:34:15,729 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 203, "queue_name": "MITx-6.002x", "submission_key": "c6ff93e9f0bb8fd8b8bab29150adb66b"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133412\\"}"}']}>
+2012-11-13 13:34:15,729 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 203, u'queue_name': u'MITx-6.002x', u'submission_key': u'c6ff93e9f0bb8fd8b8bab29150adb66b'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133412"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:34:15,729 ERROR 28826 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:34:15,729 ERROR 28826 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:34:19,945 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 205, "queue_name": "MITx-6.002x", "submission_key": "dd4c4f485876a1d28a4f2ce21696f78d"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133417\\"}"}']}>
+2012-11-13 13:34:19,946 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 205, "queue_name": "MITx-6.002x", "submission_key": "dd4c4f485876a1d28a4f2ce21696f78d"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133417\\"}"}']}>
+2012-11-13 13:34:19,946 DEBUG 28826 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 205, u'queue_name': u'MITx-6.002x', u'submission_key': u'dd4c4f485876a1d28a4f2ce21696f78d'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133417"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:34:19,947 ERROR 28826 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:34:19,947 ERROR 28826 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['prompt'],"")
+KeyError: 'prompt'
+2012-11-13 13:34:47,239 DEBUG 29000 [controller.xqueue_interface] xqueue_interface.py:25 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 207, "queue_name": "MITx-6.002x", "submission_key": "de99bcc251ecba3fecee74a6ebba29e9"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133443\\"}"}']}>
+2012-11-13 13:34:47,239 DEBUG 29000 [controller.xqueue_interface] xqueue_interface.py:26 - <QueryDict: {u'xqueue_header': [u'{"submission_id": 207, "queue_name": "MITx-6.002x", "submission_key": "de99bcc251ecba3fecee74a6ebba29e9"}'], u'xqueue_body': [u'{"student_response": "Enter essay here. khhk", "grader_payload": "{\\"grader\\": \\"tests/models/essay_set_1.p\\", \\"prompt\\": \\"This is the prompt!\\", \\"problem_id\\": \\"6.002x/Welcome/OETest\\", \\"location\\": \\"MITx/6.002x/problem/OETest\\"}", "student_info": "{\\"anonymous_student_id\\": \\"5afe5d9bb03796557ee2614f5c9611fb\\", \\"submission_time\\": \\"20121113133443\\"}"}']}>
+2012-11-13 13:34:47,239 DEBUG 29000 [controller.xqueue_interface] xqueue_interface.py:29 - Header: {u'submission_id': 207, u'queue_name': u'MITx-6.002x', u'submission_key': u'de99bcc251ecba3fecee74a6ebba29e9'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133443"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:34:47,240 ERROR 29000 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:34:47,240 ERROR 29000 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 38, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:39:30,534 DEBUG 29490 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 208, u'queue_name': u'MITx-6.002x', u'submission_key': u'00d5f54449ad63e0bb8a274b234a4882'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133927"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:39:30,535 DEBUG 29490 [controller.xqueue_interface] xqueue_interface.py:35 - {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113133927"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:39:30,535 DEBUG 29490 [controller.xqueue_interface] xqueue_interface.py:36 - {u'submission_id': 208, u'queue_name': u'MITx-6.002x', u'submission_key': u'00d5f54449ad63e0bb8a274b234a4882'}
+2012-11-13 13:39:30,535 ERROR 29490 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:39:30,535 ERROR 29490 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:40:45,572 DEBUG 29628 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 209, u'queue_name': u'MITx-6.002x', u'submission_key': u'a1bb2207cc425f42839f7038bf85cba2'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113134044"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:40:45,573 DEBUG 29628 [controller.xqueue_interface] xqueue_interface.py:35 - {"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}
+2012-11-13 13:40:45,573 DEBUG 29628 [controller.xqueue_interface] xqueue_interface.py:36 - {u'submission_id': 209, u'queue_name': u'MITx-6.002x', u'submission_key': u'a1bb2207cc425f42839f7038bf85cba2'}
+2012-11-13 13:40:45,573 ERROR 29628 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:40:45,573 ERROR 29628 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:41:06,714 DEBUG 29688 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 210, u'queue_name': u'MITx-6.002x', u'submission_key': u'6b15ecaf009b107b0904755f56497b57'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113134103"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:41:06,715 DEBUG 29688 [controller.xqueue_interface] xqueue_interface.py:35 - {"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}
+2012-11-13 13:41:06,715 DEBUG 29688 [controller.xqueue_interface] xqueue_interface.py:36 - {u'submission_id': 210, u'queue_name': u'MITx-6.002x', u'submission_key': u'6b15ecaf009b107b0904755f56497b57'}
+2012-11-13 13:41:06,715 ERROR 29688 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:41:06,715 ERROR 29688 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:41:46,836 DEBUG 29787 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 212, u'queue_name': u'MITx-6.002x', u'submission_key': u'd72cf51d9d835060f2b8f154d0396d73'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113134142"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:41:46,836 ERROR 29787 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 35, in submit
+    log.debug(body['grader_payload']['prompt'])
+TypeError: string indices must be integers
+2012-11-13 13:41:46,836 ERROR 29787 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 35, in submit
+    log.debug(body['grader_payload']['prompt'])
+TypeError: string indices must be integers
+2012-11-13 13:42:47,473 DEBUG 29901 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 214, u'queue_name': u'MITx-6.002x', u'submission_key': u'da7100fd0dbb92b3d9665e46180aa8ba'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': u'{"anonymous_student_id": "5afe5d9bb03796557ee2614f5c9611fb", "submission_time": "20121113134243"}', u'grader_payload': u'{"grader": "tests/models/essay_set_1.p", "prompt": "This is the prompt!", "problem_id": "6.002x/Welcome/OETest", "location": "MITx/6.002x/problem/OETest"}'}
+2012-11-13 13:42:47,473 DEBUG 29901 [controller.xqueue_interface] xqueue_interface.py:35 - <type 'unicode'>
+2012-11-13 13:42:47,473 DEBUG 29901 [controller.xqueue_interface] xqueue_interface.py:36 - {u'submission_id': 214, u'queue_name': u'MITx-6.002x', u'submission_key': u'da7100fd0dbb92b3d9665e46180aa8ba'}
+2012-11-13 13:42:47,474 ERROR 29901 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:42:47,474 ERROR 29901 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 37, in submit
+    prompt=_value_or_default(body['grader_payload']['prompt'],"")
+TypeError: string indices must be integers
+2012-11-13 13:50:52,811 DEBUG 30008 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 217, u'queue_name': u'MITx-6.002x', u'submission_key': u'24fecb0e22d3345f365c36d01a1064ad'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': {u'anonymous_student_id': u'5afe5d9bb03796557ee2614f5c9611fb', u'submission_time': u'20121113135049'}, u'grader_payload': {u'grader': u'tests/models/essay_set_1.p', u'prompt': u'This is the prompt!', u'problem_id': u'6.002x/Welcome/OETest', u'location': u'MITx/6.002x/problem/OETest'}}
+2012-11-13 13:50:52,811 ERROR 30008 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 47, in submit
+    student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
+AttributeError: 'module' object has no attribute 'strptime'
+2012-11-13 13:50:52,811 ERROR 30008 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 47, in submit
+    student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
+AttributeError: 'module' object has no attribute 'strptime'
+2012-11-13 13:53:51,487 ERROR 31060 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 48
+    student_submission_time=datetime(*(time.strptime(submission_time_string, "%Y%m%d%H%M%S"))[0:6]))
+                                                                                                   ^
+SyntaxError: invalid syntax
+2012-11-13 13:53:51,487 ERROR 31060 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 101, in get_response
+    request.path_info)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 300, in resolve
+    sub_match = pattern.resolve(new_path)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 209, in resolve
+    return ResolverMatch(self.callback, args, kwargs, self.name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 216, in callback
+    self._callback = get_callable(self._callback_str)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/functional.py", line 27, in wrapper
+    result = func(*args)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/urlresolvers.py", line 92, in get_callable
+    lookup_view = getattr(import_module(mod_name), func_name)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "./controller/xqueue_interface.py", line 48
+    student_submission_time=datetime(*(time.strptime(submission_time_string, "%Y%m%d%H%M%S"))[0:6]))
+                                                                                                   ^
+SyntaxError: invalid syntax
+2012-11-13 13:54:05,923 DEBUG 31060 [controller.xqueue_interface] xqueue_interface.py:28 - Header: {u'submission_id': 221, u'queue_name': u'MITx-6.002x', u'submission_key': u'c22a902a252e17913a08bee284cf682b'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': {u'anonymous_student_id': u'5afe5d9bb03796557ee2614f5c9611fb', u'submission_time': u'20121113135403'}, u'grader_payload': {u'grader': u'tests/models/essay_set_1.p', u'prompt': u'This is the prompt!', u'problem_id': u'6.002x/Welcome/OETest', u'location': u'MITx/6.002x/problem/OETest'}}
+2012-11-13 13:54:05,925 ERROR 31060 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 48, in submit
+    student_submission_time=datetime(*(time.strptime(submission_time_string, "%Y%m%d%H%M%S"))[0:6])
+TypeError: 'module' object is not callable
+2012-11-13 13:54:05,925 ERROR 31060 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 48, in submit
+    student_submission_time=datetime(*(time.strptime(submission_time_string, "%Y%m%d%H%M%S"))[0:6])
+TypeError: 'module' object is not callable
+2012-11-13 13:54:47,538 DEBUG 31183 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 222, u'queue_name': u'MITx-6.002x', u'submission_key': u'e61d463f8fb77c7fd981ceb9c4fbb585'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': {u'anonymous_student_id': u'5afe5d9bb03796557ee2614f5c9611fb', u'submission_time': u'20121113135444'}, u'grader_payload': {u'grader': u'tests/models/essay_set_1.p', u'prompt': u'This is the prompt!', u'problem_id': u'6.002x/Welcome/OETest', u'location': u'MITx/6.002x/problem/OETest'}}
+2012-11-13 13:54:47,543 ERROR 31183 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 59, in submit
+    location=location,
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/manager.py", line 134, in get_or_create
+    return self.get_query_set().get_or_create(**kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 445, in get_or_create
+    return self.get(**lookup), False
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 361, in get
+    num = len(clone)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 85, in __len__
+    self._result_cache = list(self.iterator())
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 291, in iterator
+    for row in compiler.results_iter():
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 763, in results_iter
+    for rows in self.execute_sql(MULTI):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 818, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/backends/util.py", line 40, in execute
+    return self.cursor.execute(sql, params)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/backends/sqlite3/base.py", line 344, in execute
+    return Database.Cursor.execute(self, query, params)
+DatabaseError: no such column: controller_submission.xqueue_queue_name
+2012-11-13 13:54:47,543 ERROR 31183 [django.request] base.py:215 - Internal Server Error: /grading_controller/submit/
+Traceback (most recent call last):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/core/handlers/base.py", line 111, in get_response
+    response = callback(request, *callback_args, **callback_kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/views/decorators/csrf.py", line 77, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/contrib/auth/decorators.py", line 20, in _wrapped_view
+    return view_func(request, *args, **kwargs)
+  File "./controller/xqueue_interface.py", line 59, in submit
+    location=location,
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/manager.py", line 134, in get_or_create
+    return self.get_query_set().get_or_create(**kwargs)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 445, in get_or_create
+    return self.get(**lookup), False
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 361, in get
+    num = len(clone)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 85, in __len__
+    self._result_cache = list(self.iterator())
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/query.py", line 291, in iterator
+    for row in compiler.results_iter():
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 763, in results_iter
+    for rows in self.execute_sql(MULTI):
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/models/sql/compiler.py", line 818, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/backends/util.py", line 40, in execute
+    return self.cursor.execute(sql, params)
+  File "/home/vik/mitx_all/python/local/lib/python2.7/site-packages/django/db/backends/sqlite3/base.py", line 344, in execute
+    return Database.Cursor.execute(self, query, params)
+DatabaseError: no such column: controller_submission.xqueue_queue_name
+2012-11-13 13:55:56,013 DEBUG 31401 [controller.xqueue_interface] xqueue_interface.py:27 - Header: {u'submission_id': 224, u'queue_name': u'MITx-6.002x', u'submission_key': u'4355b54f6978563b0a1739bf201d5a9b'}
+ Body: {u'student_response': u'Enter essay here. khhk', u'student_info': {u'anonymous_student_id': u'5afe5d9bb03796557ee2614f5c9611fb', u'submission_time': u'20121113135552'}, u'grader_payload': {u'grader': u'tests/models/essay_set_1.p', u'prompt': u'This is the prompt!', u'problem_id': u'6.002x/Welcome/OETest', u'location': u'MITx/6.002x/problem/OETest'}}
+2012-11-13 13:55:56,024 DEBUG 31401 [controller.xqueue_interface] xqueue_interface.py:62 - Essay to be graded from student 5afe5d9bb03796557ee2614f5c9611fb, in course , and problem 6.002x/Welcome/OETest
+Submission created at 2012-11-13 18:55:56.019788+00:00 and modified at 2012-11-13 18:55:56.019810+00:00
+Current state is W and next grader is 
+2012-11-13 13:55:56,024 DEBUG 31401 [controller.xqueue_interface] xqueue_interface.py:63 - Created successfully!
