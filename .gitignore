@@ -8,3 +8,4 @@ models/
 *.conf
 *.db
 essaydb
+*.log

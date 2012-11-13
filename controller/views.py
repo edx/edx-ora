@@ -5,6 +5,11 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import json
+import logging
+
+import util
+
+log = logging.getLogger(__name__)
 
 # Xqueue reply format:
 #    JSON-serialized dict:
@@ -26,6 +31,7 @@ def log_in(request):
             user = authenticate(username=p['username'], password=p['password'])
             if user is not None:
                 login(request, user)
+                log.debug("Successful login!")
                 return HttpResponse(compose_reply(True, 'Logged in'))
             else:
                 return HttpResponse(compose_reply(False, 'Incorrect login credentials'))

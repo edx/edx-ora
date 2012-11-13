@@ -39,8 +39,8 @@ XQUEUE_INTERFACE = {
 }
 
 GRADING_CONTROLLER_INTERFACE = {
-    'url' : "http://127.0.0.1:3033",
-    'django_auth' : {
+    "url" : "http://127.0.0.1:3033",
+    "django_auth" : {
         "username" : "xqueue_pull",
         "password" : "abcd",
     }

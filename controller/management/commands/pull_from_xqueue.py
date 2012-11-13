@@ -31,7 +31,7 @@ class Command(BaseCommand):
             for queue_name in args:
                 try:
                     response_code,queue_item=self.get_from_queue(queue_name)
-                    return_code,content=parse_xobject(queue_item)
+                    return_code,content=parse_xobject(queue_item,queue_name)
                     log.debug(content)
 
                     #Post to grading controller here!
@@ -54,17 +54,19 @@ class Command(BaseCommand):
         '''
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
         controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
-        log.debug(controller_login_url)
 
         xqueue_response = self.xqueue_session.post(xqueue_login_url,
             {'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
             'password': settings.XQUEUE_INTERFACE['django_auth']['password']}
         )
 
-        controller_response = self.controller_session.post(xqueue_login_url,
+        controller_response = self.controller_session.post(controller_login_url,
             {'username': settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
             'password': settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password']}
         )
+
+        log.debug("Username: {0} Pass: {1}".format(settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password']))
 
         xqueue_response.raise_for_status()
         controller_response.raise_for_status()
@@ -139,7 +141,7 @@ def parse_xreply(xreply):
     content = xreply['content']
     return return_code, content
 
-def parse_xobject(xobject):
+def parse_xobject(xobject,queue_name):
     """
     Parse a queue object from xqueue:
         { 'return_code': 0 (success), 1 (fail)
@@ -150,11 +152,12 @@ def parse_xobject(xobject):
         xobject = json.loads(xobject)
 
         header= json.loads(xobject['xqueue_header'])
+        header.update({'queue_name' : queue_name})
         body=json.loads(xobject['xqueue_body'])
 
-        content={'xqueue_header' : header,
-            'xqueue_body' : body
-        }
+        content=json.dumps({'xqueue_header' : json.dumps(header),
+            'xqueue_body' : json.dumps(body)
+        })
     except ValueError, err:
         log.error(err)
         return (1, 'unexpected reply from server')

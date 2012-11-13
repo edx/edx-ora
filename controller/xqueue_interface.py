@@ -4,13 +4,17 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import datetime
-from controller.views import compose_reply
+from views import compose_reply
+import logging
 
-from controller.models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
+from models import Submission,PeerGrader,MLGrader,InstructorGrader,SelfAssessmentGrader
+import util
+import json
+
+log = logging.getLogger(__name__)
 
 @csrf_exempt
 @login_required
-@statsd.timed('xqueue.ext_interface.put_result.time')
 def submit(request):
     '''
     Xqueue pull script posts objects here.
@@ -23,7 +27,7 @@ def submit(request):
         log.debug("Header: {0}\n Body: {1}".format(header,body))
         if not reply_is_valid:
             log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
-                get_request_ip(request),
+                util.get_request_ip(request),
                 request.POST,
             ))
             return HttpResponse(compose_reply(False, 'Incorrect format'))
@@ -38,6 +42,7 @@ def submit(request):
                 xqueue_submission_id=_value_or_default(header['submission_id'])
                 xqueue_submission_key=_value_or_default(header['submission_key'])
                 state_code="W"
+                xqueue_queue_name=_value_or_default(header["queue_name"])
 
                 submission_time_string=_value_or_default(body['student_info']['submission_time'])
                 student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
@@ -51,6 +56,7 @@ def submit(request):
                     student_submission_time=student_submission_time,
                     xqueue_submission_id=xqueue_submission_id,
                     xqueue_submission_key=xqueue_submission_key,
+                    xqueue_queue_name=xqueue_queue_name,
                     location=location,
                 )
 
@@ -61,7 +67,7 @@ def submit(request):
 
             except Exception as err:
                 log.error("Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
-                    get_request_ip(request),
+                    util.get_request_ip(request),
                     xqueue_submission_id,
                     xqueue_submission_key,
                 ))
@@ -94,22 +100,32 @@ def _is_valid_reply(external_reply):
         submission_key: Secret key to match against Xqueue database (string)
         score_msg:      Grading result from external grader (string)
     '''
-    fail = (False,-1,'','')
+    fail = (False,-1,'')
+
+    external_reply=json.loads(external_reply)
     try:
-        header    = external_reply['xqueue_header']
-        body = external_reply['xqueue_body']
+        header = json.loads(external_reply['xqueue_header'])
+        body = json.loads(external_reply['xqueue_body'])
     except KeyError:
+        log.debug("Can't parse")
         return fail
 
     if not isinstance(header,dict) or not isinstance(body,dict):
+        log.debug("Not dicts")
+        log.debug(header)
+        log.debug(body)
+        log.debug(type(header))
+        log.debug(type(body))
         return fail
 
     for tag in ['submission_id', 'submission_key']:
         if not header.has_key(tag):
+            log.debug("{0} not found in header".format(tag))
             return fail
 
     for tag in ['grader_payload', 'student_response', 'student_info']:
         if not body.has_key(tag):
+            log.debug("{0} not found in body".format(tag))
             return fail
 
     return True,header,body

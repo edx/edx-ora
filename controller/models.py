@@ -35,6 +35,7 @@ class Submission(models.Model):
     student_submission_time=models.DateTimeField(default=datetime.datetime.now)
     xqueue_submission_id=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     xqueue_submission_key=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
+    xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
 
     def __unicode__(self):
