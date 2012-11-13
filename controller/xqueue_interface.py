@@ -81,7 +81,7 @@ def submit(request):
 
 def handle_submission(submission_id):
     sub=Submissions.objects.get(id=submission_id)
-    
+    subs_with_problem_id=Submissions.objects.filter(location=sub.location)
 
 
 

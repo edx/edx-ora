@@ -39,10 +39,10 @@ class Submission(models.Model):
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
 
     def __unicode__(self):
-        sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}\n".format(
+        sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
             self.student_id,self.course_id,self.problem_id)
-        sub_row+= "Submission created at {0} and modified at {1}\n".format(self.date_created,self.date_modified)
-        sub_row+= "Current state is {0} and next grader is {1}".format(self.state,self.next_grader)
+        sub_row+= "Submission created at {0} and modified at {1}.  ".format(self.date_created,self.date_modified)
+        sub_row+= "Current state is {0} and next grader is {1}.".format(self.state,self.next_grader)
         return sub_row
 
 
