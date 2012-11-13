@@ -22,6 +22,7 @@ class Command(BaseCommand):
         """
         log.info(' [*] Pulling from xqueues...')
         self.xqueue_session=requests.session()
+        self.controller_session=requests.session()
 
         flag=True
         error = self.login()
@@ -36,7 +37,10 @@ class Command(BaseCommand):
                     #Post to grading controller here!
                     if return_code==0:
                         #Post to controller
-                        pass
+                        self._http_post(urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                            '/grading_controller/submit/'))
+                    else:
+                        log.error("Error getting queue item.")
 
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
@@ -46,20 +50,29 @@ class Command(BaseCommand):
         '''
         Login to xqueue to pull submissions
         '''
-        full_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
 
-        response = self.xqueue_session.post(full_login_url,{'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
-                                            'password': settings.XQUEUE_INTERFACE['django_auth']['password']})
+        xqueue_response = self.xqueue_session.post(xqueue_login_url,
+            {'username': settings.XQUEUE_INTERFACE['django_auth']['username'],
+            'password': settings.XQUEUE_INTERFACE['django_auth']['password']}
+        )
 
-        response.raise_for_status()
-        log.debug("login response: %r", response.json)
+        controller_response = self.controller_session.post(xqueue_login_url,
+            {'username': settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+            'password': settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password']}
+        )
 
-        log.debug(response.content)
-        (error,msg)= parse_xreply(response.content)
+        xqueue_response.raise_for_status()
+        controller_response.raise_for_status()
 
-        log.debug(error)
+        log.debug("xqueue login response: %r", xqueue_response.json)
+        log.debug("controller login response: %r", controller_response.json)
 
-        return error
+        (xqueue_error,xqueue_msg)= parse_xreply(xqueue_response.content)
+        (controller_error,controller_msg) = parse_xreply(controller_response.content)
+
+        return max(controller_error,xqueue_error)
 
     def get_from_queue(self,queue_name):
         """
@@ -84,6 +97,26 @@ class Command(BaseCommand):
             return (1, 'unexpected HTTP status code [%d]' % r.status_code)
 
         return parse_xreply(r.text)
+
+    def _http_post(self, url, data, timeout):
+        '''
+        Contact grading controller, but fail gently.
+
+        Returns (success, msg), where:
+            success: Flag indicating successful exchange (Boolean)
+            msg: Accompanying message; Controller reply when successful (string)
+        '''
+
+        try:
+            r = self.controller_session.post(url, data=data, timeout=timeout, verify=False)
+        except (ConnectionError, Timeout):
+            log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
+            return (False, 'cannot connect to server')
+
+        if r.status_code not in [200]:
+            log.error('Server %s returned status_code=%d' % (url, r.status_code))
+            return (False, 'unexpected HTTP status code [%d]' % r.status_code)
+        return (True, r.text)
 
 
 def parse_xreply(xreply):
