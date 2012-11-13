@@ -64,7 +64,7 @@ def submit(request):
                 log.debug("Created successfully!")
 
                 sub.save()
-                
+
             except Exception as err:
                 xqueue_submission_id=_value_or_default(header['submission_id'])
                 xqueue_submission_key=_value_or_default(header['submission_key'])
@@ -78,6 +78,12 @@ def submit(request):
             #Handle submission after writing it to db
 
             return HttpResponse(compose_reply(success=True, content=''))
+
+def handle_submission(submission_id):
+    sub=Submissions.objects.get(id=submission_id)
+    
+
+
 
 def _value_or_default(value,default=None):
     if value is not None:
