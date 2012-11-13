@@ -3,8 +3,6 @@ from path import path
 import os
 
 # Django settings for grading_controller project.
-
-
 ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
@@ -39,8 +37,8 @@ XQUEUE_INTERFACE = {
 }
 
 GRADING_CONTROLLER_INTERFACE = {
-    url : "http://127.0.0.1:3033",
-    django_auth : {
+    'url' : "http://127.0.0.1:3033",
+    'django_auth' : {
         "username" : "xqueue_pull",
         "password" : "abcd",
     }
