@@ -38,13 +38,13 @@ def log_out(request):
 
 # Status check
 #--------------------------------------------------
-@csrf_exempt
 def status(request):
     return HttpResponse(util.compose_reply(success=True, content='OK'))
 
+@csrf_exempt
 def instructor_grading(request):
     if request.method == 'POST':
-        post_data=request.POST
+        post_data=request.POST.dict()
         for tag in ['assessment','feedback']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed keys 'assessment' and 'feedback'")
@@ -55,13 +55,12 @@ def instructor_grading(request):
 
 
 
-    else:
-        url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
-        if not url_base.endswith("/"):
-            url_base+="/"
-        rendered=render_to_string('instructor_grading.html', {
-            'score_points': [0,1],
-            'ajax_url' : url_base
-        })
-        return HttpResponse(rendered)
+    url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
+    if not url_base.endswith("/"):
+        url_base+="/"
+    rendered=render_to_string('instructor_grading.html', {
+        'score_points': [0,1],
+        'ajax_url' : url_base
+    })
+    return HttpResponse(rendered)
 

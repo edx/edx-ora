@@ -55,11 +55,11 @@ def get_submission_in(request):
 
 
 @login_required
-def put_result():
+def put_result(request):
     if request.method != 'POST':
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
-        post_data=request.POST
+        post_data=request.POST.dict()
 
         for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id']:
             if not post_data.has_key(tag):
@@ -76,20 +76,10 @@ def put_result():
         except:
             return HttpResponse(compose_reply(False,"Can't parse assessment into an int."))
 
-        try:
-            sub=Submission.objects.get(id=post_data['submission_id'])
-        except:
-            return HttpResponse(compose_reply(False,"Invalid submission id passed in."))
+        success=util.create_grader(post_data)
+        if not success:
+            return HttpResponse(compose_reply(False,"Could not save grader."))
 
-        grade=Grader(
-            score=post_data['assessment'],
-            feedback = post_data['feedback'],
-            status_code = post_data['status'],
-            grader_id= post_data['grader_id']
-            grader_type= post_data['grader_type']
-            confidence= post_data['confidence']
-        )
+        return HttpResponse(compose_reply(True,"Saved successfully."))
 
-        grade.submission=sub
 
-        grade.save()

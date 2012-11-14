@@ -8,8 +8,8 @@
     <script>
         $(document).ready(function(){
             $("input[name=save]").click(function(event){
-                feedback=$("textarea[name=feedback]").val()
-                assessment=$("select[name=assessment]").find(':selected').text()
+                feedback=$("textarea[name=feedback]").first().val()
+                assessment=$("select[name=assessment]").first().find(':selected').text()
                 $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, assessment : assessment}, function(data) {
                     $('div.result').html(data);
                 });

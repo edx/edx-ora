@@ -1,5 +1,5 @@
 from django.conf import settings
-from models import Submission
+from models import Submission, Grader
 import json
 import logging
 
@@ -138,3 +138,25 @@ def _http_post(session, url, data, timeout):
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
         return (False, 'unexpected HTTP status code [%d]' % r.status_code)
     return (True, r.text)
+
+def create_grader(grader_dict):
+
+    try:
+        sub=Submission.objects.get(id=grader_dict['submission_id'])
+    except:
+        return False
+
+    grade=Grader(
+        score=grader_dict['assessment'],
+        feedback = grader_dict['feedback'],
+        status_code = grader_dict['status'],
+        grader_id= grader_dict['grader_id'],
+        grader_type= grader_dict['grader_type'],
+        confidence= grader_dict['confidence'],
+    )
+
+    grade.submission=sub
+    grade.save()
+
+    return True
+
