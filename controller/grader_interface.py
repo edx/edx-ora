@@ -8,7 +8,7 @@ from statsd import statsd
 import json
 import logging
 
-from models import Submission, GRADER_TYPE
+from models import Submission, GRADER_TYPE, Grader, STATUS_CODES
 import util
 
 @login_required
@@ -56,5 +56,40 @@ def get_submission_in(request):
 
 @login_required
 def put_result():
-    #Accept a post request from external grader, and handle properly
-    pass
+    if request.method != 'POST':
+        return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
+    else:
+        post_data=request.POST
+
+        for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id']:
+            if not post_data.has_key(tag):
+                return HttpResponse(compose_reply(False,"Failed to find needed keys."))
+
+        if post_data['grader_type'] not in GRADER_TYPE:
+            return HttpResponse(compose_reply(False,"Invalid grader type."))
+
+        if post_data['status'] not in STATUS_CODES:
+            return HttpResponse(compose_reply(False,"Invalid grader status."))
+
+        try:
+            post_data['assessment']=int(post_data['assessment'])
+        except:
+            return HttpResponse(compose_reply(False,"Can't parse assessment into an int."))
+
+        try:
+            sub=Submission.objects.get(id=post_data['submission_id'])
+        except:
+            return HttpResponse(compose_reply(False,"Invalid submission id passed in."))
+
+        grade=Grader(
+            score=post_data['assessment'],
+            feedback = post_data['feedback'],
+            status_code = post_data['status'],
+            grader_id= post_data['grader_id']
+            grader_type= post_data['grader_type']
+            confidence= post_data['confidence']
+        )
+
+        grade.submission=sub
+
+        grade.save()

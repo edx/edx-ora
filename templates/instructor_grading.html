@@ -10,8 +10,8 @@
             $("input[name=save]").click(function(event){
                 feedback=$("textarea[name=feedback]").val()
                 assessment=$("select[name=assessment]").find(':selected').text()
-                $.post('grading_controller/status', {feedback : feedback, assessment : assessment}, function(data) {
-                    $('.result').html(data);
+                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, assessment : assessment}, function(data) {
+                    $('div.result').html(data);
                 });
             });
         });
@@ -21,9 +21,9 @@
             <option value="{{i}}">{{i}}</option>
         {% endfor %}
     </select>
-    <textarea name="feedback" class="feedback" cols="70" rows="20">Enter feedback here.</textarea>
+    <br/><br/>
+    <textarea name="feedback" class="feedback" cols="70" rows="5">Enter feedback here.</textarea><br/><br/>
     <input type="button" value="Save" class="save-button" name="save"/>
-    <input type="button" value="Next" class="next-button" name="next"/>
     <div id="result"></div>
 </body>
 </html>
