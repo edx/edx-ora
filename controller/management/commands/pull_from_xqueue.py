@@ -1,13 +1,12 @@
-import json
-import logging
-
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.utils import timezone
+
 import requests
 import urlparse
 import time
 import json
+import logging
 
 log = logging.getLogger(__name__)
 

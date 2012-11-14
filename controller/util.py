@@ -36,6 +36,15 @@ def subs_pending_instructor(location):
 
     return len(subs_pending)
 
-
 def subs_by_instructor(location):
     return subs_graded_by_instructor(location),subs_pending_instructor(location)
+
+# Xqueue reply format:
+#    JSON-serialized dict:
+#    { 'return_code': 0(success)/1(error),
+#      'content'    : 'my content', }
+#--------------------------------------------------
+def compose_reply(success, content):
+    return_code = 0 if success else 1
+    return json.dumps({ 'return_code': return_code,
+                        'content': content })

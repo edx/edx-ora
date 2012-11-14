@@ -19,6 +19,9 @@ MANAGERS = ADMINS
 REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 
+#Config for specific graders
+MIN_TO_USE_ML=100
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.

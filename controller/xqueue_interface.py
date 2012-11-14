@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from datetime import datetime
-from views import compose_reply
 import logging
 
 from models import Submission,Grader
@@ -13,8 +12,6 @@ import json
 
 log = logging.getLogger(__name__)
 
-MIN_TO_USE_ML=100
-
 @csrf_exempt
 @login_required
 def submit(request):
@@ -22,7 +19,7 @@ def submit(request):
     Xqueue pull script posts objects here.
     '''
     if request.method != 'POST':
-        return HttpResponse(compose_reply(False, "'submit' must use HTTP POST"))
+        return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
         reply_is_valid, header, body = _is_valid_reply(request.POST)
 
@@ -32,7 +29,7 @@ def submit(request):
                 util.get_request_ip(request),
                 request.POST,
             ))
-            return HttpResponse(compose_reply(False, 'Incorrect format'))
+            return HttpResponse(util.compose_reply(False, 'Incorrect format'))
         else:
             try:
                 prompt=util._value_or_default(body['grader_payload']['prompt'],"")
@@ -72,19 +69,19 @@ def submit(request):
                     xqueue_submission_id,
                     xqueue_submission_key,
                 ))
-                return HttpResponse(compose_reply(False,'Unable to create submission.'))
+                return HttpResponse(util.compose_reply(False,'Unable to create submission.'))
 
             #Handle submission and write to db
 
             success=handle_submission(sub)
 
-            return HttpResponse(compose_reply(success=success, content=''))
+            return HttpResponse(util.compose_reply(success=success, content=''))
 
 def handle_submission(sub):
     try:
         subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
 
-        if((subs_graded_by_instructor+subs_pending_instructor)>=MIN_TO_USE_ML):
+        if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
             sub.next_grader_type="IN"

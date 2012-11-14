@@ -11,16 +11,6 @@ import util
 
 log = logging.getLogger(__name__)
 
-# Xqueue reply format:
-#    JSON-serialized dict:
-#    { 'return_code': 0(success)/1(error),
-#      'content'    : 'my content', }
-#--------------------------------------------------
-def compose_reply(success, content):
-    return_code = 0 if success else 1
-    return json.dumps({ 'return_code': return_code,
-                        'content': content })
-
 # Log in
 #--------------------------------------------------
 @csrf_exempt
@@ -32,19 +22,19 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 log.debug("Successful login!")
-                return HttpResponse(compose_reply(True, 'Logged in'))
+                return HttpResponse(util.compose_reply(True, 'Logged in'))
             else:
-                return HttpResponse(compose_reply(False, 'Incorrect login credentials'))
+                return HttpResponse(util.compose_reply(False, 'Incorrect login credentials'))
         else:
-            return HttpResponse(compose_reply(False, 'Insufficient login info'))
+            return HttpResponse(util.compose_reply(False, 'Insufficient login info'))
     else:
-        return HttpResponse(compose_reply(False,'login_required'))
+        return HttpResponse(util.compose_reply(False,'login_required'))
 
 def log_out(request):
     logout(request)
-    return HttpResponse(compose_reply(success=True,content='Goodbye'))
+    return HttpResponse(util.compose_reply(success=True,content='Goodbye'))
 
 # Status check
 #--------------------------------------------------
 def status(request):
-    return HttpResponse(compose_reply(success=True, content='OK'))
+    return HttpResponse(util.compose_reply(success=True, content='OK'))
