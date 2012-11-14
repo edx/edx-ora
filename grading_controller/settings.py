@@ -21,6 +21,7 @@ TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 
 #Config for specific graders
 MIN_TO_USE_ML=100
+ML_PATH=os.path.join(ENV_ROOT,"machine_learning/")
 
 DATABASES = {
     'default': {
