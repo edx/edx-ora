@@ -43,6 +43,7 @@ def status(request):
 
 @csrf_exempt
 def instructor_grading(request):
+    log.debug(request.session)
     if request.method == 'POST':
         post_data=request.POST.dict()
         for tag in ['assessment','feedback']:
@@ -55,12 +56,18 @@ def instructor_grading(request):
 
 
 
+    found,sub_id=util.get_instructor_grading("MITx/6.002x")
+
+    if not found:
+        return HttpResponse("No available grading.  Check back later.")
+
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
     if not url_base.endswith("/"):
         url_base+="/"
     rendered=render_to_string('instructor_grading.html', {
         'score_points': [0,1],
-        'ajax_url' : url_base
+        'ajax_url' : url_base,
+        'sub_id' : sub_id
     })
     return HttpResponse(rendered)
 

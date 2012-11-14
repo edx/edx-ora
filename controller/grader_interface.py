@@ -37,27 +37,19 @@ def get_submission_in(request):
         return HttpResponse(util.compose_reply(False,
         "'get_submission' requires parameter 'course_id'"))
 
-    locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
-    for location in locations_for_course:
-        subs_graded_by_instructor, subs_pending_instructor=util.subs_by_instructor(location)
-        if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
-            to_be_graded=Submission.objects.filter(
-                location=location,
-                state="W",
-                next_grader_type="IN",
-            )[0]
-            if to_be_graded is not None:
-                to_be_graded.state="C"
-                to_be_graded.save()
-                return HttpResponse(util.compose_reply(True,to_be_graded.id))
+    found,sub_id=util.get_instructor_grading(course_id)
 
-    return HttpResponse(util.compose_reply(False,"Nothing to grade."))
+    if not found:
+        return HttpResponse(util.compose_reply(False,"Nothing to grade."))
+
+    return HttpResponse(util.compose_reply(True,to_be_graded.id))
+
 
 
 @login_required
 def put_result(request):
     if request.method != 'POST':
-        return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
+        return HttpResponse(util.compose_reply(False, "'put_result' must use HTTP POST"))
     else:
         post_data=request.POST.dict()
 

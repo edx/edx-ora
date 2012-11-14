@@ -160,3 +160,22 @@ def create_grader(grader_dict):
 
     return True
 
+def get_instructor_grading(course_id):
+    found=False
+    sub_id=0
+    locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
+    for location in locations_for_course:
+        subs_graded_by_instructor, subs_pending_instructor=subs_by_instructor(location)
+        if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
+            to_be_graded=Submission.objects.filter(
+                location=location,
+                state="W",
+                next_grader_type="IN",
+            )[0]
+            if to_be_graded is not None:
+                to_be_graded.state="C"
+                to_be_graded.save()
+                found=True
+                sub_id=to_be_graded.id
+                return found,sub_id
+    return found,sub_id
