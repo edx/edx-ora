@@ -7,10 +7,14 @@ import urlparse
 import time
 import json
 import logging
+import sys
+
+sys.path.append(settings.ML_PATH)
+import grade
 
 log = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    args = "<queue_name>"
-    help = "Pull items from given queues and send to grading controller"
+    args = "None"
+    help = "Poll grading controller and send items to be graded to ml"
 
