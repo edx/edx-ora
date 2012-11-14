@@ -38,6 +38,7 @@ def submit(request):
                 prompt=util._value_or_default(body['grader_payload']['prompt'],"")
                 student_id=util._value_or_default(body['student_info']['anonymous_student_id'])
                 location=util._value_or_default(body['grader_payload']['location'])
+                course_id=util._value_or_default(body['grader_payload']['course_id'])
                 problem_id=util._value_or_default(body['grader_payload']['problem_id'],location)
                 grader_settings=util._value_or_default(body['grader_payload']['grader'],"")
                 student_response=util._value_or_default(body['student_response'])
@@ -60,6 +61,7 @@ def submit(request):
                     xqueue_submission_key=xqueue_submission_key,
                     xqueue_queue_name=xqueue_queue_name,
                     location=location,
+                    course_id=course_id,
                 )
 
             except Exception as err:
@@ -80,17 +82,9 @@ def submit(request):
 
 def handle_submission(sub):
     try:
-        subs_graded_by_instructor=Submission.objects.filter(location=sub.location,
-            previous_grader_type__in=["IN"],
-            state__in=["F"],
-        )
+        subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
 
-        subs_pending_instructor=Submission.objects.filter(location=sub.location,
-            next_grader_type__in=["IN"],
-            state__in=["C","W"],
-        )
-
-        if((len(subs_graded_by_instructor)+len(subs_pending_instructor))>=MIN_TO_USE_ML):
+        if((subs_graded_by_instructor+subs_pending_instructor)>=MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
             sub.next_grader_type="IN"

@@ -1,3 +1,5 @@
+from models import Submission
+
 def get_request_ip(request):
     '''
     Retrieve the IP origin of a Django request
@@ -16,3 +18,24 @@ def _value_or_default(value,default=None):
         error="Needed value not passed by xqueue."
         #TODO: Fix in future to fail in a more robust way
         raise Exception(error)
+
+
+def subs_graded_by_instructor(location):
+    subs_graded=Submission.objects.filter(location=location,
+        previous_grader_type__in=["IN"],
+        state__in=["F"],
+    )
+
+    return len(subs_graded)
+
+def subs_pending_instructor(location):
+    subs_pending=Submission.objects.filter(location=location,
+        next_grader_type__in=["IN"],
+        state__in=["C","W"],
+    )
+
+    return len(subs_pending)
+
+
+def subs_by_instructor(location):
+    return subs_graded_by_instructor(location),subs_pending_instructor(location)
