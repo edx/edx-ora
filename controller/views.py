@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import render_to_string
 
 import json
 import logging
@@ -38,3 +39,8 @@ def log_out(request):
 #--------------------------------------------------
 def status(request):
     return HttpResponse(util.compose_reply(success=True, content='OK'))
+
+def instructor_grading(request):
+    rendered=render_to_string('instructor_grading.html', {'score_points': [0,1]})
+    return HttpResponse(rendered)
+

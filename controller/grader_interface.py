@@ -13,54 +13,43 @@ import util
 
 @login_required
 def get_submission_ml(request):
-    try:
-        grader_type = request.GET['grader_type']
-        #grader_location = util._value_or_default(request.GET['grader_location'],None)
-    except KeyError:
-        return HttpResponse(util.compose_reply(False, "'get_submission' requires parameter 'grader_type'"))
-
-    if grader_type not in [x[0] for x in GRADER_TYPE]:
-        return HttpResponse(util.compose_reply(False, ("Invalid grader type: {0}.  "
-                                                 "Valid grader types in models file.").format(grader_type)))
-    else:
-        unique_locations=[x['location'] for x in Submission.objects.values('location').distinct()]
-        for location in unique_locations:
-            subs_graded_by_instructor=util.subs_graded_by_instructor(location)
-            if subs_graded_by_instructor>=settings.MIN_TO_USE_ML:
-                to_be_graded=Submission.objects.filter(
-                    location=location,
-                    state="W",
-                    next_grader_type="ML",
-                )[0]
-                if to_be_graded is not None:
-                    return HttpResponse(util.compose_reply(True,to_be_graded.id))
+    unique_locations=[x['location'] for x in Submission.objects.values('location').distinct()]
+    for location in unique_locations:
+        subs_graded_by_instructor=util.subs_graded_by_instructor(location)
+        if subs_graded_by_instructor>=settings.MIN_TO_USE_ML:
+            to_be_graded=Submission.objects.filter(
+                location=location,
+                state="W",
+                next_grader_type="ML",
+            )[0]
+            if to_be_graded is not None:
+                to_be_graded.state="C"
+                to_be_graded.save()
+                return HttpResponse(util.compose_reply(True,to_be_graded.id))
 
     return HttpResponse(util.compose_reply(False,"Nothing to grade."))
 
 @login_required
 def get_submission_in(request):
     try:
-        grader_type = request.GET['grader_type']
-        grader_location = util._value_or_default(request.GET['course_id'],None)
+        course_id = util._value_or_default(request.GET['course_id'],None)
     except KeyError:
-    return HttpResponse(util.compose_reply(False,
-        "'get_submission' requires parameters 'grader_type' and 'course_id'"))
+        return HttpResponse(util.compose_reply(False,
+        "'get_submission' requires parameter 'course_id'"))
 
-    if grader_type not in [x[0] for x in GRADER_TYPE]:
-        return HttpResponse(util.compose_reply(False, ("Invalid grader type: {0}.  "
-                                                       "Valid grader types in models file.").format(grader_type)))
-    else:
-        locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
-        for location in locations_for_course:
-            subs_graded_by_instructor, subs_pending_instructor=util.subs_by_instructor(location)
-            if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
-                to_be_graded=Submission.objects.filter(
-                    location=location,
-                    state="W",
-                    next_grader_type="IN",
-                )[0]
-                if to_be_graded is not None:
-                    return HttpResponse(util.compose_reply(True,to_be_graded.id))
+    locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
+    for location in locations_for_course:
+        subs_graded_by_instructor, subs_pending_instructor=util.subs_by_instructor(location)
+        if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
+            to_be_graded=Submission.objects.filter(
+                location=location,
+                state="W",
+                next_grader_type="IN",
+            )[0]
+            if to_be_graded is not None:
+                to_be_graded.state="C"
+                to_be_graded.save()
+                return HttpResponse(util.compose_reply(True,to_be_graded.id))
 
     return HttpResponse(util.compose_reply(False,"Nothing to grade."))
 

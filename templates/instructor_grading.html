@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <script src="/static/jquery.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("input[name=save]").click(function(event){
+                feedback=$("textarea[name=feedback]").val()
+                assessment=$("select[name=assessment]").find(':selected').text()
+                $.post('grading_controller/status', {feedback : feedback, assessment : assessment}, function(data) {
+                    $('.result').html(data);
+                });
+            });
+        });
+    </script>
+    <select name="assessment" class="assessment">
+        {% for i in score_points %}
+            <option value="{{i}}">{{i}}</option>
+        {% endfor %}
+    </select>
+    <textarea name="feedback" class="feedback" cols="70" rows="20">Enter feedback here.</textarea>
+    <input type="button" value="Save" class="save-button" name="save"/>
+    <input type="button" value="Next" class="next-button" name="next"/>
+    <div id="result"></div>
+</body>
+</html>

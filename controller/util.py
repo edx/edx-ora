@@ -107,7 +107,7 @@ def login(session,url,username,password):
     (error,msg)= parse_xreply(response.content)
     return error,msg
 
-def _http_get(session,url, data):
+def _http_get(session,url, data={}):
     try:
         r = session.get(url, params=data)
     except requests.exceptions.ConnectionError, err:
