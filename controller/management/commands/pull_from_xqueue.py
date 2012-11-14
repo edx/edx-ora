@@ -45,7 +45,7 @@ class Command(BaseCommand):
                         )
                         log.debug("Successful post!")
                     else:
-                        log.error("Error getting queue item.")
+                        log.info("Error getting queue item or no queue items to get.")
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
 
@@ -81,7 +81,7 @@ class Command(BaseCommand):
         try:
             response = util._http_get(self.xqueue_session,urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submission/'),
                 {'queue_name' : queue_name})
-        except Exception as err
+        except Exception as err:
             return 1,"Error getting response: {0}".format(err)
-    
+
         return response
