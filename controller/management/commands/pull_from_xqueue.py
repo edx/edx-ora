@@ -38,14 +38,17 @@ class Command(BaseCommand):
                     if return_code==0:
                         #Post to controller
                         log.debug("Trying to post.")
-                        util._http_post(urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                            '/grading_controller/submit/'),content,settings.REQUESTS_TIMEOUT)
+                        util._http_post(
+                            self.controller_session,
+                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/submit/'),
+                            content,settings.REQUESTS_TIMEOUT,
+                        )
                         log.debug("Successful post!")
                     else:
                         log.error("Error getting queue item.")
-
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
+
                 time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
     def login(self):
@@ -76,9 +79,9 @@ class Command(BaseCommand):
         Get a single submission from xqueue
         """
         try:
-            response = util._http_get(urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submission/'),
+            response = util._http_get(self.xqueue_session,urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/get_submission/'),
                 {'queue_name' : queue_name})
-        except Exception as err:
-            return "Error getting response: {0}".format(err)
-
+        except Exception as err
+            return 1,"Error getting response: {0}".format(err)
+    
         return response

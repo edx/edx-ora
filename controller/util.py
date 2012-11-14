@@ -116,8 +116,8 @@ def _http_get(session,url, data):
 
     if r.status_code not in [200]:
         return (1, 'unexpected HTTP status code [%d]' % r.status_code)
-
-    return util.parse_xreply(r.text)
+    log.debug(r.text)
+    return parse_xreply(r.text)
 
 def _http_post(session, url, data, timeout):
     '''
