@@ -1,5 +1,9 @@
+from django.conf import settings
 from models import Submission
 import json
+import logging
+
+log=logging.getLogger(__name__)
 
 def get_request_ip(request):
     '''
@@ -100,7 +104,7 @@ def login(session,url,username,password):
 
     response.raise_for_status()
     log.debug("login response from %r: %r", url,response.json)
-    (error,msg)= parse_xreply(xqueue_response.content)
+    (error,msg)= parse_xreply(response.content)
     return error,msg
 
 def _http_get(session,url, data):
