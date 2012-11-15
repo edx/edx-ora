@@ -158,6 +158,16 @@ def create_grader(grader_dict):
     grade.submission=sub
     grade.save()
 
+    #TODO: Need some kind of logic here or somewhere else to handle setting next_grader
+
+    sub.previous_grader_type=grade.grader_type
+    sub.next_grader_type=grade.grader_type
+
+    if(grade.status=="S" and grade.grader_type in ["IN","ML"]):
+        sub.state="F"
+
+    sub.save()
+
     return True
 
 def get_instructor_grading(course_id):
