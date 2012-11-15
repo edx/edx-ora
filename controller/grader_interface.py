@@ -7,9 +7,13 @@ from statsd import statsd
 
 import json
 import logging
+import requests
+import urlparse
 
 from models import Submission, GRADER_TYPE, Grader, STATUS_CODES
 import util
+
+log=logging.getLogger(__name__)
 
 @login_required
 def get_submission_ml(request):
@@ -54,15 +58,16 @@ def put_result(request):
         return HttpResponse(util.compose_reply(False, "'put_result' must use HTTP POST"))
     else:
         post_data=request.POST.dict()
+        log.debug(post_data)
 
         for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id']:
             if not post_data.has_key(tag):
                 return HttpResponse(util.compose_reply(False,"Failed to find needed keys."))
 
-        if post_data['grader_type'] not in GRADER_TYPE:
+        if post_data['grader_type'] not in [i[0] for i in GRADER_TYPE]:
             return HttpResponse(util.compose_reply(False,"Invalid grader type."))
 
-        if post_data['status'] not in STATUS_CODES:
+        if post_data['status'] not in [i[0] for i in STATUS_CODES]:
             return HttpResponse(util.compose_reply(False,"Invalid grader status."))
 
         try:
@@ -70,9 +75,24 @@ def put_result(request):
         except:
             return HttpResponse(util.compose_reply(False,"Can't parse assessment into an int."))
 
-        success=util.create_grader(post_data)
+        success,header=util.create_grader(post_data)
         if not success:
             return HttpResponse(util.compose_reply(False,"Could not save grader."))
+
+        #Add in call to xqueue here
+        #sub.xqueue_submission_key, sub.xqueue_submission_id, sub.xqueue_queue_name
+        xqueue_session=requests.session()
+        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        (xqueue_error,xqueue_msg)=util.login(
+            xqueue_session,
+            xqueue_login_url,
+            settings.XQUEUE_INTERFACE['django_auth']['username'],
+            settings.XQUEUE_INTERFACE['django_auth']['password'],
+        )
+
+        error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+
+        log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 
         return HttpResponse(util.compose_reply(True,"Saved successfully."))
 

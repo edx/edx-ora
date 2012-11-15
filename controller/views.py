@@ -61,7 +61,7 @@ def instructor_grading(request):
             return HttpResponse("Can't parse assessment into an int.")
 
         try:
-            created=util.create_grader({
+            created,sub_info=util.create_grader({
                 'assessment': post_data['assessment'],
                 'feedback' : post_data['feedback'],
                 'status' : "S",

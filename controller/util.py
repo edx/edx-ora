@@ -163,12 +163,23 @@ def create_grader(grader_dict):
     sub.previous_grader_type=grade.grader_type
     sub.next_grader_type=grade.grader_type
 
-    if(grade.status=="S" and grade.grader_type in ["IN","ML"]):
+    if(grade.status_code=="S" and grade.grader_type in ["IN","ML"]):
         sub.state="F"
 
     sub.save()
 
-    return True
+    return True,{'submission_id' : sub.xqueue_submission_id, 'submission_key' : sub.xqueue_submission_key }
+
+def post_results_to_xqueue(session,header,body):
+
+    request={
+        'xqueue_header' : header,
+        'xqueue_body' : body,
+    }
+
+    (error,msg)=_http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request, settings.REQUESTS_TIMEOUT)
+
+    return error,msg
 
 def get_instructor_grading(course_id):
     found=False
