@@ -31,7 +31,7 @@ def subs_graded_by_instructor(location):
         state__in=["F"],
     )
 
-    return len(subs_graded)
+    return subs_graded
 
 def subs_pending_instructor(location):
     subs_pending=Submission.objects.filter(location=location,
@@ -39,10 +39,10 @@ def subs_pending_instructor(location):
         state__in=["C","W"],
     )
 
-    return len(subs_pending)
+    return subs_pending
 
 def subs_by_instructor(location):
-    return subs_graded_by_instructor(location),subs_pending_instructor(location)
+    return len(subs_graded_by_instructor(location)),len(subs_pending_instructor(location))
 
 # Xqueue reply format:
 #    JSON-serialized dict:
