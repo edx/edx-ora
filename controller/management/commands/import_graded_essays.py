@@ -29,13 +29,15 @@ class Command(BaseCommand):
         parser.read(args[0])
 
         print("Starting import...")
+        print("Reading config from file {0}".format(args[0]))
 
-        location = parser.get('ImportData', 'location')
-        course_id = parser.get('ImportData', 'course_id')
-        problem_id = parser.get('ImportData', 'problem_id')
-        prompt = parser.get('ImportData', 'prompt')
-        essay_file = parser.get('ImportData', 'essay_file')
-        essay_limit = parser.get('ImportData', 'essay_limit')
+        header_name="importdata"
+        location = parser.get(header_name, 'location')
+        course_id = parser.get(header_name, 'course_id')
+        problem_id = parser.get(header_name, 'problem_id')
+        prompt = parser.get(header_name, 'prompt')
+        essay_file = parser.get(header_name, 'essay_file')
+        essay_limit = int(parser.get(header_name, 'essay_limit'))
 
         score,text=[],[]
         combined_raw=open(essay_file).read()
@@ -50,7 +52,7 @@ class Command(BaseCommand):
                 prompt=prompt,
                 student_id="",
                 problem_id=problem_id,
-                state="W",
+                state="F",
                 student_response=text[i],
                 student_submission_time= datetime.now(),
                 xqueue_submission_id= "",
@@ -74,7 +76,7 @@ class Command(BaseCommand):
             grade.submission=sub
             grade.save()
 
-        print ("Successfully imported {0} essays using configuration in file {!}.".format(
+        print ("Successfully imported {0} essays using configuration in file {1}.".format(
             min(essay_limit,len(text)),
             args[0],
         ))
