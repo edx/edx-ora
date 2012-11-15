@@ -172,10 +172,10 @@ def get_instructor_grading(course_id):
                 state="W",
                 next_grader_type="IN",
             )
+
             if(len(to_be_graded)>0):
                 to_be_graded=to_be_graded[0]
-            if to_be_graded is not None:
-                if len(to_be_graded)>0:
+                if to_be_graded is not None:
                     to_be_graded.state="C"
                     to_be_graded.save()
                     found=True

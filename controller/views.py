@@ -70,6 +70,7 @@ def instructor_grading(request):
         except:
             return HttpResponse("Can't parse assessment into an int.")
 
+    found=False
     if 'current_sub' not in request.session.keys():
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
         request.session['current_sub']=sub_id
@@ -84,7 +85,7 @@ def instructor_grading(request):
         request.session.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Try reloading.")
 
-    if sub.state in ["C", "F"]:
+    if sub.state in ["C", "F"] and not found:
         request.session.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Try reloading.")
 
@@ -97,6 +98,7 @@ def instructor_grading(request):
         'text' : sub.student_response,
         'location' : sub.location,
         'prompt' : sub.prompt,
+        'sub_id' : sub.id,
     })
     return HttpResponse(rendered)
 
