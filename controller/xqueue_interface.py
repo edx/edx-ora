@@ -45,6 +45,7 @@ def submit(request):
                 xqueue_submission_key=util._value_or_default(header['submission_key'])
                 state_code="W"
                 xqueue_queue_name=util._value_or_default(header["queue_name"])
+                max_score=util._value_or_default(body['max_score'])
 
                 submission_time_string=util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
@@ -62,6 +63,7 @@ def submit(request):
                     xqueue_queue_name=xqueue_queue_name,
                     location=location,
                     course_id=course_id,
+                    max_score=max_score,
                 )
 
             except Exception as err:
