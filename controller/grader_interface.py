@@ -21,11 +21,13 @@ def get_submission_ml(request):
                 location=location,
                 state="W",
                 next_grader_type="ML",
-            )[0]
-            if to_be_graded is not None:
-                to_be_graded.state="C"
-                to_be_graded.save()
-                return HttpResponse(util.compose_reply(True,to_be_graded.id))
+            )
+            if(len(to_be_graded)>0):
+                to_be_graded=to_be_graded[0]
+                if to_be_graded is not None:
+                    to_be_graded.state="C"
+                    to_be_graded.save()
+                    return HttpResponse(util.compose_reply(True,to_be_graded.id))
 
     return HttpResponse(util.compose_reply(False,"Nothing to grade."))
 
@@ -45,7 +47,7 @@ def get_submission_in(request):
     return HttpResponse(util.compose_reply(True,to_be_graded.id))
 
 
-
+@csrf_exempt
 @login_required
 def put_result(request):
     if request.method != 'POST':
@@ -55,23 +57,23 @@ def put_result(request):
 
         for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id']:
             if not post_data.has_key(tag):
-                return HttpResponse(compose_reply(False,"Failed to find needed keys."))
+                return HttpResponse(util.compose_reply(False,"Failed to find needed keys."))
 
         if post_data['grader_type'] not in GRADER_TYPE:
-            return HttpResponse(compose_reply(False,"Invalid grader type."))
+            return HttpResponse(util.compose_reply(False,"Invalid grader type."))
 
         if post_data['status'] not in STATUS_CODES:
-            return HttpResponse(compose_reply(False,"Invalid grader status."))
+            return HttpResponse(util.compose_reply(False,"Invalid grader status."))
 
         try:
             post_data['assessment']=int(post_data['assessment'])
         except:
-            return HttpResponse(compose_reply(False,"Can't parse assessment into an int."))
+            return HttpResponse(util.compose_reply(False,"Can't parse assessment into an int."))
 
         success=util.create_grader(post_data)
         if not success:
-            return HttpResponse(compose_reply(False,"Could not save grader."))
+            return HttpResponse(util.compose_reply(False,"Could not save grader."))
 
-        return HttpResponse(compose_reply(True,"Saved successfully."))
+        return HttpResponse(util.compose_reply(True,"Saved successfully."))
 
 

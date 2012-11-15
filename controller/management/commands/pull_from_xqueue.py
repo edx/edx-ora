@@ -41,7 +41,8 @@ class Command(BaseCommand):
                         util._http_post(
                             self.controller_session,
                             urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/submit/'),
-                            content,settings.REQUESTS_TIMEOUT,
+                            content,
+                            settings.REQUESTS_TIMEOUT,
                         )
                         log.debug("Successful post!")
                     else:
