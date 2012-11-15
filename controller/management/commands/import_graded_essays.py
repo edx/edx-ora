@@ -60,6 +60,8 @@ class Command(BaseCommand):
                 xqueue_queue_name= "",
                 location=location,
                 course_id=course_id,
+                previous_grader_type="IN",
+                next_grader_type="NA",
             )
 
             sub.save()
