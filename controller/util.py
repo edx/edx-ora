@@ -171,11 +171,14 @@ def get_instructor_grading(course_id):
                 location=location,
                 state="W",
                 next_grader_type="IN",
-            )[0]
+            )
+            if(len(to_be_graded)>0):
+                to_be_graded=to_be_graded[0]
             if to_be_graded is not None:
-                to_be_graded.state="C"
-                to_be_graded.save()
-                found=True
-                sub_id=to_be_graded.id
-                return found,sub_id
+                if len(to_be_graded)>0:
+                    to_be_graded.state="C"
+                    to_be_graded.save()
+                    found=True
+                    sub_id=to_be_graded.id
+                    return found,sub_id
     return found,sub_id

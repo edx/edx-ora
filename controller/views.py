@@ -11,6 +11,8 @@ import logging
 
 import util
 
+from models import Submission
+
 log = logging.getLogger(__name__)
 
 # Log in
@@ -49,8 +51,8 @@ def instructor_grading(request):
         for tag in ['assessment','feedback']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed keys 'assessment' and 'feedback'")
-            
-        if requests.session['current_sub'] is None:
+
+        if 'current_sub' not in request.session.keys():
             return HttpResponse("No submission id in session.  Cannot match assessment.  Please reload.")
 
         try:
@@ -64,25 +66,26 @@ def instructor_grading(request):
                 'confidence' : 1,
                 'submission_id' : requests.session['current_sub'],
             })
-            requests.session['current_sub']=None
+            request.session.pop('current_sub')
         except:
             return HttpResponse("Can't parse assessment into an int.")
 
-    if requests.session['current_sub'] is None:
+    if 'current_sub' not in request.session.keys():
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
-        requests.session['current_sub']=sub_id
+        request.session['current_sub']=sub_id
+        log.debug(sub_id)
         if not found:
             return HttpResponse("No available grading.  Check back later.")
 
-    sub_id=requests.session['current_sub']
+    sub_id=request.session['current_sub']
     try:
         sub=Submission.objects.get(id=sub_id)
     except:
-        requests.session['current_sub']=None
+        request.session.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Try reloading.")
 
     if sub.state in ["C", "F"]:
-        requests.session['current_sub']=None
+        request.session.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Try reloading.")
 
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
