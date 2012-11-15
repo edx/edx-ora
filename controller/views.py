@@ -49,17 +49,41 @@ def instructor_grading(request):
         for tag in ['assessment','feedback']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed keys 'assessment' and 'feedback'")
+            
+        if requests.session['current_sub'] is None:
+            return HttpResponse("No submission id in session.  Cannot match assessment.  Please reload.")
+
         try:
             post_data['assessment']=int(post_data['assessment'])
+            created=util.create_grader({
+                'assessment': post_data['assessment'],
+                'feedback' : post_data['feedback'],
+                'status' : "S",
+                'grader_id' : 1,
+                'grader_type' : "IN",
+                'confidence' : 1,
+                'submission_id' : requests.session['current_sub'],
+            })
+            requests.session['current_sub']=None
         except:
             return HttpResponse("Can't parse assessment into an int.")
 
+    if requests.session['current_sub'] is None:
+        found,sub_id=util.get_instructor_grading("MITx/6.002x")
+        requests.session['current_sub']=sub_id
+        if not found:
+            return HttpResponse("No available grading.  Check back later.")
 
+    sub_id=requests.session['current_sub']
+    try:
+        sub=Submission.objects.get(id=sub_id)
+    except:
+        requests.session['current_sub']=None
+        return HttpResponse("Invalid submission id in session.  Try reloading.")
 
-    found,sub_id=util.get_instructor_grading("MITx/6.002x")
-
-    if not found:
-        return HttpResponse("No available grading.  Check back later.")
+    if sub.state in ["C", "F"]:
+        requests.session['current_sub']=None
+        return HttpResponse("Invalid submission id in session.  Try reloading.")
 
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
     if not url_base.endswith("/"):
@@ -67,7 +91,9 @@ def instructor_grading(request):
     rendered=render_to_string('instructor_grading.html', {
         'score_points': [0,1],
         'ajax_url' : url_base,
-        'sub_id' : sub_id
+        'text' : sub.student_response,
+        'location' : sub.location,
+        'prompt' : sub.prompt,
     })
     return HttpResponse(rendered)
 
