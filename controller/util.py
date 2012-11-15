@@ -2,6 +2,8 @@ from django.conf import settings
 from models import Submission, Grader
 import json
 import logging
+from django.utils import timezone
+import datetime
 
 log=logging.getLogger(__name__)
 
@@ -193,7 +195,7 @@ def create_grader(grader_dict):
     grade.submission=sub
     grade.save()
 
-    #TODO: Need some kind of logic here or somewhere else to handle setting next_grader
+    #TODO: Need some kind of logic somewhere else to handle setting next_grader
 
     sub.previous_grader_type=grade.grader_type
     sub.next_grader_type=grade.grader_type
@@ -246,8 +248,29 @@ def get_instructor_grading(course_id):
                     return found,sub_id
     return found,sub_id
 
-def check_for_ungraded_subs():
-    pass
+def check_if_timed_out(subs):
+    now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
+    sub_times=[now-sub.date_modified for sub in subs]
+    min_time=datetime.timedelta(minutes=settings.RESET_SUBMISSIONS_AFTER)
 
-def check_for_expired_subs():
-    pass
+    for i in xrange(0,len(sub_times)):
+        if sub_times>min_time:
+            sub=subs[i]
+            if sub.state=="C":
+                sub.state="W"
+                sub.save()
+
+    return True
+
+
+def check_if_expired():
+    now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
+    sub_times=[now-sub.date_modified for sub in subs]
+    min_time=datetime.timedelta(minutes=settings.EXPIRE_SUBMISSIONS_AFTER)
+
+    timed_out_list=[]
+    for i in xrange(0,len(sub_times)):
+        if sub_times>min_time:
+            timed_out_list.append(subs[i])
+
+    return timed_out_list
