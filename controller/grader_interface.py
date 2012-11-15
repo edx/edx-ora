@@ -17,6 +17,9 @@ log=logging.getLogger(__name__)
 
 @login_required
 def get_submission_ml(request):
+    """
+    Gets a submission for the ML grader
+    """
     unique_locations=[x['location'] for x in Submission.objects.values('location').distinct()]
     for location in unique_locations:
         subs_graded_by_instructor=len(util.subs_graded_by_instructor(location))
@@ -37,6 +40,9 @@ def get_submission_ml(request):
 
 @login_required
 def get_submission_in(request):
+    """
+    Gets a submission for the Instructor grading view
+    """
     try:
         course_id = util._value_or_default(request.GET['course_id'],None)
     except KeyError:
@@ -54,6 +60,9 @@ def get_submission_in(request):
 @csrf_exempt
 @login_required
 def put_result(request):
+    """
+    Used by external interfaces to post results back to controller
+    """
     if request.method != 'POST':
         return HttpResponse(util.compose_reply(False, "'put_result' must use HTTP POST"))
     else:

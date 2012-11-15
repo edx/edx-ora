@@ -22,6 +22,9 @@ class Command(BaseCommand):
     help = "Poll grading controller and send items to be graded to ml"
 
     def handle(self, *args, **options):
+        """
+        Calls ml model creator to evaluate database, decide what needs to have a model created, and do so.
+        """
         unique_locations=[x['location'] for x in Submission.objects.values('location').distinct()]
         for location in unique_locations:
             subs_graded_by_instructor=util.subs_graded_by_instructor(location)

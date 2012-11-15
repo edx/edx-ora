@@ -77,6 +77,9 @@ class Command(BaseCommand):
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
     def login(self):
+        """
+        Logs in to the controller
+        """
         controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
 
         (controller_error,controller_msg)=util.login(

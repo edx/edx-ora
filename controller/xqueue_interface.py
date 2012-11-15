@@ -82,6 +82,9 @@ def submit(request):
             return HttpResponse(util.compose_reply(success=success, content=''))
 
 def handle_submission(sub):
+    """
+    Handles a new submission.  Decides what the next grader should be and saves it.
+    """
     try:
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)

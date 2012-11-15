@@ -12,16 +12,16 @@ import requests
 import urlparse
 
 import util
-from copy import deepcopy
 
 from models import Submission
 
 log = logging.getLogger(__name__)
 
-# Log in
-#--------------------------------------------------
 @csrf_exempt
 def log_in(request):
+    """
+    Handles external login request.
+    """
     if request.method == 'POST':
         p = request.POST.copy()
         if p.has_key('username') and p.has_key('password'):
@@ -38,19 +38,27 @@ def log_in(request):
         return HttpResponse(util.compose_reply(False,'login_required'))
 
 def log_out(request):
+    """
+    Uses django auth to handle a logout request
+    """
     logout(request)
     return HttpResponse(util.compose_reply(success=True,content='Goodbye'))
 
-# Status check
-#--------------------------------------------------
 def status(request):
+    """
+    Returns a simple status update
+    """
     return HttpResponse(util.compose_reply(success=True, content='OK'))
 
 @csrf_exempt
 def instructor_grading(request):
+    """
+    Temporary instructor grading view.  Can be removed once real instructor grading is wired in.
+    Handles both rendering and AJAX Posts.
+    """
     post_data={}
     if request.method == 'POST':
-        post_data=copy.deepcopy(request.POST.dict())
+        post_data=request.POST.dict().copy()
         for tag in ['score','feedback', 'submission_id', 'max_score']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed keys 'score' and 'feedback'")
@@ -72,18 +80,18 @@ def instructor_grading(request):
                 'confidence' : 1,
                 'submission_id' : post_data['submission_id'],
                 })
-            post_data.pop('submission_id')
 
         except:
             return HttpResponse("Cannot create grader object.")
+
         post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
 
         correct_ratio=post_data['score']/post_data['max_score']
         correct=False
         if(correct_ratio>=.66):
             correct=True
-        post_data=post_data.update({'correct' : correct})
-        log.debug(post_data)
+
+        post_data.update({'correct' : correct})
         xqueue_session=requests.session()
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
         (xqueue_error,xqueue_msg)=util.login(
@@ -112,11 +120,11 @@ def instructor_grading(request):
     try:
         sub=Submission.objects.get(id=sub_id)
     except:
-        post_data.pop('current_sub')
+        post_data.pop('submission_id')
         return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
     if sub.state in ["F"] and not found:
-        post_data.pop('current_sub')
+        post_data.pop('submission_id')
         return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']

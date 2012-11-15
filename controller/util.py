@@ -220,6 +220,10 @@ def post_results_to_xqueue(session,header,body):
     return error,msg
 
 def get_instructor_grading(course_id):
+    """
+    Gets instructor grading for a given course id.
+    Returns one submission id corresponding to the course.
+    """
     found=False
     sub_id=0
     locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
