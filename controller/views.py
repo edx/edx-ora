@@ -57,6 +57,10 @@ def instructor_grading(request):
 
         try:
             post_data['assessment']=int(post_data['assessment'])
+        except:
+            return HttpResponse("Can't parse assessment into an int.")
+
+        try:
             created=util.create_grader({
                 'assessment': post_data['assessment'],
                 'feedback' : post_data['feedback'],
@@ -64,11 +68,11 @@ def instructor_grading(request):
                 'grader_id' : 1,
                 'grader_type' : "IN",
                 'confidence' : 1,
-                'submission_id' : requests.session['current_sub'],
-            })
+                'submission_id' : request.session['current_sub'],
+                })
             request.session.pop('current_sub')
         except:
-            return HttpResponse("Can't parse assessment into an int.")
+            return HttpResponse("Cannot create grader object.")
 
     found=False
     if 'current_sub' not in request.session.keys():
@@ -76,6 +80,7 @@ def instructor_grading(request):
         request.session['current_sub']=sub_id
         log.debug(sub_id)
         if not found:
+            request.session.pop('current_sub')
             return HttpResponse("No available grading.  Check back later.")
 
     sub_id=request.session['current_sub']
@@ -83,11 +88,11 @@ def instructor_grading(request):
         sub=Submission.objects.get(id=sub_id)
     except:
         request.session.pop('current_sub')
-        return HttpResponse("Invalid submission id in session.  Try reloading.")
+        return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
-    if sub.state in ["C", "F"] and not found:
+    if sub.state in ["F"] and not found:
         request.session.pop('current_sub')
-        return HttpResponse("Invalid submission id in session.  Try reloading.")
+        return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
     if not url_base.endswith("/"):

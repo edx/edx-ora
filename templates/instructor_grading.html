@@ -11,7 +11,9 @@
                 feedback=$("textarea[name=feedback]").first().val()
                 assessment=$("select[name=assessment]").first().find(':selected').text()
                 $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, assessment : assessment}, function(data) {
-                    $('div.result').html(data);
+                    document.open();
+                    document.write(data);
+                    document.close();
                 });
             });
         });
