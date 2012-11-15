@@ -52,7 +52,6 @@ class Command(BaseCommand):
                     grader_dict={
                         'score' : results['score'],
                         'correct' : results['correct'],
-                        'msg' : results['msg'],
                         'assessment': results['score'],
                         'feedback' : results['feedback'],
                         'status' : status,
@@ -71,6 +70,7 @@ class Command(BaseCommand):
                     log.debug("Got response of {0} from server, message: {1}".format(created,msg))
                 else:
                     log.info("Error getting item from controller or no items to get.")
+
             except Exception as err:
                 log.debug("Error getting submission: ".format(err))
 

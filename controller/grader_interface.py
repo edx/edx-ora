@@ -60,7 +60,7 @@ def put_result(request):
         post_data=request.POST.dict()
         log.debug(post_data)
 
-        for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id']:
+        for tag in ['assessment','feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'correct']:
             if not post_data.has_key(tag):
                 return HttpResponse(util.compose_reply(False,"Failed to find needed keys."))
 
@@ -72,6 +72,7 @@ def put_result(request):
 
         try:
             post_data['assessment']=int(post_data['assessment'])
+            post_data['score']=int(post_data['score'])
         except:
             return HttpResponse(util.compose_reply(False,"Can't parse assessment into an int."))
 
