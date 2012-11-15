@@ -249,6 +249,9 @@ def get_instructor_grading(course_id):
     return found,sub_id
 
 def check_if_timed_out(subs):
+    """
+    Check if submissions have timed out, and reset them to waiting to grade state if they have
+    """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-sub.date_modified for sub in subs]
     min_time=datetime.timedelta(minutes=settings.RESET_SUBMISSIONS_AFTER)
@@ -263,7 +266,10 @@ def check_if_timed_out(subs):
     return True
 
 
-def check_if_expired():
+def check_if_expired(subs):
+    """
+    Check if submissions have expired, and return them if they have
+    """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-sub.date_modified for sub in subs]
     min_time=datetime.timedelta(minutes=settings.EXPIRE_SUBMISSIONS_AFTER)
@@ -274,3 +280,8 @@ def check_if_expired():
             timed_out_list.append(subs[i])
 
     return timed_out_list
+
+def expire_submissions():
+    subs=Submission.objects.filter(
+
+    )
