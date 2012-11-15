@@ -9,6 +9,7 @@ import json
 import logging
 import sys
 from ConfigParser import SafeConfigParser
+from datetime import datetime
 
 from controller.models import Submission,Grader
 
@@ -27,11 +28,14 @@ class Command(BaseCommand):
         parser = SafeConfigParser()
         parser.read(args[0])
 
+        print("Starting import...")
+
         location = parser.get('ImportData', 'location')
         course_id = parser.get('ImportData', 'course_id')
         problem_id = parser.get('ImportData', 'problem_id')
         prompt = parser.get('ImportData', 'prompt')
         essay_file = parser.get('ImportData', 'essay_file')
+        essay_limit = parser.get('ImportData', 'essay_limit')
 
         score,text=[],[]
         combined_raw=open(essay_file).read()
@@ -41,34 +45,36 @@ class Command(BaseCommand):
             text.append(text1)
             score.append(int(score1))
 
+        for i in range(0,min(essay_limit,len(text))):
+            sub=Submission(
+                prompt=prompt,
+                student_id="",
+                problem_id=problem_id,
+                state="W",
+                student_response=text[i],
+                student_submission_time= datetime.now(),
+                xqueue_submission_id= "",
+                xqueue_submission_key= "",
+                xqueue_queue_name= "",
+                location=location,
+                course_id=course_id,
+            )
 
-        log.info(' [*] Pulling from xqueues...')
-        self.xqueue_session=requests.session()
-        self.controller_session=requests.session()
+            sub.save()
 
-        flag=True
-        error = self.login()
+            grade=Grader(
+                score=score[i],
+                feedback = "",
+                status_code = "S",
+                grader_id= "",
+                grader_type= "IN",
+                confidence= 1,
+            )
 
-        while flag:
-            for queue_name in args:
-                try:
-                    response_code,queue_item=self.get_from_queue(queue_name)
-                    return_code,content=util.parse_xobject(queue_item,queue_name)
-                    log.debug(content)
+            grade.submission=sub
+            grade.save()
 
-                    #Post to grading controller here!
-                    if return_code==0:
-                        #Post to controller
-                        log.debug("Trying to post.")
-                        util._http_post(
-                            self.controller_session,
-                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/submit/'),
-                            content,settings.REQUESTS_TIMEOUT,
-                        )
-                        log.debug("Successful post!")
-                    else:
-                        log.info("Error getting queue item or no queue items to get.")
-                except Exception as err:
-                    log.debug("Error getting submission: ".format(err))
-
-                time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
+        print ("Successfully imported {0} essays using configuration in file {!}.".format(
+            min(essay_limit,len(text)),
+            args[0],
+        ))
