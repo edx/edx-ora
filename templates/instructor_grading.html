@@ -11,7 +11,7 @@
                 feedback=$("textarea[name=feedback]").first().val()
                 score=$("select[name=score]").first().find(':selected').text()
                 submission_id=$("p[name=submission_id]").first().text()
-                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, score : score, submission_id : submission_id}, function(data) {
+                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, score : score, submission_id : submission_id, max_score : {{max_score}}}, function(data) {
                     document.open();
                     document.write(data);
                     document.close();

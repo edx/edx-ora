@@ -22,7 +22,7 @@ def submit(request):
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
         #Minimal parsing of reply
-        reply_is_valid, header, body = _is_valid_reply(request.POST)
+        reply_is_valid, header, body = _is_valid_reply(request.POST.copy())
         log.debug("Header: {0}\n Body: {1}".format(header,body))
 
         if not reply_is_valid:

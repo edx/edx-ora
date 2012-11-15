@@ -57,7 +57,7 @@ def put_result(request):
     if request.method != 'POST':
         return HttpResponse(util.compose_reply(False, "'put_result' must use HTTP POST"))
     else:
-        post_data=request.POST.dict()
+        post_data=request.POST.dict().copy()
         log.debug(post_data)
 
         for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'correct']:

@@ -12,6 +12,7 @@ import requests
 import urlparse
 
 import util
+from copy import deepcopy
 
 from models import Submission
 
@@ -49,13 +50,14 @@ def status(request):
 def instructor_grading(request):
     post_data={}
     if request.method == 'POST':
-        post_data=request.POST.dict()
-        for tag in ['score','feedback', 'submission_id']:
+        post_data=copy.deepcopy(request.POST.dict())
+        for tag in ['score','feedback', 'submission_id', 'max_score']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed keys 'score' and 'feedback'")
 
         try:
             post_data['score']=int(post_data['score'])
+            post_data['max_score']=int(post_data['max_score'])
             post_data['submission_id']=int(post_data['submission_id'])
         except:
             return HttpResponse("Can't parse score into an int.")
@@ -75,9 +77,13 @@ def instructor_grading(request):
         except:
             return HttpResponse("Cannot create grader object.")
         post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
-        post_data=post_data.update({
-            ''
-        })
+
+        correct_ratio=post_data['score']/post_data['max_score']
+        correct=False
+        if(correct_ratio>=.66):
+            correct=True
+        post_data=post_data.update({'correct' : correct})
+        log.debug(post_data)
         xqueue_session=requests.session()
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
         (xqueue_error,xqueue_msg)=util.login(
@@ -86,13 +92,15 @@ def instructor_grading(request):
             settings.XQUEUE_INTERFACE['django_auth']['username'],
             settings.XQUEUE_INTERFACE['django_auth']['password'],
         )
+        log.debug(post_data)
 
         error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
         log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 
     found=False
-    if 'submission_id' not in post_data.keys():
+    if post_data is None or post_data=={}:
+        post_data={}
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
         post_data['submission_id']=sub_id
         log.debug(sub_id)
@@ -115,12 +123,13 @@ def instructor_grading(request):
     if not url_base.endswith("/"):
         url_base+="/"
     rendered=render_to_string('instructor_grading.html', {
-        'score_points': [0,1],
+        'score_points': [i for i in xrange(0,sub.max_score+1)],
         'ajax_url' : url_base,
         'text' : sub.student_response,
         'location' : sub.location,
         'prompt' : sub.prompt,
         'sub_id' : sub.id,
+        'max_score' : sub.max_score,
     })
     return HttpResponse(rendered)
 
