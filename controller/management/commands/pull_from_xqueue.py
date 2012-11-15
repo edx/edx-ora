@@ -21,15 +21,20 @@ class Command(BaseCommand):
         Constant loop that pulls from queue and posts to grading controller
         """
         log.info(' [*] Pulling from xqueues...')
+
+        #Define sessions for logging into xqueue and controller
         self.xqueue_session=requests.session()
         self.controller_session=requests.session()
 
+        #Login, then setup endless query loop
         flag=True
         error = self.login()
 
         while flag:
+            #Loop through each queue that is given in arguments
             for queue_name in args:
                 try:
+                    #Get and parse queue objects
                     response_code,queue_item=self.get_from_queue(queue_name)
                     return_code,content=util.parse_xobject(queue_item,queue_name)
                     log.debug(content)

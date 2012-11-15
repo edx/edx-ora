@@ -8,6 +8,8 @@ from django.conf import settings
 
 import json
 import logging
+import requests
+import urlparse
 
 import util
 
@@ -45,53 +47,68 @@ def status(request):
 
 @csrf_exempt
 def instructor_grading(request):
-    log.debug(request.session)
+    post_data={}
     if request.method == 'POST':
         post_data=request.POST.dict()
-        for tag in ['assessment','feedback']:
+        for tag in ['score','feedback', 'submission_id']:
             if not post_data.has_key(tag):
-                return HttpResponse("Failed to find needed keys 'assessment' and 'feedback'")
-
-        if 'current_sub' not in request.session.keys():
-            return HttpResponse("No submission id in session.  Cannot match assessment.  Please reload.")
+                return HttpResponse("Failed to find needed keys 'score' and 'feedback'")
 
         try:
-            post_data['assessment']=int(post_data['assessment'])
+            post_data['score']=int(post_data['score'])
+            post_data['submission_id']=int(post_data['submission_id'])
         except:
-            return HttpResponse("Can't parse assessment into an int.")
+            return HttpResponse("Can't parse score into an int.")
 
         try:
-            created,sub_info=util.create_grader({
-                'assessment': post_data['assessment'],
+            created,header=util.create_grader({
+                'score': post_data['score'],
                 'feedback' : post_data['feedback'],
                 'status' : "S",
                 'grader_id' : 1,
                 'grader_type' : "IN",
                 'confidence' : 1,
-                'submission_id' : request.session['current_sub'],
+                'submission_id' : post_data['submission_id'],
                 })
-            request.session.pop('current_sub')
+            post_data.pop('submission_id')
+
         except:
             return HttpResponse("Cannot create grader object.")
+        post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
+        post_data=post_data.update({
+            ''
+        })
+        xqueue_session=requests.session()
+        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        (xqueue_error,xqueue_msg)=util.login(
+            xqueue_session,
+            xqueue_login_url,
+            settings.XQUEUE_INTERFACE['django_auth']['username'],
+            settings.XQUEUE_INTERFACE['django_auth']['password'],
+        )
+
+        error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+
+        log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 
     found=False
-    if 'current_sub' not in request.session.keys():
+    if 'submission_id' not in post_data.keys():
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
-        request.session['current_sub']=sub_id
+        post_data['submission_id']=sub_id
         log.debug(sub_id)
         if not found:
-            request.session.pop('current_sub')
+            post_data.pop('submission_id')
             return HttpResponse("No available grading.  Check back later.")
 
-    sub_id=request.session['current_sub']
+    sub_id=post_data['submission_id']
     try:
         sub=Submission.objects.get(id=sub_id)
     except:
-        request.session.pop('current_sub')
+        post_data.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
     if sub.state in ["F"] and not found:
-        request.session.pop('current_sub')
+        post_data.pop('current_sub')
         return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 
     url_base=settings.GRADING_CONTROLLER_INTERFACE['url']

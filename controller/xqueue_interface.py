@@ -21,9 +21,10 @@ def submit(request):
     if request.method != 'POST':
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
+        #Minimal parsing of reply
         reply_is_valid, header, body = _is_valid_reply(request.POST)
-
         log.debug("Header: {0}\n Body: {1}".format(header,body))
+
         if not reply_is_valid:
             log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
                 util.get_request_ip(request),
@@ -32,6 +33,7 @@ def submit(request):
             return HttpResponse(util.compose_reply(False, 'Incorrect format'))
         else:
             try:
+                #Retrieve individual values from xqueue body and header.
                 prompt=util._value_or_default(body['grader_payload']['prompt'],"")
                 student_id=util._value_or_default(body['student_info']['anonymous_student_id'])
                 location=util._value_or_default(body['grader_payload']['location'])
@@ -47,6 +49,7 @@ def submit(request):
                 submission_time_string=util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
 
+                #Create submission object
                 sub, created = Submission.objects.get_or_create(
                     prompt=prompt,
                     student_id=student_id,
@@ -72,15 +75,14 @@ def submit(request):
                 return HttpResponse(util.compose_reply(False,'Unable to create submission.'))
 
             #Handle submission and write to db
-
             success=handle_submission(sub)
 
             return HttpResponse(util.compose_reply(success=success, content=''))
 
 def handle_submission(sub):
     try:
+        #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
-
         if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:

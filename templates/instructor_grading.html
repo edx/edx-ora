@@ -9,8 +9,9 @@
         $(document).ready(function(){
             $("input[name=save]").click(function(event){
                 feedback=$("textarea[name=feedback]").first().val()
-                assessment=$("select[name=assessment]").first().find(':selected').text()
-                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, assessment : assessment}, function(data) {
+                score=$("select[name=score]").first().find(':selected').text()
+                submission_id=$("p[name=submission_id]").first().text()
+                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, score : score, submission_id : submission_id}, function(data) {
                     document.open();
                     document.write(data);
                     document.close();
@@ -18,7 +19,7 @@
             });
         });
     </script>
-    {{sub_id}}
+    <p name="submission_id">{{sub_id}}</p>
     <br/>
     {{location}}
     <br/><br/>
@@ -27,7 +28,7 @@
     {{text}}
     <br/><br/>
 
-    <select name="assessment" class="assessment">
+    <select name="score" class="score">
         {% for i in score_points %}
             <option value="{{i}}">{{i}}</option>
         {% endfor %}

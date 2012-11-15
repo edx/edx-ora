@@ -15,6 +15,10 @@ def get_request_ip(request):
     return ip
 
 def _value_or_default(value,default=None):
+    """
+    If value isn't None, return value, default if it is.
+    Error if value is None with no default.
+    """
     if value is not None:
         return value
     elif default is not None:
@@ -26,6 +30,9 @@ def _value_or_default(value,default=None):
 
 
 def subs_graded_by_instructor(location):
+    """
+    Get submissions that are graded by instructor
+    """
     subs_graded=Submission.objects.filter(location=location,
         previous_grader_type__in=["IN"],
         state__in=["F"],
@@ -34,6 +41,9 @@ def subs_graded_by_instructor(location):
     return subs_graded
 
 def subs_pending_instructor(location):
+    """
+    Get submissions that are pending instructor grading.
+    """
     subs_pending=Submission.objects.filter(location=location,
         next_grader_type__in=["IN"],
         state__in=["C","W"],
@@ -42,14 +52,20 @@ def subs_pending_instructor(location):
     return subs_pending
 
 def subs_by_instructor(location):
+    """
+    Return length of submissions pending instructor grading and graded.
+    """
     return len(subs_graded_by_instructor(location)),len(subs_pending_instructor(location))
 
-# Xqueue reply format:
-#    JSON-serialized dict:
-#    { 'return_code': 0(success)/1(error),
-#      'content'    : 'my content', }
-#--------------------------------------------------
+
 def compose_reply(success, content):
+    """
+    Return a reply given below values:
+    JSON-serialized dict:
+     {'return_code': 0(success)/1(error),
+    'content'    : 'my content', }
+
+    """
     return_code = 0 if success else 1
     return json.dumps({ 'return_code': return_code,
                         'content': content })
@@ -96,6 +112,10 @@ def parse_xobject(xobject,queue_name):
     return 0, content
 
 def login(session,url,username,password):
+    """
+    Login to given url with given username and password.
+    Use given request session (requests.session)
+    """
     response = session.post(url,
         {'username': username,
          'password': password,
@@ -108,6 +128,12 @@ def login(session,url,username,password):
     return error,msg
 
 def _http_get(session,url, data={}):
+    """
+    Send an HTTP get request:
+    session: requests.session object.
+    url : url to send request to
+    data: optional dictionary to send
+    """
     try:
         r = session.get(url, params=data)
     except requests.exceptions.ConnectionError, err:
@@ -122,6 +148,11 @@ def _http_get(session,url, data={}):
 def _http_post(session, url, data, timeout):
     '''
     Contact grading controller, but fail gently.
+    Takes following arguments:
+    session - requests.session object
+    url - url to post to
+    data - dictionary with data to post
+    timeout - timeout in settings
 
     Returns (success, msg), where:
         success: Flag indicating successful exchange (Boolean)
@@ -140,14 +171,18 @@ def _http_post(session, url, data, timeout):
     return (True, r.text)
 
 def create_grader(grader_dict):
-
+    """
+    Creates a grader object and associates it with a given submission
+    Input is grader dictionary with keys:
+     feedback, status, grader_id, grader_type, confidence.
+    """
     try:
         sub=Submission.objects.get(id=grader_dict['submission_id'])
     except:
         return False
 
     grade=Grader(
-        score=grader_dict['assessment'],
+        score=grader_dict['score'],
         feedback = grader_dict['feedback'],
         status_code = grader_dict['status'],
         grader_id= grader_dict['grader_id'],
@@ -171,7 +206,10 @@ def create_grader(grader_dict):
     return True,{'submission_id' : sub.xqueue_submission_id, 'submission_key' : sub.xqueue_submission_key }
 
 def post_results_to_xqueue(session,header,body):
+    """
+    Post the results from a grader back to xqueue.
 
+    """
     request={
         'xqueue_header' : header,
         'xqueue_body' : body,
@@ -203,3 +241,9 @@ def get_instructor_grading(course_id):
                     sub_id=to_be_graded.id
                     return found,sub_id
     return found,sub_id
+
+def check_for_ungraded_subs():
+    pass
+
+def check_for_expired_subs():
+    pass

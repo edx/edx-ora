@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 #Grade and handle here
                 if response_code==0:
                     sub=Submission.objects.get(id=content)
-                    student_response=sub.student_response
+                    student_response=sub.student_response.encode('ascii', 'ignore')
                     grader_path=sub.location
                     results=grade.grade(grader_path,None,student_response) #grader config is none for now, could be different later
                     log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'],results['errors']))
@@ -52,7 +52,6 @@ class Command(BaseCommand):
                     grader_dict={
                         'score' : results['score'],
                         'correct' : results['correct'],
-                        'assessment': results['score'],
                         'feedback' : results['feedback'],
                         'status' : status,
                         'grader_id' : 1,
