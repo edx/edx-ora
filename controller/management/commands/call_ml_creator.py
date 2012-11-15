@@ -32,9 +32,9 @@ class Command(BaseCommand):
             ))
             if len(subs_graded_by_instructor)>=settings.MIN_TO_USE_ML:
                 if not create.check(location) or len(subs_graded_by_instructor)%10==0:
-                    text=[str(i.student_response) for i in subs_graded_by_instructor]
+                    text=[str(i.student_response.encode('ascii', 'ignore')) for i in subs_graded_by_instructor]
                     scores=[i.get_last_grader().score for i in subs_graded_by_instructor]
-                    prompt=subs_graded_by_instructor[0].prompt
+                    prompt=str(subs_graded_by_instructor[0].prompt.encode('ascii', 'ignore'))
                     model_path=subs_graded_by_instructor[0].location
                     results=create.create(text,scores,prompt,model_path)
                     log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
