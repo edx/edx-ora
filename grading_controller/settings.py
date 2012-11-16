@@ -24,7 +24,7 @@ TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
 #Config for specific graders
 MIN_TO_USE_ML=100
 ML_PATH=os.path.join(ENV_ROOT,"machine_learning/")
-EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60  #Minutes
+EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds
 RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds
 
 DATABASES = {

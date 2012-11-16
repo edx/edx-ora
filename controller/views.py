@@ -57,6 +57,7 @@ def instructor_grading(request):
     Handles both rendering and AJAX Posts.
     """
     post_data={}
+    saved=False
     if request.method == 'POST':
         post_data=request.POST.dict().copy()
         for tag in ['score','feedback', 'submission_id', 'max_score']:
@@ -80,7 +81,7 @@ def instructor_grading(request):
                 'confidence' : 1,
                 'submission_id' : post_data['submission_id'],
                 })
-
+            saved=True
         except:
             return HttpResponse("Cannot create grader object.")
 
@@ -107,20 +108,26 @@ def instructor_grading(request):
         log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 
     found=False
-    if post_data is None or post_data=={}:
+    if post_data is None or post_data=={} or saved:
         post_data={}
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
         post_data['submission_id']=sub_id
         log.debug(sub_id)
         if not found:
-            post_data.pop('submission_id')
+            try:
+                post_data.pop('submission_id')
+            except:
+                return HttpResponse("Could not find submission_id in post_data")
             return HttpResponse("No available grading.  Check back later.")
 
-    sub_id=post_data['submission_id']
     try:
+        sub_id=post_data['submission_id']
         sub=Submission.objects.get(id=sub_id)
     except:
-        post_data.pop('submission_id')
+        try:
+            post_data.pop('submission_id')
+        except:
+            return HttpResponse("Could not find key submission_id in post data.")
         return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
     if sub.state in ["F"] and not found:
