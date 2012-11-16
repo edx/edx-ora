@@ -268,7 +268,7 @@ def check_if_timed_out(subs):
         status code indicating success
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times=[now-sub.date_modified for sub in subs]
+    sub_times=[now-i['date_modified'] for i in list(subs.values('date_modified'))]
     min_time=datetime.timedelta(minutes=settings.RESET_SUBMISSIONS_AFTER)
 
     for i in xrange(0,len(sub_times)):
@@ -288,7 +288,7 @@ def check_if_expired(subs):
         subs - A queryset of submissions
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times=[now-sub.date_modified for sub in subs]
+    sub_times=[now-i['date_modified'] for i in list(subs.values('date_modified'))]
     min_time=datetime.timedelta(minutes=settings.EXPIRE_SUBMISSIONS_AFTER)
 
     timed_out_list=[]

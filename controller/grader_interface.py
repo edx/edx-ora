@@ -31,7 +31,7 @@ def get_submission_ml(request):
                 state="W",
                 next_grader_type="ML",
             )
-            if(len(to_be_graded)>0):
+            if(to_be_graded.count()>0):
                 to_be_graded=to_be_graded[0]
                 if to_be_graded is not None:
                     to_be_graded.state="C"
@@ -56,7 +56,7 @@ def get_submission_in(request):
     if not found:
         return HttpResponse(util.compose_reply(False,"Nothing to grade."))
 
-    return HttpResponse(util.compose_reply(True,to_be_graded.id))
+    return HttpResponse(util.compose_reply(True,sub_id))
 
 
 @csrf_exempt
