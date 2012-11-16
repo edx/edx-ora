@@ -25,7 +25,7 @@ class Command(BaseCommand):
         """
         Calls ml model creator to evaluate database, decide what needs to have a model created, and do so.
         """
-        unique_locations=[x['location'] for x in Submission.objects.values('location').distinct()]
+        unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
         for location in unique_locations:
             subs_graded_by_instructor=util.subs_graded_by_instructor(location)
             log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
@@ -35,8 +35,8 @@ class Command(BaseCommand):
             ))
             if len(subs_graded_by_instructor)>=settings.MIN_TO_USE_ML:
                 if not create.check(location) or len(subs_graded_by_instructor)%10==0:
-                    text=[str(i.student_response.encode('ascii', 'ignore')) for i in subs_graded_by_instructor]
-                    scores=[i.get_last_grader().score for i in subs_graded_by_instructor]
+                    text=[str(i['student_response'].encode('ascii', 'ignore')) for i in list(subs_graded_by_instructor.values('student_response'))]
+                    scores=[i.get_last_grader().score for i in list(subs_graded_by_instructor)]
                     prompt=str(subs_graded_by_instructor[0].prompt.encode('ascii', 'ignore'))
                     model_path=subs_graded_by_instructor[0].location
                     results=create.create(text,scores,prompt,model_path)

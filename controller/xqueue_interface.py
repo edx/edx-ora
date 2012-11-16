@@ -17,6 +17,16 @@ log = logging.getLogger(__name__)
 def submit(request):
     '''
     Xqueue pull script posts objects here.
+    Input:
+
+    request - dict with keys xqueue_header and xqueue_body
+    xqueue_header needs submission_id,submission_key,queue_name
+    xqueue_body needs grader_payload, student_info, student_response, max_score
+    grader_payload needs location, course_id,problem_id,grader
+    student_info needs anonymous_student_id, submission_time
+
+    Output:
+    Returns status code indicating success (0) or failure (1) and message
     '''
     if request.method != 'POST':
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
@@ -88,6 +98,8 @@ def handle_submission(sub):
     try:
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
+
+        #TODO: abstract out logic for assigning which grader to go with.
         if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
@@ -110,9 +122,8 @@ def _is_valid_reply(external_reply):
 
     Returns:
         is_valid:       Flag indicating success (Boolean)
-        submission_id:  Graded submission's database ID in Xqueue (int)
-        submission_key: Secret key to match against Xqueue database (string)
-        score_msg:      Grading result from external grader (string)
+        header :        header of the queue item
+        body:           body of the queue item
     '''
     fail = (False,-1,'')
 
