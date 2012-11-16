@@ -309,12 +309,12 @@ def expire_submissions(timed_out_list):
     for sub in timed_out_list:
         sub.state="F"
         grader_dict={
-            score=0,
-            feedback = "Error scoring submission.",
-            status_code = "F",
-            grader_id= "0",
-            grader_type= sub.next_grader_type,
-            confidence= 1,
+            'score' : 0,
+            'feedback' : "Error scoring submission.",
+            'status_code' : "F",
+            'grader_id' : "0",
+            'grader_type' : sub.next_grader_type,
+            'confidence' : 1,
         }
         success,header=create_grader()
         sub.save()
@@ -328,9 +328,10 @@ def expire_submissions(timed_out_list):
             settings.XQUEUE_INTERFACE['django_auth']['password'],
         )
 
-        error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
+        error,msg = post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
 
         return error,msg
+
 
 
 

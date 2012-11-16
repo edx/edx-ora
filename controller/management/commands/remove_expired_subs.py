@@ -23,6 +23,7 @@ class Command(BaseCommand):
         while flag:
             subs=Submission.objects.all()
             util.check_if_timed_out(subs)
-
+            expired_list=util.check_if_expired(subs)
+            error,msg=util.expire_submissions(expired_list)
 
             time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
