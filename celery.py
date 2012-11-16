@@ -5,7 +5,7 @@ from celery import Celery
 celery = Celery('proj.celery',
     broker='amqp://',
     backend='amqp://',
-    include=['proj.tasks'])
+    include=['grading_controller.tasks'])
 
 # Optional configuration, see the application user guide.
 celery.conf.update(
