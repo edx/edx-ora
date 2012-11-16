@@ -19,11 +19,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         flag=True
-
+        log.debug("Starting check for expired subs.")
         while flag:
             subs=Submission.objects.all()
             util.check_if_timed_out(subs)
             expired_list=util.check_if_expired(subs)
-            error,msg=util.expire_submissions(expired_list)
+            if len(expired_list)>0:
+                error,msg=util.expire_submissions(expired_list)
 
             time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)

@@ -270,13 +270,17 @@ def check_if_timed_out(subs):
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-i['date_modified'] for i in list(subs.values('date_modified'))]
     min_time=datetime.timedelta(minutes=settings.RESET_SUBMISSIONS_AFTER)
+    count=0
 
     for i in xrange(0,len(sub_times)):
-        if sub_times>min_time:
+        if sub_times[i]>min_time:
             sub=subs[i]
             if sub.state=="C":
                 sub.state="W"
                 sub.save()
+                count+=1
+
+    log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
 
     return True
 
@@ -293,7 +297,7 @@ def check_if_expired(subs):
 
     timed_out_list=[]
     for i in xrange(0,len(sub_times)):
-        if sub_times>min_time:
+        if sub_times[i]>min_time:
             timed_out_list.append(subs[i])
 
     return timed_out_list
@@ -330,7 +334,8 @@ def expire_submissions(timed_out_list):
 
         error,msg = post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
 
-        return error,msg
+    log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
+    return error,msg
 
 
 
