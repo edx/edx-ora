@@ -94,6 +94,11 @@ def submit(request):
 def handle_submission(sub):
     """
     Handles a new submission.  Decides what the next grader should be and saves it.
+    Input:
+        sub - A Submission object from controller.models
+
+    Output:
+        True/False status code
     """
     try:
         #Assign whether grader should be ML or IN based on number of graded examples.

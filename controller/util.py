@@ -57,7 +57,7 @@ def subs_by_instructor(location):
     """
     Return length of submissions pending instructor grading and graded.
     """
-    return len(subs_graded_by_instructor(location)),len(subs_pending_instructor(location))
+    return subs_graded_by_instructor(location).count(),subs_pending_instructor(location).count()
 
 
 def compose_reply(success, content):

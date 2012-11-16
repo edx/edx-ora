@@ -30,7 +30,7 @@ class Command(BaseCommand):
             subs_graded_by_instructor=util.subs_graded_by_instructor(location)
             log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
                 location,
-                len(subs_graded_by_instructor),
+                subs_graded_by_instructor.count(),
                 settings.MIN_TO_USE_ML,
             ))
             if len(subs_graded_by_instructor)>=settings.MIN_TO_USE_ML:
