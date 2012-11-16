@@ -1,6 +1,13 @@
 from logsettings import get_logger_config
 from path import path
 import os
+import djcelery
+
+
+#Django celery settings
+djcelery.setup_loader()
+BROKER_URL = 'amqp://' #guest:guest@localhost:5672//
+
 
 # Django settings for grading_controller project.
 ROOT_PATH = path(__file__).dirname()
@@ -165,6 +172,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'controller',
     'south',
+    'djcelery',
 )
 
 
