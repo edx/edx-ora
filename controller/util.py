@@ -298,7 +298,39 @@ def check_if_expired(subs):
 
     return timed_out_list
 
-def expire_submissions():
-    subs=Submission.objects.filter(
+def expire_submissions(timed_out_list):
+    """
+    Expire submissions by posting back to LMS with error message.
+    Input:
+        timed_out_list from check_if_expired method
+    Output:
+        Success code.
+    """
+    for sub in timed_out_list:
+        sub.state="F"
+        grader_dict={
+            score=0,
+            feedback = "Error scoring submission.",
+            status_code = "F",
+            grader_id= "0",
+            grader_type= sub.next_grader_type,
+            confidence= 1,
+        }
+        success,header=create_grader()
+        sub.save()
 
-    )
+        xqueue_session=requests.session()
+        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+        (xqueue_error,xqueue_msg)=util.login(
+            xqueue_session,
+            xqueue_login_url,
+            settings.XQUEUE_INTERFACE['django_auth']['username'],
+            settings.XQUEUE_INTERFACE['django_auth']['password'],
+        )
+
+        error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
+
+        return error,msg
+
+
+
