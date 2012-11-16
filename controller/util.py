@@ -269,7 +269,7 @@ def check_if_timed_out(subs):
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-i['date_modified'] for i in list(subs.values('date_modified'))]
-    min_time=datetime.timedelta(minutes=settings.RESET_SUBMISSIONS_AFTER)
+    min_time=datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
     count=0
 
     for i in xrange(0,len(sub_times)):
@@ -293,7 +293,7 @@ def check_if_expired(subs):
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-i['date_modified'] for i in list(subs.values('date_modified'))]
-    min_time=datetime.timedelta(minutes=settings.EXPIRE_SUBMISSIONS_AFTER)
+    min_time=datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
 
     timed_out_list=[]
     for i in xrange(0,len(sub_times)):
@@ -320,8 +320,10 @@ def expire_submissions(timed_out_list):
             'grader_type' : sub.next_grader_type,
             'confidence' : 1,
         }
-        success,header=create_grader()
         sub.save()
+        #TODO: Currently looks up submission object twice.  Fix in future.
+        success,header=create_grader(grader_dict)
+
 
         xqueue_session=requests.session()
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')

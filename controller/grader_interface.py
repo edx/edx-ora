@@ -51,6 +51,7 @@ def get_submission_in(request):
         return HttpResponse(util.compose_reply(False,
         "'get_submission' requires parameter 'course_id'"))
 
+    #TODO: Bring this back into this module once instructor grading stub view is gone.
     found,sub_id=util.get_instructor_grading(course_id)
 
     if not found:
