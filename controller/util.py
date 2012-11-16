@@ -4,6 +4,7 @@ import json
 import logging
 from django.utils import timezone
 import datetime
+import requests
 
 log=logging.getLogger(__name__)
 
@@ -163,7 +164,7 @@ def _http_post(session, url, data, timeout):
 
     try:
         r = session.post(url, data=data, timeout=timeout, verify=False)
-    except (ConnectionError, Timeout):
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
         return (False, 'cannot connect to server')
 
@@ -176,7 +177,7 @@ def create_grader(grader_dict):
     """
     Creates a grader object and associates it with a given submission
     Input is grader dictionary with keys:
-     feedback, status, grader_id, grader_type, confidence.
+     feedback, status, grader_id, grader_type, confidence, score
     """
     try:
         sub=Submission.objects.get(id=grader_dict['submission_id'])
@@ -200,6 +201,8 @@ def create_grader(grader_dict):
     sub.previous_grader_type=grade.grader_type
     sub.next_grader_type=grade.grader_type
 
+    #TODO: Some kind of logic to decide when sub is finished grading.
+
     if(grade.status_code=="S" and grade.grader_type in ["IN","ML"]):
         sub.state="F"
 
@@ -210,7 +213,10 @@ def create_grader(grader_dict):
 def post_results_to_xqueue(session,header,body):
     """
     Post the results from a grader back to xqueue.
-
+    Input:
+        session - a requests session that is logged in to xqueue
+        header - xqueue header.  Dict containing keys submission_key and submission_id
+        body - xqueue body.  Arbitrary dict.
     """
     request={
         'xqueue_header' : header,
@@ -225,10 +231,15 @@ def get_instructor_grading(course_id):
     """
     Gets instructor grading for a given course id.
     Returns one submission id corresponding to the course.
+    Input:
+        course_id - Id of a course.
+    Returns:
+        found - Boolean indicating whether or not something to grade was found
+        sub_id - If found, the id of a submission to grade
     """
     found=False
     sub_id=0
-    locations_for_course=[x['location'] for x in Submission.objects.filter(course_id=course_id).values('location').distinct()]
+    locations_for_course=[x['location'] for x in list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     for location in locations_for_course:
         subs_graded_by_instructor, subs_pending_instructor=subs_by_instructor(location)
         if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
@@ -238,7 +249,7 @@ def get_instructor_grading(course_id):
                 next_grader_type="IN",
             )
 
-            if(len(to_be_graded)>0):
+            if(to_be_graded.count()>0):
                 to_be_graded=to_be_graded[0]
                 if to_be_graded is not None:
                     to_be_graded.state="C"
@@ -251,6 +262,10 @@ def get_instructor_grading(course_id):
 def check_if_timed_out(subs):
     """
     Check if submissions have timed out, and reset them to waiting to grade state if they have
+    Input:
+        subs - A QuerySet of submissions
+    Output:
+        status code indicating success
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-sub.date_modified for sub in subs]
@@ -268,7 +283,9 @@ def check_if_timed_out(subs):
 
 def check_if_expired(subs):
     """
-    Check if submissions have expired, and return them if they have
+    Check if submissions have expired, and return them if they have.
+    Input:
+        subs - A queryset of submissions
     """
     now=datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
     sub_times=[now-sub.date_modified for sub in subs]
