@@ -22,9 +22,9 @@ from models import Submission,Grader
 log=logging.getLogger(__name__)
 
 LOGIN_URL="/grading_controller/login/"
-SUBMIT_URL="grading_controller/submit/"
-ML_GET_URL="grading_controller/get_submission_ml/"
-IN_GET_URL="grading_controller/get_submission_instructor/"
+SUBMIT_URL="/grading_controller/submit/"
+ML_GET_URL="/grading_controller/get_submission_ml/"
+IN_GET_URL="/grading_controller/get_submission_instructor/"
 
 TEST_SUB=Submission(
     prompt="prompt",
@@ -49,54 +49,51 @@ def parse_xreply(xreply):
 def login_to_controller(session):
     controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],LOGIN_URL)
 
-    (controller_error,controller_msg)=util.login(
-        session,
-        controller_login_url,
-        "test",
-        "CambridgeMA",
+    response = session.post(controller_login_url,
+        {'username': 'test',
+         'password': 'CambridgeMA',
+         }
     )
-
+    response.raise_for_status()
+    log.debug(response.content)
     return True
 
 class xqueue_interface_test(unittest.TestCase):
 
     def setUp(self):
-        user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
-        user.save()
-
-    def tearDown(self):
-        for user in User.objects.all():
-            user.delete()
+        if(User.objects.filter(username='test').count()==0):
+            user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
+            user.save()
+        self.c = Client()
 
     def test_log_in(self):
         '''
         Test Xqueue login behavior. Particularly important is the response for GET (e.g. by redirect)
         '''
-        c = Client()
 
         # 0) Attempt login with GET, must fail with message='login_required'
         #    The specific message is important, as it is used as a flag by LMS to reauthenticate!
-        response = c.get(LOGIN_URL)
+        response = self.c.get(LOGIN_URL)
         (error, msg) = parse_xreply(response.content)
         self.assertEqual(error, True)
 
         # 1) Attempt login with POST, but no auth
-        response = c.post(LOGIN_URL)
+        response = self.c.post(LOGIN_URL)
         (error,_) = parse_xreply(response.content)
         self.assertEqual(error, True)
 
         # 2) Attempt login with POST, incorrect auth
-        response = c.post(LOGIN_URL,{'username':'test','password':'PaloAltoCA'})
+        response = self.c.post(LOGIN_URL,{'username':'test','password':'PaloAltoCA'})
         (error,_) = parse_xreply(response.content)
         self.assertEqual(error, True)
 
         # 3) Login correctly
-        response = c.post(LOGIN_URL,{'username':'test','password':'CambridgeMA'})
+        response = self.c.post(LOGIN_URL,{'username':'test','password':'CambridgeMA'})
         (error,_) = parse_xreply(response.content)
         self.assertEqual(error, False)
 
     def test_xqueue_submit(self):
-        controller_session=requests.session()
+        response=self.c.login(username='test', password='CambridgeMA')
 
         xqueue_header={
             'submission_id' : 1,
@@ -114,8 +111,8 @@ class xqueue_interface_test(unittest.TestCase):
             'anonymous_student_id' : "blah"
         }
         xqueue_body={
-            'grader_payload' : grader_payload,
-            'student_info' : student_info,
+            'grader_payload' : json.dumps(grader_payload),
+            'student_info' : json.dumps(student_info),
             'student_response' : "Test!",
             'max_score' : 1,
         }
@@ -124,14 +121,15 @@ class xqueue_interface_test(unittest.TestCase):
             'xqueue_body' : json.dumps(xqueue_body),
         }
 
-        login_to_controller(controller_session)
 
-        success,msg = util._http_post(
-            controller_session,
-            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],SUBMIT_URL),
+        content = self.c.post(
+            SUBMIT_URL,
             content,
-            settings.REQUESTS_TIMEOUT,
+            content_type="application/json",
         )
+
+        body=json.loads(content.content)
+        log.debug(body)
 
         self.assertEqual(success,True)
 
@@ -139,14 +137,12 @@ class xqueue_interface_test(unittest.TestCase):
 class grader_interface_test(unittest.TestCase):
 
     def setUp(self):
-        for user in User.objects.all():
-            user.delete()
-        user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
-        user.save()
+        if(User.objects.filter(username='test').count()==0):
+            user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
+            user.save()
 
-    def tearDown(self):
-        for user in User.objects.all():
-            user.delete()
+        self.c = Client()
+        response=self.c.login(username='test', password='CambridgeMA')
 
     def test_submission_create(self):
         sub=TEST_SUB
@@ -155,33 +151,34 @@ class grader_interface_test(unittest.TestCase):
 
     def test_get_ml_subs(self):
 
-        log.debug(User.objects.all())
-
-        controller_session=requests.session()
-        login_to_controller(controller_session)
-
-        success,msg = util._http_get(
-            controller_session,
-            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], ML_GET_URL),
+        content= self.c.get(
+            ML_GET_URL,
+            data={}
         )
-        log.debug(msg)
-        self.assertEqual(msg,"Nothing to grade.")
-        self.assertEqual(success,1)
+
+        body=json.loads(content.content)
+        self.assertEqual(body['content'],"Nothing to grade.")
+        self.assertEqual(body['return_code'],1)
 
     def test_get_sub_in(self):
         sub=TEST_SUB
         sub.save()
-        controller_session=requests.session()
-        login_to_controller(controller_session)
 
-        success,msg = util._http_get(
-            controller_session,
-            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], IN_GET_URL),
+        content = self.c.get(
+            IN_GET_URL,
             data={'course_id' : 'course_id'}
         )
-        log.debug(Submission.objects.all())
-        log.debug(msg)
 
+        body=json.loads(content.content)
 
+        log.debug(body)
+        sub_id=body['content']
+
+        return_code=body['return_code']
+        self.assertEqual(return_code,0)
+
+        sub=Submission.objects.get(id=sub_id)
+
+        self.assertEqual(sub.prompt,"prompt")
 
 

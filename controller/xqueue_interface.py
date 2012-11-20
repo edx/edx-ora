@@ -139,6 +139,7 @@ def _is_valid_reply(external_reply):
         header = json.loads(external_reply['xqueue_header'])
         body = json.loads(external_reply['xqueue_body'])
     except KeyError:
+        log.debug("Cannot load header or body.")
         return fail
 
     if not isinstance(header,dict) or not isinstance(body,dict):
@@ -158,6 +159,7 @@ def _is_valid_reply(external_reply):
         body['grader_payload']=json.loads(body['grader_payload'])
         body['student_info']=json.loads(body['student_info'])
     except:
+        log.debug("Cannot load payload or info.")
         return fail
 
     return True,header,body
