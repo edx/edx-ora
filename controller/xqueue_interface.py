@@ -51,7 +51,7 @@ def submit(request):
                 location=util._value_or_default(body['grader_payload']['location'])
                 course_id=util._value_or_default(body['grader_payload']['course_id'])
                 problem_id=util._value_or_default(body['grader_payload']['problem_id'],location)
-                grader_settings=util._value_or_default(body['grader_payload']['grader'],"")
+                grader_settings=util._value_or_default(body['grader_payload']['grader_settings'],"")
                 student_response=util._value_or_default(body['student_response'])
                 xqueue_submission_id=util._value_or_default(header['submission_id'])
                 xqueue_submission_key=util._value_or_default(header['submission_key'])
