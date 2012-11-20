@@ -17,14 +17,29 @@ import xqueue_interface
 import grader_interface
 import util
 
+from models import Submission,Grader
+
 log=logging.getLogger(__name__)
 
-SUBMIT_URL="/grading_controller/submit/"
 LOGIN_URL="/grading_controller/login/"
+SUBMIT_URL="grading_controller/submit/"
+ML_GET_URL="grading_controller/get_submission_ml/"
 
 def parse_xreply(xreply):
     xreply = json.loads(xreply)
     return (xreply['return_code'], xreply['content'])
+
+def login_to_controller(session):
+    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+
+    (controller_error,controller_msg)=util.login(
+        session,
+        controller_login_url,
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
+    )
+
+    return True
 
 class xqueue_interface_test(unittest.TestCase):
 
@@ -90,18 +105,11 @@ class xqueue_interface_test(unittest.TestCase):
             'xqueue_body' : json.dumps(xqueue_body),
         }
 
-        controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
-
-        (controller_error,controller_msg)=util.login(
-            controller_session,
-            controller_login_url,
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
-        )
+        login_to_controller(controller_session)
 
         success,msg = util._http_post(
             controller_session,
-            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/submit/'),
+            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],SUBMIT_URL),
             content,
             settings.REQUESTS_TIMEOUT,
         )
@@ -117,5 +125,37 @@ class grader_interface_test(unittest.TestCase):
     def tearDown(self):
         self.user.delete()
 
+    def test_submission_create(self):
+        sub=Submission(
+            prompt="prompt",
+            student_id="id",
+            problem_id="id",
+            state="w",
+            student_response="response",
+            student_submission_time=datetime.now(),
+            xqueue_submission_id="id",
+            xqueue_submission_key="key",
+            xqueue_queue_name="MITx-6.002x",
+            location="location",
+            course_id="course_id",
+            max_score=3,
+        )
+
+        sub.save()
+
+        assert True
+
+    def test_get_ml_subs(self):
+
+        controller_session=requests.session()
+        login_to_controller(controller_session)
+
+        success,msg = util._http_get(
+            controller_session,
+            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], ML_GET_URL),
+        )
+        log.debug(msg)
+        self.assertEqual(msg,"Nothing to grade.")
+        self.assertEqual(success,1)
 
 
