@@ -6,20 +6,21 @@ import json
 import unittest
 from datetime import datetime
 import logging
+import urlparse
 
 from django.contrib.auth.models import User
 from django.test.client import Client
+import requests
 from django.conf import settings
 
 import xqueue_interface
 import grader_interface
+import util
 
 log=logging.getLogger(__name__)
 
-URL_BASE="http://127.0.0.1:3033/"
-
-SUBMIT_URL=URL_BASE + "grading_controller/submit/"
-LOGIN_URL=URL_BASE + "grading_controller/login/"
+SUBMIT_URL="/grading_controller/submit/"
+LOGIN_URL="/grading_controller/login/"
 
 def parse_xreply(xreply):
     xreply = json.loads(xreply)
@@ -61,7 +62,7 @@ class xqueue_interface_test(unittest.TestCase):
         self.assertEqual(error, False)
 
     def test_xqueue_submit(self):
-        c=Client()
+        controller_session=requests.session()
 
         xqueue_header={
             'submission_id' : 1,
@@ -88,9 +89,33 @@ class xqueue_interface_test(unittest.TestCase):
             'xqueue_header' : json.dumps(xqueue_header),
             'xqueue_body' : json.dumps(xqueue_body),
         }
-        response = c.post(LOGIN_URL,{'username':'test','password':'CambridgeMA'})
 
-        (error,msg) = c.post(SUBMIT_URL,content)
-        log.debug(error)
-        self.assertEqual(error,False)
+        controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+
+        (controller_error,controller_msg)=util.login(
+            controller_session,
+            controller_login_url,
+            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
+        )
+
+        success,msg = util._http_post(
+            controller_session,
+            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/submit/'),
+            content,
+            settings.REQUESTS_TIMEOUT,
+        )
+
+        self.assertEqual(success,True)
+
+
+class grader_interface_test(unittest.TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='test',password='CambridgeMA')
+
+    def tearDown(self):
+        self.user.delete()
+
+
 
