@@ -93,7 +93,6 @@ class xqueue_interface_test(unittest.TestCase):
         self.assertEqual(error, False)
 
     def test_xqueue_submit(self):
-        response=self.c.login(username='test', password='CambridgeMA')
 
         xqueue_header={
             'submission_id' : 1,
@@ -122,7 +121,7 @@ class xqueue_interface_test(unittest.TestCase):
         }
 
 
-        content = self.c.post(
+        content,msg = self.c.post(
             SUBMIT_URL,
             content,
             content_type="application/json",
@@ -131,7 +130,7 @@ class xqueue_interface_test(unittest.TestCase):
         body=json.loads(content.content)
         log.debug(body)
 
-        self.assertEqual(success,True)
+        self.assertEqual(body['return_code'],0)
 
 
 class grader_interface_test(unittest.TestCase):
