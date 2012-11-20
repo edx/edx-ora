@@ -5,6 +5,7 @@ import logging
 from django.utils import timezone
 import datetime
 import requests
+import ConfigParser
 
 log=logging.getLogger(__name__)
 
@@ -339,6 +340,18 @@ def expire_submissions(timed_out_list):
 
     log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return error,msg
+
+def get_grader_settings(settings_file):
+    config = ConfigParser.RawConfigParser()
+    config.read('example.cfg')
+    grader_type=config.get("grading","grader_type")
+
+    grader_settings={
+        'grader_type' : grader_type,
+    }
+
+    return grader_settings
+
 
 
 

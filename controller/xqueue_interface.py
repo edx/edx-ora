@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from datetime import datetime
 import logging
+import os
 
 from models import Submission,Grader
 import util
@@ -77,6 +78,7 @@ def submit(request):
                     location=location,
                     course_id=course_id,
                     max_score=max_score,
+                    grader_settings=grader_settings,
                 )
 
             except Exception as err:
@@ -103,21 +105,28 @@ def handle_submission(sub):
     Output:
         True/False status code
     """
-    try:
+    #try:
         #Assign whether grader should be ML or IN based on number of graded examples.
-        subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
+    subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
 
-        #TODO: abstract out logic for assigning which grader to go with.
+    #TODO: abstract out logic for assigning which grader to go with.
+    grader_settings=util.get_grader_settings(os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings))
+    if grader_settings['grader_type']=="ML":
         if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"
         else:
             sub.next_grader_type="IN"
-
-        sub.save()
-        log.debug("Created successfully!")
-    except:
-        log.debug("Creation failed!")
+    elif grader_settings['grader_type']=="PE":
+        sub.next_grader_type="PE"
+    else:
+        log.debug("Invalid grader type specified in settings file.")
         return False
+
+    sub.save()
+    log.debug("Created successfully!")
+    #except:
+    #    log.debug("Creation failed!")
+    #return False
 
     return True
 

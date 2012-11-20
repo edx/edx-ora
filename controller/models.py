@@ -41,6 +41,7 @@ class Submission(models.Model):
     xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     max_score=models.IntegerField(default=1)
+    grader_settings=models.TextField(default="")
 
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(

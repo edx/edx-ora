@@ -20,6 +20,7 @@ MANAGERS = ADMINS
 REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
+GRADER_SETTINGS_DIRECTORY="grader_settings/"
 
 #Config for specific graders
 MIN_TO_USE_ML=100
