@@ -110,7 +110,8 @@ def handle_submission(sub):
     subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
 
     #TODO: abstract out logic for assigning which grader to go with.
-    grader_settings=util.get_grader_settings(os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings))
+    grader_settings_path=os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings)
+    grader_settings=util.get_grader_settings(grader_settings_path)
     if grader_settings['grader_type']=="ML":
         if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"

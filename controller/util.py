@@ -204,8 +204,15 @@ def create_grader(grader_dict):
 
     #TODO: Some kind of logic to decide when sub is finished grading.
 
+    #If submission is ML or IN graded, and was successful, state is finished
     if(grade.status_code=="S" and grade.grader_type in ["IN","ML"]):
         sub.state="F"
+    elif(grade.status_code=="S" and grade.grader_type in ["PE"]):
+        #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
+        successful_peer_grader_count=sub.get_successful_peer_graders().count()
+        #If number of successful peer graders equals the needed count, finalize submission.
+        if successful_peer_grader_count>=settings.PEER_GRADER_COUNT:
+            sub.state="F"
 
     sub.save()
 
@@ -259,6 +266,38 @@ def get_instructor_grading(course_id):
                     found=True
                     sub_id=to_be_graded.id
                     return found,sub_id
+    return found,sub_id
+
+def get_peer_grading(location,grader_id):
+    """
+    Gets instructor grading for a given course id.
+    Returns one submission id corresponding to the course.
+    Input:
+        location - problem location.
+    Returns:
+        found - Boolean indicating whether or not something to grade was found
+        sub_id - If found, the id of a submission to grade
+    """
+    found=False
+    sub_id=0
+    to_be_graded=Submission.objects.filter(
+        location=location,
+        state="W",
+        next_grader_type="PE",
+    )
+
+    if to_be_graded is not None:
+        if to_be_graded.count()>0:
+            for grade_item in to_be_graded:
+                #Ensure that student hasn't graded this submission before!
+                previous_graders=[p.grader_id for p in grade_item.get_successful_peer_graders()]
+                if grader_id not in previous_graders:
+                    to_be_graded.state="C"
+                    to_be_graded.save()
+                    found=True
+                    sub_id=to_be_graded.id
+                    return found,sub_id
+
     return found,sub_id
 
 def check_if_timed_out(subs):
@@ -343,7 +382,7 @@ def expire_submissions(timed_out_list):
 
 def get_grader_settings(settings_file):
     config = ConfigParser.RawConfigParser()
-    config.read('example.cfg')
+    config.read(settings_file)
     grader_type=config.get("grading","grader_type")
 
     grader_settings={

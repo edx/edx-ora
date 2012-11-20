@@ -66,6 +66,14 @@ class Submission(models.Model):
         self.save()
         return "Save ok."
 
+    def get_successful_peer_graders(self):
+        all_graders=self.get_all_graders()
+        successful_peer_graders=all_graders.filter(
+            status_code="S",
+            grader_type="PE",
+        )
+        return successful_peer_graders
+
 class Grader(models.Model):
     submission = models.ForeignKey('Submission')
     score=models.IntegerField()

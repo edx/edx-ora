@@ -59,6 +59,26 @@ def get_submission_instructor(request):
 
     return HttpResponse(util.compose_reply(True,sub_id))
 
+@login_required
+def get_submission_peer(request):
+    """
+    Gets a submission for the Peer grading view
+    """
+    try:
+        location = util._value_or_default(request.GET['location'],None)
+        grader_id = util._value_or_default(request.GET['grader_id'],None)
+    except KeyError:
+        return HttpResponse(util.compose_reply(False,
+            "'get_submission' requires parameters 'location', 'grader_id'"))
+
+    #TODO: Bring this back into this module once instructor grading stub view is gone.
+    found,sub_id=util.get_peer_grading(location,grader_id)
+
+    if not found:
+        return HttpResponse(util.compose_reply(False,"Nothing to grade."))
+
+    return HttpResponse(util.compose_reply(True,sub_id))
+
 
 @csrf_exempt
 @login_required
