@@ -87,12 +87,6 @@ def instructor_grading(request):
 
         post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
 
-        correct_ratio=post_data['score']/post_data['max_score']
-        correct=False
-        if(correct_ratio>=.66):
-            correct=True
-
-        post_data.update({'correct' : correct})
         xqueue_session=requests.session()
         xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
         (xqueue_error,xqueue_msg)=util.login(

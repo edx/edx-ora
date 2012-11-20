@@ -92,7 +92,7 @@ def put_result(request):
         post_data=request.POST.dict().copy()
         log.debug(post_data)
 
-        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'correct']:
+        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score']:
             if not post_data.has_key(tag):
                 return HttpResponse(util.compose_reply(False,"Failed to find needed keys."))
 

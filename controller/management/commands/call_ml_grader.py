@@ -51,7 +51,6 @@ class Command(BaseCommand):
 
                     grader_dict={
                         'score' : results['score'],
-                        'correct' : results['correct'],
                         'feedback' : results['feedback'],
                         'status' : status,
                         'grader_id' : 1,
