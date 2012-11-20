@@ -38,6 +38,8 @@ class Command(BaseCommand):
         prompt = parser.get(header_name, 'prompt')
         essay_file = parser.get(header_name, 'essay_file')
         essay_limit = int(parser.get(header_name, 'essay_limit'))
+        state=parser.get(header_name,"state")
+        next_grader_type=parser.get(header_name,"next_grader")
 
         score,text=[],[]
         combined_raw=open(essay_file).read()
@@ -52,7 +54,7 @@ class Command(BaseCommand):
                 prompt=prompt,
                 student_id="",
                 problem_id=problem_id,
-                state="F",
+                state=state,
                 student_response=text[i],
                 student_submission_time= datetime.now(),
                 xqueue_submission_id= "",
@@ -61,7 +63,7 @@ class Command(BaseCommand):
                 location=location,
                 course_id=course_id,
                 previous_grader_type="IN",
-                next_grader_type="NA",
+                next_grader_type= next_grader_type,
             )
 
             sub.save()
