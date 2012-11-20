@@ -120,14 +120,17 @@ class xqueue_interface_test(unittest.TestCase):
             'xqueue_body' : json.dumps(xqueue_body),
         }
 
+        response=self.c.login(username='test', password='CambridgeMA')
 
-        content,msg = self.c.post(
+        content = self.c.post(
             SUBMIT_URL,
             content,
-            content_type="application/json",
+            content_type="application/text",
         )
 
-        body=json.loads(content.content)
+        log.debug(content)
+
+        body=content.content
         log.debug(body)
 
         self.assertEqual(body['return_code'],0)

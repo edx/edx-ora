@@ -49,7 +49,7 @@ def subs_pending_instructor(location):
     """
     subs_pending=Submission.objects.filter(location=location,
         next_grader_type__in=["IN"],
-        state__in=["C","W"],
+        state__in=["C"],
     )
 
     return subs_pending
