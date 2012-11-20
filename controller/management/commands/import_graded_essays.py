@@ -42,7 +42,7 @@ class Command(BaseCommand):
         next_grader_type=parser.get(header_name,"next_grader")
 
         score,text=[],[]
-        combined_raw=open(essay_file).read()
+        combined_raw=open(settings.REPO_PATH / essay_file).read()
         raw_lines=combined_raw.splitlines()
         for row in xrange(1,len(raw_lines)):
             score1,text1 = raw_lines[row].strip().split("\t")
