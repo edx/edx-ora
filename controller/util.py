@@ -43,13 +43,13 @@ def subs_graded_by_instructor(location):
 
     return subs_graded
 
-def subs_pending_instructor(location):
+def subs_pending_instructor(location,state_in=["C","W"]):
     """
     Get submissions that are pending instructor grading.
     """
     subs_pending=Submission.objects.filter(location=location,
         next_grader_type__in=["IN"],
-        state__in=["C"],
+        state__in=state_in,
     )
 
     return subs_pending
@@ -241,7 +241,8 @@ def get_instructor_grading(course_id):
     sub_id=0
     locations_for_course=[x['location'] for x in list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     for location in locations_for_course:
-        subs_graded_by_instructor, subs_pending_instructor=subs_by_instructor(location)
+        subs_graded_by_instructor, subs_pending_instructor=subs_graded_by_instructor(location).count()
+        subs_pending_instructor=subs_pending_instructor(location,subs_in=["C"]).count()
         if (subs_graded_by_instructor+subs_pending_instructor)<settings.MIN_TO_USE_ML:
             to_be_graded=Submission.objects.filter(
                 location=location,
