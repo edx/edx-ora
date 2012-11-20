@@ -46,6 +46,7 @@ def submit(request):
             try:
                 #Retrieve individual values from xqueue body and header.
                 prompt=util._value_or_default(body['grader_payload']['prompt'],"")
+                rubric=util._value_or_default(body['grader_payload']['rubric'],"")
                 student_id=util._value_or_default(body['student_info']['anonymous_student_id'])
                 location=util._value_or_default(body['grader_payload']['location'])
                 course_id=util._value_or_default(body['grader_payload']['course_id'])
@@ -64,6 +65,7 @@ def submit(request):
                 #Create submission object
                 sub, created = Submission.objects.get_or_create(
                     prompt=prompt,
+                    rubric=rubric,
                     student_id=student_id,
                     problem_id=problem_id,
                     state=state_code,

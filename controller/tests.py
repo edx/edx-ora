@@ -24,19 +24,36 @@ log=logging.getLogger(__name__)
 LOGIN_URL="/grading_controller/login/"
 SUBMIT_URL="grading_controller/submit/"
 ML_GET_URL="grading_controller/get_submission_ml/"
+IN_GET_URL="grading_controller/get_submission_instructor/"
+
+TEST_SUB=Submission(
+    prompt="prompt",
+    student_id="id",
+    problem_id="id",
+    state="W",
+    student_response="response",
+    student_submission_time=datetime.now(),
+    xqueue_submission_id="id",
+    xqueue_submission_key="key",
+    xqueue_queue_name="MITx-6.002x",
+    location="location",
+    course_id="course_id",
+    max_score=3,
+    next_grader_type="IN",
+)
 
 def parse_xreply(xreply):
     xreply = json.loads(xreply)
     return (xreply['return_code'], xreply['content'])
 
 def login_to_controller(session):
-    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],LOGIN_URL)
 
     (controller_error,controller_msg)=util.login(
         session,
         controller_login_url,
-        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
-        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
+        "test",
+        "CambridgeMA",
     )
 
     return True
@@ -44,10 +61,12 @@ def login_to_controller(session):
 class xqueue_interface_test(unittest.TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='test',password='CambridgeMA')
+        user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
+        user.save()
 
     def tearDown(self):
-        self.user.delete()
+        for user in User.objects.all():
+            user.delete()
 
     def test_log_in(self):
         '''
@@ -120,32 +139,23 @@ class xqueue_interface_test(unittest.TestCase):
 class grader_interface_test(unittest.TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='test',password='CambridgeMA')
+        for user in User.objects.all():
+            user.delete()
+        user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
+        user.save()
 
     def tearDown(self):
-        self.user.delete()
+        for user in User.objects.all():
+            user.delete()
 
     def test_submission_create(self):
-        sub=Submission(
-            prompt="prompt",
-            student_id="id",
-            problem_id="id",
-            state="w",
-            student_response="response",
-            student_submission_time=datetime.now(),
-            xqueue_submission_id="id",
-            xqueue_submission_key="key",
-            xqueue_queue_name="MITx-6.002x",
-            location="location",
-            course_id="course_id",
-            max_score=3,
-        )
-
+        sub=TEST_SUB
         sub.save()
-
         assert True
 
     def test_get_ml_subs(self):
+
+        log.debug(User.objects.all())
 
         controller_session=requests.session()
         login_to_controller(controller_session)
@@ -157,5 +167,21 @@ class grader_interface_test(unittest.TestCase):
         log.debug(msg)
         self.assertEqual(msg,"Nothing to grade.")
         self.assertEqual(success,1)
+
+    def test_get_sub_in(self):
+        sub=TEST_SUB
+        sub.save()
+        controller_session=requests.session()
+        login_to_controller(controller_session)
+
+        success,msg = util._http_get(
+            controller_session,
+            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], IN_GET_URL),
+            data={'course_id' : 'course_id'}
+        )
+        log.debug(Submission.objects.all())
+        log.debug(msg)
+
+
 
 

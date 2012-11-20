@@ -27,6 +27,7 @@ class Submission(models.Model):
     previous_grader_type=models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
 
     prompt = models.TextField(default="")
+    rubric=models.TextField(default="")
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
