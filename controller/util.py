@@ -242,7 +242,7 @@ def get_instructor_grading(course_id):
     locations_for_course=[x['location'] for x in list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     for location in locations_for_course:
         subs_graded=subs_graded_by_instructor(location).count()
-        subs_pending=subs_pending_instructor(location,subs_in=["C"]).count()
+        subs_pending=subs_pending_instructor(location,state_in=["C"]).count()
         if (subs_graded+subs_pending)<settings.MIN_TO_USE_ML:
             to_be_graded=Submission.objects.filter(
                 location=location,
