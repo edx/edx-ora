@@ -41,7 +41,7 @@ def get_submission_ml(request):
     return HttpResponse(util.compose_reply(False,"Nothing to grade."))
 
 @login_required
-def get_submission_in(request):
+def get_submission_instructor(request):
     """
     Gets a submission for the Instructor grading view
     """

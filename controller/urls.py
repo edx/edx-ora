@@ -26,6 +26,6 @@ urlpatterns += patterns('controller.xqueue_interface',
 #------------------------------------------------------------
 urlpatterns += patterns('controller.grader_interface',
     url(r'^get_submission_ml/$', 'get_submission_ml'),
-    url(r'^get_submission_in/$', 'get_submission_in'),
+    url(r'^get_submission_instructor/$', 'get_submission_instructor'),
     url(r'^put_result/$', 'put_result'),
 )
