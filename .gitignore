@@ -6,3 +6,4 @@ models/
 *.db
 essaydb
 *.log
+log/
