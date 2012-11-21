@@ -27,10 +27,9 @@ class Command(BaseCommand):
         Constant loop that polls grading controller
         """
         log.info(' [*] Polling grading controller...')
-        self.controller_session=requests.session()
+        self.controller_session=util.controller_login()
 
         flag=True
-        error = self.login()
 
         while flag:
 
@@ -74,21 +73,6 @@ class Command(BaseCommand):
 
 
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
-
-    def login(self):
-        """
-        Logs in to the controller
-        """
-        controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
-
-        (controller_error,controller_msg)=util.login(
-            self.controller_session,
-            controller_login_url,
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
-        )
-
-        return controller_error
 
     def get_item_from_controller(self):
         """

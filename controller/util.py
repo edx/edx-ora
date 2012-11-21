@@ -6,6 +6,7 @@ from django.utils import timezone
 import datetime
 import requests
 import ConfigParser
+import urlparse
 
 log=logging.getLogger(__name__)
 
@@ -367,14 +368,7 @@ def expire_submissions(timed_out_list):
         success,header=create_grader(grader_dict)
 
 
-        xqueue_session=requests.session()
-        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
-        (xqueue_error,xqueue_msg)=util.login(
-            xqueue_session,
-            xqueue_login_url,
-            settings.XQUEUE_INTERFACE['django_auth']['username'],
-            settings.XQUEUE_INTERFACE['django_auth']['password'],
-        )
+        xqueue_session=xqueue_login()
 
         error,msg = post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
 
