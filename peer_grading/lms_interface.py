@@ -144,4 +144,41 @@ def save_grade(request):
 
     return util._success_response({'msg' : "Posted to queue."},_INTERFACE_VERSION)
 
+def is_student_calibrated(request):
+    """
+    Decides if student has fulfilled criteria for peer grading calibration for a given location (problem id).
+    Input:
+        student id, problem id
+    Output:
+        Boolean indicating whether or not student has finished calibration.
+    """
+
+    if request.method!="GET":
+        raise Http404
+
+def get_calibration_essay(student_id,location):
+    """
+    Gets a calibration essay for a particular student and location (problem id).
+    Input:
+        student id, location
+    Output:
+        dict containing text of calibration essay, prompt, rubric, max score
+    """
+
+    pass
+
+def is_peer_grading_finished_for_student(student_id):
+    """
+    Checks to see whether there are enough reliable peer evaluations of student to ensure that grading is done.
+    Input:
+        student id
+    Output:
+        Boolean indicating whether or not there are enough reliable evaluations.
+    """
+    pass
+
+
+
+
+
 

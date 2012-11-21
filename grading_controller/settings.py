@@ -23,11 +23,19 @@ TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
 GRADER_SETTINGS_DIRECTORY="grader_settings/"
 
 #Config for specific graders
+#ML
 MIN_TO_USE_ML=100
 ML_PATH=os.path.join(ENV_ROOT,"machine_learning/")
+
+#Peer
+PEER_GRADER_COUNT=3
+PEER_GRADER_MAXIMUM_TO_SEARCH=20
+
+
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds
 RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds
-PEER_GRADER_COUNT=3
+
+
 
 DATABASES = {
     'default': {

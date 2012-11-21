@@ -7,6 +7,9 @@ import datetime
 import requests
 import ConfigParser
 import urlparse
+import random
+
+from django.http import HttpResponse
 
 log = logging.getLogger(__name__)
 
@@ -301,9 +304,23 @@ def get_single_peer_grading_item(location, grader_id):
     )
 
     if to_be_graded is not None:
-        if to_be_graded.count() > 0:
-            for grade_item in to_be_graded:
-                #Ensure that student hasn't graded this submission before!
+        to_be_graded_length=to_be_graded.count()
+        if to_be_graded_length > 0:
+            maximum_to_search=min(settings.PEER_GRADER_MAXIMUM_TO_SEARCH,to_be_graded_length)
+            indices_to_search=random.sample(xrange(0,to_be_graded_length),maximum_to_search)
+            previous_grader_counts=[]
+            selected_to_be_graded=[]
+            for i in indices_to_search:
+                grade_item=to_be_graded[i]
+                selected_to_be_graded.append(grade_item)
+                previous_graders_count=grade_item.get_successful_peer_graders().count()
+                previous_grader_counts.append(previous_graders_count)
+
+            #Ensure that student hasn't graded this submission before!
+            #Also ensures that all submissions are searched through if student has graded the minimum one
+            for i in xrange(0,len(indices_to_search)):
+                minimum_index=previous_grader_counts.index(min(previous_grader_counts))
+                grade_item=selected_to_be_graded[minimum_index]
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
                 if grader_id not in previous_graders:
                     to_be_graded.state = "C"
@@ -311,6 +328,11 @@ def get_single_peer_grading_item(location, grader_id):
                     found = True
                     sub_id = to_be_graded.id
                     return found, sub_id
+                else:
+                    if len(indices_to_search)>1:
+                        indices_to_search.pop(minimum_index)
+                        previous_grader_counts.pop(minimum_index)
+                        selected_to_be_graded.pop(minimum_index)
 
     return found, sub_id
 
