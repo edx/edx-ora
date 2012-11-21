@@ -442,6 +442,25 @@ def create_xqueue_header_and_body(submission):
 
     return xqueue_header,xqueue_body
 
+def _error_response(msg,version):
+    """
+    Return a failing response with the specified message.
+    """
+    response = {'version': version,
+                'success': False,
+                'error': msg}
+    return HttpResponse(json.dumps(response), mimetype="application/json")
+
+
+def _success_response(data,version):
+    """
+    Return a successful response with the specified data.
+    """
+    response = {'version': version,
+                'success': True}
+    response.update(data)
+    return HttpResponse(json.dumps(response), mimetype="application/json")
+
 
 
 
