@@ -87,14 +87,7 @@ def instructor_grading(request):
 
         post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
 
-        xqueue_session=requests.session()
-        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
-        (xqueue_error,xqueue_msg)=util.login(
-            xqueue_session,
-            xqueue_login_url,
-            settings.XQUEUE_INTERFACE['django_auth']['username'],
-            settings.XQUEUE_INTERFACE['django_auth']['password'],
-        )
+        xqueue_session=util.xqueue_login()
         log.debug(post_data)
 
         error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
