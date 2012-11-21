@@ -84,6 +84,28 @@ class Submission(models.Model):
         )
         return successful_peer_graders
 
+    def get_successful_graders(self):
+        all_graders=self.get_all_graders()
+        successful_graders=all_graders.filter(
+            status_code="S",
+        )
+        return successful_graders
+
+    def get_all_successful_scores_and_feedback(self):
+        all_graders=list(self.get_successful_graders())
+        if len(all_graders)==0:
+            return {'score' : 0, 'feedback' : "No finished graders!  Please contact course staff."}
+        elif all_graders[0].grader_type in ["IN", "ML"]:
+            return {'score' : all_graders[0].score, 'feedback' : all_graders[0].feedback}
+        elif self.previous_grader_type=="PE":
+            peer_graders=[p for p in all_graders if p.grader_type=="PE"]
+            score=[p.score for p in peer_graders]
+            feedback=[p.feedback for p in peer_graders]
+            return {'score' : score, 'feedback' : feedback}
+        else:
+            return {'score' : 0, 'feedback' : "Unexpected error! Please contact course staff."}
+
+
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
     submission = models.ForeignKey('Submission')

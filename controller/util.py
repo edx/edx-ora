@@ -426,6 +426,21 @@ def controller_login():
     )
     return session
 
+def create_xqueue_header_and_body(submission):
+
+    xqueue_header={
+        'submission_id': submission.xqueue_submission_id,
+        'submission_key': submission.xqueue_submission_key,
+        }
+
+    score,feedback=submission.get_all_successful_scores_and_feedback()
+    xqueue_body={
+        'feedback' : feedback,
+        'score' : score,
+    }
+
+    return xqueue_header,xqueue_body
+
 
 
 

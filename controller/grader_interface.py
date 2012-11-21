@@ -116,8 +116,7 @@ def put_result(request):
 
         #xqueue_session=util.xqueue_login()
         #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
-
-        log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
+        #log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 
         return HttpResponse(util.compose_reply(True,"Saved successfully."))
 
