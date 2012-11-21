@@ -156,6 +156,9 @@ def is_student_calibrated(request):
     if request.method!="GET":
         raise Http404
 
+    student_id=request.GET.get("student_id")
+    problem_id=request.GET.get("problem_id")
+
 def get_calibration_essay(student_id,location):
     """
     Gets a calibration essay for a particular student and location (problem id).
