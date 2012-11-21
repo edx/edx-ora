@@ -33,9 +33,7 @@ def submit(request):
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
         #Minimal parsing of reply
-        log.debug(request.POST)
         reply_is_valid, header, body = _is_valid_reply(request.POST.copy())
-        log.debug("Header: {0}\n Body: {1}".format(header,body))
 
         if not reply_is_valid:
             log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
@@ -107,7 +105,7 @@ def handle_submission(sub):
     """
     #try:
         #Assign whether grader should be ML or IN based on number of graded examples.
-    subs_graded_by_instructor,subs_pending_instructor=util.subs_by_instructor(sub.location)
+    subs_graded_by_instructor,subs_pending_instructor=util.count_submissions_graded_and_pending_instructor(sub.location)
 
     #TODO: abstract out logic for assigning which grader to go with.
     grader_settings_path=os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings)
