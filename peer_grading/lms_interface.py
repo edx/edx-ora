@@ -176,8 +176,8 @@ def is_student_calibrated(request):
     if calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
         calibration_error=calibration_history.get_average_calibration_error()
         normalized_calibration_error=calibration_error/float(max_score)
-        if normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR and \
-           calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
+        if(normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR and
+           calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
             return util._success_response({'calibrated' : False}, _INTERFACE_VERSION)
         else:
             return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)

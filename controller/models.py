@@ -124,6 +124,9 @@ class Grader(models.Model):
     # should be between 0 and 1, with 1 being most confident.
     confidence=models.DecimalField(max_digits=10, decimal_places=9)
 
+    #User for instructor grading to mark essays as calibration or not.
+    is_calibration=models.BooleanField(default=False)
+
 
 
 
