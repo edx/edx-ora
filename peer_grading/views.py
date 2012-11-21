@@ -159,14 +159,9 @@ def save_grade(request):
     if not success:
         return _error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
 
-    try:
-    xqueue_session=requests.session()
-    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
-    (xqueue_error,xqueue_msg)=util.login(
-        xqueue_session,
-        xqueue_login_url,
-        settings.XQUEUE_INTERFACE['django_auth']['username'],
-        settings.XQUEUE_INTERFACE['django_auth']['password'],
-    )
+
+
 
     error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+
+

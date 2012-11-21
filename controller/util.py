@@ -231,9 +231,9 @@ def post_results_to_xqueue(session,header,body):
         'xqueue_body' : body,
     }
 
-    (error,msg)=_http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request, settings.REQUESTS_TIMEOUT)
+    (success,msg)=_http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request, settings.REQUESTS_TIMEOUT)
 
-    return error,msg
+    return success,msg
 
 def get_instructor_grading(course_id):
     """
@@ -391,6 +391,30 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
+
+def xqueue_login():
+    session=requests.session()
+    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+    (xqueue_error,xqueue_msg)=login(
+        session,
+        xqueue_login_url,
+        settings.XQUEUE_INTERFACE['django_auth']['username'],
+        settings.XQUEUE_INTERFACE['django_auth']['password'],
+    )
+
+    return session
+
+def controller_login():
+    session=requests.session()
+    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+    (controller_error,controller_msg)=login(
+        session,
+        controller_login_url,
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
+    )
+    return session
+
 
 
 
