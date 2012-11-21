@@ -73,7 +73,7 @@ def get_next_submission(request):
     if not grader_id or not location:
         return _error_response("Failed to find needed keys 'grader_id' and 'location'")
 
-    (found,sub_id) = util.get_peer_grading(location,grader_id)
+    (found,sub_id) = util.get_single_peer_grading_item(location,grader_id)
 
     if not found:
         return  _error_response("No current grading.",_INTERFACE_VERSION)
@@ -155,13 +155,12 @@ def save_grade(request):
     #We need to figure out how/when to post peer grading results back to LMS given the "multiple peers" problem.
     #The best solution is probably to post back to LMS each time, and LMS have logic dictating when/which peer
     #graded results to show the student.
-    (success,header) = util.create_grader(d)
+    (success,header) = util.create_and_save_grader_object(d)
     if not success:
         return _error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
 
-    xqueue_session=util.xqueue_login()
-
-    error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+    #xqueue_session=util.xqueue_login()
+    #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
     return _success_response({'msg' : "Posted to queue."},_INTERFACE_VERSION)
 

@@ -35,7 +35,7 @@ def _value_or_default(value, default=None):
         raise Exception(error)
 
 
-def subs_graded_by_instructor(location):
+def finished_submissions_graded_by_instructor(location):
     """
     Get submissions that are graded by instructor
     """
@@ -47,7 +47,7 @@ def subs_graded_by_instructor(location):
     return subs_graded
 
 
-def subs_pending_instructor(location, state_in=["C", "W"]):
+def submissions_pending_instructor(location, state_in=["C", "W"]):
     """
     Get submissions that are pending instructor grading.
     """
@@ -59,11 +59,11 @@ def subs_pending_instructor(location, state_in=["C", "W"]):
     return subs_pending
 
 
-def subs_by_instructor(location):
+def count_submissions_graded_and_pending_instructor(location):
     """
     Return length of submissions pending instructor grading and graded.
     """
-    return subs_graded_by_instructor(location).count(), subs_pending_instructor(location).count()
+    return finished_submissions_graded_by_instructor(location).count(), submissions_pending_instructor(location).count()
 
 
 def compose_reply(success, content):
@@ -153,7 +153,6 @@ def _http_get(session, url, data={}):
 
     if r.status_code not in [200]:
         return (1, 'unexpected HTTP status code [%d]' % r.status_code)
-    log.debug(r.text)
     return parse_xreply(r.text)
 
 
@@ -183,7 +182,7 @@ def _http_post(session, url, data, timeout):
     return (0, r.text)
 
 
-def create_grader(grader_dict):
+def create_and_save_grader_object(grader_dict):
     """
     Creates a Grader object and associates it with a given submission
     Input is grader dictionary with keys:
@@ -247,7 +246,7 @@ def post_results_to_xqueue(session, header, body):
     return success, msg
 
 
-def get_instructor_grading(course_id):
+def get_single_instructor_grading_item(course_id):
     """
     Gets instructor grading for a given course id.
     Returns one submission id corresponding to the course.
@@ -262,8 +261,8 @@ def get_instructor_grading(course_id):
     locations_for_course = [x['location'] for x in
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     for location in locations_for_course:
-        subs_graded = subs_graded_by_instructor(location).count()
-        subs_pending = subs_pending_instructor(location, state_in=["C"]).count()
+        subs_graded = finished_submissions_graded_by_instructor(location).count()
+        subs_pending = submissions_pending_instructor(location, state_in=["C"]).count()
         if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
             to_be_graded = Submission.objects.filter(
                 location=location,
@@ -282,7 +281,7 @@ def get_instructor_grading(course_id):
     return found, sub_id
 
 
-def get_peer_grading(location, grader_id):
+def get_single_peer_grading_item(location, grader_id):
     """
     Gets instructor grading for a given course id.
     Returns one submission id corresponding to the course.
@@ -316,7 +315,7 @@ def get_peer_grading(location, grader_id):
     return found, sub_id
 
 
-def check_if_timed_out(subs):
+def reset_timed_out_submissions(subs):
     """
     Check if submissions have timed out, and reset them to waiting to grade state if they have
     Input:
@@ -342,7 +341,7 @@ def check_if_timed_out(subs):
     return True
 
 
-def check_if_expired(subs):
+def get_submissions_that_have_expired(subs):
     """
     Check if submissions have expired, and return them if they have.
     Input:
@@ -360,7 +359,7 @@ def check_if_expired(subs):
     return timed_out_list
 
 
-def expire_submissions(timed_out_list):
+def post_expired_submissions_to_xqueue(timed_out_list):
     """
     Expire submissions by posting back to LMS with error message.
     Input:
@@ -380,7 +379,7 @@ def expire_submissions(timed_out_list):
         }
         sub.save()
         #TODO: Currently looks up submission object twice.  Fix in future.
-        success, header = create_grader(grader_dict)
+        success, header = create_and_save_grader_object(grader_dict)
 
         xqueue_session = xqueue_login()
 
@@ -425,6 +424,23 @@ def controller_login():
         settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
     )
     return session
+
+def create_xqueue_header_and_body(submission):
+
+    xqueue_header={
+        'submission_id': submission.xqueue_submission_id,
+        'submission_key': submission.xqueue_submission_key,
+        }
+
+    score_and_feedback=submission.get_all_successful_scores_and_feedback()
+    score=score_and_feedback['score']
+    feedback=score_and_feedback['feedback']
+    xqueue_body={
+        'feedback' : feedback,
+        'score' : score,
+    }
+
+    return xqueue_header,xqueue_body
 
 
 
