@@ -159,9 +159,10 @@ def save_grade(request):
     if not success:
         return _error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
 
-
-
+    xqueue_session=util.xqueue_login()
 
     error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+
+    return _success_response({'msg' : "Posted to queue."},_INTERFACE_VERSION)
 
 

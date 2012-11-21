@@ -168,12 +168,12 @@ def _http_post(session, url, data, timeout):
         r = session.post(url, data=data, timeout=timeout, verify=False)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
-        return (False, 'cannot connect to server')
+        return (1, 'cannot connect to server')
 
     if r.status_code not in [200]:
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
-        return (False, 'unexpected HTTP status code [%d]' % r.status_code)
-    return (True, r.text)
+        return (1, 'unexpected HTTP status code [%d]' % r.status_code)
+    return (0, r.text)
 
 def create_grader(grader_dict):
     """
