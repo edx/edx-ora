@@ -10,6 +10,7 @@ from controller.models import Submission
 from controller import util
 import requests
 import urlparse
+from django.template.loader import render_to_string
 
 log = logging.getLogger(__name__)
 

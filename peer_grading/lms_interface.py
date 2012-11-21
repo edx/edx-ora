@@ -11,6 +11,9 @@ from controller import util
 import requests
 import urlparse
 
+from models import CalibrationHistory, CalibrationRecord
+from controller.models import Submission,Grader
+
 log = logging.getLogger(__name__)
 
 feedback_template = u"""
@@ -156,8 +159,30 @@ def is_student_calibrated(request):
     if request.method!="GET":
         raise Http404
 
+    problem_id=request.GET.get("problem_id")
+    student_id=request.GET.get("student_id")
+
+    matching_submissions=Submission.objects.filter(problem_id=problem_id)
+
+    if matching_submissions.count<1:
+        return util._error_response("Invalid problem id specified: {0}".format(problem_id),_INTERFACE_VERSION)
+
     student_id=request.GET.get("student_id")
     problem_id=request.GET.get("problem_id")
+
+    calibration_history=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
+    max_score=matching_submissions[0].max_score
+    calibration_record_count=calibration_history.get_calibration_record_count()
+    if calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+        calibration_error=calibration_history.get_average_calibration_error()
+        normalized_calibration_error=calibration_error/float(max_score)
+        if normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR and \
+           calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
+            return util._success_response({'calibrated' : False}, _INTERFACE_VERSION)
+        else:
+            return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)
+    else:
+        return util._success_response({'calibrated' : False},_INTERFACE_VERSION)
 
 def get_calibration_essay(student_id,location):
     """

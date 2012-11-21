@@ -7,8 +7,8 @@ class CalibrationHistory(models.Model):
     #Have problem_id and location in order to allow for one to be user_defined, and one system defined
     #This allows for the same problem to be used across classes without re-calibration if needed.
     #Currently use location instead of problem_id
-    problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    location=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
+    location=models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
 
     def __unicode__(self):
         history_row=("Calibration history for student {0} on problem {1} at location {2}").format(
