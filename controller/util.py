@@ -303,13 +303,16 @@ def get_single_peer_grading_item(location, grader_id):
         next_grader_type="PE",
     )
 
+    #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length=to_be_graded.count()
         if to_be_graded_length > 0:
+            #Set the maximum number of records to search through
             maximum_to_search=min(settings.PEER_GRADER_MAXIMUM_TO_SEARCH,to_be_graded_length)
             indices_to_search=random.sample(xrange(0,to_be_graded_length),maximum_to_search)
             previous_grader_counts=[]
             selected_to_be_graded=[]
+            #Get number of successful peer graders for each item.
             for i in indices_to_search:
                 grade_item=to_be_graded[i]
                 selected_to_be_graded.append(grade_item)

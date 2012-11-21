@@ -177,7 +177,16 @@ def is_peer_grading_finished_for_student(student_id):
     """
     pass
 
+def save_calibration(request):
+    """
+    Saves a calibration essay sent back from LMS.
+    Input:
+        request dict containing keys student_id, location, calibration_essay_id, score
+    Output:
+        Boolean indicating success in saving calibration essay or not.
+    """
 
+    pass
 
 
 
