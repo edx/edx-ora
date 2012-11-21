@@ -153,7 +153,6 @@ def _http_get(session, url, data={}):
 
     if r.status_code not in [200]:
         return (1, 'unexpected HTTP status code [%d]' % r.status_code)
-    log.debug(r.text)
     return parse_xreply(r.text)
 
 
@@ -433,7 +432,9 @@ def create_xqueue_header_and_body(submission):
         'submission_key': submission.xqueue_submission_key,
         }
 
-    score,feedback=submission.get_all_successful_scores_and_feedback()
+    score_and_feedback=submission.get_all_successful_scores_and_feedback()
+    score=score_and_feedback['score']
+    feedback=score_and_feedback['feedback']
     xqueue_body={
         'feedback' : feedback,
         'score' : score,

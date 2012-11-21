@@ -88,7 +88,6 @@ def instructor_grading(request):
         post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
 
         xqueue_session=util.xqueue_login()
-        log.debug(post_data)
 
         error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
@@ -99,7 +98,6 @@ def instructor_grading(request):
         post_data={}
         found,sub_id=util.get_instructor_grading("MITx/6.002x")
         post_data['submission_id']=sub_id
-        log.debug(sub_id)
         if not found:
             try:
                 post_data.pop('submission_id')

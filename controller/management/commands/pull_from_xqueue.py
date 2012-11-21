@@ -62,12 +62,15 @@ class Command(BaseCommand):
                     xqueue_header,xqueue_body=util.create_xqueue_header_and_body(submission)
                     (success,msg) = util.post_results_to_xqueue(
                         self.xqueue_session,
-                        xqueue_header,
-                        xqueue_body,
+                        json.dumps(xqueue_header),
+                        json.dumps(xqueue_body),
                     )
                     if success==0:
+                        log.debug("Successful post back to xqueue!")
                         submission.posted_results_back_to_queue=True
                         submission.save()
+                    else:
+                        log.debug("Could not post back.  Error: {0}".format(msg))
 
                 time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 

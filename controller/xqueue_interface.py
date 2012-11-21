@@ -33,9 +33,7 @@ def submit(request):
         return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
     else:
         #Minimal parsing of reply
-        log.debug(request.POST)
         reply_is_valid, header, body = _is_valid_reply(request.POST.copy())
-        log.debug("Header: {0}\n Body: {1}".format(header,body))
 
         if not reply_is_valid:
             log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
