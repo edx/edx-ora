@@ -125,7 +125,6 @@ class xqueue_interface_test(unittest.TestCase):
         content = self.c.post(
             SUBMIT_URL,
             content,
-            content_type="application/text",
         )
 
         log.debug(content)
