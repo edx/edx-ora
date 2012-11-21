@@ -11,3 +11,8 @@ urlpatterns = patterns('peer_grading.lms_interface',
     url(r'^save_grade/$', 'save_grade'),
     url(r'^is_calibrated/$', 'is_student_calibrated'),
 )
+
+# Temporary stub view
+urlpatterns = patterns('peer_grading.views',
+    url(r'^peer_grading/$', 'peer_grading'),
+)
