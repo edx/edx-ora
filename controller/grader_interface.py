@@ -113,9 +113,9 @@ def put_result(request):
 
         #Add in call to xqueue here
         #sub.xqueue_submission_key, sub.xqueue_submission_id, sub.xqueue_queue_name
-        xqueue_session=util.xqueue_login()
 
-        error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
+        #xqueue_session=util.xqueue_login()
+        #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
         log.debug("Posted to xqueue, got {0} and {1}".format(error,msg))
 

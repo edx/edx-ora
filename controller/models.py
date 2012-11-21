@@ -51,6 +51,7 @@ class Submission(models.Model):
     xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     xqueue_submission_key = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
+    posted_results_back_to_queue=models.BooleanField(default=False)
 
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
