@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -151,7 +152,7 @@ def is_student_calibrated(request):
     """
     Decides if student has fulfilled criteria for peer grading calibration for a given location (problem id).
     Input:
-        student id, problem id
+        student id, problem_id
     Output:
         Boolean indicating whether or not student has finished calibration.
     """
@@ -166,9 +167,6 @@ def is_student_calibrated(request):
 
     if matching_submissions.count<1:
         return util._error_response("Invalid problem id specified: {0}".format(problem_id),_INTERFACE_VERSION)
-
-    student_id=request.GET.get("student_id")
-    problem_id=request.GET.get("problem_id")
 
     calibration_history=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
     max_score=matching_submissions[0].max_score
@@ -190,10 +188,42 @@ def get_calibration_essay(student_id,location):
     Input:
         student id, location
     Output:
-        dict containing text of calibration essay, prompt, rubric, max score
+        dict containing text of calibration essay, prompt, rubric, max score, calibration essay id
     """
 
+    calibration_graders=Grader.objects.filter(
+        submission__location__exact=location,
+        grader_type="IN",
+        is_calibration=True,
+    )
+
+    calibration_grader_count=calibration_graders.count()
+    if calibration_grader_count<settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+        return util._success_response({'got_essay' : False, 'message' : "Not enough calibration essays."})
+
+    student_calibration_history=CalibrationHistory.get(student_id=student_id,location=location)
+    student_calibration_records=student_calibration_history.calibrationrecord_set.all()
+
+    student_calibration_ids=[cr.id for cr in list(student_calibration_records)]
+    calibration_essay_ids=[cr.id for cr in list(calibration_graders)]
+
+    for i in xrange(0,len(calibration_essay_ids)):
+        if calibration_essay_ids[i] not in student_calibration_ids:
+            #return the essay here
+            pass
+
+    if len(student_calibration_ids)>len(calibration_essay_ids):
+        random_calibration_essay_id=random.sample(calibration_essay_ids,1)[0]
+
+
+def get_calibration_essay_data(calibration_essay_id):
+    """
+    From a calibration essay id, lookup prompt, rubric, max score, prompt, essay text, and return
+    Input:
+        calibration essay id
+    """
     pass
+
 
 def is_peer_grading_finished_for_student(student_id):
     """
