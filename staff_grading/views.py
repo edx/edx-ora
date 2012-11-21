@@ -83,7 +83,7 @@ def get_next_submission(request):
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
-    (found, id) = util.get_instructor_grading(course_id)
+    (found, id) = util.get_single_instructor_grading_item(course_id)
     if not found:
         return _success_response({'message': 'No more submissions to grade.'})
 
@@ -160,7 +160,7 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0}
 
-    if not util.create_grader(d):
+    if not util.create_and_save_grader_object(d):
         return _error_response("There was a problem saving the grade.  Contact support.")
 
     return _success_response({})

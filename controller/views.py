@@ -72,7 +72,7 @@ def instructor_grading(request):
             return HttpResponse("Can't parse score into an int.")
 
         try:
-            created,header=util.create_grader({
+            created,header=util.create_and_save_grader_object({
                 'score': post_data['score'],
                 'feedback' : post_data['feedback'],
                 'status' : "S",
@@ -96,7 +96,7 @@ def instructor_grading(request):
     found=False
     if post_data is None or post_data=={} or saved:
         post_data={}
-        found,sub_id=util.get_instructor_grading("MITx/6.002x")
+        found,sub_id=util.get_single_instructor_grading_item("MITx/6.002x")
         post_data['submission_id']=sub_id
         if not found:
             try:

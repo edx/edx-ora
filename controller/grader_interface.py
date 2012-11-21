@@ -24,7 +24,7 @@ def get_submission_ml(request):
     """
     unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
-        subs_graded_by_instructor=util.subs_graded_by_instructor(location).count()
+        subs_graded_by_instructor=util.finished_submissions_graded_by_instructor(location).count()
         if subs_graded_by_instructor>=settings.MIN_TO_USE_ML:
             to_be_graded=Submission.objects.filter(
                 location=location,
@@ -52,7 +52,7 @@ def get_submission_instructor(request):
         "'get_submission' requires parameter 'course_id'"))
 
     #TODO: Bring this back into this module once instructor grading stub view is gone.
-    found,sub_id=util.get_instructor_grading(course_id)
+    found,sub_id=util.get_single_instructor_grading_item(course_id)
 
     if not found:
         return HttpResponse(util.compose_reply(False,"Nothing to grade."))
@@ -72,7 +72,7 @@ def get_submission_peer(request):
             "'get_submission' requires parameters 'location', 'grader_id'"))
 
     #TODO: Bring this back into this module once instructor grading stub view is gone.
-    found,sub_id=util.get_peer_grading(location,grader_id)
+    found,sub_id=util.get_single_peer_grading_item(location,grader_id)
 
     if not found:
         return HttpResponse(util.compose_reply(False,"Nothing to grade."))
@@ -107,7 +107,7 @@ def put_result(request):
         except:
             return HttpResponse(util.compose_reply(False,"Can't parse score into an int."))
 
-        success,header=util.create_grader(post_data)
+        success,header=util.create_and_save_grader_object(post_data)
         if not success:
             return HttpResponse(util.compose_reply(False,"Could not save grader."))
 
