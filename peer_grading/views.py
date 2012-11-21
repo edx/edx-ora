@@ -8,8 +8,30 @@ from django.views.decorators.csrf import csrf_exempt
 
 from controller.models import Submission
 from controller import util
+import requests
+import urlparse
 
 log = logging.getLogger(__name__)
+
+feedback_template = u"""
+
+<section>
+    <header>Feedback</header>
+    <div class="shortform">
+        <div class="result-output">
+          <p>Score: {score}</p>
+        </div>
+    </div>
+    <div class="longform">
+        <div class="result-output">
+          <div class="feedback">
+            Feedback: {feedback}
+          </div>
+        </div>
+    </div>
+</section>
+
+"""
 
 _INTERFACE_VERSION=1
 
@@ -24,7 +46,7 @@ def _error_response(msg,version):
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 
-def _success_response(data):
+def _success_response(data,version):
     """
     Return a successful response with the specified data.
     """
@@ -97,20 +119,23 @@ def save_grade(request):
     if request.method != "POST":
         raise Http404
 
-    location = request.POST.get('location')
-    grader_id = request.POST.get('grader_id')
-    submission_id = request.POST.get('submission_id')
+    post_data=request.POST.dict().copy()
+
+    for tag in ['location','grader_id','submission_id','submission_key','score','feedback']:
+        if not tag in post_data:
+            return _error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+
+    location = post_data['location']
+    grader_id = post_data['grader_id']
+    submission_id = post_data['submission_id']
 
     #Submission key currently unused, but plan to use it for validation in the future.
-    submission_key = request.POST.get('submission_key')
-    score = request.POST.get('score')
-    feedback = request.POST.get('feedback')
+    submission_key = post_data['submission_key']
+    score = post_data['score']
 
-    if (# These have to be truthy
-        not (location and grader_id and submission_id) or
-        # These have to be non-None
-        score is None or feedback is None):
-        return _error_response("Missing required parameters",_INTERFACE_VERSION)
+    #This is done to ensure that response is properly formatted on the lms side.
+    feedback_string = post_data['feedback']
+    feedback=feedback_template.format(feedback=feedback_string,score=score)
 
     try:
         score = int(score)
@@ -127,5 +152,21 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0}
 
-    if not util.create_grader(d):
+    #We need to figure out how/when to post peer grading results back to LMS given the "multiple peers" problem.
+    #The best solution is probably to post back to LMS each time, and LMS have logic dictating when/which peer
+    #graded results to show the student.
+    (success,header) = util.create_grader(d)
+    if not success:
         return _error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
+
+    try:
+    xqueue_session=requests.session()
+    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+    (xqueue_error,xqueue_msg)=util.login(
+        xqueue_session,
+        xqueue_login_url,
+        settings.XQUEUE_INTERFACE['django_auth']['username'],
+        settings.XQUEUE_INTERFACE['django_auth']['password'],
+    )
+
+    error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
