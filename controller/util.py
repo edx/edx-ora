@@ -176,7 +176,7 @@ def _http_post(session, url, data, timeout):
 
 def create_grader(grader_dict):
     """
-    Creates a grader object and associates it with a given submission
+    Creates a Grader object and associates it with a given submission
     Input is grader dictionary with keys:
      feedback, status, grader_id, grader_type, confidence, score
     """
