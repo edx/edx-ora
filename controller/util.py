@@ -8,6 +8,7 @@ import requests
 import ConfigParser
 import urlparse
 import random
+from django.db.models import Count
 
 from django.http import HttpResponse
 
@@ -308,22 +309,18 @@ def get_single_peer_grading_item(location, grader_id):
         to_be_graded_length=to_be_graded.count()
         if to_be_graded_length > 0:
             #Set the maximum number of records to search through
-            maximum_to_search=min(settings.PEER_GRADER_MAXIMUM_TO_SEARCH,to_be_graded_length)
-            indices_to_search=random.sample(xrange(0,to_be_graded_length),maximum_to_search)
-            previous_grader_counts=[]
-            selected_to_be_graded=[]
-            #Get number of successful peer graders for each item.
-            for i in indices_to_search:
-                grade_item=to_be_graded[i]
-                selected_to_be_graded.append(grade_item)
-                previous_graders_count=grade_item.get_successful_peer_graders().count()
-                previous_grader_counts.append(previous_graders_count)
+            submissions_to_grade=(to_be_graded.filter(grader__status_code="S",
+                                  grader__grader_type="PE").annotate(num_graders=Count('grader')).
+                                  values("num_graders","id"))
+
+            submission_ids=[p['id'] for p in submissions_to_grade]
+            submission_grader_counts=[p['num_graders'] for p in submissions_to_grade]
 
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
-            for i in xrange(0,len(indices_to_search)):
-                minimum_index=previous_grader_counts.index(min(previous_grader_counts))
-                grade_item=selected_to_be_graded[minimum_index]
+            for i in xrange(0,submission_ids):
+                minimum_index=submission_grader_counts.index(min(submission_grader_counts))
+                grade_item=Submission.objects.get(id=submission_ids[minimum_index])
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
                 if grader_id not in previous_graders:
                     to_be_graded.state = "C"
@@ -332,10 +329,9 @@ def get_single_peer_grading_item(location, grader_id):
                     sub_id = to_be_graded.id
                     return found, sub_id
                 else:
-                    if len(indices_to_search)>1:
-                        indices_to_search.pop(minimum_index)
-                        previous_grader_counts.pop(minimum_index)
-                        selected_to_be_graded.pop(minimum_index)
+                    if len(submission_ids)>1:
+                        submission_ids.pop(minimum_index)
+                        submission_grader_counts.pop(minimum_index)
 
     return found, sub_id
 
