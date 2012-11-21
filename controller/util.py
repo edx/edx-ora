@@ -274,6 +274,7 @@ def get_peer_grading(location,grader_id):
     Returns one submission id corresponding to the course.
     Input:
         location - problem location.
+        grader_id - student id of the peer grader
     Returns:
         found - Boolean indicating whether or not something to grade was found
         sub_id - If found, the id of a submission to grade
@@ -390,6 +391,7 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
+
 
 
 
