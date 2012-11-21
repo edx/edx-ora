@@ -23,12 +23,10 @@ class Command(BaseCommand):
         log.info(' [*] Pulling from xqueues...')
 
         #Define sessions for logging into xqueue and controller
-        self.xqueue_session=requests.session()
-        self.controller_session=requests.session()
-
+        self.xqueue_session=util.xqueue_login()
+        self.controller_session=util.controller_login()
         #Login, then setup endless query loop
         flag=True
-        error = self.login()
 
         while flag:
             #Loop through each queue that is given in arguments
@@ -57,28 +55,6 @@ class Command(BaseCommand):
 
                 time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
-    def login(self):
-        '''
-        Login to xqueue to pull submissions
-        '''
-        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
-        controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
-
-        (xqueue_error,xqueue_msg)=util.login(
-            self.xqueue_session,
-            xqueue_login_url,
-            settings.XQUEUE_INTERFACE['django_auth']['username'],
-            settings.XQUEUE_INTERFACE['django_auth']['password'],
-        )
-
-        (controller_error,controller_msg)=util.login(
-            self.controller_session,
-            controller_login_url,
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
-            settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
-        )
-
-        return max(controller_error,xqueue_error)
 
     def get_from_queue(self,queue_name):
         """

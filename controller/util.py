@@ -6,6 +6,7 @@ from django.utils import timezone
 import datetime
 import requests
 import ConfigParser
+import urlparse
 
 log=logging.getLogger(__name__)
 
@@ -167,12 +168,12 @@ def _http_post(session, url, data, timeout):
         r = session.post(url, data=data, timeout=timeout, verify=False)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
-        return (False, 'cannot connect to server')
+        return (1, 'cannot connect to server')
 
     if r.status_code not in [200]:
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
-        return (False, 'unexpected HTTP status code [%d]' % r.status_code)
-    return (True, r.text)
+        return (1, 'unexpected HTTP status code [%d]' % r.status_code)
+    return (0, r.text)
 
 def create_grader(grader_dict):
     """
@@ -231,9 +232,9 @@ def post_results_to_xqueue(session,header,body):
         'xqueue_body' : body,
     }
 
-    (error,msg)=_http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request, settings.REQUESTS_TIMEOUT)
+    (success,msg)=_http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request, settings.REQUESTS_TIMEOUT)
 
-    return error,msg
+    return success,msg
 
 def get_instructor_grading(course_id):
     """
@@ -274,6 +275,7 @@ def get_peer_grading(location,grader_id):
     Returns one submission id corresponding to the course.
     Input:
         location - problem location.
+        grader_id - student id of the peer grader
     Returns:
         found - Boolean indicating whether or not something to grade was found
         sub_id - If found, the id of a submission to grade
@@ -366,14 +368,7 @@ def expire_submissions(timed_out_list):
         success,header=create_grader(grader_dict)
 
 
-        xqueue_session=requests.session()
-        xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
-        (xqueue_error,xqueue_msg)=util.login(
-            xqueue_session,
-            xqueue_login_url,
-            settings.XQUEUE_INTERFACE['django_auth']['username'],
-            settings.XQUEUE_INTERFACE['django_auth']['password'],
-        )
+        xqueue_session=xqueue_login()
 
         error,msg = post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(grader_dict))
 
@@ -390,6 +385,31 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
+
+def xqueue_login():
+    session=requests.session()
+    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'],'/xqueue/login/')
+    (xqueue_error,xqueue_msg)=login(
+        session,
+        xqueue_login_url,
+        settings.XQUEUE_INTERFACE['django_auth']['username'],
+        settings.XQUEUE_INTERFACE['django_auth']['password'],
+    )
+
+    return session
+
+def controller_login():
+    session=requests.session()
+    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/login/')
+    (controller_error,controller_msg)=login(
+        session,
+        controller_login_url,
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
+        settings.GRADING_CONTROLLER_INTERFACE['django_auth']['password'],
+    )
+    return session
+
+
 
 
 
