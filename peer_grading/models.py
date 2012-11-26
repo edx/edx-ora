@@ -41,4 +41,5 @@ class CalibrationRecord(models.Model):
 
     #This tracks whether the record was created from a calibration essay prior to the student starting grading,
     #Or from a calibration essay inserted into the peer grading
+    #Unused for now.
     is_pre_calibration=models.BooleanField(default=True)

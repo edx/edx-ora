@@ -248,11 +248,11 @@ def get_calibration_essay_data(calibration_essay_id):
     return response
 
 
-def is_peer_grading_finished_for_student(student_id):
+def is_peer_grading_finished_for_submission(submission_id):
     """
-    Checks to see whether there are enough reliable peer evaluations of student to ensure that grading is done.
+    Checks to see whether there are enough reliable peer evaluations of submission to ensure that grading is done.
     Input:
-        student id
+        submission id
     Output:
         Boolean indicating whether or not there are enough reliable evaluations.
     """
@@ -297,7 +297,9 @@ def save_calibration(request):
          'location' : location,
         }
 
-    (success,message)=create_and_save_calibration_record(d)
+    (success,data)=create_and_save_calibration_record(d)
+
+    return success
 
 
 def create_and_save_calibration_record(calibration_data):
@@ -333,15 +335,24 @@ def create_and_save_calibration_record(calibration_data):
     try:
         actual_score=submission.get_last_successful_instructor_grader()['score']
     except:
-        return util._error_response("Error getting actual.".format(calibration_data['submission_id']),
+        return util._error_response("Error getting actual score for submission id {0}.".format(calibration_data['submission_id']),
             _INTERFACE_VERSION)
+
+    if actual_score== -1:
+        return util._error_response("No instructor graded submission for submission id {0}."
+        .format(calibration_data['submission_id']),_INTERFACE_VERSION)
 
     cal_record=CalibrationRecord(
         submission=submission,
         calibration_history=calibration_history,
         score=calibration_data['score'],
         actual_score=actual_score,
+        feedback=calibration_data['feedback'],
     )
+
+    cal_record.save()
+
+    return util._success_response({'cal_id' : cal_record.id})
 
 
 

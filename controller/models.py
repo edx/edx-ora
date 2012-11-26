@@ -112,7 +112,7 @@ class Submission(models.Model):
             grader_type="IN",
         ).order_by("-date_created")
         if successful_instructor_graders.count()==0:
-            return {'score' : 0, 'feedback' : "None."}
+            return {'score' : -1}
 
         last_successful_instructor=successful_instructor_graders[0]
         return {'score' : last_successful_instructor.score}
