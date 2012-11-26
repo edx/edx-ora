@@ -7,13 +7,11 @@ from django.utils import timezone
 
 
 # General
-# Note that instructor grading is a temporary stub view
 #------------------------------------------------------------
 urlpatterns = patterns('controller.views',
     url(r'^login/$', 'log_in'),
     url(r'^logout/$', 'log_out'),
     url(r'^status/$', 'status'),
-    url(r'^instructor_grading/$', 'instructor_grading'),
 )
 
 # Xqueue submission interface (xqueue pull script uses this)

@@ -6,7 +6,6 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Deleting model 'PeerGrader'
         db.delete_table('controller_peergrader')
@@ -32,7 +31,7 @@ class Migration(SchemaMigration):
             ('grader_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('grader_type', self.gf('django.db.models.fields.CharField')(max_length=2)),
             ('confidence', self.gf('django.db.models.fields.DecimalField')(max_digits=10, decimal_places=9)),
-        ))
+            ))
         db.send_create_signal('controller', ['Grader'])
 
         # Deleting field 'Submission.final_grader'
@@ -50,7 +49,7 @@ class Migration(SchemaMigration):
             ('score', self.gf('django.db.models.fields.IntegerField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('submission', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['controller.Submission'])),
-        ))
+            ))
         db.send_create_signal('controller', ['PeerGrader'])
 
         # Adding model 'MLGrader'
@@ -64,7 +63,7 @@ class Migration(SchemaMigration):
             ('score', self.gf('django.db.models.fields.IntegerField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('submission', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['controller.Submission'])),
-        ))
+            ))
         db.send_create_signal('controller', ['MLGrader'])
 
         # Adding model 'SelfAssessmentGrader'
@@ -77,7 +76,7 @@ class Migration(SchemaMigration):
             ('score', self.gf('django.db.models.fields.IntegerField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('submission', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['controller.Submission'])),
-        ))
+            ))
         db.send_create_signal('controller', ['SelfAssessmentGrader'])
 
         # Adding model 'InstructorGrader'
@@ -90,7 +89,7 @@ class Migration(SchemaMigration):
             ('score', self.gf('django.db.models.fields.IntegerField')()),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('submission', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['controller.Submission'])),
-        ))
+            ))
         db.send_create_signal('controller', ['InstructorGrader'])
 
         # Deleting model 'Grader'
@@ -98,8 +97,8 @@ class Migration(SchemaMigration):
 
         # Adding field 'Submission.final_grader'
         db.add_column('controller_submission', 'final_grader',
-                      self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
-                      keep_default=False)
+            self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
+            keep_default=False)
 
 
     models = {
@@ -129,7 +128,8 @@ class Migration(SchemaMigration):
             'state': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'student_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'student_response': ('django.db.models.fields.TextField', [], {'default': "''"}),
-            'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'student_submission_time': (
+            'django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'})

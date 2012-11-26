@@ -6,12 +6,11 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Adding field 'Submission.posted_results_back_to_queue'
         db.add_column('controller_submission', 'posted_results_back_to_queue',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
+            self.gf('django.db.models.fields.BooleanField')(default=False),
+            keep_default=False)
 
 
     def backwards(self, orm):
@@ -51,7 +50,8 @@ class Migration(SchemaMigration):
             'state': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'student_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'student_response': ('django.db.models.fields.TextField', [], {'default': "''"}),
-            'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'student_submission_time': (
+            'django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'})

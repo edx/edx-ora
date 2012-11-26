@@ -10,8 +10,9 @@ import logging
 import sys
 
 import controller.util as util
+from controller.models import SubmissionState, GraderStatus
 
-from controller.models import Submission,Grader
+from controller.models import Submission, Grader
 
 sys.path.append(settings.ML_PATH)
 import grade
@@ -27,50 +28,50 @@ class Command(BaseCommand):
         Constant loop that polls grading controller
         """
         log.info(' [*] Polling grading controller...')
-        self.controller_session=util.controller_login()
+        self.controller_session = util.controller_login()
 
-        flag=True
+        flag = True
 
         while flag:
-
             try:
-                response_code,content=self.get_item_from_controller()
+                response_code, content = self.get_item_from_controller()
 
                 #Grade and handle here
-                if response_code==0:
-                    sub=Submission.objects.get(id=content)
-                    student_response=sub.student_response.encode('ascii', 'ignore')
-                    grader_path=sub.location
-                    results=grade.grade(grader_path,None,student_response) #grader config is none for now, could be different later
-                    log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'],results['errors']))
+                if response_code == 0:
+                    sub = Submission.objects.get(id=content)
+                    student_response = sub.student_response.encode('ascii', 'ignore')
+                    grader_path = sub.location
+                    results = grade.grade(grader_path, None,
+                        student_response) #grader config is none for now, could be different later
+                    log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                     if results['success']:
-                        status="S"
+                        status = GraderStatus.success
                     else:
-                        status="F"
+                        status = GraderStatus.failure
 
-                    grader_dict={
-                        'score' : results['score'],
-                        'feedback' : results['feedback'],
-                        'status' : status,
-                        'grader_id' : 1,
-                        'grader_type' : "ML",
-                        'confidence' : 1,
-                        'submission_id' : sub.id,
-                        }
+                    grader_dict = {
+                        'score': results['score'],
+                        'feedback': results['feedback'],
+                        'status': status,
+                        'grader_id': 1,
+                        'grader_type': "ML",
+                        'confidence': 1,
+                        'submission_id': sub.id,
+                    }
 
-                    created,msg=util._http_post(
+                    created, msg = util._http_post(
                         self.controller_session,
-                        urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/put_result/'),
+                        urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                            '/grading_controller/put_result/'),
                         grader_dict,
                         settings.REQUESTS_TIMEOUT,
                     )
-                    log.debug("Got response of {0} from server, message: {1}".format(created,msg))
+                    log.debug("Got response of {0} from server, message: {1}".format(created, msg))
                 else:
                     log.info("Error getting item from controller or no items to get.")
 
             except Exception as err:
                 log.debug("Error getting submission: ".format(err))
-
 
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
@@ -81,10 +82,11 @@ class Command(BaseCommand):
         try:
             response = util._http_get(
                 self.controller_session,
-                urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],'/grading_controller/get_submission_ml/'),
+                urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                    '/grading_controller/get_submission_ml/'),
             )
         except Exception as err:
-            return False,"Error getting response: {0}".format(err)
+            return False, "Error getting response: {0}".format(err)
 
         return response
 

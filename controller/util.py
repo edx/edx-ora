@@ -1,12 +1,10 @@
 from django.conf import settings
-from models import Submission, Grader
 import json
 import logging
-from django.utils import timezone
-import datetime
 import requests
-import ConfigParser
 import urlparse
+
+from django.http import HttpResponse
 
 log = logging.getLogger(__name__)
 
@@ -33,37 +31,6 @@ def _value_or_default(value, default=None):
         error = "Needed value not passed by xqueue."
         #TODO: Fix in future to fail in a more robust way
         raise Exception(error)
-
-
-def finished_submissions_graded_by_instructor(location):
-    """
-    Get submissions that are graded by instructor
-    """
-    subs_graded = Submission.objects.filter(location=location,
-        previous_grader_type__in=["IN"],
-        state__in=["F"],
-    )
-
-    return subs_graded
-
-
-def submissions_pending_instructor(location, state_in=["C", "W"]):
-    """
-    Get submissions that are pending instructor grading.
-    """
-    subs_pending = Submission.objects.filter(location=location,
-        next_grader_type__in=["IN"],
-        state__in=state_in,
-    )
-
-    return subs_pending
-
-
-def count_submissions_graded_and_pending_instructor(location):
-    """
-    Return length of submissions pending instructor grading and graded.
-    """
-    return finished_submissions_graded_by_instructor(location).count(), submissions_pending_instructor(location).count()
 
 
 def compose_reply(success, content):
@@ -182,51 +149,6 @@ def _http_post(session, url, data, timeout):
     return (0, r.text)
 
 
-def create_and_save_grader_object(grader_dict):
-    """
-    Creates a Grader object and associates it with a given submission
-    Input is grader dictionary with keys:
-     feedback, status, grader_id, grader_type, confidence, score
-    """
-    try:
-        sub = Submission.objects.get(id=grader_dict['submission_id'])
-    except:
-        return False
-
-    grade = Grader(
-        score=grader_dict['score'],
-        feedback=grader_dict['feedback'],
-        status_code=grader_dict['status'],
-        grader_id=grader_dict['grader_id'],
-        grader_type=grader_dict['grader_type'],
-        confidence=grader_dict['confidence'],
-    )
-
-    grade.submission = sub
-    grade.save()
-
-    #TODO: Need some kind of logic somewhere else to handle setting next_grader
-
-    sub.previous_grader_type = grade.grader_type
-    sub.next_grader_type = grade.grader_type
-
-    #TODO: Some kind of logic to decide when sub is finished grading.
-
-    #If submission is ML or IN graded, and was successful, state is finished
-    if(grade.status_code == "S" and grade.grader_type in ["IN", "ML"]):
-        sub.state = "F"
-    elif(grade.status_code == "S" and grade.grader_type in ["PE"]):
-        #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
-        successful_peer_grader_count = sub.get_successful_peer_graders().count()
-        #If number of successful peer graders equals the needed count, finalize submission.
-        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
-            sub.state = "F"
-
-    sub.save()
-
-    return True, {'submission_id': sub.xqueue_submission_id, 'submission_key': sub.xqueue_submission_key}
-
-
 def post_results_to_xqueue(session, header, body):
     """
     Post the results from a grader back to xqueue.
@@ -244,161 +166,6 @@ def post_results_to_xqueue(session, header, body):
         settings.REQUESTS_TIMEOUT)
 
     return success, msg
-
-
-def get_single_instructor_grading_item(course_id):
-    """
-    Gets instructor grading for a given course id.
-    Returns one submission id corresponding to the course.
-    Input:
-        course_id - Id of a course.
-    Returns:
-        found - Boolean indicating whether or not something to grade was found
-        sub_id - If found, the id of a submission to grade
-    """
-    found = False
-    sub_id = 0
-    locations_for_course = [x['location'] for x in
-                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
-    for location in locations_for_course:
-        subs_graded = finished_submissions_graded_by_instructor(location).count()
-        subs_pending = submissions_pending_instructor(location, state_in=["C"]).count()
-        if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
-            to_be_graded = Submission.objects.filter(
-                location=location,
-                state="W",
-                next_grader_type="IN",
-            )
-
-            if(to_be_graded.count() > 0):
-                to_be_graded = to_be_graded[0]
-                if to_be_graded is not None:
-                    to_be_graded.state = "C"
-                    to_be_graded.save()
-                    found = True
-                    sub_id = to_be_graded.id
-                    return found, sub_id
-    return found, sub_id
-
-
-def get_single_peer_grading_item(location, grader_id):
-    """
-    Gets instructor grading for a given course id.
-    Returns one submission id corresponding to the course.
-    Input:
-        location - problem location.
-        grader_id - student id of the peer grader
-    Returns:
-        found - Boolean indicating whether or not something to grade was found
-        sub_id - If found, the id of a submission to grade
-    """
-    found = False
-    sub_id = 0
-    to_be_graded = Submission.objects.filter(
-        location=location,
-        state="W",
-        next_grader_type="PE",
-    )
-
-    if to_be_graded is not None:
-        if to_be_graded.count() > 0:
-            for grade_item in to_be_graded:
-                #Ensure that student hasn't graded this submission before!
-                previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
-                if grader_id not in previous_graders:
-                    to_be_graded.state = "C"
-                    to_be_graded.save()
-                    found = True
-                    sub_id = to_be_graded.id
-                    return found, sub_id
-
-    return found, sub_id
-
-
-def reset_timed_out_submissions(subs):
-    """
-    Check if submissions have timed out, and reset them to waiting to grade state if they have
-    Input:
-        subs - A QuerySet of submissions
-    Output:
-        status code indicating success
-    """
-    now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times = [now - i['date_modified'] for i in list(subs.values('date_modified'))]
-    min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
-    count = 0
-
-    for i in xrange(0, len(sub_times)):
-        if sub_times[i] > min_time:
-            sub = subs[i]
-            if sub.state == "C":
-                sub.state = "W"
-                sub.save()
-                count += 1
-
-    log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
-
-    return True
-
-
-def get_submissions_that_have_expired(subs):
-    """
-    Check if submissions have expired, and return them if they have.
-    Input:
-        subs - A queryset of submissions
-    """
-    now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times = [now - i['date_modified'] for i in list(subs.values('date_modified'))]
-    min_time = datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
-
-    timed_out_list = []
-    for i in xrange(0, len(sub_times)):
-        if sub_times[i] > min_time:
-            timed_out_list.append(subs[i])
-
-    return timed_out_list
-
-
-def post_expired_submissions_to_xqueue(timed_out_list):
-    """
-    Expire submissions by posting back to LMS with error message.
-    Input:
-        timed_out_list from check_if_expired method
-    Output:
-        Success code.
-    """
-    for sub in timed_out_list:
-        sub.state = "F"
-        grader_dict = {
-            'score': 0,
-            'feedback': "Error scoring submission.",
-            'status_code': "F",
-            'grader_id': "0",
-            'grader_type': sub.next_grader_type,
-            'confidence': 1,
-        }
-        sub.save()
-        #TODO: Currently looks up submission object twice.  Fix in future.
-        success, header = create_and_save_grader_object(grader_dict)
-
-        xqueue_session = xqueue_login()
-
-        error, msg = post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
-
-    log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
-    return error, msg
-
-
-def get_grader_settings(settings_file):
-    config = ConfigParser.RawConfigParser()
-    config.read(settings_file)
-    grader_type = config.get("grading", "grader_type")
-
-    grader_settings = {
-        'grader_type': grader_type,
-    }
-
-    return grader_settings
 
 
 def xqueue_login():
@@ -425,22 +192,42 @@ def controller_login():
     )
     return session
 
-def create_xqueue_header_and_body(submission):
 
-    xqueue_header={
+def create_xqueue_header_and_body(submission):
+    xqueue_header = {
         'submission_id': submission.xqueue_submission_id,
         'submission_key': submission.xqueue_submission_key,
-        }
-
-    score_and_feedback=submission.get_all_successful_scores_and_feedback()
-    score=score_and_feedback['score']
-    feedback=score_and_feedback['feedback']
-    xqueue_body={
-        'feedback' : feedback,
-        'score' : score,
     }
 
-    return xqueue_header,xqueue_body
+    score_and_feedback = submission.get_all_successful_scores_and_feedback()
+    score = score_and_feedback['score']
+    feedback = score_and_feedback['feedback']
+    xqueue_body = {
+        'feedback': feedback,
+        'score': score,
+    }
+
+    return xqueue_header, xqueue_body
+
+
+def _error_response(msg, version):
+    """
+    Return a failing response with the specified message.
+    """
+    response = {'version': version,
+                'success': False,
+                'error': msg}
+    return HttpResponse(json.dumps(response), mimetype="application/json")
+
+
+def _success_response(data, version):
+    """
+    Return a successful response with the specified data.
+    """
+    response = {'version': version,
+                'success': True}
+    response.update(data)
+    return HttpResponse(json.dumps(response), mimetype="application/json")
 
 
 
