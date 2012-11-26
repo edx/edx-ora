@@ -57,6 +57,9 @@ def post_expired_submissions_to_xqueue(timed_out_list):
     Output:
         Success code.
     """
+
+    xqueue_session = util.xqueue_login()
+
     for sub in timed_out_list:
         sub.state = SUBMISSION_STATE['finished']
         grader_dict = {
@@ -70,8 +73,6 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         sub.save()
         #TODO: Currently looks up submission object twice.  Fix in future.
         success, header = grader_util.create_and_save_grader_object(grader_dict)
-
-        xqueue_session = util.xqueue_login()
 
         error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 
