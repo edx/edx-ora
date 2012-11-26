@@ -262,12 +262,35 @@ def save_calibration(request):
     """
     Saves a calibration essay sent back from LMS.
     Input:
-        request dict containing keys student_id, location, calibration_essay_id, score
+        request dict containing keys student_id, location, calibration_essay_id, score, submission_key, feedback
     Output:
         Boolean indicating success in saving calibration essay or not.
     """
 
-    pass
+    if request.method != "POST":
+        raise Http404
+
+    post_data=request.POST.dict().copy()
+
+    for tag in ['location','student_id','calibration_essay_id','submission_key','score','feedback']:
+        if not tag in post_data:
+            return util._error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+
+    location = post_data['location']
+    student_id = post_data['student_id']
+    submission_id = post_data['calibration_essay_id']
+    score = post_data['score']
+    feedback=post_data['feedback']
+
+    #Submission key currently unused, but plan to use it for validation in the future.
+    submission_key = post_data['submission_key']
+
+    try:
+        score = int(score)
+    except ValueError:
+        return util._error_response("Expected integer score.  Got {0}".format(score),_INTERFACE_VERSION )
+
+
 
 
 
