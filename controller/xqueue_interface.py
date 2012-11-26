@@ -122,7 +122,12 @@ def handle_submission(sub):
         else:
             sub.next_grader_type = "IN"
     elif grader_settings['grader_type'] == "PE":
-        sub.next_grader_type = "PE"
+        #Ensures that there will be some calibration essays before peer grading begins!
+        #Calibration essays can be added using command line utility, or through normal instructor grading.
+        if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_PEER):
+            sub.next_grader_type = "PE"
+        else:
+            sub.next_grader_type = "IN"
     else:
         log.debug("Invalid grader type specified in settings file.")
         return False
