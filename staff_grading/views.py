@@ -18,14 +18,14 @@ from django.views.decorators.csrf import csrf_exempt
 
 from controller.models import Submission
 from controller import util
+from controller.grader_util import create_and_save_grader_object
+from .staff_grading_util import get_single_instructor_grading_item
 
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
 
-
-# TODO: implement login
-#@login_required
+@login_required
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -63,7 +63,7 @@ def get_next_submission(request):
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
-    (found, id) = util.get_single_instructor_grading_item(course_id)
+    (found, id) = get_single_instructor_grading_item(course_id)
     if not found:
         return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
 
@@ -91,7 +91,7 @@ def get_next_submission(request):
     return util._success_response(response, _INTERFACE_VERSION)
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def save_grade(request):
     """
@@ -140,7 +140,7 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0}
 
-    if not util.create_and_save_grader_object(d):
+    if not create_and_save_grader_object(d):
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 
     return util._success_response({}, _INTERFACE_VERSION)
