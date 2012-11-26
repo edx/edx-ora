@@ -31,6 +31,9 @@ ML_PATH = os.path.join(ENV_ROOT, "machine_learning/")
 PEER_GRADER_COUNT = 3
 PEER_GRADER_MINIMUM_TO_CALIBRATE = 3
 PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6
+
+#Error units are defined as the absolute value of student calibration score minus actual score divided by maximum score
+#abs(student_score-actual_score)/max_score
 PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
 
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds
