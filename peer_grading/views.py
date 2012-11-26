@@ -67,7 +67,7 @@ def peer_grading(request):
             try:
                 created, header = create_and_save_grader_object({
                     'score': post_data['score'],
-                    'status': GRADER_STATUS['success'],
+                    'status': GraderStatus.success,
                     'grader_id': student_id,
                     'grader_type': "PE",
                     'confidence': 1,
@@ -112,7 +112,7 @@ def peer_grading(request):
                     return HttpResponse("Could not find key submission_id in post data.")
                 return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
-            if sub.state in [SUBMISSION_STATE['finished']]:
+            if sub.state in [SubmissionState.finished]:
                 post_data.pop('submission_id')
                 return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 

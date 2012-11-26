@@ -45,9 +45,9 @@ class Command(BaseCommand):
                         student_response) #grader config is none for now, could be different later
                     log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                     if results['success']:
-                        status = GRADER_STATUS['success']
+                        status = GraderStatus.success
                     else:
-                        status = GRADER_STATUS['failure']
+                        status = GraderStatus.failure
 
                     grader_dict = {
                         'score': results['score'],

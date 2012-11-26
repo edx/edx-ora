@@ -74,7 +74,7 @@ class Command(BaseCommand):
                 grade = Grader(
                     score=score[i],
                     feedback="",
-                    status_code=GRADER_STATUS['success'],
+                    status_code=GraderStatus.success,
                     grader_id="",
                     grader_type="IN",
                     confidence=1,

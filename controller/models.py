@@ -1,16 +1,14 @@
 from django.db import models
 import datetime
 
-GRADER_STATUS={
-    'failure' : "F",
-    'success' : "S",
-}
+class GraderStatus():
+    failure="F"
+    success="S"
 
-SUBMISSION_STATE={
-    'being_graded' : "C",
-    'waiting_to_be_graded' : "W",
-    'finished' : "F",
-}
+class SubmissionState():
+    being_graded="C"
+    waiting_to_be_graded="W"
+    finished="F"
 
 GRADER_TYPE = (
     ('ML', 'ML'),
@@ -21,14 +19,14 @@ GRADER_TYPE = (
     )
 
 STATUS_CODES = (
-    (GRADER_STATUS['success'], "Success"),
-    (GRADER_STATUS['failure'], "Failure"),
+    (GraderStatus.success, "Success"),
+    (GraderStatus.failure, "Failure"),
     )
 
 STATE_CODES = (
-    (SUBMISSION_STATE['being_graded'], "Currently being Graded"),
-    (SUBMISSION_STATE['waiting_to_be_graded'], "Waiting to be Graded"),
-    (SUBMISSION_STATE['finished'], "Finished" )
+    (SubmissionState.being_graded, "Currently being Graded"),
+    (SubmissionState.waiting_to_be_graded, "Waiting to be Graded"),
+    (SubmissionState.finished, "Finished" )
     )
 
 CHARFIELD_LEN_SMALL = 128
@@ -90,7 +88,7 @@ class Submission(models.Model):
     def get_successful_peer_graders(self):
         all_graders = self.get_all_graders()
         successful_peer_graders = all_graders.filter(
-            status_code=GRADER_STATUS['success'],
+            status_code=GraderStatus.success,
             grader_type="PE",
         )
         return successful_peer_graders
@@ -98,7 +96,7 @@ class Submission(models.Model):
     def get_successful_graders(self):
         all_graders = self.get_all_graders()
         successful_graders = all_graders.filter(
-            status_code=GRADER_STATUS['success'],
+            status_code=GraderStatus.success,
         )
         return successful_graders
 
@@ -119,7 +117,7 @@ class Submission(models.Model):
     def get_last_successful_instructor_grader(self):
         all_graders = self.get_all_graders()
         successful_instructor_graders = all_graders.filter(
-            status_code=GRADER_STATUS['success'],
+            status_code=GraderStatus.success,
             grader_type="IN",
         ).order_by("-date_created")
         if successful_instructor_graders.count() == 0:

@@ -31,13 +31,13 @@ def get_submission_ml(request):
         if subs_graded_by_instructor >= settings.MIN_TO_USE_ML:
             to_be_graded = Submission.objects.filter(
                 location=location,
-                state=SUBMISSION_STATE['waiting_to_be_graded'],
+                state=SubmissionState.waiting_to_be_graded,
                 next_grader_type="ML",
             )
             if(to_be_graded.count() > 0):
                 to_be_graded = to_be_graded[0]
                 if to_be_graded is not None:
-                    to_be_graded.state = SUBMISSION_STATE['being_graded']
+                    to_be_graded.state = SubmissionState.being_graded
                     to_be_graded.save()
                     return HttpResponse(util.compose_reply(True, to_be_graded.id))
 

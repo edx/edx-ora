@@ -77,7 +77,7 @@ class Command(BaseCommand):
 
     def check_for_completed_submissions(self):
         submissions_to_post = Submission.objects.filter(
-            state=SUBMISSION_STATE['finished'],
+            state=SubmissionState.finished,
             posted_results_back_to_queue=False,
         )
         return submissions_to_post

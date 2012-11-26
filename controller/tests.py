@@ -18,7 +18,7 @@ import grader_interface
 import util
 
 from models import Submission, Grader
-from models import GRADER_STATUS,SUBMISSION_STATE
+from models import GraderStatus, SubmissionState
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ TEST_SUB = Submission(
     prompt="prompt",
     student_id="id",
     problem_id="id",
-    state=SUBMISSION_STATE['waiting_to_be_graded'],
+    state=SubmissionState.waiting_to_be_graded,
     student_response="response",
     student_submission_time=datetime.now(),
     xqueue_submission_id="id",

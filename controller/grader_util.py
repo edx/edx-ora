@@ -2,7 +2,7 @@ import ConfigParser
 from django.conf import settings
 from models import Submission, Grader
 import logging
-from models import GRADER_STATUS, SUBMISSION_STATE
+from models import GraderStatus, SubmissionState
 
 log = logging.getLogger(__name__)
 
@@ -42,14 +42,14 @@ def create_and_save_grader_object(grader_dict):
     #TODO: Some kind of logic to decide when sub is finished grading.
 
     #If submission is ML or IN graded, and was successful, state is finished
-    if(grade.status_code == GRADER_STATUS['success'] and grade.grader_type in ["IN", "ML"]):
-        sub.state = SUBMISSION_STATE['finished']
-    elif(grade.status_code == GRADER_STATUS['success'] and grade.grader_type in ["PE"]):
+    if(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
+        sub.state = SubmissionState.finished
+    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
         #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
         successful_peer_grader_count = sub.get_successful_peer_graders().count()
         #If number of successful peer graders equals the needed count, finalize submission.
         if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
-            sub.state = SUBMISSION_STATE['finished']
+            sub.state = SubmissionState.finished
 
     sub.save()
 
