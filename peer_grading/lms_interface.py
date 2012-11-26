@@ -1,6 +1,7 @@
 import logging
 
 from django.http import  Http404
+from django.contrib.auth.decorators import login_required
 from controller.grader_util import create_and_save_grader_object
 
 from controller.models import Submission
@@ -33,6 +34,7 @@ feedback_template = u"""
 
 _INTERFACE_VERSION=1
 
+@login_required
 def get_next_submission(request):
     """
     Gets next submission from controller for peer grading.
@@ -77,6 +79,7 @@ def get_next_submission(request):
 
     return util._success_response(response,_INTERFACE_VERSION)
 
+@login_required
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -140,6 +143,7 @@ def save_grade(request):
 
     return util._success_response({'msg' : "Posted to queue."},_INTERFACE_VERSION)
 
+@login_required
 def is_student_calibrated(request):
     """
     Decides if student has fulfilled criteria for peer grading calibration for a given location (problem id).
@@ -164,6 +168,7 @@ def is_student_calibrated(request):
 
     return util._success_response(data,_INTERFACE_VERSION)
 
+@login_required
 def show_calibration_essay(request):
     if request.method!="GET":
         raise Http404
@@ -178,6 +183,7 @@ def show_calibration_essay(request):
 
     return util._success_response(data,_INTERFACE_VERSION)
 
+@login_required
 def save_calibration_essay(request):
     """
     Saves a calibration essay sent back from LMS.
