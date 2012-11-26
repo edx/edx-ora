@@ -94,36 +94,40 @@ def get_calibration_essay(location, student_id):
         dict containing text of calibration essay, prompt, rubric, max score, calibration essay id
     """
 
+    #Get all possible calibration essays for problem
     calibration_submissions = Submission.objects.filter(
         location=location,
         grader__grader_type="IN",
         grader__is_calibration=True,
     )
 
+    #Check to ensure sufficient calibration essays exists
     calibration_submission_count = calibration_submissions.count()
     if calibration_submission_count < settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
         return False, "Not enough calibration essays."
 
+    #Get all student calibration done on current problem
     student_calibration_history = CalibrationHistory.objects.get(student_id=student_id, location=location)
     student_calibration_records = student_calibration_history.get_all_calibration_records()
-
     student_calibration_ids = [cr.submission.id for cr in list(student_calibration_records)]
     calibration_essay_ids = [cr.id for cr in list(calibration_submissions)]
 
+    #Ensure that student only gets calibration essays that they have not seen before
     for i in xrange(0, len(calibration_essay_ids)):
         if calibration_essay_ids[i] not in student_calibration_ids:
             calibration_data = get_calibration_essay_data(calibration_essay_ids[i])
             return True, calibration_data
 
+    #If student has already seen all the calibration essays, give them a random one.
     if len(student_calibration_ids) > len(calibration_essay_ids):
-        random_calibration_essay_id = random.sample(calibration_essay_ids, 1)[0]
+        random_calibration_essay_id = random.choice(calibration_essay_ids)
         calibration_data = get_calibration_essay_data(random_calibration_essay_id)
         return True, calibration_data
 
     return False, "Unexpected error."
 
 
-def check_calibration_status(problem_id,student_id):
+def check_calibration_status(location,student_id):
     """
     Checks if a given student has calibrated for a given problem or not
     Input:
@@ -134,24 +138,35 @@ def check_calibration_status(problem_id,student_id):
           data is a dict containing key 'calibrated', which is a boolean showing whether or not student is calibrated.
     """
 
-    matching_submissions = Submission.objects.filter(location=problem_id)
+    matching_submissions = Submission.objects.filter(location=location)
 
     if matching_submissions.count() < 1:
-        return False, "Invalid problem id specified: {0}".format(problem_id)
+        return False, "Invalid problem id specified: {0}".format(location)
 
-    calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
+    #Get student calibration history and count number of records associated with it
+    calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
     max_score = matching_submissions[0].max_score
     calibration_record_count = calibration_history.get_calibration_record_count()
     log.debug("Calibration record count: {0}".format(calibration_record_count))
+
+    #If student has calibrated more than the minimum and less than the max, check if error is higher than specified
+    #Threshold.  Send another calibration essay if so.
     if (calibration_record_count >= settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
         calibration_record_count < settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
+        #Get average student error on the calibration records.
         calibration_error = calibration_history.get_average_calibration_error()
-        normalized_calibration_error = calibration_error / float(max_score)
+        if max_score>0:
+            normalized_calibration_error = calibration_error / float(max_score)
+        else:
+            normalized_calibration_error=0
+        #If error is too high, student not calibrated, otherwise they are.
         if normalized_calibration_error >= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR:
             return True, {'calibrated': False}
         else:
             return True, {'calibrated': True}
+    #If student has seen too many calibration essays, just say that they are calibrated.
     elif calibration_record_count >= settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
         return True, {'calibrated': True}
+    #If they have not already calibrated the minimum number of essays, they are not calibrated
     else:
         return True, {'calibrated': False}

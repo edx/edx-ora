@@ -24,10 +24,18 @@ class CalibrationHistory(models.Model):
 
     def get_average_calibration_error(self):
         all_records = list(self.get_all_calibration_records())
+
+        #Get average student error
+        #mean(abs(student_score-actual_score))
         errors = [abs(all_records[i].actual_score - all_records[i].score) for i in xrange(0, len(all_records))]
         total_error = 0
         for i in xrange(0, len(errors)):
             total_error += errors[i]
+
+        #If student has no records, return 0
+        if len(errors)==0:
+            return 0
+
         average_error = total_error / float(len(errors))
         return average_error
 
@@ -41,7 +49,10 @@ class CalibrationRecord(models.Model):
     #This is currently not used, but in case student offers feedback.  This may be useful in some way.
     feedback = models.TextField()
 
-    #This tracks whether the record was created from a calibration essay prior to the student starting grading,
+    #The plan is to display calibration records to students at two points:
+    #1. Before they start grading (pre-calibration)
+    #2. Randomly mixed in with essays while they are graded
+    #This tracks whether the record was created during pre-calibration,
     #Or from a calibration essay inserted into the peer grading
     #Unused for now.
     is_pre_calibration = models.BooleanField(default=True)
