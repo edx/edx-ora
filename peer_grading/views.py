@@ -28,7 +28,7 @@ def peer_grading(request):
 
     if request.method == 'POST':
         post_data=request.POST.dict().copy()
-        for tag in ['score', 'submission_id', 'max_score', 'student_id', 'feedback', 'location', 'type']:
+        for tag in ['score', 'submission_id', 'max_score', 'student_id', 'feedback', 'type']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed key {0}".format(tag))
 
@@ -47,12 +47,18 @@ def peer_grading(request):
                 'score' : post_data['score'],
                 'feedback' : post_data['feedback'],
                 'student_id' : post_data['student_id'],
-                'location' : post_data['location'],
+                'location' : location,
             }
             try:
-                lms_interface.create_and_save_calibration_record(calibration_data)
+                success, data = lms_interface.create_and_save_calibration_record(calibration_data)
             except:
                 return HttpResponse("Could not create calibration record.")
+
+            if not success:
+                return HttpResponse(data)
+
+            return HttpResponse("Calibration record created!  Reload for next essay.")
+
         elif post_data['type'] == "submission":
             try:
                 created,header=util.create_and_save_grader_object({
@@ -66,6 +72,8 @@ def peer_grading(request):
                     })
             except:
                 return HttpResponse("Cannot create grader object.")
+
+            return HttpResponse("Submission object created!  Reload for next essay.")
         else:
             return HttpResponse("Invalid grader type.")
 

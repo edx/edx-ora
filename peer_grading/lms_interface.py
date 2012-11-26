@@ -342,34 +342,31 @@ def create_and_save_calibration_record(calibration_data):
 
     for tag in ['submission_id','score','feedback','student_id','location']:
         if not tag in calibration_data:
-            return util._error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+            return False, ("Cannot find needed key {0} in request.".format(tag))
 
     try:
-        calibration_history=CalibrationHistory.objects.get_or_create(
+        calibration_history,success=CalibrationHistory.objects.get_or_create(
             student_id=calibration_data['student_id'],
             location=calibration_data['location'],
         )
     except:
-        return util._error_response("Cannot get or create CalibrationRecord with "
+        return False, ("Cannot get or create CalibrationRecord with "
                                     "student id {0} and location {1}.".format(calibration_data['student_id'],
-                                    calibration_data['location']),_INTERFACE_VERSION)
+                                    calibration_data['location']))
     try:
         submission=Submission.objects.get(
             id=calibration_data['submission_id']
         )
     except:
-        return util._error_response("Invalid submission id {0}.".format(calibration_data['submission_id']),
-                                    _INTERFACE_VERSION)
+        return False, ("Invalid submission id {0}.".format(calibration_data['submission_id']))
 
     try:
         actual_score=submission.get_last_successful_instructor_grader()['score']
     except:
-        return util._error_response("Error getting actual score for submission id {0}.".format(calibration_data['submission_id']),
-            _INTERFACE_VERSION)
+        return False, ("Error getting actual score for submission id {0}.".format(calibration_data['submission_id']))
 
     if actual_score== -1:
-        return util._error_response("No instructor graded submission for submission id {0}."
-        .format(calibration_data['submission_id']),_INTERFACE_VERSION)
+        return False, ("No instructor graded submission for submission id {0}.".format(calibration_data['submission_id']))
 
     cal_record=CalibrationRecord(
         submission=submission,
@@ -381,7 +378,7 @@ def create_and_save_calibration_record(calibration_data):
 
     cal_record.save()
 
-    return util._success_response({'cal_id' : cal_record.id})
+    return True, {'cal_id' : cal_record.id}
 
 
 
