@@ -6,8 +6,6 @@ from peer_grading.models import CalibrationHistory, CalibrationRecord
 
 log = logging.getLogger(__name__)
 
-__author__ = 'vik'
-
 def create_and_save_calibration_record(calibration_data):
     """
     This function will create and save a calibration record object.
