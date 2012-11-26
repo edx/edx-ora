@@ -12,7 +12,8 @@ def create_and_save_calibration_record(calibration_data):
     Input:
         Dictionary containing keys submission_id, score, feedback, student_id, location
     Output:
-        Boolean indicating success or error message
+        Boolean indicating success and dictionary with calibration id
+        Or boolean indicating failure and error message
     """
 
     for tag in ['submission_id', 'score', 'feedback', 'student_id', 'location']:
