@@ -1,6 +1,17 @@
 from django.db import models
 import datetime
 
+GRADER_STATUS={
+    'failure' : "F",
+    'success' : "S",
+}
+
+SUBMISSION_STATE={
+    'being_graded' : "C",
+    'waiting_to_be_graded' : "W",
+    'finished' : "F",
+}
+
 GRADER_TYPE = (
     ('ML', 'ML'),
     ('IN', 'Instructor'),
@@ -10,14 +21,14 @@ GRADER_TYPE = (
     )
 
 STATUS_CODES = (
-    ("S", "Success"),
-    ("F", "Failure"),
+    (GRADER_STATUS['success'], "Success"),
+    (GRADER_STATUS['failure'], "Failure"),
     )
 
 STATE_CODES = (
-    ("C", "Currently being Graded"),
-    ("W", "Waiting to be Graded"),
-    ("F", "Finished" )
+    (SUBMISSION_STATE['being_graded'], "Currently being Graded"),
+    (SUBMISSION_STATE['waiting_to_be_graded'], "Waiting to be Graded"),
+    (SUBMISSION_STATE['finished'], "Finished" )
     )
 
 CHARFIELD_LEN_SMALL = 128
@@ -79,7 +90,7 @@ class Submission(models.Model):
     def get_successful_peer_graders(self):
         all_graders = self.get_all_graders()
         successful_peer_graders = all_graders.filter(
-            status_code="S",
+            status_code=GRADER_STATUS['success'],
             grader_type="PE",
         )
         return successful_peer_graders
@@ -87,7 +98,7 @@ class Submission(models.Model):
     def get_successful_graders(self):
         all_graders = self.get_all_graders()
         successful_graders = all_graders.filter(
-            status_code="S",
+            status_code=GRADER_STATUS['success'],
         )
         return successful_graders
 
@@ -108,7 +119,7 @@ class Submission(models.Model):
     def get_last_successful_instructor_grader(self):
         all_graders = self.get_all_graders()
         successful_instructor_graders = all_graders.filter(
-            status_code="S",
+            status_code=GRADER_STATUS['success'],
             grader_type="IN",
         ).order_by("-date_created")
         if successful_instructor_graders.count() == 0:

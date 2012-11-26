@@ -9,6 +9,7 @@ import os
 import json
 
 from models import Submission, Grader
+from models import SUBMISSION_STATE,GRADER_STATUS
 import util
 import grader_util
 from staff_grading import staff_grading_util
@@ -56,7 +57,7 @@ def submit(request):
                 student_response = util._value_or_default(body['student_response'])
                 xqueue_submission_id = util._value_or_default(header['submission_id'])
                 xqueue_submission_key = util._value_or_default(header['submission_key'])
-                state_code = "W"
+                state_code = SUBMISSION_STATE['waiting_to_be_graded']
                 xqueue_queue_name = util._value_or_default(header["queue_name"])
                 max_score = util._value_or_default(body['max_score'])
 

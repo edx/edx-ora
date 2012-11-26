@@ -1,6 +1,7 @@
 from django.conf import settings
 from controller.models import Submission
 import logging
+from controller.models import SUBMISSION_STATE,GRADER_STATUS
 
 log = logging.getLogger(__name__)
 
@@ -11,13 +12,13 @@ def finished_submissions_graded_by_instructor(location):
     """
     subs_graded = Submission.objects.filter(location=location,
         previous_grader_type__in=["IN"],
-        state__in=["F"],
+        state__in=[SUBMISSION_STATE['finished']],
     )
 
     return subs_graded
 
 
-def submissions_pending_instructor(location, state_in=["C", "W"]):
+def submissions_pending_instructor(location, state_in=[SUBMISSION_STATE['being_graded'], SUBMISSION_STATE['waiting_to_be_graded']]):
     """
     Get submissions that are pending instructor grading.
     """
@@ -52,18 +53,18 @@ def get_single_instructor_grading_item(course_id):
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     for location in locations_for_course:
         subs_graded = finished_submissions_graded_by_instructor(location).count()
-        subs_pending = submissions_pending_instructor(location, state_in=["C"]).count()
+        subs_pending = submissions_pending_instructor(location, state_in=[SUBMISSION_STATE['being_graded']]).count()
         if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
             to_be_graded = Submission.objects.filter(
                 location=location,
-                state="W",
+                state=SUBMISSION_STATE['waiting_to_be_graded'],
                 next_grader_type="IN",
             )
 
             if(to_be_graded.count() > 0):
                 to_be_graded = to_be_graded[0]
                 if to_be_graded is not None:
-                    to_be_graded.state = "C"
+                    to_be_graded.state = SUBMISSION_STATE['being_graded']
                     to_be_graded.save()
                     found = True
                     sub_id = to_be_graded.id

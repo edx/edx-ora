@@ -12,6 +12,7 @@ from ConfigParser import SafeConfigParser
 from datetime import datetime
 
 from controller.models import Submission, Grader
+from controller.models import GRADER_STATUS,SUBMISSION_STATE
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +74,7 @@ class Command(BaseCommand):
                 grade = Grader(
                     score=score[i],
                     feedback="",
-                    status_code="S",
+                    status_code=GRADER_STATUS['success'],
                     grader_id="",
                     grader_type="IN",
                     confidence=1,

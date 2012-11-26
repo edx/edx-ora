@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 
 from controller.models import Submission
+from controller.models import SUBMISSION_STATE,GRADER_STATUS
 from controller import util
 
 import calibration
@@ -64,7 +65,7 @@ def get_next_submission(request):
         log.debug("Could not find submission with id {0}".format(sub_id))
         return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 
-    if sub.state != "C":
+    if sub.state != SUBMISSION_STATE['being_graded']:
         log.debug("Submission with id {0} has incorrect internal state {1}.".format(sub_id, sub.state))
         return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 

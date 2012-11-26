@@ -10,6 +10,7 @@ import logging
 import sys
 
 import controller.util as util
+from controller.models import SUBMISSION_STATE,GRADER_STATUS
 
 from controller.models import Submission, Grader
 
@@ -44,9 +45,9 @@ class Command(BaseCommand):
                         student_response) #grader config is none for now, could be different later
                     log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                     if results['success']:
-                        status = "S"
+                        status = GRADER_STATUS['success']
                     else:
-                        status = "F"
+                        status = GRADER_STATUS['failure']
 
                     grader_dict = {
                         'score': results['score'],

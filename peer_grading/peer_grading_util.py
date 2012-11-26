@@ -1,5 +1,6 @@
 from django.db.models import Count
 from controller.models import Submission
+from controller.models import SUBMISSION_STATE,GRADER_STATUS
 import logging
 
 log = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ def get_single_peer_grading_item(location, grader_id):
     sub_id = 0
     to_be_graded = Submission.objects.filter(
         location=location,
-        state="W",
+        state=SUBMISSION_STATE['waiting_to_be_graded'],
         next_grader_type="PE",
     )
 
@@ -35,7 +36,7 @@ def get_single_peer_grading_item(location, grader_id):
                 submission_grader_counts = [0] * submissions_to_grade_count
             elif submissions_to_grade_count == 0:
                 submissions_to_grade = (to_be_graded
-                                        .filter(grader__status_code="S", grader__grader_type="PE")
+                                        .filter(grader__status_code=GRADER_STATUS['success'], grader__grader_type="PE")
                                         .exclude(grader__grader_id=grader_id)
                                         .annotate(num_graders=Count('grader'))
                                         .values("num_graders", "id")
@@ -53,7 +54,7 @@ def get_single_peer_grading_item(location, grader_id):
                 grade_item = Submission.objects.get(id=submission_ids[minimum_index])
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
                 if grader_id not in previous_graders:
-                    grade_item.state = "C"
+                    grade_item.state = SUBMISSION_STATE['being_graded']
                     grade_item.save()
                     found = True
                     sub_id = grade_item.id

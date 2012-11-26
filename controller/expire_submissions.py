@@ -5,6 +5,7 @@ from django.utils import timezone
 import controller.grader_util as grader_util
 import controller.util as util
 import logging
+from controller.models import GRADER_STATUS,SUBMISSION_STATE
 
 log = logging.getLogger(__name__)
 
@@ -24,8 +25,8 @@ def reset_timed_out_submissions(subs):
 
     for i in xrange(0, timed_out_sub_count):
         sub = subs[i]
-        if sub.state == "C":
-            sub.state = "W"
+        if sub.state == SUBMISSION_STATE['being_graded']:
+            sub.state = SUBMISSION_STATE['waiting_to_be_graded']
             sub.save()
             count += 1
 
@@ -57,11 +58,11 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         Success code.
     """
     for sub in timed_out_list:
-        sub.state = "F"
+        sub.state = SUBMISSION_STATE['finished']
         grader_dict = {
             'score': 0,
             'feedback': "Error scoring submission.",
-            'status_code': "F",
+            'status_code': GRADER_STATUS['finished'],
             'grader_id': "0",
             'grader_type': sub.next_grader_type,
             'confidence': 1,

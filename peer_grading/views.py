@@ -15,6 +15,7 @@ import urlparse
 from django.template.loader import render_to_string
 from peer_grading.calibration import create_and_save_calibration_record, get_calibration_essay, check_calibration_status
 from peer_grading.peer_grading_util import get_single_peer_grading_item
+from controller.models import SUBMISSION_STATE,GRADER_STATUS
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ def peer_grading(request):
             try:
                 created, header = create_and_save_grader_object({
                     'score': post_data['score'],
-                    'status': "S",
+                    'status': GRADER_STATUS['success'],
                     'grader_id': student_id,
                     'grader_type': "PE",
                     'confidence': 1,
@@ -111,7 +112,7 @@ def peer_grading(request):
                     return HttpResponse("Could not find key submission_id in post data.")
                 return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 
-            if sub.state in ["F"]:
+            if sub.state in [SUBMISSION_STATE['finished']]:
                 post_data.pop('submission_id')
                 return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 

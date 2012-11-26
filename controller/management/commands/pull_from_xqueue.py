@@ -10,6 +10,7 @@ import logging
 
 import controller.util as util
 from controller.models import Submission
+from controller.models import GRADER_STATUS,SUBMISSION_STATE
 
 log = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ class Command(BaseCommand):
 
     def check_for_completed_submissions(self):
         submissions_to_post = Submission.objects.filter(
-            state="F",
+            state=SUBMISSION_STATE['finished'],
             posted_results_back_to_queue=False,
         )
         return submissions_to_post
