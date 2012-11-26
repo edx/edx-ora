@@ -23,7 +23,7 @@ def peer_grading(request):
     """
     post_data={}
     saved=False
-    location="MITx/6.002x"
+    location="MITx/6.002x/problem/OETest"
     student_id="5"
 
     if request.method == 'POST':
@@ -71,7 +71,10 @@ def peer_grading(request):
 
     if request.method == 'GET':
         post_data={}
-        (success,data)=lms_interface.check_calibration_status({'problem_id' : location, 'student_id' : student_id})
+        success, data=lms_interface.check_calibration_status({'problem_id' : location, 'student_id' : student_id})
+        if not success:
+            return HttpResponse("Failed to check calibration status.")
+
         calibrated=data['calibrated']
         url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
         if not url_base.endswith("/"):
@@ -115,7 +118,7 @@ def peer_grading(request):
                 })
             return HttpResponse(rendered)
         else:
-            (success,data)=lms_interface.get_calibration_essay({'problem_id' : location,'student_id' : student_id})
+            success, data=lms_interface.get_calibration_essay({'problem_id' : location,'student_id' : student_id})
 
             if not success:
                 return HttpResponse("Error getting calibration essay.")

@@ -163,19 +163,24 @@ def is_student_calibrated(request):
     problem_id=request.GET.get("problem_id")
     student_id=request.GET.get("student_id")
 
-    return check_calibration_status({'problem_id' : problem_id, 'student_id' : student_id})
+    success, data = check_calibration_status({'problem_id' : problem_id, 'student_id' : student_id})
+
+    if not success:
+        return util._error_response(data,_INTERFACE_VERSION)
+
+    return util._success_response(data,_INTERFACE_VERSION)
 
 
 def check_calibration_status(student_info):
     problem_id=student_info['problem_id']
     student_id=student_info['student_id']
 
-    matching_submissions=Submission.objects.filter(problem_id=problem_id)
+    matching_submissions=Submission.objects.filter(location=problem_id)
 
-    if matching_submissions.count<1:
-        return util._error_response("Invalid problem id specified: {0}".format(problem_id),_INTERFACE_VERSION)
+    if matching_submissions.count()<1:
+        return False, "Invalid problem id specified: {0}".format(problem_id)
 
-    calibration_history=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
+    calibration_history,created=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
     max_score=matching_submissions[0].max_score
     calibration_record_count=calibration_history.get_calibration_record_count()
     if (calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
@@ -183,13 +188,13 @@ def check_calibration_status(student_info):
         calibration_error=calibration_history.get_average_calibration_error()
         normalized_calibration_error=calibration_error/float(max_score)
         if normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR:
-            return util._success_response({'calibrated' : False}, _INTERFACE_VERSION)
+            return True, {'calibrated' : False}
         else:
-            return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)
+            return True, {'calibrated' : True}
     elif calibration_record_count>=settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
-        return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)
+        return True, {'calibrated' : True}
     else:
-        return util._success_response({'calibrated' : False},_INTERFACE_VERSION)
+        return True, {'calibrated' : False}
 
 def show_calibration_essay(request):
     if request.method!="GET":
@@ -198,7 +203,12 @@ def show_calibration_essay(request):
     problem_id=request.GET.get("problem_id")
     student_id=request.GET.get("student_id")
 
-    return get_calibration_essay({'problem_id' : problem_id, 'student_id' : student_id})
+    success, data = get_calibration_essay({'problem_id' : problem_id, 'student_id' : student_id})
+
+    if not success:
+        return util._error_response(data,_INTERFACE_VERSION)
+
+    return util._success_response(data,_INTERFACE_VERSION)
 
 def get_calibration_essay(calibration_data):
     """
@@ -220,7 +230,7 @@ def get_calibration_essay(calibration_data):
 
     calibration_submission_count=calibration_submissions.count()
     if calibration_submission_count<settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
-        return util._error_response("Not enough calibration essays.")
+        return False, "Not enough calibration essays."
 
     student_calibration_history=CalibrationHistory.get(student_id=student_id,location=location)
     student_calibration_records=student_calibration_history.get_all_calibration_records()
@@ -231,14 +241,14 @@ def get_calibration_essay(calibration_data):
     for i in xrange(0,len(calibration_essay_ids)):
         if calibration_essay_ids[i] not in student_calibration_ids:
             calibration_data=get_calibration_essay_data(calibration_essay_ids[i])
-            return util._success_response(calibration_data)
+            return True, calibration_data
 
     if len(student_calibration_ids)>len(calibration_essay_ids):
         random_calibration_essay_id=random.sample(calibration_essay_ids,1)[0]
         calibration_data=get_calibration_essay_data(random_calibration_essay_id)
-        return util._success_response(calibration_data)
+        return True, calibration_data
 
-    return util._error_response("Unexpected error.")
+    return False, "Unexpected error."
 
 
 
