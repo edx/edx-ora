@@ -310,12 +310,17 @@ def get_single_peer_grading_item(location, grader_id):
         if to_be_graded_length > 0:
             #Set the maximum number of records to search through
             submissions_to_grade=(to_be_graded.filter(grader__isnull=True))
-            submissions_to_grade=(to_be_graded.filter(grader__status_code="S",
-                                  grader__grader_type="PE").annotate(num_graders=Count('grader')).
-                                  values("num_graders","id"))
+            submissions_to_grade_count=submissions_to_grade.count()
+            submission_grader_counts=[0] * len(submissions_to_grade_count)
+
+            if submissions_to_grade_count==0:
+                submissions_to_grade=(to_be_graded.filter(grader__status_code="S",
+                                      grader__grader_type="PE").annotate(num_graders=Count('grader')).
+                                      values("num_graders","id"))
+                submission_grader_counts=[p['num_graders'] for p in submissions_to_grade]
 
             submission_ids=[p['id'] for p in submissions_to_grade]
-            submission_grader_counts=[p['num_graders'] for p in submissions_to_grade]
+
 
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one

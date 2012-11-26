@@ -68,7 +68,7 @@ class Command(BaseCommand):
             )
 
             sub.save()
-            if(add_grader):
+            if add_grader:
                 grade=Grader(
                     score=score[i],
                     feedback = "",
