@@ -36,6 +36,9 @@ class CalibrationRecord(models.Model):
     score=models.IntegerField()
     actual_score=models.IntegerField()
 
+    #This is currently not used, but in case student offers feedback.  This may be useful in some way.
+    feedback=models.TextField()
+
     #This tracks whether the record was created from a calibration essay prior to the student starting grading,
     #Or from a calibration essay inserted into the peer grading
     is_pre_calibration=models.BooleanField(default=True)

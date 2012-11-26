@@ -103,7 +103,19 @@ class Submission(models.Model):
             feedback=[p.feedback for p in peer_graders]
             return {'score' : score, 'feedback' : feedback}
         else:
-            return {'score' : 0, 'feedback' : "Unexpected error! Please contact course staff."}
+            return {'score' : -1}
+
+    def get_last_successful_instructor_grader(self):
+        all_graders=self.get_all_graders()
+        successful_instructor_graders=all_graders.filter(
+            status_code="S",
+            grader_type="IN",
+        ).order_by("-date_created")
+        if successful_instructor_graders.count()==0:
+            return {'score' : 0, 'feedback' : "None."}
+
+        last_successful_instructor=successful_instructor_graders[0]
+        return {'score' : last_successful_instructor.score}
 
 
 # TODO: what's a better name for this?  GraderResult?

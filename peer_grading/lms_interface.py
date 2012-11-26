@@ -290,6 +290,59 @@ def save_calibration(request):
     except ValueError:
         return util._error_response("Expected integer score.  Got {0}".format(score),_INTERFACE_VERSION )
 
+    d = {'submission_id': submission_id,
+         'score': score,
+         'feedback': feedback,
+         'student_id' : student_id,
+         'location' : location,
+        }
+
+    (success,message)=create_and_save_calibration_record(d)
+
+
+def create_and_save_calibration_record(calibration_data):
+    """
+    This function will create and save a calibration record object.
+    Input:
+        Dictionary containing
+    Output:
+        Boolean indicating success or error message
+    """
+
+    for tag in ['submission_id','score','feedback','student_id','location']:
+        if not tag in calibration_data:
+            return util._error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+
+    try:
+        calibration_history=CalibrationHistory.objects.get_or_create(
+            student_id=calibration_data['student_id'],
+            location=calibration_data['location'],
+        )
+    except:
+        return util._error_response("Cannot get or create CalibrationRecord with "
+                                    "student id {0} and location {1}.".format(calibration_data['student_id'],
+                                    calibration_data['location']),_INTERFACE_VERSION)
+    try:
+        submission=Submission.objects.get(
+            id=calibration_data['submission_id']
+        )
+    except:
+        return util._error_response("Invalid submission id {0}.".format(calibration_data['submission_id']),
+                                    _INTERFACE_VERSION)
+
+    try:
+        actual_score=submission.get_last_successful_instructor_grader()['score']
+    except:
+        return util._error_response("Error getting actual.".format(calibration_data['submission_id']),
+            _INTERFACE_VERSION)
+
+    cal_record=CalibrationRecord(
+        submission=submission,
+        calibration_history=calibration_history,
+        score=calibration_data['score'],
+        actual_score=actual_score,
+    )
+
 
 
 
