@@ -10,7 +10,7 @@ import logging
 
 import controller.util as util
 from controller.models import Submission
-from controller.models import GRADER_STATUS,SUBMISSION_STATE
+from controller.models import GraderStatus, SubmissionState
 
 log = logging.getLogger(__name__)
 

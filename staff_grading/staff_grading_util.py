@@ -1,7 +1,7 @@
 from django.conf import settings
 from controller.models import Submission
 import logging
-from controller.models import SUBMISSION_STATE,GRADER_STATUS
+from controller.models import SubmissionState, GraderStatus
 
 log = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import logging
 import sys
 
 import controller.util as util
-from controller.models import SUBMISSION_STATE,GRADER_STATUS
+from controller.models import SubmissionState, GraderStatus
 
 from controller.models import Submission, Grader
 

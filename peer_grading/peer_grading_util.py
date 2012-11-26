@@ -1,6 +1,6 @@
 from django.db.models import Count
 from controller.models import Submission
-from controller.models import SUBMISSION_STATE,GRADER_STATUS
+from controller.models import SubmissionState, GraderStatus
 import logging
 
 log = logging.getLogger(__name__)

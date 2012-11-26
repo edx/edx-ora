@@ -10,7 +10,7 @@ import logging
 import requests
 import urlparse
 
-from models import Submission, GRADER_TYPE, Grader, STATUS_CODES, SUBMISSION_STATE,GRADER_STATUS
+from models import Submission, GRADER_TYPE, Grader, STATUS_CODES, SubmissionState, GraderStatus
 import util
 import grader_util
 from staff_grading import staff_grading_util

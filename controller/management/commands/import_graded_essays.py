@@ -12,7 +12,7 @@ from ConfigParser import SafeConfigParser
 from datetime import datetime
 
 from controller.models import Submission, Grader
-from controller.models import GRADER_STATUS,SUBMISSION_STATE
+from controller.models import GraderStatus, SubmissionState
 
 log = logging.getLogger(__name__)
 

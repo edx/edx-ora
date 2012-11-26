@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 
 from controller.models import Submission
-from controller.models import SUBMISSION_STATE,GRADER_STATUS
+from controller.models import SubmissionState, GraderStatus
 from controller import util
 
 import calibration

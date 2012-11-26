@@ -15,7 +15,7 @@ import urlparse
 from django.template.loader import render_to_string
 from peer_grading.calibration import create_and_save_calibration_record, get_calibration_essay, check_calibration_status
 from peer_grading.peer_grading_util import get_single_peer_grading_item
-from controller.models import SUBMISSION_STATE,GRADER_STATUS
+from controller.models import SubmissionState, GraderStatus
 
 log = logging.getLogger(__name__)
 
