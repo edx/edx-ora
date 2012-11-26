@@ -12,7 +12,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+# ('Your Name', 'your_email@example.com'),
 )
 
 MANAGERS = ADMINS
@@ -20,34 +20,30 @@ MANAGERS = ADMINS
 REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
-GRADER_SETTINGS_DIRECTORY="grader_settings/"
+GRADER_SETTINGS_DIRECTORY = "grader_settings/"
 
 #Config for specific graders
 #ML
-MIN_TO_USE_ML=100
-ML_PATH=os.path.join(ENV_ROOT,"machine_learning/")
+MIN_TO_USE_ML = 100
+ML_PATH = os.path.join(ENV_ROOT, "machine_learning/")
 
 #Peer
-PEER_GRADER_COUNT=3
-PEER_GRADER_MINIMUM_TO_CALIBRATE=3
-PEER_GRADER_MAXIMUM_TO_CALIBRATE=6
-PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR=.5
-
-
+PEER_GRADER_COUNT = 3
+PEER_GRADER_MINIMUM_TO_CALIBRATE = 3
+PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6
+PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
 
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds
 RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds
 
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'essaydb',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': 'essaydb', # Or path to database file if using sqlite3.
+        'USER': '', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -61,10 +57,10 @@ XQUEUE_INTERFACE = {
 }
 
 GRADING_CONTROLLER_INTERFACE = {
-    "url" : "http://127.0.0.1:3033",
-    "django_auth" : {
-        "username" : "xqueue_pull",
-        "password" : "abcd",
+    "url": "http://127.0.0.1:3033",
+    "django_auth": {
+        "username": "xqueue_pull",
+        "password": "abcd",
     }
 }
 
@@ -112,19 +108,19 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    str(os.path.join(REPO_PATH,"static/")),
+    str(os.path.join(REPO_PATH, "static/")),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-)
+    )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-)
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    )
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '7q%=)6+vz$1zy!-vm4-k-^tj5q)hbgukoud%%$6edcxn^i^u)a'
@@ -133,8 +129,8 @@ SECRET_KEY = '7q%=)6+vz$1zy!-vm4-k-^tj5q)hbgukoud%%$6edcxn^i^u)a'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+    #     'django.template.loaders.eggs.Loader',
+    )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
@@ -143,7 +139,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
-)
+    )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -153,7 +149,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+    )
 
 ROOT_URLCONF = 'grading_controller.urls'
 
@@ -161,11 +157,11 @@ ROOT_URLCONF = 'grading_controller.urls'
 WSGI_APPLICATION = 'grading_controller.wsgi.application'
 
 TEMPLATE_DIRS = (
-    str(os.path.join(REPO_PATH,"templates/"))
+    str(os.path.join(REPO_PATH, "templates/"))
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-)
+    )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -182,8 +178,7 @@ INSTALLED_APPS = (
     'staff_grading',
     'south',
     'peer_grading',
-)
-
+    )
 
 LOGGING = get_logger_config(ENV_ROOT / "log",
     logging_env="dev",

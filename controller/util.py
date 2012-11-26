@@ -148,6 +148,7 @@ def _http_post(session, url, data, timeout):
         return (1, 'unexpected HTTP status code [%d]' % r.status_code)
     return (0, r.text)
 
+
 def post_results_to_xqueue(session, header, body):
     """
     Post the results from a grader back to xqueue.
@@ -191,24 +192,25 @@ def controller_login():
     )
     return session
 
-def create_xqueue_header_and_body(submission):
 
-    xqueue_header={
+def create_xqueue_header_and_body(submission):
+    xqueue_header = {
         'submission_id': submission.xqueue_submission_id,
         'submission_key': submission.xqueue_submission_key,
-        }
-
-    score_and_feedback=submission.get_all_successful_scores_and_feedback()
-    score=score_and_feedback['score']
-    feedback=score_and_feedback['feedback']
-    xqueue_body={
-        'feedback' : feedback,
-        'score' : score,
     }
 
-    return xqueue_header,xqueue_body
+    score_and_feedback = submission.get_all_successful_scores_and_feedback()
+    score = score_and_feedback['score']
+    feedback = score_and_feedback['feedback']
+    xqueue_body = {
+        'feedback': feedback,
+        'score': score,
+    }
 
-def _error_response(msg,version):
+    return xqueue_header, xqueue_body
+
+
+def _error_response(msg, version):
     """
     Return a failing response with the specified message.
     """
@@ -218,7 +220,7 @@ def _error_response(msg,version):
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 
-def _success_response(data,version):
+def _success_response(data, version):
     """
     Return a successful response with the specified data.
     """

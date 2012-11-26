@@ -6,12 +6,11 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Adding field 'CalibrationRecord.submission'
         db.add_column('peer_grading_calibrationrecord', 'submission',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['controller.Submission']),
-                      keep_default=False)
+            self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['controller.Submission']),
+            keep_default=False)
 
 
     def backwards(self, orm):
@@ -38,7 +37,8 @@ class Migration(SchemaMigration):
             'state': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'student_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'student_response': ('django.db.models.fields.TextField', [], {'default': "''"}),
-            'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'student_submission_time': (
+            'django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'})
@@ -53,7 +53,8 @@ class Migration(SchemaMigration):
         'peer_grading.calibrationrecord': {
             'Meta': {'object_name': 'CalibrationRecord'},
             'actual_score': ('django.db.models.fields.IntegerField', [], {}),
-            'calibration_history': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['peer_grading.CalibrationHistory']"}),
+            'calibration_history': (
+            'django.db.models.fields.related.ForeignKey', [], {'to': "orm['peer_grading.CalibrationHistory']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_pre_calibration': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'score': ('django.db.models.fields.IntegerField', [], {}),

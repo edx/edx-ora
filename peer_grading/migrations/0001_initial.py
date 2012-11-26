@@ -6,7 +6,6 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Adding model 'CalibrationHistory'
         db.create_table('peer_grading_calibrationhistory', (
@@ -14,17 +13,18 @@ class Migration(SchemaMigration):
             ('student_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('problem_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('location', self.gf('django.db.models.fields.CharField')(max_length=128)),
-        ))
+            ))
         db.send_create_signal('peer_grading', ['CalibrationHistory'])
 
         # Adding model 'CalibrationRecord'
         db.create_table('peer_grading_calibrationrecord', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('calibration_history', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['peer_grading.CalibrationHistory'])),
+            ('calibration_history',
+             self.gf('django.db.models.fields.related.ForeignKey')(to=orm['peer_grading.CalibrationHistory'])),
             ('score', self.gf('django.db.models.fields.IntegerField')()),
             ('actual_score', self.gf('django.db.models.fields.IntegerField')()),
             ('is_pre_calibration', self.gf('django.db.models.fields.BooleanField')(default=True)),
-        ))
+            ))
         db.send_create_signal('peer_grading', ['CalibrationRecord'])
 
 
@@ -47,7 +47,8 @@ class Migration(SchemaMigration):
         'peer_grading.calibrationrecord': {
             'Meta': {'object_name': 'CalibrationRecord'},
             'actual_score': ('django.db.models.fields.IntegerField', [], {}),
-            'calibration_history': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['peer_grading.CalibrationHistory']"}),
+            'calibration_history': (
+            'django.db.models.fields.related.ForeignKey', [], {'to': "orm['peer_grading.CalibrationHistory']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_pre_calibration': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'score': ('django.db.models.fields.IntegerField', [], {})

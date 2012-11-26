@@ -11,7 +11,6 @@ def get_logger_config(log_dir,
                       syslog_addr=None,
                       debug=False,
                       local_loglevel='INFO'):
-
     """
 
     Return the appropriate logging config dictionary. You should assign the
@@ -47,24 +46,24 @@ def get_logger_config(log_dir,
             'standard': {
                 'format': '%(asctime)s %(levelname)s %(process)d '
                           '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
-                },
+            },
             'syslog_format': {'format': syslog_format},
             'raw': {'format': '%(message)s'},
-            },
+        },
         'handlers': {
             'console': {
                 'level': 'DEBUG' if debug else 'INFO',
                 'class': 'logging.StreamHandler',
                 'formatter': 'standard',
                 'stream': sys.stdout,
-                },
+            },
             'syslogger-remote': {
                 'level': 'INFO',
                 'class': 'logging.handlers.SysLogHandler',
                 'address': syslog_addr,
                 'formatter': 'syslog_format',
-                },
             },
+        },
         'loggers': {
             'django': {
                 'handlers': handlers,
@@ -86,7 +85,7 @@ def get_logger_config(log_dir,
                 'level': 'DEBUG',
                 'propagate': False
             },
-            }
+        }
     }
 
     if dev_env:
@@ -99,8 +98,8 @@ def get_logger_config(log_dir,
                 'filename': edx_file_loc,
                 'maxBytes': 1024 * 1024 * 2,
                 'backupCount': 5,
-                },
-            })
+            },
+        })
     else:
         logger_config['handlers'].update({
             'local': {
@@ -109,7 +108,7 @@ def get_logger_config(log_dir,
                 'address': '/dev/log',
                 'formatter': 'syslog_format',
                 'facility': SysLogHandler.LOG_LOCAL0,
-                },
-            })
+            },
+        })
 
     return logger_config

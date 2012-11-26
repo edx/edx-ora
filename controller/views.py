@@ -34,14 +34,16 @@ def log_in(request):
         else:
             return HttpResponse(util.compose_reply(False, 'Insufficient login info'))
     else:
-        return HttpResponse(util.compose_reply(False,'login_required'))
+        return HttpResponse(util.compose_reply(False, 'login_required'))
+
 
 def log_out(request):
     """
     Uses django auth to handle a logout request
     """
     logout(request)
-    return HttpResponse(util.compose_reply(success=True,content='Goodbye'))
+    return HttpResponse(util.compose_reply(success=True, content='Goodbye'))
+
 
 def status(request):
     """

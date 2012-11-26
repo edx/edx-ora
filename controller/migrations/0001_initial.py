@@ -6,7 +6,6 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Adding model 'Submission'
         db.create_table('controller_submission', (
@@ -19,7 +18,7 @@ class Migration(SchemaMigration):
             ('problem_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('course_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('state', self.gf('django.db.models.fields.CharField')(max_length=1)),
-        ))
+            ))
         db.send_create_signal('controller', ['Submission'])
 
         # Adding model 'PeerGrader'
@@ -32,7 +31,7 @@ class Migration(SchemaMigration):
             ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('grader_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
-        ))
+            ))
         db.send_create_signal('controller', ['PeerGrader'])
 
         # Adding model 'MLGrader'
@@ -46,7 +45,7 @@ class Migration(SchemaMigration):
             ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('grader_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
             ('confidence', self.gf('django.db.models.fields.DecimalField')(max_digits=10, decimal_places=9)),
-        ))
+            ))
         db.send_create_signal('controller', ['MLGrader'])
 
         # Adding model 'InstructorGrader'
@@ -59,7 +58,7 @@ class Migration(SchemaMigration):
             ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('grader_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
-        ))
+            ))
         db.send_create_signal('controller', ['InstructorGrader'])
 
         # Adding model 'SelfAssessmentGrader'
@@ -72,7 +71,7 @@ class Migration(SchemaMigration):
             ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('grader_id', self.gf('django.db.models.fields.CharField')(max_length=128)),
-        ))
+            ))
         db.send_create_signal('controller', ['SelfAssessmentGrader'])
 
 

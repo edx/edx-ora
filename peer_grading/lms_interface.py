@@ -2,13 +2,13 @@ import logging
 
 from django.http import  Http404
 from django.contrib.auth.decorators import login_required
-from controller.grader_util import create_and_save_grader_object
+import controller.grader_util as grader_util
 
 from controller.models import Submission
 from controller import util
 
-from peer_grading.calibration import create_and_save_calibration_record, get_calibration_essay, check_calibration_status
-from peer_grading.peer_grading_util import get_single_peer_grading_item
+import calibration
+import peer_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ feedback_template = u"""
 
 """
 
-_INTERFACE_VERSION=1
+_INTERFACE_VERSION = 1
 
 @login_required
 def get_next_submission(request):
@@ -44,40 +44,41 @@ def get_next_submission(request):
            location - The problem id to get peer grading for.
     """
 
-    if request.method!="GET":
+    if request.method != "GET":
         raise Http404
 
     grader_id = request.GET.get("grader_id")
     location = request.GET.get("location")
 
     if not grader_id or not location:
-        return util._error_response("Failed to find needed keys 'grader_id' and 'location'",_INTERFACE_VERSION )
+        return util._error_response("Failed to find needed keys 'grader_id' and 'location'", _INTERFACE_VERSION)
 
-    (found,sub_id) = get_single_peer_grading_item(location,grader_id)
+    (found, sub_id) = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
-        return  util._error_response("No current grading.",_INTERFACE_VERSION)
+        return  util._error_response("No current grading.", _INTERFACE_VERSION)
 
     try:
-        sub=Submission.objects.get(id=sub_id)
+        sub = Submission.objects.get(id=sub_id)
     except:
         log.debug("Could not find submission with id {0}".format(sub_id))
-        return util._error_response("Error getting grading.",_INTERFACE_VERSION)
+        return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 
-    if sub.state!="C":
-        log.debug("Submission with id {0} has incorrect internal state {1}.".format(sub_id,sub.state))
-        return util._error_response("Error getting grading.",_INTERFACE_VERSION)
+    if sub.state != "C":
+        log.debug("Submission with id {0} has incorrect internal state {1}.".format(sub_id, sub.state))
+        return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 
-    response={
-        'submission_id' : sub_id,
-        'submission_key' : sub.xqueue_submission_key,
-        'student_response' : sub.student_response,
-        'prompt' : sub.prompt,
-        'rubric' : sub.rubric,
-        'max_score' : sub.max_score,
-        }
+    response = {
+        'submission_id': sub_id,
+        'submission_key': sub.xqueue_submission_key,
+        'student_response': sub.student_response,
+        'prompt': sub.prompt,
+        'rubric': sub.rubric,
+        'max_score': sub.max_score,
+    }
 
-    return util._success_response(response,_INTERFACE_VERSION)
+    return util._success_response(response, _INTERFACE_VERSION)
+
 
 @login_required
 def save_grade(request):
@@ -100,11 +101,11 @@ def save_grade(request):
     if request.method != "POST":
         raise Http404
 
-    post_data=request.POST.dict().copy()
+    post_data = request.POST.dict().copy()
 
-    for tag in ['location','grader_id','submission_id','submission_key','score','feedback']:
+    for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback']:
         if not tag in post_data:
-            return util._error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+            return util._error_response("Cannot find needed key {0} in request.".format(tag), _INTERFACE_VERSION)
 
     location = post_data['location']
     grader_id = post_data['grader_id']
@@ -116,12 +117,12 @@ def save_grade(request):
 
     #This is done to ensure that response is properly formatted on the lms side.
     feedback_string = post_data['feedback']
-    feedback=feedback_template.format(feedback=feedback_string,score=score)
+    feedback = feedback_template.format(feedback=feedback_string, score=score)
 
     try:
         score = int(score)
     except ValueError:
-        return util._error_response("Expected integer score.  Got {0}".format(score),_INTERFACE_VERSION )
+        return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
 
     d = {'submission_id': submission_id,
          'score': score,
@@ -134,14 +135,15 @@ def save_grade(request):
          'confidence': 1.0}
 
     #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.
-    (success,header) = create_and_save_grader_object(d)
+    (success, header) = grader_util.create_and_save_grader_object(d)
     if not success:
-        return util._error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
+        return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 
     #xqueue_session=util.xqueue_login()
     #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
-    return util._success_response({'msg' : "Posted to queue."},_INTERFACE_VERSION)
+    return util._success_response({'msg': "Posted to queue."}, _INTERFACE_VERSION)
+
 
 @login_required
 def is_student_calibrated(request):
@@ -155,33 +157,35 @@ def is_student_calibrated(request):
     Note: Location in the database is currently being used as the problem id.
     """
 
-    if request.method!="GET":
+    if request.method != "GET":
         raise Http404
 
-    problem_id=request.GET.get("problem_id")
-    student_id=request.GET.get("student_id")
+    problem_id = request.GET.get("problem_id")
+    student_id = request.GET.get("student_id")
 
-    success, data = check_calibration_status({'problem_id' : problem_id, 'student_id' : student_id})
+    success, data = calibration.check_calibration_status({'problem_id': problem_id, 'student_id': student_id})
 
     if not success:
-        return util._error_response(data,_INTERFACE_VERSION)
+        return util._error_response(data, _INTERFACE_VERSION)
 
-    return util._success_response(data,_INTERFACE_VERSION)
+    return util._success_response(data, _INTERFACE_VERSION)
+
 
 @login_required
 def show_calibration_essay(request):
-    if request.method!="GET":
+    if request.method != "GET":
         raise Http404
 
-    problem_id=request.GET.get("problem_id")
-    student_id=request.GET.get("student_id")
+    problem_id = request.GET.get("problem_id")
+    student_id = request.GET.get("student_id")
 
-    success, data = get_calibration_essay({'problem_id' : problem_id, 'student_id' : student_id})
+    success, data = calibration.get_calibration_essay({'problem_id': problem_id, 'student_id': student_id})
 
     if not success:
-        return util._error_response(data,_INTERFACE_VERSION)
+        return util._error_response(data, _INTERFACE_VERSION)
 
-    return util._success_response(data,_INTERFACE_VERSION)
+    return util._success_response(data, _INTERFACE_VERSION)
+
 
 @login_required
 def save_calibration_essay(request):
@@ -196,17 +200,17 @@ def save_calibration_essay(request):
     if request.method != "POST":
         raise Http404
 
-    post_data=request.POST.dict().copy()
+    post_data = request.POST.dict().copy()
 
-    for tag in ['location','student_id','calibration_essay_id','submission_key','score','feedback']:
+    for tag in ['location', 'student_id', 'calibration_essay_id', 'submission_key', 'score', 'feedback']:
         if not tag in post_data:
-            return util._error_response("Cannot find needed key {0} in request.".format(tag),_INTERFACE_VERSION)
+            return util._error_response("Cannot find needed key {0} in request.".format(tag), _INTERFACE_VERSION)
 
     location = post_data['location']
     student_id = post_data['student_id']
     submission_id = post_data['calibration_essay_id']
     score = post_data['score']
-    feedback=post_data['feedback']
+    feedback = post_data['feedback']
 
     #Submission key currently unused, but plan to use it for validation in the future.
     submission_key = post_data['submission_key']
@@ -214,15 +218,15 @@ def save_calibration_essay(request):
     try:
         score = int(score)
     except ValueError:
-        return util._error_response("Expected integer score.  Got {0}".format(score),_INTERFACE_VERSION )
+        return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
 
     d = {'submission_id': submission_id,
          'score': score,
          'feedback': feedback,
-         'student_id' : student_id,
-         'location' : location,
-        }
+         'student_id': student_id,
+         'location': location,
+    }
 
-    (success,data)=create_and_save_calibration_record(d)
+    (success, data) = calibration.create_and_save_calibration_record(d)
 
     return success

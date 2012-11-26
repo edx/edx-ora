@@ -3,7 +3,7 @@ from django.conf import settings
 from models import Submission, Grader
 import logging
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def create_and_save_grader_object(grader_dict):
     """

@@ -6,7 +6,7 @@ import controller.grader_util as grader_util
 import controller.util as util
 import logging
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def reset_timed_out_submissions(subs):
     """

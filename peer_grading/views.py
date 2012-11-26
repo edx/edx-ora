@@ -24,33 +24,33 @@ def peer_grading(request):
     Temporary peer grading view.  Can be removed once real peer grading is wired in.
     Handles both rendering and AJAX Posts.
     """
-    post_data={}
-    saved=False
-    location="MITx/6.002x/problem/OETest"
-    student_id="5"
+    post_data = {}
+    saved = False
+    location = "MITx/6.002x/problem/OETest"
+    student_id = "5"
 
     if request.method == 'POST':
-        post_data=request.POST.dict().copy()
+        post_data = request.POST.dict().copy()
         for tag in ['score', 'submission_id', 'max_score', 'student_id', 'feedback', 'type']:
             if not post_data.has_key(tag):
                 return HttpResponse("Failed to find needed key {0}".format(tag))
 
         try:
-            post_data['score']=int(post_data['score'])
-            post_data['max_score']=int(post_data['max_score'])
-            post_data['submission_id']=int(post_data['submission_id'])
+            post_data['score'] = int(post_data['score'])
+            post_data['max_score'] = int(post_data['max_score'])
+            post_data['submission_id'] = int(post_data['submission_id'])
             post_data['student_id'] = post_data['student_id']
-            post_data['feedback']="<p>" + post_data['feedback'] + "</p>"
+            post_data['feedback'] = "<p>" + post_data['feedback'] + "</p>"
         except:
             return HttpResponse("Can't parse score into an int.")
 
-        if post_data['type']=="calibration":
-            calibration_data={
-                'submission_id' : post_data['submission_id'],
-                'score' : post_data['score'],
-                'feedback' : post_data['feedback'],
-                'student_id' : student_id,
-                'location' : location,
+        if post_data['type'] == "calibration":
+            calibration_data = {
+                'submission_id': post_data['submission_id'],
+                'score': post_data['score'],
+                'feedback': post_data['feedback'],
+                'student_id': student_id,
+                'location': location,
             }
             try:
                 success, data = create_and_save_calibration_record(calibration_data)
@@ -64,15 +64,15 @@ def peer_grading(request):
 
         elif post_data['type'] == "submission":
             try:
-                created,header= create_and_save_grader_object({
+                created, header = create_and_save_grader_object({
                     'score': post_data['score'],
-                    'status' : "S",
-                    'grader_id' : student_id,
-                    'grader_type' : "PE",
-                    'confidence' : 1,
-                    'submission_id' : post_data['submission_id'],
-                    'feedback' : post_data['feedback'],
-                    })
+                    'status': "S",
+                    'grader_id': student_id,
+                    'grader_type': "PE",
+                    'confidence': 1,
+                    'submission_id': post_data['submission_id'],
+                    'feedback': post_data['feedback'],
+                })
             except:
                 return HttpResponse("Cannot create grader object.")
 
@@ -81,19 +81,19 @@ def peer_grading(request):
             return HttpResponse("Invalid grader type.")
 
     if request.method == 'GET':
-        post_data={}
-        success, data= check_calibration_status({'problem_id' : location, 'student_id' : student_id})
+        post_data = {}
+        success, data = check_calibration_status({'problem_id': location, 'student_id': student_id})
         if not success:
             return HttpResponse(data)
 
-        calibrated=data['calibrated']
-        url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
+        calibrated = data['calibrated']
+        url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
         if not url_base.endswith("/"):
-            url_base+="/"
+            url_base += "/"
 
         if calibrated:
-            found,sub_id= get_single_peer_grading_item(location,student_id)
-            post_data['submission_id']=sub_id
+            found, sub_id = get_single_peer_grading_item(location, student_id)
+            post_data['submission_id'] = sub_id
             if not found:
                 try:
                     post_data.pop('submission_id')
@@ -102,8 +102,8 @@ def peer_grading(request):
                 return HttpResponse("No available grading.  Check back later.")
 
             try:
-                sub_id=post_data['submission_id']
-                sub=Submission.objects.get(id=sub_id)
+                sub_id = post_data['submission_id']
+                sub = Submission.objects.get(id=sub_id)
             except:
                 try:
                     post_data.pop('submission_id')
@@ -115,36 +115,36 @@ def peer_grading(request):
                 post_data.pop('submission_id')
                 return HttpResponse("Invalid submission id in session.  Sub is marked finished.  Try reloading.")
 
-            rendered=render_to_string('instructor_grading.html', {
-                'score_points': [i for i in xrange(0,sub.max_score+1)],
-                'ajax_url' : url_base,
-                'text' : sub.student_response,
-                'location' : sub.location,
-                'prompt' : sub.prompt,
-                'rubric' : sub.rubric,
-                'sub_id' : sub.id,
-                'max_score' : sub.max_score,
-                'type' : 'submission',
-                'student_id' : student_id,
-                })
+            rendered = render_to_string('instructor_grading.html', {
+                'score_points': [i for i in xrange(0, sub.max_score + 1)],
+                'ajax_url': url_base,
+                'text': sub.student_response,
+                'location': sub.location,
+                'prompt': sub.prompt,
+                'rubric': sub.rubric,
+                'sub_id': sub.id,
+                'max_score': sub.max_score,
+                'type': 'submission',
+                'student_id': student_id,
+            })
             return HttpResponse(rendered)
         else:
-            success, data= get_calibration_essay({'problem_id' : location,'student_id' : student_id})
+            success, data = get_calibration_essay({'problem_id': location, 'student_id': student_id})
 
             if not success:
                 return HttpResponse(data)
 
-            rendered=render_to_string("instructor_grading.html", {
-                'score_points': [i for i in xrange(0,data['max_score']+1)],
-                'ajax_url' : url_base,
-                'text' : data['student_response'],
-                'location' : location,
-                'prompt' : data['prompt'],
-                'rubric' : data['rubric'],
-                'sub_id' : data['submission_id'],
-                'max_score' : data['max_score'],
-                'type' : 'calibration',
-                'student_id' : student_id,
+            rendered = render_to_string("instructor_grading.html", {
+                'score_points': [i for i in xrange(0, data['max_score'] + 1)],
+                'ajax_url': url_base,
+                'text': data['student_response'],
+                'location': location,
+                'prompt': data['prompt'],
+                'rubric': data['rubric'],
+                'sub_id': data['submission_id'],
+                'max_score': data['max_score'],
+                'type': 'calibration',
+                'student_id': student_id,
             })
 
             return HttpResponse(rendered)
