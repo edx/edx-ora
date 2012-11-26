@@ -2,10 +2,11 @@ import datetime
 import json
 from django.conf import settings
 from django.utils import timezone
-from controller.grader_util import create_and_save_grader_object
-from controller.util import log, xqueue_login, post_results_to_xqueue
+import controller.grader_util as grader_util
+import controller.util as util
+import logging
 
-__author__ = 'vik'
+log=logging.getLogger(__name__)
 
 def reset_timed_out_submissions(subs):
     """
@@ -71,11 +72,11 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         }
         sub.save()
         #TODO: Currently looks up submission object twice.  Fix in future.
-        success, header = create_and_save_grader_object(grader_dict)
+        success, header = grader_util.create_and_save_grader_object(grader_dict)
 
-        xqueue_session = xqueue_login()
+        xqueue_session = util.xqueue_login()
 
-        error, msg = post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
+        error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 
     log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return error, msg

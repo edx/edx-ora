@@ -1,8 +1,9 @@
 import ConfigParser
 from django.conf import settings
 from models import Submission, Grader
+import logging
 
-__author__ = 'vik'
+log=logging.getLogger(__name__)
 
 def create_and_save_grader_object(grader_dict):
     """

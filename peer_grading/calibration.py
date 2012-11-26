@@ -1,8 +1,10 @@
 import random
 from django.conf import settings
 from controller.models import Submission
-from peer_grading.lms_interface import log
+import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
+
+log=logging.getLogger(__name__)
 
 __author__ = 'vik'
 

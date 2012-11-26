@@ -1,7 +1,9 @@
 from django.conf import settings
 from controller.models import Submission
+import logging
 
-__author__ = 'vik'
+log=logging.getLogger(__name__)
+
 
 def finished_submissions_graded_by_instructor(location):
     """

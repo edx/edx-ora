@@ -1,7 +1,8 @@
 from django.db.models import Count
 from controller.models import Submission
+import logging
 
-__author__ = 'vik'
+log=logging.getLogger(__name__)
 
 def get_single_peer_grading_item(location, grader_id):
     """
