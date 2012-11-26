@@ -61,7 +61,7 @@ def login_to_controller(session):
     return True
 
 
-class xqueue_interface_test(unittest.TestCase):
+class XQueueInterfaceTest(unittest.TestCase):
     def setUp(self):
         if(User.objects.filter(username='test').count() == 0):
             user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
@@ -138,7 +138,7 @@ class xqueue_interface_test(unittest.TestCase):
         self.assertEqual(body['return_code'], 0)
 
 
-class grader_interface_test(unittest.TestCase):
+class GraderInterfaceTest(unittest.TestCase):
     def setUp(self):
         if(User.objects.filter(username='test').count() == 0):
             user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
