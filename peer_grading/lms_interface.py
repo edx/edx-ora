@@ -163,6 +163,13 @@ def is_student_calibrated(request):
     problem_id=request.GET.get("problem_id")
     student_id=request.GET.get("student_id")
 
+    return check_calibration_status({'problem_id' : problem_id, 'student_id' : student_id})
+
+
+def check_calibration_status(student_info):
+    problem_id=student_info['problem_id']
+    student_id=student_info['student_id']
+
     matching_submissions=Submission.objects.filter(problem_id=problem_id)
 
     if matching_submissions.count<1:
@@ -184,7 +191,16 @@ def is_student_calibrated(request):
     else:
         return util._success_response({'calibrated' : False},_INTERFACE_VERSION)
 
-def get_calibration_essay(student_id,location):
+def show_calibration_essay(request):
+    if request.method!="GET":
+        raise Http404
+
+    problem_id=request.GET.get("problem_id")
+    student_id=request.GET.get("student_id")
+
+    return get_calibration_essay({'problem_id' : problem_id, 'student_id' : student_id})
+
+def get_calibration_essay(calibration_data):
     """
     Gets a calibration essay for a particular student and location (problem id).
     Input:
@@ -192,6 +208,9 @@ def get_calibration_essay(student_id,location):
     Output:
         dict containing text of calibration essay, prompt, rubric, max score, calibration essay id
     """
+
+    location=calibration_data['problem_id']
+    student_id=calibration_data['student_id']
 
     calibration_submissions=Submission.objects.filter(
         location=location,
