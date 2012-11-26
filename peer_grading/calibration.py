@@ -12,7 +12,7 @@ def create_and_save_calibration_record(calibration_data):
     """
     This function will create and save a calibration record object.
     Input:
-        Dictionary containing
+        Dictionary containing keys submission_id, score, feedback, student_id, location
     Output:
         Boolean indicating success or error message
     """
@@ -64,6 +64,9 @@ def get_calibration_essay_data(calibration_essay_id):
     From a calibration essay id, lookup prompt, rubric, max score, prompt, essay text, and return
     Input:
         calibration essay id
+    Output:
+        Dict containing submission id, submission key, student response, prompt, rubric, max_score
+        Or error string if submission cannot be found
     """
 
     try:
@@ -125,6 +128,15 @@ def get_calibration_essay(calibration_data):
 
 
 def check_calibration_status(student_info):
+    """
+    Checks if a given student has calibrated for a given problem or not
+    Input:
+        dict containing problem_id, student_id
+    Output:
+        success, data
+          success is a boolean
+          data is a dict containing key 'calibrated', which is a boolean showing whether or not student is calibrated.
+    """
     problem_id = student_info['problem_id']
     student_id = student_info['student_id']
 

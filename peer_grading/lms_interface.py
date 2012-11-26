@@ -173,6 +173,14 @@ def is_student_calibrated(request):
 
 @login_required
 def show_calibration_essay(request):
+    """
+    Shows a calibration essay when it receives a GET request.
+    Input:
+        Http request containing problem_id and student_id
+    Output:
+        Http response containing essay data (submission id, submission key, student response, prompt, rubric, max_score)
+        Or error
+    """
     if request.method != "GET":
         raise Http404
 

@@ -51,6 +51,11 @@ def create_and_save_grader_object(grader_dict):
 
 
 def get_grader_settings(settings_file):
+    """
+    Reads grader settings from a given file
+    Output:
+        Dictionary containing all grader settings
+    """
     config = ConfigParser.RawConfigParser()
     config.read(settings_file)
     grader_type = config.get("grading", "grader_type")
