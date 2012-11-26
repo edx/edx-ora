@@ -232,7 +232,7 @@ def get_calibration_essay(calibration_data):
     if calibration_submission_count<settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
         return False, "Not enough calibration essays."
 
-    student_calibration_history=CalibrationHistory.get(student_id=student_id,location=location)
+    student_calibration_history=CalibrationHistory.objects.get(student_id=student_id,location=location)
     student_calibration_records=student_calibration_history.get_all_calibration_records()
 
     student_calibration_ids=[cr.id for cr in list(student_calibration_records)]

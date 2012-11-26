@@ -41,6 +41,7 @@ class Command(BaseCommand):
         state=parser.get(header_name,"state")
         next_grader_type=parser.get(header_name,"next_grader")
         add_grader = parser.get(header_name,"add_grader_object")=="True"
+        set_as_calibration=parser.get(header_name,"set_as_calibration")=="True"
 
         score,text=[],[]
         combined_raw=open(settings.REPO_PATH / essay_file).read()
@@ -76,6 +77,7 @@ class Command(BaseCommand):
                     grader_id= "",
                     grader_type= "IN",
                     confidence= 1,
+                    is_calibration=set_as_calibration,
                 )
 
                 grade.submission=sub

@@ -73,7 +73,7 @@ def peer_grading(request):
         post_data={}
         success, data=lms_interface.check_calibration_status({'problem_id' : location, 'student_id' : student_id})
         if not success:
-            return HttpResponse("Failed to check calibration status.")
+            return HttpResponse(data)
 
         calibrated=data['calibrated']
         url_base=settings.GRADING_CONTROLLER_INTERFACE['url']
@@ -121,7 +121,7 @@ def peer_grading(request):
             success, data=lms_interface.get_calibration_essay({'problem_id' : location,'student_id' : student_id})
 
             if not success:
-                return HttpResponse("Error getting calibration essay.")
+                return HttpResponse(data)
 
             rendered=render_to_string("instructor_grading.html", {
                 'score_points': [i for i in xrange(0,data['max_score']+1)],
