@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+from controller.grader_util import create_and_save_grader_object
 
 from controller.models import Submission
 from controller import util
@@ -12,6 +13,8 @@ import lms_interface
 import requests
 import urlparse
 from django.template.loader import render_to_string
+from peer_grading.calibration import create_and_save_calibration_record, get_calibration_essay, check_calibration_status
+from peer_grading.peer_grading_util import get_single_peer_grading_item
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +53,7 @@ def peer_grading(request):
                 'location' : location,
             }
             try:
-                success, data = lms_interface.create_and_save_calibration_record(calibration_data)
+                success, data = create_and_save_calibration_record(calibration_data)
             except:
                 return HttpResponse("Could not create calibration record.")
 
@@ -61,7 +64,7 @@ def peer_grading(request):
 
         elif post_data['type'] == "submission":
             try:
-                created,header=util.create_and_save_grader_object({
+                created,header= create_and_save_grader_object({
                     'score': post_data['score'],
                     'status' : "S",
                     'grader_id' : student_id,
@@ -79,7 +82,7 @@ def peer_grading(request):
 
     if request.method == 'GET':
         post_data={}
-        success, data=lms_interface.check_calibration_status({'problem_id' : location, 'student_id' : student_id})
+        success, data= check_calibration_status({'problem_id' : location, 'student_id' : student_id})
         if not success:
             return HttpResponse(data)
 
@@ -89,7 +92,7 @@ def peer_grading(request):
             url_base+="/"
 
         if calibrated:
-            found,sub_id=util.get_single_peer_grading_item(location,student_id)
+            found,sub_id= get_single_peer_grading_item(location,student_id)
             post_data['submission_id']=sub_id
             if not found:
                 try:
@@ -126,7 +129,7 @@ def peer_grading(request):
                 })
             return HttpResponse(rendered)
         else:
-            success, data=lms_interface.get_calibration_essay({'problem_id' : location,'student_id' : student_id})
+            success, data= get_calibration_essay({'problem_id' : location,'student_id' : student_id})
 
             if not success:
                 return HttpResponse(data)
