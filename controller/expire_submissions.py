@@ -60,21 +60,26 @@ def post_expired_submissions_to_xqueue(timed_out_list):
 
     xqueue_session = util.xqueue_login()
 
-    for sub in timed_out_list:
-        sub.state = SUBMISSION_STATE['finished']
-        grader_dict = {
-            'score': 0,
-            'feedback': "Error scoring submission.",
-            'status_code': GRADER_STATUS['failure'],
-            'grader_id': "0",
-            'grader_type': sub.next_grader_type,
-            'confidence': 1,
-        }
-        sub.save()
-        #TODO: Currently looks up submission object twice.  Fix in future.
-        success, header = grader_util.create_and_save_grader_object(grader_dict)
+    if len(timed_out_list)>0:
+        for sub in timed_out_list:
+            sub.state = SUBMISSION_STATE['finished']
+            grader_dict = {
+                'score': 0,
+                'feedback': "Error scoring submission.",
+                'status': GRADER_STATUS['failure'],
+                'grader_id': "0",
+                'grader_type': sub.next_grader_type,
+                'confidence': 1,
+                'submission_id' : sub.id,
+            }
+            sub.save()
 
-        error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
+            #TODO: Currently looks up submission object twice.  Fix in future.
+            success, header = grader_util.create_and_save_grader_object(grader_dict)
+            log.debug(header)
+            log.debug(success)
 
-    log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
-    return error, msg
+            error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
+
+        log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
+    return True

@@ -2,7 +2,7 @@ import ConfigParser
 from django.conf import settings
 from models import Submission, Grader
 import logging
-from models import GRADER_STATUS,SUBMISSION_STATE
+from models import GRADER_STATUS, SUBMISSION_STATE
 
 log = logging.getLogger(__name__)
 
@@ -10,12 +10,17 @@ def create_and_save_grader_object(grader_dict):
     """
     Creates a Grader object and associates it with a given submission
     Input is grader dictionary with keys:
-     feedback, status, grader_id, grader_type, confidence, score
+     feedback, status, grader_id, grader_type, confidence, score,submission_id
     """
+
+    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id"]:
+        if tag not in grader_dict:
+            return False, "{0} tag not in input dictionary.".format(tag)
+
     try:
         sub = Submission.objects.get(id=grader_dict['submission_id'])
     except:
-        return False
+        return False, "Error getting submission."
 
     grade = Grader(
         score=grader_dict['score'],
