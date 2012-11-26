@@ -314,9 +314,13 @@ def get_single_peer_grading_item(location, grader_id):
             submission_grader_counts=[0] * len(submissions_to_grade_count)
 
             if submissions_to_grade_count==0:
-                submissions_to_grade=(to_be_graded.filter(grader__status_code="S",
-                                      grader__grader_type="PE").annotate(num_graders=Count('grader')).
-                                      values("num_graders","id").order_by("num_graders")[:50])
+                submissions_to_grade=(to_be_graded
+                                      .filter(grader__status_code="S",grader__grader_type="PE")
+                                      .exclude(grader__grader_id=grader_id)
+                                      .annotate(num_graders=Count('grader'))
+                                      .values("num_graders","id")
+                                      .order_by("num_graders")[:50]
+                                     )
                 submission_grader_counts=[p['num_graders'] for p in submissions_to_grade]
 
             submission_ids=[p['id'] for p in submissions_to_grade]
