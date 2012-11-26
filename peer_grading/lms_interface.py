@@ -178,18 +178,7 @@ def show_calibration_essay(request):
 
     return util._success_response(data,_INTERFACE_VERSION)
 
-
-def is_peer_grading_finished_for_submission(submission_id):
-    """
-    Checks to see whether there are enough reliable peer evaluations of submission to ensure that grading is done.
-    Input:
-        submission id
-    Output:
-        Boolean indicating whether or not there are enough reliable evaluations.
-    """
-    pass
-
-def save_calibration(request):
+def save_calibration_essay(request):
     """
     Saves a calibration essay sent back from LMS.
     Input:

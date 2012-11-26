@@ -11,6 +11,7 @@ import sys
 
 from controller.models import Submission
 import controller.util as util
+from staff_grading import staff_grading_util
 
 sys.path.append(settings.ML_PATH)
 import create
@@ -27,7 +28,7 @@ class Command(BaseCommand):
         """
         unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
         for location in unique_locations:
-            subs_graded_by_instructor=util.finished_submissions_graded_by_instructor(location)
+            subs_graded_by_instructor=staff_grading_util.finished_submissions_graded_by_instructor(location)
             log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
                 location,
                 subs_graded_by_instructor.count(),

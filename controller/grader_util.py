@@ -1,6 +1,6 @@
 import ConfigParser
 from django.conf import settings
-from controller.models import Submission, Grader
+from models import Submission, Grader
 
 __author__ = 'vik'
 

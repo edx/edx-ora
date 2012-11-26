@@ -6,10 +6,12 @@ from django.utils import timezone
 from datetime import datetime
 import logging
 import os
+import json
 
 from models import Submission,Grader
 import util
-import json
+import grader_util
+from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -105,11 +107,11 @@ def handle_submission(sub):
     """
     #try:
         #Assign whether grader should be ML or IN based on number of graded examples.
-    subs_graded_by_instructor,subs_pending_instructor=util.count_submissions_graded_and_pending_instructor(sub.location)
+    subs_graded_by_instructor,subs_pending_instructor=staff_grading_util.count_submissions_graded_and_pending_instructor(sub.location)
 
     #TODO: abstract out logic for assigning which grader to go with.
     grader_settings_path=os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings)
-    grader_settings=util.get_grader_settings(grader_settings_path)
+    grader_settings=grader_util.get_grader_settings(grader_settings_path)
     if grader_settings['grader_type']=="ML":
         if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
             sub.next_grader_type="ML"

@@ -63,3 +63,14 @@ def get_single_peer_grading_item(location, grader_id):
                         submission_grader_counts.pop(minimum_index)
 
     return found, sub_id
+
+
+def is_peer_grading_finished_for_submission(submission_id):
+    """
+    Checks to see whether there are enough reliable peer evaluations of submission to ensure that grading is done.
+    Input:
+        submission id
+    Output:
+        Boolean indicating whether or not there are enough reliable evaluations.
+    """
+    pass
