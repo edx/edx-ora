@@ -2,10 +2,10 @@ import datetime
 import json
 from django.conf import settings
 from django.utils import timezone
-import controller.grader_util as grader_util
-import controller.util as util
+import grader_util
+import util
 import logging
-from controller.models import GRADER_STATUS,SUBMISSION_STATE
+from models import GRADER_STATUS,SUBMISSION_STATE
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         grader_dict = {
             'score': 0,
             'feedback': "Error scoring submission.",
-            'status_code': GRADER_STATUS['finished'],
+            'status_code': GRADER_STATUS['failure'],
             'grader_id': "0",
             'grader_type': sub.next_grader_type,
             'confidence': 1,
