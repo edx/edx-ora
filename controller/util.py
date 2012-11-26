@@ -311,9 +311,10 @@ def get_single_peer_grading_item(location, grader_id):
             #Set the maximum number of records to search through
             submissions_to_grade=(to_be_graded.filter(grader__isnull=True).values("id")[:50])
             submissions_to_grade_count=submissions_to_grade.count()
-            submission_grader_counts=[0] * len(submissions_to_grade_count)
 
-            if submissions_to_grade_count==0:
+            if submissions_to_grade_count>0:
+                submission_grader_counts=[0] * submissions_to_grade_count
+            elif submissions_to_grade_count==0:
                 submissions_to_grade=(to_be_graded
                                       .filter(grader__status_code="S",grader__grader_type="PE")
                                       .exclude(grader__grader_id=grader_id)
