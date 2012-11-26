@@ -105,6 +105,9 @@ class xqueue_interface_test(unittest.TestCase):
             'course_id': u'MITx/6.002x',
             'problem_id': u'6.002x/Welcome/OETest',
             'grader': "temp",
+            'prompt' : 'This is a prompt',
+            'rubric' : 'This is a rubric.',
+            'grader_settings' : "ml_grading.conf",
         }
         student_info = {
             'submission_time': datetime.now().strftime("%Y%m%d%H%M%S"),
@@ -130,8 +133,7 @@ class xqueue_interface_test(unittest.TestCase):
 
         log.debug(content)
 
-        body = content.content
-        log.debug(body)
+        body = json.loads(content.content)
 
         self.assertEqual(body['return_code'], 0)
 
