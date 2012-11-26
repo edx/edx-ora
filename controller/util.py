@@ -37,12 +37,11 @@ def compose_reply(success, content):
     """
     Return a reply given below values:
     JSON-serialized dict:
-     {'return_code': 0(success)/1(error),
-    'content'    : 'my content', }
+     {'success': bool,
+      'content': 'my content', }
 
     """
-    return_code = 0 if success else 1
-    return json.dumps({'return_code': return_code,
+    return json.dumps({'success': success,
                        'content': content})
 
 
