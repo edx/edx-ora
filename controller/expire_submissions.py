@@ -17,19 +17,20 @@ def reset_timed_out_submissions(subs):
         status code indicating success
     """
     now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times = [now - i['date_modified'] for i in list(subs.values('date_modified'))]
     min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
+    timed_out_subs=subs.filter(date_modified__lt=now-min_time)
+    timed_out_sub_count=timed_out_subs.count()
     count = 0
 
-    for i in xrange(0, len(sub_times)):
-        if sub_times[i] > min_time:
-            sub = subs[i]
-            if sub.state == "C":
-                sub.state = "W"
-                sub.save()
-                count += 1
+    for i in xrange(0, timed_out_sub_count):
+        sub = subs[i]
+        if sub.state == "C":
+            sub.state = "W"
+            sub.save()
+            count += 1
 
-    log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
+    if count>0:
+        log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
 
     return True
 
@@ -41,15 +42,10 @@ def get_submissions_that_have_expired(subs):
         subs - A queryset of submissions
     """
     now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
-    sub_times = [now - i['date_modified'] for i in list(subs.values('date_modified'))]
     min_time = datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
+    expired_subs=subs.filter(date_modified__lt=now-min_time)
 
-    timed_out_list = []
-    for i in xrange(0, len(sub_times)):
-        if sub_times[i] > min_time:
-            timed_out_list.append(subs[i])
-
-    return timed_out_list
+    return list(expired_subs)
 
 
 def post_expired_submissions_to_xqueue(timed_out_list):
