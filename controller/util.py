@@ -8,7 +8,7 @@ import requests
 import ConfigParser
 import urlparse
 import random
-from django.db.models import Count
+from django.db.models import Count,Min
 
 from django.http import HttpResponse
 
@@ -309,6 +309,7 @@ def get_single_peer_grading_item(location, grader_id):
         to_be_graded_length=to_be_graded.count()
         if to_be_graded_length > 0:
             #Set the maximum number of records to search through
+            submissions_to_grade=(to_be_graded.filter(grader__isnull=True))
             submissions_to_grade=(to_be_graded.filter(grader__status_code="S",
                                   grader__grader_type="PE").annotate(num_graders=Count('grader')).
                                   values("num_graders","id"))

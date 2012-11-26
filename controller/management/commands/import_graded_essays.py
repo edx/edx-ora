@@ -40,6 +40,7 @@ class Command(BaseCommand):
         essay_limit = int(parser.get(header_name, 'essay_limit'))
         state=parser.get(header_name,"state")
         next_grader_type=parser.get(header_name,"next_grader")
+        add_grader = parser.get(header_name,"add_grader_object")=="True"
 
         score,text=[],[]
         combined_raw=open(settings.REPO_PATH / essay_file).read()
@@ -67,18 +68,18 @@ class Command(BaseCommand):
             )
 
             sub.save()
+            if(add_grader):
+                grade=Grader(
+                    score=score[i],
+                    feedback = "",
+                    status_code = "S",
+                    grader_id= "",
+                    grader_type= "IN",
+                    confidence= 1,
+                )
 
-            grade=Grader(
-                score=score[i],
-                feedback = "",
-                status_code = "S",
-                grader_id= "",
-                grader_type= "IN",
-                confidence= 1,
-            )
-
-            grade.submission=sub
-            grade.save()
+                grade.submission=sub
+                grade.save()
 
         print ("Successfully imported {0} essays using configuration in file {1}.".format(
             min(essay_limit,len(text)),

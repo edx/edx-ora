@@ -127,6 +127,10 @@ class Grader(models.Model):
     #User for instructor grading to mark essays as calibration or not.
     is_calibration=models.BooleanField(default=False)
 
+    def __unicode__(self):
+        sub_row="Grader object for submission {0} with status code {1}. ".format(self.submission.id,self.status_code)
+        sub_row+="Grader type {0}, created on {1}, modified on {2}. ".format(self.grader_type,self.date_created,self.date_modified)
+        return sub_row
 
 
 
