@@ -32,6 +32,7 @@ class CalibrationHistory(models.Model):
 
 class CalibrationRecord(models.Model):
     calibration_history=models.ForeignKey("CalibrationHistory")
+    submission=models.ForeignKey("Submission")
     score=models.IntegerField()
     actual_score=models.IntegerField()
 

@@ -136,9 +136,7 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0}
 
-    #We need to figure out how/when to post peer grading results back to LMS given the "multiple peers" problem.
-    #The best solution is probably to post back to LMS each time, and LMS have logic dictating when/which peer
-    #graded results to show the student.
+    #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.
     (success,header) = util.create_and_save_grader_object(d)
     if not success:
         return util._error_response("There was a problem saving the grade.  Contact support.",_INTERFACE_VERSION)
@@ -154,7 +152,9 @@ def is_student_calibrated(request):
     Input:
         student id, problem_id
     Output:
-        Boolean indicating whether or not student has finished calibration.
+        Dictionary with boolean calibrated indicating whether or not student has finished calibration.
+
+    Note: Location in the database is currently being used as the problem id.
     """
 
     if request.method!="GET":
@@ -171,14 +171,16 @@ def is_student_calibrated(request):
     calibration_history=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
     max_score=matching_submissions[0].max_score
     calibration_record_count=calibration_history.get_calibration_record_count()
-    if calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+    if (calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
+        calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
         calibration_error=calibration_history.get_average_calibration_error()
         normalized_calibration_error=calibration_error/float(max_score)
-        if(normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR and
-           calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
+        if normalized_calibration_error>= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR:
             return util._success_response({'calibrated' : False}, _INTERFACE_VERSION)
         else:
             return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)
+    elif calibration_record_count>=settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
+        return util._success_response({'calibrated' : True}, _INTERFACE_VERSION)
     else:
         return util._success_response({'calibrated' : False},_INTERFACE_VERSION)
 
@@ -191,29 +193,34 @@ def get_calibration_essay(student_id,location):
         dict containing text of calibration essay, prompt, rubric, max score, calibration essay id
     """
 
-    calibration_graders=Grader.objects.filter(
-        submission__location__exact=location,
-        grader_type="IN",
-        is_calibration=True,
+    calibration_submissions=Submission.objects.filter(
+        location=location,
+        grader__grader_type="IN",
+        grader__is_calibration=True,
     )
 
-    calibration_grader_count=calibration_graders.count()
-    if calibration_grader_count<settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
-        return util._success_response({'got_essay' : False, 'message' : "Not enough calibration essays."})
+    calibration_submission_count=calibration_submissions.count()
+    if calibration_submission_count<settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+        return util._error_response("Not enough calibration essays.")
 
     student_calibration_history=CalibrationHistory.get(student_id=student_id,location=location)
-    student_calibration_records=student_calibration_history.calibrationrecord_set.all()
+    student_calibration_records=student_calibration_history.get_all_calibration_records()
 
     student_calibration_ids=[cr.id for cr in list(student_calibration_records)]
-    calibration_essay_ids=[cr.id for cr in list(calibration_graders)]
+    calibration_essay_ids=[cr.id for cr in list(calibration_submissions)]
 
     for i in xrange(0,len(calibration_essay_ids)):
         if calibration_essay_ids[i] not in student_calibration_ids:
-            #return the essay here
-            pass
+            calibration_data=get_calibration_essay_data(calibration_essay_ids[i])
+            return util._success_response(calibration_data)
 
     if len(student_calibration_ids)>len(calibration_essay_ids):
         random_calibration_essay_id=random.sample(calibration_essay_ids,1)[0]
+        calibration_data=get_calibration_essay_data(random_calibration_essay_id)
+        return util._success_response(calibration_data)
+
+    return util._error_response("Unexpected error.")
+
 
 
 def get_calibration_essay_data(calibration_essay_id):
@@ -222,7 +229,23 @@ def get_calibration_essay_data(calibration_essay_id):
     Input:
         calibration essay id
     """
-    pass
+
+    try:
+        sub=Submission.objects.get(id=calibration_essay_id)
+    except:
+        return "Could not find submission!"
+
+
+    response={
+        'submission_id' : calibration_essay_id,
+        'submission_key' : sub.xqueue_submission_key,
+        'student_response' : sub.student_response,
+        'prompt' : sub.prompt,
+        'rubric' : sub.rubric,
+        'max_score' : sub.max_score,
+        }
+
+    return response
 
 
 def is_peer_grading_finished_for_student(student_id):
