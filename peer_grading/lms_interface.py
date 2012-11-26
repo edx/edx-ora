@@ -183,6 +183,7 @@ def check_calibration_status(student_info):
     calibration_history,created=CalibrationHistory.objects.get_or_create(student_id=student_id, location=problem_id)
     max_score=matching_submissions[0].max_score
     calibration_record_count=calibration_history.get_calibration_record_count()
+    log.debug("Calibration record count: {0}".format(calibration_record_count))
     if (calibration_record_count>=settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
         calibration_record_count<settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
         calibration_error=calibration_history.get_average_calibration_error()
@@ -235,7 +236,7 @@ def get_calibration_essay(calibration_data):
     student_calibration_history=CalibrationHistory.objects.get(student_id=student_id,location=location)
     student_calibration_records=student_calibration_history.get_all_calibration_records()
 
-    student_calibration_ids=[cr.id for cr in list(student_calibration_records)]
+    student_calibration_ids=[cr.submission.id for cr in list(student_calibration_records)]
     calibration_essay_ids=[cr.id for cr in list(calibration_submissions)]
 
     for i in xrange(0,len(calibration_essay_ids)):

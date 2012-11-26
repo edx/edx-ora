@@ -46,7 +46,7 @@ def peer_grading(request):
                 'submission_id' : post_data['submission_id'],
                 'score' : post_data['score'],
                 'feedback' : post_data['feedback'],
-                'student_id' : post_data['student_id'],
+                'student_id' : student_id,
                 'location' : location,
             }
             try:
@@ -64,7 +64,7 @@ def peer_grading(request):
                 created,header=util.create_and_save_grader_object({
                     'score': post_data['score'],
                     'status' : "S",
-                    'grader_id' : post_data['student_id'],
+                    'grader_id' : student_id,
                     'grader_type' : "PE",
                     'confidence' : 1,
                     'submission_id' : post_data['submission_id'],

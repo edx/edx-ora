@@ -43,3 +43,8 @@ class CalibrationRecord(models.Model):
     #Or from a calibration essay inserted into the peer grading
     #Unused for now.
     is_pre_calibration=models.BooleanField(default=True)
+
+    def __unicode__(self):
+        history_row=(("Calibration record for calibration history {0} and submission {1} with score {2} and actual score {3}")
+                    .format(self.calibration_history.id,self.submission.id,self.score,self.actual_score))
+        return history_row
