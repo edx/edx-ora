@@ -7,31 +7,18 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-        # Adding field 'Submission.grader_settings'
-        db.add_column('controller_submission', 'grader_settings',
-            self.gf('django.db.models.fields.TextField')(default=''),
+        # Adding field 'CalibrationRecord.feedback'
+        db.add_column('peer_grading_calibrationrecord', 'feedback',
+            self.gf('django.db.models.fields.TextField')(default='blah'),
             keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Submission.grader_settings'
-        db.delete_column('controller_submission', 'grader_settings')
+        # Deleting field 'CalibrationRecord.feedback'
+        db.delete_column('peer_grading_calibrationrecord', 'feedback')
 
 
     models = {
-        'controller.grader': {
-            'Meta': {'object_name': 'Grader'},
-            'confidence': ('django.db.models.fields.DecimalField', [], {'max_digits': '10', 'decimal_places': '9'}),
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'feedback': ('django.db.models.fields.TextField', [], {}),
-            'grader_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'grader_type': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'score': ('django.db.models.fields.IntegerField', [], {}),
-            'status_code': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'submission': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['controller.Submission']"})
-        },
         'controller.submission': {
             'Meta': {'object_name': 'Submission'},
             'course_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
@@ -42,6 +29,7 @@ class Migration(SchemaMigration):
             'location': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'next_grader_type': ('django.db.models.fields.CharField', [], {'default': "'NA'", 'max_length': '2'}),
+            'posted_results_back_to_queue': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'previous_grader_type': ('django.db.models.fields.CharField', [], {'default': "'NA'", 'max_length': '2'}),
             'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'prompt': ('django.db.models.fields.TextField', [], {'default': "''"}),
@@ -54,7 +42,25 @@ class Migration(SchemaMigration):
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'})
+        },
+        'peer_grading.calibrationhistory': {
+            'Meta': {'object_name': 'CalibrationHistory'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
+            'problem_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
+            'student_id': ('django.db.models.fields.CharField', [], {'max_length': '128'})
+        },
+        'peer_grading.calibrationrecord': {
+            'Meta': {'object_name': 'CalibrationRecord'},
+            'actual_score': ('django.db.models.fields.IntegerField', [], {}),
+            'calibration_history': (
+            'django.db.models.fields.related.ForeignKey', [], {'to': "orm['peer_grading.CalibrationHistory']"}),
+            'feedback': ('django.db.models.fields.TextField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_pre_calibration': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'score': ('django.db.models.fields.IntegerField', [], {}),
+            'submission': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['controller.Submission']"})
         }
     }
 
-    complete_apps = ['controller']
+    complete_apps = ['peer_grading']

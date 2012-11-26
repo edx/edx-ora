@@ -11,7 +11,8 @@
                 feedback=$("textarea[name=feedback]").first().val()
                 score=$("select[name=score]").first().find(':selected').text()
                 submission_id=$("p[name=submission_id]").first().text()
-                $.post("{{ajax_url}}grading_controller/instructor_grading/", {feedback : feedback, score : score, submission_id : submission_id, max_score : {{max_score}}}, function(data) {
+                student_id=$("p[name=student_id]").first().text()
+                $.post("{{ajax_url}}peer_grading/peer_grading/", {feedback : feedback, score : score, submission_id : submission_id, max_score : {{max_score}} , student_id : student_id, type: "{{type}}"}, function(data) {
                     document.open();
                     document.write(data);
                     document.close();
@@ -19,22 +20,33 @@
             });
         });
     </script>
+    This is {{ type }}.
     <p name="submission_id">{{sub_id}}</p>
     <br/>
+    Location: <br/>
     {{location}}
     <br/><br/>
+    Prompt: <br/>
     {{prompt}}
     <br/><br/>
+    Rubric: <br/>
+    {{rubric}}
+    <br/><br/>
+    Essay Text: <br/>
     {{text}}
     <br/><br/>
 
+    Score:
     <select name="score" class="score">
         {% for i in score_points %}
             <option value="{{i}}">{{i}}</option>
         {% endfor %}
     </select>
     <br/><br/>
+    Feedback:
     <textarea name="feedback" class="feedback" cols="70" rows="5">Enter feedback here.</textarea><br/><br/>
+    Student ID:
+    <textarea name="student_id" class="student_id" cols="20" rows="1">{{student_id}}</textarea><br/><br/>
     <input type="button" value="Save" class="save-button" name="save"/>
     <div id="result"></div>
 </body>

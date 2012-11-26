@@ -6,10 +6,13 @@ from django.utils import timezone
 from datetime import datetime
 import logging
 import os
-
-from models import Submission,Grader
-import util
 import json
+
+from models import Submission, Grader
+from models import GraderStatus, SubmissionState
+import util
+import grader_util
+from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -44,22 +47,22 @@ def submit(request):
         else:
             try:
                 #Retrieve individual values from xqueue body and header.
-                prompt=util._value_or_default(body['grader_payload']['prompt'],"")
-                rubric=util._value_or_default(body['grader_payload']['rubric'],"")
-                student_id=util._value_or_default(body['student_info']['anonymous_student_id'])
-                location=util._value_or_default(body['grader_payload']['location'])
-                course_id=util._value_or_default(body['grader_payload']['course_id'])
-                problem_id=util._value_or_default(body['grader_payload']['problem_id'],location)
-                grader_settings=util._value_or_default(body['grader_payload']['grader_settings'],"")
-                student_response=util._value_or_default(body['student_response'])
-                xqueue_submission_id=util._value_or_default(header['submission_id'])
-                xqueue_submission_key=util._value_or_default(header['submission_key'])
-                state_code="W"
-                xqueue_queue_name=util._value_or_default(header["queue_name"])
-                max_score=util._value_or_default(body['max_score'])
+                prompt = util._value_or_default(body['grader_payload']['prompt'], "")
+                rubric = util._value_or_default(body['grader_payload']['rubric'], "")
+                student_id = util._value_or_default(body['student_info']['anonymous_student_id'])
+                location = util._value_or_default(body['grader_payload']['location'])
+                course_id = util._value_or_default(body['grader_payload']['course_id'])
+                problem_id = util._value_or_default(body['grader_payload']['problem_id'], location)
+                grader_settings = util._value_or_default(body['grader_payload']['grader_settings'], "")
+                student_response = util._value_or_default(body['student_response'])
+                xqueue_submission_id = util._value_or_default(header['submission_id'])
+                xqueue_submission_key = util._value_or_default(header['submission_key'])
+                state_code = SubmissionState.waiting_to_be_graded
+                xqueue_queue_name = util._value_or_default(header["queue_name"])
+                max_score = util._value_or_default(body['max_score'])
 
-                submission_time_string=util._value_or_default(body['student_info']['submission_time'])
-                student_submission_time=datetime.strptime(submission_time_string,"%Y%m%d%H%M%S")
+                submission_time_string = util._value_or_default(body['student_info']['submission_time'])
+                student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
 
                 #Create submission object
                 sub, created = Submission.objects.get_or_create(
@@ -80,19 +83,21 @@ def submit(request):
                 )
 
             except Exception as err:
-                xqueue_submission_id=util._value_or_default(header['submission_id'])
-                xqueue_submission_key=util._value_or_default(header['submission_key'])
-                log.error("Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
-                    util.get_request_ip(request),
-                    xqueue_submission_id,
-                    xqueue_submission_key,
-                ))
-                return HttpResponse(util.compose_reply(False,'Unable to create submission.'))
+                xqueue_submission_id = util._value_or_default(header['submission_id'])
+                xqueue_submission_key = util._value_or_default(header['submission_key'])
+                log.error(
+                    "Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
+                        util.get_request_ip(request),
+                        xqueue_submission_id,
+                        xqueue_submission_key,
+                    ))
+                return HttpResponse(util.compose_reply(False, 'Unable to create submission.'))
 
             #Handle submission and write to db
-            success=handle_submission(sub)
+            success = handle_submission(sub)
 
             return HttpResponse(util.compose_reply(success=success, content=''))
+
 
 def handle_submission(sub):
     """
@@ -104,19 +109,20 @@ def handle_submission(sub):
         True/False status code
     """
     #try:
-        #Assign whether grader should be ML or IN based on number of graded examples.
-    subs_graded_by_instructor,subs_pending_instructor=util.count_submissions_graded_and_pending_instructor(sub.location)
+    #Assign whether grader should be ML or IN based on number of graded examples.
+    subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
+        sub.location)
 
     #TODO: abstract out logic for assigning which grader to go with.
-    grader_settings_path=os.path.join(settings.GRADER_SETTINGS_DIRECTORY,sub.grader_settings)
-    grader_settings=util.get_grader_settings(grader_settings_path)
-    if grader_settings['grader_type']=="ML":
-        if((subs_graded_by_instructor+subs_pending_instructor)>=settings.MIN_TO_USE_ML):
-            sub.next_grader_type="ML"
+    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
+    grader_settings = grader_util.get_grader_settings(grader_settings_path)
+    if grader_settings['grader_type'] == "ML":
+        if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML):
+            sub.next_grader_type = "ML"
         else:
-            sub.next_grader_type="IN"
-    elif grader_settings['grader_type']=="PE":
-        sub.next_grader_type="PE"
+            sub.next_grader_type = "IN"
+    elif grader_settings['grader_type'] == "PE":
+        sub.next_grader_type = "PE"
     else:
         log.debug("Invalid grader type specified in settings file.")
         return False
@@ -128,6 +134,7 @@ def handle_submission(sub):
     #return False
 
     return True
+
 
 def _is_valid_reply(external_reply):
     '''
@@ -141,7 +148,7 @@ def _is_valid_reply(external_reply):
         header :        header of the queue item
         body:           body of the queue item
     '''
-    fail = (False,-1,'')
+    fail = (False, -1, '')
 
     try:
         header = json.loads(external_reply['xqueue_header'])
@@ -150,7 +157,7 @@ def _is_valid_reply(external_reply):
         log.debug("Cannot load header or body.")
         return fail
 
-    if not isinstance(header,dict) or not isinstance(body,dict):
+    if not isinstance(header, dict) or not isinstance(body, dict):
         return fail
 
     for tag in ['submission_id', 'submission_key', 'queue_name']:
@@ -164,11 +171,11 @@ def _is_valid_reply(external_reply):
             return fail
 
     try:
-        body['grader_payload']=json.loads(body['grader_payload'])
-        body['student_info']=json.loads(body['student_info'])
+        body['grader_payload'] = json.loads(body['grader_payload'])
+        body['student_info'] = json.loads(body['student_info'])
     except:
         log.debug("Cannot load payload or info.")
         return fail
 
-    return True,header,body
+    return True, header, body
 

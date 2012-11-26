@@ -7,15 +7,15 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-        # Adding field 'Submission.grader_settings'
-        db.add_column('controller_submission', 'grader_settings',
-            self.gf('django.db.models.fields.TextField')(default=''),
+        # Adding field 'Grader.is_calibration'
+        db.add_column('controller_grader', 'is_calibration',
+            self.gf('django.db.models.fields.BooleanField')(default=False),
             keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Submission.grader_settings'
-        db.delete_column('controller_submission', 'grader_settings')
+        # Deleting field 'Grader.is_calibration'
+        db.delete_column('controller_grader', 'is_calibration')
 
 
     models = {
@@ -28,6 +28,7 @@ class Migration(SchemaMigration):
             'grader_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'grader_type': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_calibration': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'score': ('django.db.models.fields.IntegerField', [], {}),
             'status_code': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'submission': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['controller.Submission']"})
@@ -42,6 +43,7 @@ class Migration(SchemaMigration):
             'location': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'next_grader_type': ('django.db.models.fields.CharField', [], {'default': "'NA'", 'max_length': '2'}),
+            'posted_results_back_to_queue': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'previous_grader_type': ('django.db.models.fields.CharField', [], {'default': "'NA'", 'max_length': '2'}),
             'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'prompt': ('django.db.models.fields.TextField', [], {'default': "''"}),

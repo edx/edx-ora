@@ -6,27 +6,26 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
-
     def forwards(self, orm):
         # Deleting field 'Submission.next_grader'
         db.delete_column('controller_submission', 'next_grader')
 
         # Adding field 'Submission.next_grader_type'
         db.add_column('controller_submission', 'next_grader_type',
-                      self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
-                      keep_default=False)
+            self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
+            keep_default=False)
 
         # Adding field 'Submission.previous_grader_type'
         db.add_column('controller_submission', 'previous_grader_type',
-                      self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
-                      keep_default=False)
+            self.gf('django.db.models.fields.CharField')(default='NA', max_length=2),
+            keep_default=False)
 
 
     def backwards(self, orm):
         # Adding field 'Submission.next_grader'
         db.add_column('controller_submission', 'next_grader',
-                      self.gf('django.db.models.fields.CharField')(default='Temp', max_length=2),
-                      keep_default=False)
+            self.gf('django.db.models.fields.CharField')(default='Temp', max_length=2),
+            keep_default=False)
 
         # Deleting field 'Submission.next_grader_type'
         db.delete_column('controller_submission', 'next_grader_type')
@@ -63,7 +62,8 @@ class Migration(SchemaMigration):
             'state': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'student_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'student_response': ('django.db.models.fields.TextField', [], {'default': "''"}),
-            'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'student_submission_time': (
+            'django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '128'})
