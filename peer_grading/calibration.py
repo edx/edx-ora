@@ -85,7 +85,7 @@ def get_calibration_essay_data(calibration_essay_id):
     return response
 
 
-def get_calibration_essay(calibration_data):
+def get_calibration_essay(location, student_id):
     """
     Gets a calibration essay for a particular student and location (problem id).
     Input:
@@ -93,9 +93,6 @@ def get_calibration_essay(calibration_data):
     Output:
         dict containing text of calibration essay, prompt, rubric, max score, calibration essay id
     """
-
-    location = calibration_data['problem_id']
-    student_id = calibration_data['student_id']
 
     calibration_submissions = Submission.objects.filter(
         location=location,
@@ -126,7 +123,7 @@ def get_calibration_essay(calibration_data):
     return False, "Unexpected error."
 
 
-def check_calibration_status(student_info):
+def check_calibration_status(problem_id,student_id):
     """
     Checks if a given student has calibrated for a given problem or not
     Input:
@@ -136,8 +133,6 @@ def check_calibration_status(student_info):
           success is a boolean
           data is a dict containing key 'calibrated', which is a boolean showing whether or not student is calibrated.
     """
-    problem_id = student_info['problem_id']
-    student_id = student_info['student_id']
 
     matching_submissions = Submission.objects.filter(location=problem_id)
 

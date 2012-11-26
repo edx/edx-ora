@@ -83,7 +83,7 @@ def peer_grading(request):
 
     if request.method == 'GET':
         post_data = {}
-        success, data = check_calibration_status({'problem_id': location, 'student_id': student_id})
+        success, data = check_calibration_status(location, student_id)
         if not success:
             return HttpResponse(data)
 
@@ -130,7 +130,7 @@ def peer_grading(request):
             })
             return HttpResponse(rendered)
         else:
-            success, data = get_calibration_essay({'problem_id': location, 'student_id': student_id})
+            success, data = get_calibration_essay(location, student_id)
 
             if not success:
                 return HttpResponse(data)

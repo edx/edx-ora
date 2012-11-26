@@ -164,7 +164,7 @@ def is_student_calibrated(request):
     problem_id = request.GET.get("problem_id")
     student_id = request.GET.get("student_id")
 
-    success, data = calibration.check_calibration_status({'problem_id': problem_id, 'student_id': student_id})
+    success, data = calibration.check_calibration_status(problem_id, student_id)
 
     if not success:
         return util._error_response(data, _INTERFACE_VERSION)
@@ -188,7 +188,7 @@ def show_calibration_essay(request):
     problem_id = request.GET.get("problem_id")
     student_id = request.GET.get("student_id")
 
-    success, data = calibration.get_calibration_essay({'problem_id': problem_id, 'student_id': student_id})
+    success, data = calibration.get_calibration_essay(problem_id, student_id)
 
     if not success:
         return util._error_response(data, _INTERFACE_VERSION)
