@@ -143,7 +143,7 @@ def save_grade(request):
          'confidence': 1.0}
 
     success, header = grader_util.create_and_save_grader_object(d)
-    
+
     if not success:
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 

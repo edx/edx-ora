@@ -80,7 +80,15 @@ class StaffGradingViewTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
 
     def test_save_grade_submission_id_does_not_exist(self):
+        #Should fail, the submission id that is posted to the view does not exist
         self.save_grade(False)
+
+    def test_save_grade_true(self):
+        test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID)
+        test_sub.save()
+
+        #Should work because submission was just created
+        self.save_grade(True)
 
     def save_grade(self, should_work):
         post_data={
