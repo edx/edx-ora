@@ -11,6 +11,7 @@ import urlparse
 from django.contrib.auth.models import User
 from django.test.client import Client
 import requests
+import test_util
 from django.conf import settings
 from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
@@ -83,15 +84,23 @@ def create_calibration_records(location,student_id,num_to_create,sub_ids,scores,
         cal_record.save()
 
 class LMSInterfaceTest(unittest.TestCase):
-    pass
+    def setUp(self):
+        test_util.create_user()
+
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def get_next_submission(self):
+        pass
+
 
 
 class IsCalibratedTest(unittest.TestCase):
     def setUp(self):
-        if(User.objects.filter(username='test').count() == 0):
-            user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
-            user.save()
-
+        test_util.create_user()
         self.c = Client()
         response = self.c.login(username='test', password='CambridgeMA')
 
@@ -101,15 +110,7 @@ class IsCalibratedTest(unittest.TestCase):
             }
 
     def tearDown(self):
-        for sub in Submission.objects.all():
-            sub.delete()
-
-        for cal_record in CalibrationRecord.objects.all():
-            cal_record.delete()
-
-        for cal_hist in CalibrationHistory.objects.all():
-            cal_hist.delete()
-
+        test_util.delete_all()
 
     def test_is_calibrated_false(self):
 

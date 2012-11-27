@@ -17,6 +17,7 @@ from django.conf import settings
 import xqueue_interface
 import grader_interface
 import util
+import test_util
 
 from models import Submission, Grader
 from models import GraderStatus, SubmissionState
@@ -33,7 +34,6 @@ PUT_URL="/grading_controller/put_result/"
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
-
 
 def parse_xreply(xreply):
 
@@ -62,44 +62,14 @@ def login_to_controller(session):
     log.debug(response.content)
     return True
 
-def get_test_sub(grader_type):
-    test_sub = Submission(
-        prompt="prompt",
-        student_id=STUDENT_ID,
-        problem_id="id",
-        state=SubmissionState.waiting_to_be_graded,
-        student_response="response",
-        student_submission_time=timezone.now(),
-        xqueue_submission_id="id",
-        xqueue_submission_key="key",
-        xqueue_queue_name="MITx-6.002x",
-        location=LOCATION,
-        course_id="course_id",
-        max_score=3,
-        next_grader_type=grader_type,
-        previous_grader_type=grader_type,
-    )
-    return test_sub
-
-def get_test_grader(grader_type):
-    test_grader=Grader(
-        score=0,
-        feedback="",
-        status_code=GraderStatus.success,
-        grader_id="1",
-        grader_type=grader_type,
-        confidence=1,
-        is_calibration=False,
-    )
-
-    return test_grader
-
 class XQueueInterfaceTest(unittest.TestCase):
     def setUp(self):
-        if(User.objects.filter(username='test').count() == 0):
-            user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
-            user.save()
+        test_util.create_user()
+
         self.c = Client()
+
+    def tearDown(self):
+        test_util.delete_all()
 
     def test_log_in(self):
         '''
@@ -173,19 +143,16 @@ class XQueueInterfaceTest(unittest.TestCase):
 
 class GraderInterfaceTest(unittest.TestCase):
     def setUp(self):
-        if(User.objects.filter(username='test').count() == 0):
-            user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
-            user.save()
+        test_util.create_user()
 
         self.c = Client()
         response = self.c.login(username='test', password='CambridgeMA')
 
     def tearDown(self):
-        for sub in Submission.objects.all():
-            sub.delete()
+        test_util.delete_all()
 
     def test_submission_create(self):
-        sub = get_test_sub("IN")
+        sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
         assert True
 
@@ -206,16 +173,16 @@ class GraderInterfaceTest(unittest.TestCase):
 
         #Create enough instructor graded submissions that ML will work
         for i in xrange(0,settings.MIN_TO_USE_ML):
-            sub=get_test_sub("IN")
+            sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
             sub.state=SubmissionState.finished
             sub.save()
 
-            grade=get_test_grader("IN")
+            grade=test_util.get_grader("IN")
             grade.submission=sub
             grade.save()
 
         #Create a submission that requires ML grading
-        sub=get_test_sub("ML")
+        sub=test_util.get_sub("ML",STUDENT_ID,LOCATION)
         sub.save()
 
         content = self.c.get(
@@ -232,7 +199,7 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(sub.prompt,"prompt")
 
     def test_get_sub_in(self):
-        sub = get_test_sub("IN")
+        sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
 
         content = self.c.get(
@@ -253,7 +220,7 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(sub.prompt, "prompt")
 
     def test_put_result(self):
-        sub = get_test_sub("IN")
+        sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
         post_dict={
             'feedback': "test feedback",
