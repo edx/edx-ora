@@ -79,7 +79,7 @@ def post_expired_submissions_to_xqueue(timed_out_list):
             log.debug(header)
             log.debug(success)
 
-            error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
+            success, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return True

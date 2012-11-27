@@ -16,6 +16,8 @@ from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION=1
+
 @csrf_exempt
 @login_required
 def submit(request):
@@ -43,7 +45,7 @@ def submit(request):
                 util.get_request_ip(request),
                 request.POST,
             ))
-            return HttpResponse(util.compose_reply(False, 'Incorrect format'))
+            return util._error_response('Incorrect format' , _INTERFACE_VERSION)
         else:
             try:
                 #Retrieve individual values from xqueue body and header.
@@ -91,12 +93,12 @@ def submit(request):
                         xqueue_submission_id,
                         xqueue_submission_key,
                     ))
-                return HttpResponse(util.compose_reply(False, 'Unable to create submission.'))
+                return util.error_response('Unable to create submission.', _INTERFACE_VERSION)
 
             #Handle submission and write to db
             success = handle_submission(sub)
 
-            return HttpResponse(util.compose_reply(success=success, content=''))
+            return util.success_response({'actual_success' : success}, _INTERFACE_VERSION)
 
 
 def handle_submission(sub):

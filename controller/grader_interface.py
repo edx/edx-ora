@@ -18,6 +18,8 @@ from peer_grading import peer_grading_util
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION=1
+
 @login_required
 def get_submission_ml(request):
     """
@@ -39,9 +41,9 @@ def get_submission_ml(request):
                 if to_be_graded is not None:
                     to_be_graded.state = SubmissionState.being_graded
                     to_be_graded.save()
-                    return HttpResponse(util.compose_reply(True, to_be_graded.id))
+                    return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
-    return HttpResponse(util.compose_reply(False, "Nothing to grade."))
+    return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 
 @login_required
@@ -51,16 +53,15 @@ def get_submission_instructor(request):
     """
     try:
         course_id = util._value_or_default(request.GET['course_id'], None)
-    except KeyError:
-        return HttpResponse(util.compose_reply(False,
-            "'get_submission' requires parameter 'course_id'"))
+    except:
+        return util._error_response("'get_submission' requires parameter 'course_id'", _INTERFACE_VERSION)
 
     found, sub_id = staff_grading_util.get_single_instructor_grading_item(course_id)
 
     if not found:
-        return HttpResponse(util.compose_reply(False, "Nothing to grade."))
+        return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
-    return HttpResponse(util.compose_reply(True, sub_id))
+    return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
 
 @login_required
@@ -72,16 +73,14 @@ def get_submission_peer(request):
         location = util._value_or_default(request.GET['location'], None)
         grader_id = util._value_or_default(request.GET['grader_id'], None)
     except KeyError:
-        return HttpResponse(util.compose_reply(False,
-            "'get_submission' requires parameters 'location', 'grader_id'"))
+        return util._error_response("'get_submission' requires parameters 'location', 'grader_id'", _INTERFACE_VERSION)
 
-    #TODO: Bring this back into this module once instructor grading stub view is gone.
     found, sub_id = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
-        return HttpResponse(util.compose_reply(False, "Nothing to grade."))
+        return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
-    return HttpResponse(util.compose_reply(True, sub_id))
+    return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
 
 @csrf_exempt
@@ -91,32 +90,32 @@ def put_result(request):
     Used by external interfaces to post results back to controller
     """
     if request.method != 'POST':
-        return HttpResponse(util.compose_reply(False, "'put_result' must use HTTP POST"))
+        return util._error_response("'put_result' must use HTTP POST", _INTERFACE_VERSION)
     else:
         post_data = request.POST.dict().copy()
         log.debug(post_data)
 
         for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score']:
             if not post_data.has_key(tag):
-                return HttpResponse(util.compose_reply(False, "Failed to find needed keys."))
+                return util._error_response("Failed to find needed key {0}.".format(tag), _INTERFACE_VERSION)
 
         #list comprehension below just gets all available grader types ['ML','IN', etc
         if post_data['grader_type'] not in [i[0] for i in GRADER_TYPE]:
-            return HttpResponse(util.compose_reply(False, "Invalid grader type."))
+            return util._error_response("Invalid grader type {0}.".format(post_data['grader_type']),_INTERFACE_VERSION)
 
         #list comprehension below gets all available status codes ['F',"S']
         if post_data['status'] not in [i[0] for i in STATUS_CODES]:
-            return HttpResponse(util.compose_reply(False, "Invalid grader status."))
+            return util._error_response("Invalid grader status.".format(post_data['status']), _INTERFACE_VERSION)
 
         try:
             post_data['score'] = int(post_data['score'])
         except:
-            return HttpResponse(util.compose_reply(False, "Can't parse score into an int."))
+            return util._errors_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
 
         success, header = grader_util.create_and_save_grader_object(post_data)
         if not success:
-            return HttpResponse(util.compose_reply(False, "Could not save grader."))
+            return util._errors_response("Could not save grader.", _INTERFACE_VERSION)
 
-        return HttpResponse(util.compose_reply(True, "Saved successfully."))
+        return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
 

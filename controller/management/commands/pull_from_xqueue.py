@@ -36,12 +36,12 @@ class Command(BaseCommand):
                 #Check for new submissions on xqueue, and send to controller
                 try:
                     #Get and parse queue objects
-                    response_code, queue_item = self.get_from_queue(queue_name)
-                    return_code, content = util.parse_xobject(queue_item, queue_name)
+                    success, queue_item = self.get_from_queue(queue_name)
+                    success, content = util.parse_xobject(queue_item, queue_name)
                     log.debug(content)
 
                     #Post to grading controller here!
-                    if return_code == 0:
+                    if  success:
                         #Post to controller
                         log.debug("Trying to post.")
                         util._http_post(
@@ -66,7 +66,7 @@ class Command(BaseCommand):
                         json.dumps(xqueue_header),
                         json.dumps(xqueue_body),
                     )
-                    if success == 0:
+                    if success:
                         log.debug("Successful post back to xqueue!")
                         submission.posted_results_back_to_queue = True
                         submission.save()
@@ -88,10 +88,10 @@ class Command(BaseCommand):
         Get a single submission from xqueue
         """
         try:
-            response = util._http_get(self.xqueue_session,
+            success, response = util._http_get(self.xqueue_session,
                 urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_submission/'),
                 {'queue_name': queue_name})
         except Exception as err:
-            return 1, "Error getting response: {0}".format(err)
+            return False, "Error getting response: {0}".format(err)
 
-        return response
+        return success, response

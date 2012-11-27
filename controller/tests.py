@@ -45,8 +45,16 @@ TEST_SUB = Submission(
 )
 
 def parse_xreply(xreply):
+
     xreply = json.loads(xreply)
-    return (xreply['return_code'], xreply['content'])
+    if 'success' in xreply:
+        return_code=xreply['success']
+    elif 'return_code' in xreply:
+        return_code = (xreply['return_code']==0)
+    else:
+        return_code = False
+
+    return (return_code, xreply['content'])
 
 
 def login_to_controller(session):
@@ -136,7 +144,7 @@ class XQueueInterfaceTest(unittest.TestCase):
 
         body = json.loads(content.content)
 
-        self.assertEqual(body['return_code'], 0)
+        self.assertEqual(body['success'], True)
 
 
 class GraderInterfaceTest(unittest.TestCase):
@@ -160,8 +168,9 @@ class GraderInterfaceTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        self.assertEqual(body['content'], "Nothing to grade.")
-        self.assertEqual(body['return_code'], 1)
+        log.debug(body)
+        self.assertEqual(body['error'], "Nothing to grade.")
+        self.assertEqual(body['success'], False)
 
     def test_get_sub_in(self):
         sub = TEST_SUB
@@ -174,10 +183,10 @@ class GraderInterfaceTest(unittest.TestCase):
 
         body = json.loads(content.content)
 
-        sub_id = body['content']
+        sub_id = body['submission_id']
 
-        return_code = body['return_code']
-        self.assertEqual(return_code, 0)
+        return_code = body['success']
+        self.assertEqual(return_code, True)
 
         sub = Submission.objects.get(id=sub_id)
 
@@ -203,9 +212,9 @@ class GraderInterfaceTest(unittest.TestCase):
         body=json.loads(content.content)
 
         log.debug(body)
-        return_code=body['return_code']
+        return_code=body['success']
 
-        self.assertEqual(return_code,0)
+        self.assertEqual(return_code,True)
 
 
 

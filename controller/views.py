@@ -16,6 +16,8 @@ from models import Submission
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION=1
+
 @csrf_exempt
 def log_in(request):
     """
@@ -42,11 +44,11 @@ def log_out(request):
     Uses django auth to handle a logout request
     """
     logout(request)
-    return HttpResponse(util.compose_reply(success=True, content='Goodbye'))
+    return util._success_response({'message' : 'Goodbye'} , _INTERFACE_VERSION)
 
 
 def status(request):
     """
     Returns a simple status update
     """
-    return HttpResponse(util.compose_reply(success=True, content='OK'))
+    return util._success_response({'content' : 'OK'}, _INTERFACE_VERSION)
