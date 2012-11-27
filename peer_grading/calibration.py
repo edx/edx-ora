@@ -107,7 +107,7 @@ def get_calibration_essay(location, student_id):
         return False, "Not enough calibration essays."
 
     #Get all student calibration done on current problem
-    student_calibration_history = CalibrationHistory.objects.get(student_id=student_id, location=location)
+    student_calibration_history, success = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
     student_calibration_records = student_calibration_history.get_all_calibration_records()
     student_calibration_ids = [cr.submission.id for cr in list(student_calibration_records)]
     calibration_essay_ids = [cr.id for cr in list(calibration_submissions)]

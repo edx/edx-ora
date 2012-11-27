@@ -158,7 +158,46 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         self.assertEqual(sub.grader_set.all().count(),1)
 
 class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
-    pass
+    def setUp(self):
+        test_util.create_user()
+
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def test_show_calibration_essay_false(self):
+        content = self.c.get(
+            SHOW_CALIBRATION,
+            data={'problem_id' : LOCATION, "student_id" : STUDENT_ID},
+        )
+
+        body = json.loads(content.content)
+        log.debug(body)
+
+        #No calibration essays exist, impossible to get any
+        self.assertEqual(body['success'], False)
+
+    def test_show_calibration_essay_not_enough(self):
+        #We added one calibration essay, so this should not work (below minimum needed).
+        self.show_calibration_essay(1,False)
+
+    def test_show_calibration_essay_enough(self):
+        #We added enough calibration essays, so this should work (equal to minimum needed).
+        self.show_calibration_essay(settings.PEER_GRADER_MINIMUM_TO_CALIBRATE, True)
+
+    def show_calibration_essay(self,count,should_work):
+        sub_ids=create_calibration_essays(count,[0] * count,True)
+        content = self.c.get(
+            SHOW_CALIBRATION,
+            data={'problem_id' : LOCATION, "student_id" : STUDENT_ID},
+        )
+
+        body = json.loads(content.content)
+        log.debug(body)
+
+        self.assertEqual(body['success'], should_work)
 
 
 
