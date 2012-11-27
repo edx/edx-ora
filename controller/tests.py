@@ -204,7 +204,8 @@ class GraderInterfaceTest(unittest.TestCase):
 
     def test_get_ml_subs_true(self):
 
-        for i in xrange(0,settings.MIN_TO_USE_ML+1):
+        #Create enough instructor graded submissions that ML will work
+        for i in xrange(0,settings.MIN_TO_USE_ML):
             sub=get_test_sub("IN")
             sub.state=SubmissionState.finished
             sub.save()
@@ -213,8 +214,7 @@ class GraderInterfaceTest(unittest.TestCase):
             grade.submission=sub
             grade.save()
 
-        log.debug("Submission count: {0}".format(staff_grading_util.finished_submissions_graded_by_instructor(LOCATION).count()))
-
+        #Create a submission that requires ML grading
         sub=get_test_sub("ML")
         sub.save()
 
@@ -225,6 +225,7 @@ class GraderInterfaceTest(unittest.TestCase):
         body = json.loads(content.content)
         log.debug(body)
 
+        #Ensure that submission is retrieved successfully
         self.assertEqual(body['success'],True)
 
         sub=Submission.objects.get(id=body['submission_id'])

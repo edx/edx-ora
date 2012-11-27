@@ -45,6 +45,42 @@ TEST_SUB = Submission(
     next_grader_type="IN",
 )
 
+def create_calibration_essays(num_to_create,scores,is_calibration):
+    test_subs=[TEST_SUB for i in xrange(0,num_to_create)]
+    sub_ids=[]
+
+    for i in xrange(0,len(test_subs)):
+        sub=test_subs[i]
+        sub.save()
+        grade=Grader(
+            submission=sub,
+            score=scores[i],
+            feedback="feedback",
+            is_calibration=is_calibration,
+            grader_id="1",
+            grader_type="IN",
+            status_code=GraderStatus.success,
+            confidence=1,
+        )
+        sub_ids.append(sub.id)
+        grade.save()
+
+    return sub_ids
+
+def create_calibration_records(location,student_id,num_to_create,sub_ids,scores,actual_scores):
+    cal_hist,success=CalibrationHistory.objects.get_or_create(location=location,student_id=student_id)
+    cal_hist.save()
+
+    for i in xrange(0,num_to_create):
+        sub=Submission.objects.get(id=sub_ids[i])
+        cal_record=CalibrationRecord(
+            submission=sub,
+            calibration_history=cal_hist,
+            score=scores[i],
+            actual_score=actual_scores[i],
+            feedback="",
+        )
+        cal_record.save()
 
 class LMSInterfaceTest(unittest.TestCase):
     pass
@@ -135,48 +171,6 @@ class IsCalibratedTest(unittest.TestCase):
 
         #Now records exist and error is 0, so student should be calibrated
         self.assertEqual(body['calibrated'], calibration_val)
-
-def create_calibration_essays(num_to_create,scores,is_calibration):
-    test_subs=[TEST_SUB for i in xrange(0,num_to_create)]
-    sub_ids=[]
-
-    for i in xrange(0,len(test_subs)):
-        sub=test_subs[i]
-        sub.save()
-        grade=Grader(
-            submission=sub,
-            score=scores[i],
-            feedback="feedback",
-            is_calibration=is_calibration,
-            grader_id="1",
-            grader_type="IN",
-            status_code=GraderStatus.success,
-            confidence=1,
-        )
-        sub_ids.append(sub.id)
-        grade.save()
-
-    return sub_ids
-
-def create_calibration_records(location,student_id,num_to_create,sub_ids,scores,actual_scores):
-    cal_hist,success=CalibrationHistory.objects.get_or_create(location=location,student_id=student_id)
-    cal_hist.save()
-
-    for i in xrange(0,num_to_create):
-        sub=Submission.objects.get(id=sub_ids[i])
-        cal_record=CalibrationRecord(
-            submission=sub,
-            calibration_history=cal_hist,
-            score=scores[i],
-            actual_score=actual_scores[i],
-            feedback="",
-        )
-        cal_record.save()
-
-
-
-
-
 
 
 
