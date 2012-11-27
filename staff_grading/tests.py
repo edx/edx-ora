@@ -49,4 +49,53 @@ class StaffGradingViewTest(unittest.TestCase):
         self.assertEqual(body['message'], "No more submissions to grade.")
         self.assertEqual(body['success'], True)
 
+    def test_get_next_submission_true(self):
+        test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID)
+        test_sub.save()
 
+        content = self.c.get(
+            GET_NEXT,
+            data={'course_id' : COURSE_ID, "grader_id" : STUDENT_ID},
+        )
+
+        body = json.loads(content.content)
+
+        #Should return true, and resulting dictionary should have submission id one
+        self.assertDictContainsSubset({'submission_id' : 1}, body)
+        self.assertEqual(body['success'], True)
+
+    def test_save_grade_false(self):
+        post_data={
+            'blah' : 'blah'
+        }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            post_data,
+        )
+
+        body=json.loads(content.content)
+
+        #Should fail, dictionary does not have needed keys
+        self.assertEqual(body['success'], False)
+
+    def test_save_grade_submission_id_does_not_exist(self):
+        self.save_grade(False)
+
+    def save_grade(self, should_work):
+        post_data={
+            'course_id' : COURSE_ID,
+            'grader_id' : STUDENT_ID,
+            'submission_id' : 1,
+            'score' : 0,
+            'feedback' : 'string',
+        }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            post_data,
+        )
+
+        body=json.loads(content.content)
+
+        self.assertEqual(body['success'], should_work)
