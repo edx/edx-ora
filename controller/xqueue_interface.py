@@ -97,8 +97,10 @@ def submit(request):
 
             #Handle submission and write to db
             success = handle_submission(sub)
+            if not success:
+                return util._error_response("Failed to handle submission.")
 
-            return util._success_response({'actual_success' : success}, _INTERFACE_VERSION)
+            return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
 
 def handle_submission(sub):
