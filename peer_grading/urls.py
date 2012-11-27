@@ -11,6 +11,6 @@ urlpatterns = patterns('peer_grading.lms_interface',
 )
 
 # Temporary stub view
-urlpatterns = patterns('peer_grading.views',
+urlpatterns += patterns('peer_grading.views',
     url(r'^peer_grading/$', 'peer_grading'),
 )
