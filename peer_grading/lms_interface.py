@@ -238,4 +238,4 @@ def save_calibration_essay(request):
 
     (success, data) = calibration.create_and_save_calibration_record(d)
 
-    return success
+    return util._success_response({'actual_success' : success}, _INTERFACE_VERSION)

@@ -199,6 +199,35 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
 
         self.assertEqual(body['success'], should_work)
 
+    def test_save_calibration_essay_false(self):
+        #Will not work because calibration essay is not associated with a real essay id
+        self.save_calibration_essay(False)
+
+    def test_save_calibration_essay_false(self):
+        sub_ids=create_calibration_essays(1,[0],True)
+        #Should work because essay has been created.
+        self.save_calibration_essay(True)
+
+    def save_calibration_essay(self,should_work):
+        test_dict={
+            'location': LOCATION,
+            'student_id': STUDENT_ID,
+            'calibration_essay_id': 1,
+            'score': 0,
+            'feedback': 'feedback',
+            'submission_key' : 'string',
+            }
+
+        content = self.c.post(
+            SAVE_CALIBRATION,
+            test_dict,
+        )
+
+        body = json.loads(content.content)
+        log.debug(body)
+
+        self.assertEqual(body['success'], should_work)
+
 
 
 class IsCalibratedTest(unittest.TestCase):
