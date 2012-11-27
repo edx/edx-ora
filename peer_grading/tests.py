@@ -27,27 +27,11 @@ SAVE_GRADE="/peer_grading/save_grade/"
 SHOW_CALIBRATION="/peer_grading/show_calibration_essay/"
 SAVE_CALIBRATION="/peer_grading/save_calibration_essay/"
 
+LOCATION="MITx/6.002x"
 STUDENT_ID="5"
-PROBLEM_ID="MITx/6.002x"
-
-TEST_SUB = Submission(
-    prompt="prompt",
-    student_id=STUDENT_ID,
-    problem_id="id",
-    state=SubmissionState.waiting_to_be_graded,
-    student_response="response",
-    student_submission_time=timezone.now(),
-    xqueue_submission_id="id",
-    xqueue_submission_key="key",
-    xqueue_queue_name="MITx-6.002x",
-    location=PROBLEM_ID,
-    course_id="course_id",
-    max_score=3,
-    next_grader_type="IN",
-)
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
-    test_subs=[TEST_SUB for i in xrange(0,num_to_create)]
+    test_subs=[test_util.get_sub("IN",STUDENT_ID,LOCATION) for i in xrange(0,num_to_create)]
     sub_ids=[]
 
     for i in xrange(0,len(test_subs)):
@@ -93,8 +77,58 @@ class LMSInterfaceTest(unittest.TestCase):
     def tearDown(self):
         test_util.delete_all()
 
-    def get_next_submission(self):
-        pass
+    def test_get_next_submission_false(self):
+        content = self.c.get(
+            GET_NEXT,
+            data={'grader_id' : STUDENT_ID, "location" : LOCATION},
+        )
+
+        body = json.loads(content.content)
+
+        #Ensure that correct response is received.
+        self.assertEqual(body['success'], False)
+        self.assertEqual(body['error'],"No current grading.")
+
+    def test_save_grade_false(self):
+        test_dict={
+            'location': LOCATION,
+            'grader_id': STUDENT_ID,
+            'submission_id': 1,
+            'score': 0,
+            'feedback': 'feedback',
+            'submission_key' : 'string',
+        }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            test_dict,
+        )
+
+        log.debug(content)
+
+        body=json.loads(content.content)
+
+        #Should be false, submission id does not exist right now!
+        self.assertEqual(body['success'], False)
+
+    def test_get_next_submission_same_student(self):
+        #Try to get an essay submitted by the same student
+        test_sub=test_util.get_sub("PE", STUDENT_ID,LOCATION)
+        test_sub.save()
+
+        content = self.c.get(
+            GET_NEXT,
+            data={'grader_id' : STUDENT_ID, "location" : LOCATION},
+        )
+
+        body = json.loads(content.content)
+        log.debug(body)
+
+        #Ensure that correct response is received.
+        self.assertEqual(body['success'], False)
+        self.assertEqual(body['error'],"No current grading.")
+
+
 
 
 
@@ -106,7 +140,7 @@ class IsCalibratedTest(unittest.TestCase):
 
         self.get_data={
             'student_id' : STUDENT_ID,
-            'problem_id' : PROBLEM_ID,
+            'problem_id' : LOCATION,
             }
 
     def tearDown(self):
@@ -125,7 +159,7 @@ class IsCalibratedTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
 
 
-        sub=TEST_SUB
+        sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
 
         content = self.c.get(
@@ -160,7 +194,7 @@ class IsCalibratedTest(unittest.TestCase):
 
     def check_is_calibrated(self,num_to_add,calibration_val,scores,actual_scores):
         sub_ids=create_calibration_essays(num_to_add,actual_scores, True)
-        create_calibration_records(PROBLEM_ID,STUDENT_ID,num_to_add,sub_ids,scores, actual_scores)
+        create_calibration_records(LOCATION,STUDENT_ID,num_to_add,sub_ids,scores, actual_scores)
         content = self.c.get(
             IS_CALIBRATED,
             data=self.get_data,
