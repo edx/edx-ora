@@ -76,8 +76,6 @@ def post_expired_submissions_to_xqueue(timed_out_list):
 
             #TODO: Currently looks up submission object twice.  Fix in future.
             success, header = grader_util.create_and_save_grader_object(grader_dict)
-            log.debug(header)
-            log.debug(success)
 
             success, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 

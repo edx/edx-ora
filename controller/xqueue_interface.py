@@ -93,12 +93,12 @@ def submit(request):
                         xqueue_submission_id,
                         xqueue_submission_key,
                     ))
-                return util.error_response('Unable to create submission.', _INTERFACE_VERSION)
+                return util._error_response('Unable to create submission.', _INTERFACE_VERSION)
 
             #Handle submission and write to db
             success = handle_submission(sub)
 
-            return util.success_response({'actual_success' : success}, _INTERFACE_VERSION)
+            return util._success_response({'actual_success' : success}, _INTERFACE_VERSION)
 
 
 def handle_submission(sub):

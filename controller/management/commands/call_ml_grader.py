@@ -35,7 +35,7 @@ class Command(BaseCommand):
         while flag:
             try:
                 success, content = self.get_item_from_controller()
-
+                log.debug(content)
                 #Grade and handle here
                 if success:
                     sub = Submission.objects.get(id=content['submission_id'])
@@ -71,7 +71,7 @@ class Command(BaseCommand):
                     log.info("Error getting item from controller or no items to get.")
 
             except Exception as err:
-                log.debug("Error getting submission: ".format(err))
+                log.debug("Error getting submission: {0}".format(err))
 
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 

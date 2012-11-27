@@ -63,15 +63,17 @@ def parse_xreply(xreply):
     #This is to correctly parse xserver replies and internal success/failure messages
     if 'return_code' in xreply:
         return_code = (xreply['return_code']==0)
+        content = xreply['content']
     elif 'success' in xreply:
         return_code = xreply['success']
+        content=xreply
     else:
         return False, "Cannot find a valid success or return code."
 
     if return_code not in [True,False]:
         return (False, 'Invalid return code.')
 
-    content = xreply['content']
+
     return return_code, content
 
 
