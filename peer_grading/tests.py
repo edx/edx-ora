@@ -45,7 +45,11 @@ TEST_SUB = Submission(
 )
 
 
-class CalibrationTest(unittest.TestCase):
+class LMSInterfaceTest(unittest.TestCase):
+    pass
+
+
+class IsCalibratedTest(unittest.TestCase):
     def setUp(self):
         if(User.objects.filter(username='test').count() == 0):
             user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
