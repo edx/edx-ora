@@ -35,7 +35,7 @@ def submit(request):
     Returns status code indicating success (0) or failure (1) and message
     '''
     if request.method != 'POST':
-        return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
+        return util._error_response("'submit' must use HTTP POST", _INTERFACE_VERSION)
     else:
         #Minimal parsing of reply
         reply_is_valid, header, body = _is_valid_reply(request.POST.copy())

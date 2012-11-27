@@ -49,12 +49,14 @@ def parse_xreply(xreply):
     xreply = json.loads(xreply)
     if 'success' in xreply:
         return_code=xreply['success']
+        content=xreply
     elif 'return_code' in xreply:
         return_code = (xreply['return_code']==0)
+        content = xreply['content']
     else:
         return_code = False
 
-    return (return_code, xreply['content'])
+    return (return_code, xreply)
 
 
 def login_to_controller(session):
