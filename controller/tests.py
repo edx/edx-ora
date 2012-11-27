@@ -86,22 +86,22 @@ class XQueueInterfaceTest(unittest.TestCase):
         #    The specific message is important, as it is used as a flag by LMS to reauthenticate!
         response = self.c.get(LOGIN_URL)
         (error, msg) = parse_xreply(response.content)
-        self.assertEqual(error, True)
+        self.assertEqual(error, False)
 
         # 1) Attempt login with POST, but no auth
         response = self.c.post(LOGIN_URL)
         (error, _) = parse_xreply(response.content)
-        self.assertEqual(error, True)
+        self.assertEqual(error, False)
 
         # 2) Attempt login with POST, incorrect auth
         response = self.c.post(LOGIN_URL, {'username': 'test', 'password': 'PaloAltoCA'})
         (error, _) = parse_xreply(response.content)
-        self.assertEqual(error, True)
+        self.assertEqual(error, False)
 
         # 3) Login correctly
         response = self.c.post(LOGIN_URL, {'username': 'test', 'password': 'CambridgeMA'})
         (error, _) = parse_xreply(response.content)
-        self.assertEqual(error, False)
+        self.assertEqual(error, True)
 
     def test_xqueue_submit(self):
         xqueue_header = {

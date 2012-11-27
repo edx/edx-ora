@@ -30,13 +30,13 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 log.debug("Successful login!")
-                return HttpResponse(util.compose_reply(True, 'Logged in'))
+                return util._success_response({'message' : 'logged in'} , _INTERFACE_VERSION)
             else:
-                return HttpResponse(util.compose_reply(False, 'Incorrect login credentials'))
+                return util._error_response('Incorrect login credentials', _INTERFACE_VERSION)
         else:
-            return HttpResponse(util.compose_reply(False, 'Insufficient login info'))
+            return util._error_response('Insufficient login info', _INTERFACE_VERSION)
     else:
-        return HttpResponse(util.compose_reply(False, 'login_required'))
+        return util._error_response('login_required', _INTERFACE_VERSION)
 
 
 def log_out(request):
