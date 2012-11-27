@@ -1,6 +1,6 @@
 """
 Run me with:
-    python manage.py test --settings=xqueue.test_settings queue
+    python manage.py test --settings=grading_controller.settings peer_grading
 """
 import json
 import unittest
@@ -14,6 +14,7 @@ import requests
 from django.conf import settings
 from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
+from django.utils import timezone
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ TEST_SUB = Submission(
     problem_id="id",
     state=SubmissionState.waiting_to_be_graded,
     student_response="response",
-    student_submission_time=datetime.now(),
+    student_submission_time=timezone.now(),
     xqueue_submission_id="id",
     xqueue_submission_key="key",
     xqueue_queue_name="MITx-6.002x",

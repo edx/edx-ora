@@ -1,10 +1,11 @@
 """
 Run me with:
-    python manage.py test --settings=xqueue.test_settings queue
+    python manage.py test --settings=grading_controller.settings controller
 """
 import json
 import unittest
 from datetime import datetime
+from django.utils import timezone
 import logging
 import urlparse
 
@@ -20,6 +21,8 @@ import util
 from models import Submission, Grader
 from models import GraderStatus, SubmissionState
 
+from staff_grading import staff_grading_util
+
 log = logging.getLogger(__name__)
 
 LOGIN_URL = "/grading_controller/login/"
@@ -28,21 +31,9 @@ ML_GET_URL = "/grading_controller/get_submission_ml/"
 IN_GET_URL = "/grading_controller/get_submission_instructor/"
 PUT_URL="/grading_controller/put_result/"
 
-TEST_SUB = Submission(
-    prompt="prompt",
-    student_id="id",
-    problem_id="id",
-    state=SubmissionState.waiting_to_be_graded,
-    student_response="response",
-    student_submission_time=datetime.now(),
-    xqueue_submission_id="id",
-    xqueue_submission_key="key",
-    xqueue_queue_name="MITx-6.002x",
-    location="location",
-    course_id="course_id",
-    max_score=3,
-    next_grader_type="IN",
-)
+LOCATION="MITx/6.002x"
+STUDENT_ID="5"
+
 
 def parse_xreply(xreply):
 
@@ -71,6 +62,37 @@ def login_to_controller(session):
     log.debug(response.content)
     return True
 
+def get_test_sub(grader_type):
+    test_sub = Submission(
+        prompt="prompt",
+        student_id=STUDENT_ID,
+        problem_id="id",
+        state=SubmissionState.waiting_to_be_graded,
+        student_response="response",
+        student_submission_time=timezone.now(),
+        xqueue_submission_id="id",
+        xqueue_submission_key="key",
+        xqueue_queue_name="MITx-6.002x",
+        location=LOCATION,
+        course_id="course_id",
+        max_score=3,
+        next_grader_type=grader_type,
+        previous_grader_type=grader_type,
+    )
+    return test_sub
+
+def get_test_grader(grader_type):
+    test_grader=Grader(
+        score=0,
+        feedback="",
+        status_code=GraderStatus.success,
+        grader_id="1",
+        grader_type=grader_type,
+        confidence=1,
+        is_calibration=False,
+    )
+
+    return test_grader
 
 class XQueueInterfaceTest(unittest.TestCase):
     def setUp(self):
@@ -112,7 +134,7 @@ class XQueueInterfaceTest(unittest.TestCase):
             'queue_name': "MITx-6.002x",
         }
         grader_payload = {
-            'location': u'MITx/6.002x/problem/OETest',
+            'location': LOCATION,
             'course_id': u'MITx/6.002x',
             'problem_id': u'6.002x/Welcome/OETest',
             'grader': "temp",
@@ -121,8 +143,8 @@ class XQueueInterfaceTest(unittest.TestCase):
             'grader_settings' : "ml_grading.conf",
         }
         student_info = {
-            'submission_time': datetime.now().strftime("%Y%m%d%H%M%S"),
-            'anonymous_student_id': "blah"
+            'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
+            'anonymous_student_id': STUDENT_ID
         }
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
@@ -158,12 +180,16 @@ class GraderInterfaceTest(unittest.TestCase):
         self.c = Client()
         response = self.c.login(username='test', password='CambridgeMA')
 
+    def tearDown(self):
+        for sub in Submission.objects.all():
+            sub.delete()
+
     def test_submission_create(self):
-        sub = TEST_SUB
+        sub = get_test_sub("IN")
         sub.save()
         assert True
 
-    def test_get_ml_subs(self):
+    def test_get_ml_subs_false(self):
         content = self.c.get(
             ML_GET_URL,
             data={}
@@ -171,11 +197,41 @@ class GraderInterfaceTest(unittest.TestCase):
 
         body = json.loads(content.content)
         log.debug(body)
+
+        #Make sure that there really isn't anything to grade
         self.assertEqual(body['error'], "Nothing to grade.")
         self.assertEqual(body['success'], False)
 
+    def test_get_ml_subs_true(self):
+
+        for i in xrange(0,settings.MIN_TO_USE_ML+1):
+            sub=get_test_sub("IN")
+            sub.state=SubmissionState.finished
+            sub.save()
+
+            grade=get_test_grader("IN")
+            grade.submission=sub
+            grade.save()
+
+        log.debug("Submission count: {0}".format(staff_grading_util.finished_submissions_graded_by_instructor(LOCATION).count()))
+
+        sub=get_test_sub("ML")
+        sub.save()
+
+        content = self.c.get(
+            ML_GET_URL,
+            data={}
+        )
+        body = json.loads(content.content)
+        log.debug(body)
+
+        self.assertEqual(body['success'],True)
+
+        sub=Submission.objects.get(id=body['submission_id'])
+        self.assertEqual(sub.prompt,"prompt")
+
     def test_get_sub_in(self):
-        sub = TEST_SUB
+        sub = get_test_sub("IN")
         sub.save()
 
         content = self.c.get(
@@ -188,14 +244,16 @@ class GraderInterfaceTest(unittest.TestCase):
         sub_id = body['submission_id']
 
         return_code = body['success']
+        #Check to see if a submission is received from the interface
         self.assertEqual(return_code, True)
 
+        #Ensure that the submission exists and is the right one
         sub = Submission.objects.get(id=sub_id)
-
         self.assertEqual(sub.prompt, "prompt")
 
     def test_put_result(self):
-
+        sub = get_test_sub("IN")
+        sub.save()
         post_dict={
             'feedback': "test feedback",
             'submission_id' : 1 ,
@@ -216,7 +274,14 @@ class GraderInterfaceTest(unittest.TestCase):
         log.debug(body)
         return_code=body['success']
 
+        #Male sure that function returns true
         self.assertEqual(return_code,True)
+
+        sub=Submission.objects.get(id=1)
+        successful_grader_count=sub.get_successful_graders().count()
+
+        #Make sure that grader object is actually created!
+        self.assertEqual(successful_grader_count,1)
 
 
 
