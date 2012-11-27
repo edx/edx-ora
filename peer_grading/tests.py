@@ -13,13 +13,6 @@ from django.test.client import Client
 import requests
 from django.conf import settings
 
-import xqueue_interface
-import grader_interface
-import util
-
-from models import Submission, Grader
-from models import GraderStatus, SubmissionState
-
 log = logging.getLogger(__name__)
 
 LOGIN_URL = "/grading_controller/login/"
@@ -30,6 +23,9 @@ SAVE_GRADE="/peer_grading/save_grade/"
 SHOW_CALIBRATION="/peer_grading/show_calibration_essay/"
 SAVE_CALIBRATION="/peer_grading/save_calibration_essay/"
 
+STUDENT_ID="5"
+PROBLEM_ID="MITx/6.002x"
+
 
 class CalibrationTest(unittest.TestCase):
     def setUp(self):
@@ -39,5 +35,20 @@ class CalibrationTest(unittest.TestCase):
 
         self.c = Client()
         response = self.c.login(username='test', password='CambridgeMA')
+
+    def test_is_calibrated_false(self):
+        get_data={
+            'student_id' : STUDENT_ID,
+            'problem_id' : PROBLEM_ID,
+        }
+        content = self.c.get(
+            IS_CALIBRATED,
+            data=get_data,
+        )
+
+        log.debug(content)
+
+        body=json.loads(content)
+
 
 

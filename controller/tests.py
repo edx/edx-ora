@@ -26,6 +26,7 @@ LOGIN_URL = "/grading_controller/login/"
 SUBMIT_URL = "/grading_controller/submit/"
 ML_GET_URL = "/grading_controller/get_submission_ml/"
 IN_GET_URL = "/grading_controller/get_submission_instructor/"
+PUT_URL="/grading_controller/put_result/"
 
 TEST_SUB = Submission(
     prompt="prompt",
@@ -173,7 +174,6 @@ class GraderInterfaceTest(unittest.TestCase):
 
         body = json.loads(content.content)
 
-        log.debug(body)
         sub_id = body['content']
 
         return_code = body['return_code']
@@ -182,5 +182,30 @@ class GraderInterfaceTest(unittest.TestCase):
         sub = Submission.objects.get(id=sub_id)
 
         self.assertEqual(sub.prompt, "prompt")
+
+    def test_put_result(self):
+
+        post_dict={
+            'feedback': "test feedback",
+            'submission_id' : 1 ,
+            'grader_type' : "ML" ,
+            'status' : "S",
+            'confidence' : 1,
+            'grader_id' : 1,
+            'score' : 1,
+            }
+
+        content = self.c.post(
+            PUT_URL,
+            post_dict,
+        )
+
+        body=json.loads(content.content)
+
+        log.debug(body)
+        return_code=body['return_code']
+
+        self.assertEqual(return_code,0)
+
 
 

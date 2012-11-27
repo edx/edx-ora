@@ -100,9 +100,11 @@ def put_result(request):
             if not post_data.has_key(tag):
                 return HttpResponse(util.compose_reply(False, "Failed to find needed keys."))
 
+        #list comprehension below just gets all available grader types ['ML','IN', etc
         if post_data['grader_type'] not in [i[0] for i in GRADER_TYPE]:
             return HttpResponse(util.compose_reply(False, "Invalid grader type."))
 
+        #list comprehension below gets all available status codes ['F',"S']
         if post_data['status'] not in [i[0] for i in STATUS_CODES]:
             return HttpResponse(util.compose_reply(False, "Invalid grader status."))
 
