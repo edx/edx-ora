@@ -67,7 +67,7 @@ def create_calibration_records(location,student_id,num_to_create,sub_ids,scores,
         )
         cal_record.save()
 
-class LMSInterfaceTest(unittest.TestCase):
+class LMSInterfacePeerGradingTest(unittest.TestCase):
     def setUp(self):
         test_util.create_user()
 
@@ -112,7 +112,7 @@ class LMSInterfaceTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
 
     def test_get_next_submission_same_student(self):
-        #Try to get an essay submitted by the same student
+        #Try to get an essay submitted by the same student for peer grading.  Should fail
         test_sub=test_util.get_sub("PE", STUDENT_ID,LOCATION)
         test_sub.save()
 
@@ -128,7 +128,37 @@ class LMSInterfaceTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
         self.assertEqual(body['error'],"No current grading.")
 
+    def test_save_grade_true(self):
+        test_sub=test_util.get_sub("PE", "blah",LOCATION)
+        test_sub.save()
 
+        test_dict={
+            'location': LOCATION,
+            'grader_id': STUDENT_ID,
+            'submission_id': 1,
+            'score': 0,
+            'feedback': 'feedback',
+            'submission_key' : 'string',
+            }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            test_dict,
+        )
+
+        log.debug(content)
+
+        body=json.loads(content.content)
+        #Should succeed, as we created a submission above that save_grade can use
+        self.assertEqual(body['success'], True)
+
+        sub=Submission.objects.get(id=1)
+
+        #Ensure that grader object is created
+        self.assertEqual(sub.grader_set.all().count(),1)
+
+class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
+    pass
 
 
 
