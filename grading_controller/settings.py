@@ -28,6 +28,7 @@ MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10
 MIN_TO_USE_ML = 100
 ML_PATH = os.path.join(ENV_ROOT, "machine_learning/")
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/")
+TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds
 
 #Peer
 MIN_TO_USE_PEER=20
