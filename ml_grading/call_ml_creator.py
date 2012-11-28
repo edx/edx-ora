@@ -21,11 +21,12 @@ import create
 
 log = logging.getLogger(__name__)
 
-class Command(BaseCommand):
-    args = "None"
-    help = "Poll grading controller and send items to be graded to ml"
+class CallMLCreator():
+    """
+    "Poll grading controller and send items to be graded to ml"
+    """
 
-    def handle(self, *args, **options):
+    def run(self):
         """
         Calls ml model creator to evaluate database, decide what needs to have a model created, and do so.
         """
@@ -84,6 +85,12 @@ class Command(BaseCommand):
                     ))
 
         return "Finished looping through."
+
+if __name__ == '__main__':
+    call_ml_creator=CallMLCreator()
+    call_ml_creator.run()
+
+
 
 
 

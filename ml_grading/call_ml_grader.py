@@ -74,16 +74,19 @@ error_template = u"""
 
 """
 
-class Command(BaseCommand):
-    args = "None"
-    help = "Poll grading controller and send items to be graded to ml"
+class CallMLGrader():
+    """
+    "Poll grading controller and send items to be graded to ml"
+    """
 
-    def handle(self, *args, **options):
+    def __init__(self):
+        self.controller_session = util.controller_login()
+
+    def run(self):
         """
         Constant loop that polls grading controller
         """
         log.info(' [*] Polling grading controller...')
-        self.controller_session = util.controller_login()
 
         flag = True
 
@@ -191,6 +194,10 @@ def add_results_to_template(results):
         )
 
     return feedback
+
+if __name__ == '__main__':
+    call_ml_grader=CallMLGrader()
+    call_ml_grader.run()
 
 
 
