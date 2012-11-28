@@ -2,6 +2,16 @@ from models import Timing
 from django.utils import timezone
 from controller.models import Submission, Grader
 
+def initialize_timing(sub_id):
+    success, timing_dict=generate_initial_timing_dict(sub_id)
+    if success:
+        instantiate_timing_object(timing_dict)
+
+def finalize_timing(sub_id, grade_id):
+    success, timing_dict=generate_final_timing_dict(sub_id,grade_id)
+    if success:
+        save_grader_data_in_timing_object(timing_dict)
+
 def generate_initial_timing_dict(submission_id):
     """
     Generate a timing dictionary from a submission object id.
