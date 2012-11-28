@@ -45,6 +45,15 @@ def get_latest_created_model(location):
 
     return True, created_models[0]
 
+def save_created_model(model_data):
+    """
+
+    """
+
+    tags=['max_score', 'prompt', 'rubric', 'location', 'course_id', 'submission_ids_used', 'problem_id', 'model_relative_path',
+          'model_full_path', 'number_of_essays', 'cv_kappa', 'cv_mean_absolute_error', 'creation_succeeded']
+
+
 def check(model_path):
     try:
         with open(model_path) as f: pass
