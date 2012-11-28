@@ -18,6 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from controller.models import Submission
 from controller import util
+from controller import grader_util
+import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +65,7 @@ def get_next_submission(request):
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
-    (found, id) = util.get_single_instructor_grading_item(course_id)
+    (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
     if not found:
         return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
 
@@ -140,7 +142,9 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0}
 
-    if not util.create_and_save_grader_object(d):
+    success, header = grader_util.create_and_save_grader_object(d)
+
+    if not success:
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 
     return util._success_response({}, _INTERFACE_VERSION)

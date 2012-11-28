@@ -29,7 +29,7 @@ STATE_CODES = (
     (SubmissionState.finished, "Finished" )
     )
 
-CHARFIELD_LEN_SMALL = 128
+CHARFIELD_LEN_SMALL = 1024
 
 class Submission(models.Model):
     # controller state

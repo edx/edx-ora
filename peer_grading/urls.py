@@ -1,9 +1,5 @@
 from django.conf.urls import patterns, url
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 
 # LMS Interface
 urlpatterns = patterns('peer_grading.lms_interface',
@@ -15,6 +11,6 @@ urlpatterns = patterns('peer_grading.lms_interface',
 )
 
 # Temporary stub view
-urlpatterns = patterns('peer_grading.views',
+urlpatterns += patterns('peer_grading.views',
     url(r'^peer_grading/$', 'peer_grading'),
 )

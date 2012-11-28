@@ -36,24 +36,28 @@ class Command(BaseCommand):
                 #Check for new submissions on xqueue, and send to controller
                 try:
                     #Get and parse queue objects
-                    response_code, queue_item = self.get_from_queue(queue_name)
-                    return_code, content = util.parse_xobject(queue_item, queue_name)
-                    log.debug(content)
+                    success, queue_length= self.get_queue_length(queue_name)
+                    while success and queue_length>0:
+                        success, queue_item = self.get_from_queue(queue_name)
+                        success, content = util.parse_xobject(queue_item, queue_name)
+                        log.debug(content)
 
-                    #Post to grading controller here!
-                    if return_code == 0:
-                        #Post to controller
-                        log.debug("Trying to post.")
-                        util._http_post(
-                            self.controller_session,
-                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                '/grading_controller/submit/'),
-                            content,
-                            settings.REQUESTS_TIMEOUT,
-                        )
-                        log.debug("Successful post!")
-                    else:
-                        log.info("Error getting queue item or no queue items to get.")
+                        #Post to grading controller here!
+                        if  success:
+                            #Post to controller
+                            log.debug("Trying to post.")
+                            util._http_post(
+                                self.controller_session,
+                                urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                                    '/grading_controller/submit/'),
+                                content,
+                                settings.REQUESTS_TIMEOUT,
+                            )
+                            log.debug("Successful post!")
+                        else:
+                            log.info("Error getting queue item or no queue items to get.")
+
+                        success, queue_length= self.get_queue_length(queue_name)
                 except Exception as err:
                     log.debug("Error getting submission: ".format(err))
 
@@ -66,7 +70,7 @@ class Command(BaseCommand):
                         json.dumps(xqueue_header),
                         json.dumps(xqueue_body),
                     )
-                    if success == 0:
+                    if success:
                         log.debug("Successful post back to xqueue!")
                         submission.posted_results_back_to_queue = True
                         submission.save()
@@ -88,10 +92,28 @@ class Command(BaseCommand):
         Get a single submission from xqueue
         """
         try:
-            response = util._http_get(self.xqueue_session,
+            success, response = util._http_get(self.xqueue_session,
                 urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_submission/'),
                 {'queue_name': queue_name})
         except Exception as err:
-            return 1, "Error getting response: {0}".format(err)
+            return False, "Error getting response: {0}".format(err)
 
-        return response
+        return success, response
+
+    def get_queue_length(self,queue_name):
+            """
+            Returns the length of the queue
+            """
+            try:
+                success, response = util._http_get(self.xqueue_session,
+                    urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_queuelen/'),
+                    {'queue_name': queue_name})
+
+                if not success:
+                    return False,"Invalid return code in reply"
+
+            except Exception as e:
+                log.critical("Unable to get queue length: {0}".format(e))
+                return False, "Unable to get queue length."
+
+            return True, response

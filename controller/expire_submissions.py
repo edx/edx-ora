@@ -17,7 +17,7 @@ def reset_timed_out_submissions(subs):
     Output:
         status code indicating success
     """
-    now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
     timed_out_subs=subs.filter(date_modified__lt=now-min_time)
     timed_out_sub_count=timed_out_subs.count()
@@ -42,7 +42,7 @@ def get_submissions_that_have_expired(subs):
     Input:
         subs - A queryset of submissions
     """
-    now = datetime.datetime.utcnow().replace(tzinfo=timezone.utc)
+    now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
     expired_subs=subs.filter(date_modified__lt=now-min_time)
 
@@ -76,10 +76,8 @@ def post_expired_submissions_to_xqueue(timed_out_list):
 
             #TODO: Currently looks up submission object twice.  Fix in future.
             success, header = grader_util.create_and_save_grader_object(grader_dict)
-            log.debug(header)
-            log.debug(success)
 
-            error, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
+            success, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return True

@@ -59,7 +59,7 @@ class Command(BaseCommand):
                 problem_id=problem_id,
                 state=state,
                 student_response=text[i],
-                student_submission_time=datetime.now(),
+                student_submission_time=timezone.now(),
                 xqueue_submission_id="",
                 xqueue_submission_key="",
                 xqueue_queue_name="",

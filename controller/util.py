@@ -53,14 +53,27 @@ def parse_xreply(xreply):
           'content': Message from xqueue (string)
         }
     """
+
     try:
         xreply = json.loads(xreply)
     except ValueError, err:
         log.error(err)
-        return (1, 'unexpected reply from server')
+        return (False, 'Unexpected reply from server.')
 
-    return_code = xreply['return_code']
-    content = xreply['content']
+    #This is to correctly parse xserver replies and internal success/failure messages
+    if 'return_code' in xreply:
+        return_code = (xreply['return_code']==0)
+        content = xreply['content']
+    elif 'success' in xreply:
+        return_code = xreply['success']
+        content=xreply
+    else:
+        return False, "Cannot find a valid success or return code."
+
+    if return_code not in [True,False]:
+        return (False, 'Invalid return code.')
+
+
     return return_code, content
 
 
@@ -83,9 +96,9 @@ def parse_xobject(xobject, queue_name):
         }
     except ValueError, err:
         log.error(err)
-        return (1, 'unexpected reply from server')
+        return (False, 'unexpected reply from server')
 
-    return 0, content
+    return True, content
 
 
 def login(session, url, username, password):
@@ -101,8 +114,8 @@ def login(session, url, username, password):
 
     response.raise_for_status()
     log.debug("login response from %r: %r", url, response.json)
-    (error, msg) = parse_xreply(response.content)
-    return error, msg
+    (success, msg) = parse_xreply(response.content)
+    return success, msg
 
 
 def _http_get(session, url, data={}):
@@ -116,10 +129,10 @@ def _http_get(session, url, data={}):
         r = session.get(url, params=data)
     except requests.exceptions.ConnectionError, err:
         log.error(err)
-        return (1, 'cannot connect to server')
+        return (False, 'Cannot connect to server.')
 
     if r.status_code not in [200]:
-        return (1, 'unexpected HTTP status code [%d]' % r.status_code)
+        return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
     return parse_xreply(r.text)
 
 
@@ -141,12 +154,12 @@ def _http_post(session, url, data, timeout):
         r = session.post(url, data=data, timeout=timeout, verify=False)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
-        return (1, 'cannot connect to server')
+        return (False, 'Cannot connect to server.')
 
     if r.status_code not in [200]:
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
-        return (1, 'unexpected HTTP status code [%d]' % r.status_code)
-    return (0, r.text)
+        return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
+    return (True, r.text)
 
 
 def post_results_to_xqueue(session, header, body):
@@ -171,7 +184,7 @@ def post_results_to_xqueue(session, header, body):
 def xqueue_login():
     session = requests.session()
     xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/login/')
-    (xqueue_error, xqueue_msg) = login(
+    (success, xqueue_msg) = login(
         session,
         xqueue_login_url,
         settings.XQUEUE_INTERFACE['django_auth']['username'],
@@ -184,7 +197,7 @@ def xqueue_login():
 def controller_login():
     session = requests.session()
     controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], '/grading_controller/login/')
-    (controller_error, controller_msg) = login(
+    (success, controller_msg) = login(
         session,
         controller_login_url,
         settings.GRADING_CONTROLLER_INTERFACE['django_auth']['username'],
