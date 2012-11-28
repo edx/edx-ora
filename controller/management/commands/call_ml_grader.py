@@ -112,6 +112,9 @@ class Command(NoArgsCommand):
 
                     if not success:
                         log.debug("Could not identify a valid created model!")
+                        results={'score' : 0}
+                        formatted_feedback="error"
+                        status=GraderStatus.failure
 
                     else:
 
@@ -138,25 +141,25 @@ class Command(NoArgsCommand):
                         else:
                             status = GraderStatus.failure
 
-                        grader_dict = {
-                            'score': results['score'],
-                            'feedback': formatted_feedback,
-                            'status': status,
-                            'grader_id': 1,
-                            'grader_type': "ML",
-                            'confidence': 1,
-                            'submission_id': sub.id,
-                        }
+                    grader_dict = {
+                        'score': results['score'],
+                        'feedback': formatted_feedback,
+                        'status': status,
+                        'grader_id': 1,
+                        'grader_type': "ML",
+                        'confidence': 1,
+                        'submission_id': sub.id,
+                    }
 
-                        #Create grader object in controller by posting back results
-                        created, msg = util._http_post(
-                            self.controller_session,
-                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                '/grading_controller/put_result/'),
-                            grader_dict,
-                            settings.REQUESTS_TIMEOUT,
-                        )
-                        log.debug("Got response of {0} from server, message: {1}".format(created, msg))
+                    #Create grader object in controller by posting back results
+                    created, msg = util._http_post(
+                        self.controller_session,
+                        urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                            '/grading_controller/put_result/'),
+                        grader_dict,
+                        settings.REQUESTS_TIMEOUT,
+                    )
+                    log.debug("Got response of {0} from server, message: {1}".format(created, msg))
                 else:
                     log.info("Error getting item from controller or no items to get.")
 

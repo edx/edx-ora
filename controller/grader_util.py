@@ -3,6 +3,7 @@ from django.conf import settings
 from models import Submission, Grader
 import logging
 from models import GraderStatus, SubmissionState
+import expire_submissions
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +51,15 @@ def create_and_save_grader_object(grader_dict):
         #If number of successful peer graders equals the needed count, finalize submission.
         if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
             sub.state = SubmissionState.finished
+    #If something fails, immediately mark it for regrading
+    #TODO: Get better logic for handling failure cases
+    elif(grade.status_code == GraderStatus.failure):
+        number_of_failures=sub.get_unsuccessful_graders().count()
+        #If it has failed too many times, just return an error
+        if number_of_failures>settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
+            expire_submissions.post_expired_submissions_to_xqueue([sub])
+        else:
+            sub.state=SubmissionState.waiting_to_be_graded
 
     sub.save()
 

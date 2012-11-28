@@ -21,6 +21,7 @@ REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
 GRADER_SETTINGS_DIRECTORY = "grader_settings/"
+MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10
 
 #Config for specific graders
 #ML

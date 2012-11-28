@@ -5,7 +5,7 @@ from django.utils import timezone
 import grader_util
 import util
 import logging
-from models import GraderStatus, SubmissionState
+from models import GraderStatus, SubmissionState, Submission
 
 log = logging.getLogger(__name__)
 
@@ -58,26 +58,28 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         Success code.
     """
 
-    xqueue_session = util.xqueue_login()
+    grader_dict = {
+        'score': 0,
+        'feedback': "Error scoring submission.",
+        'status': GraderStatus.failure,
+        'grader_id': "0",
+        'grader_type': "NA",
+        'confidence': 1,
+        'submission_id' : 1,
+        }
+
+    if isinstance(timed_out_list,Submission):
+        timed_out_list=[timed_out_list]
 
     if len(timed_out_list)>0:
         for sub in timed_out_list:
             sub.state = SubmissionState.finished
-            grader_dict = {
-                'score': 0,
-                'feedback': "Error scoring submission.",
-                'status': GraderStatus.failure,
-                'grader_id': "0",
-                'grader_type': sub.next_grader_type,
-                'confidence': 1,
-                'submission_id' : sub.id,
-            }
+
+            grader_dict['submission_id'] = sub.id
+            grader_dict['grader_type']=sub.next_grader_type
             sub.save()
 
-            #TODO: Currently looks up submission object twice.  Fix in future.
             success, header = grader_util.create_and_save_grader_object(grader_dict)
-
-            success, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
 
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return True

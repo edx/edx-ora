@@ -100,6 +100,13 @@ class Submission(models.Model):
         )
         return successful_graders
 
+    def get_unsuccessful_graders(self):
+        all_graders = self.get_all_graders()
+        unsuccessful_graders = all_graders.filter(
+            status_code=GraderStatus.failure,
+        )
+        return unsuccessful_graders
+
     def get_all_successful_scores_and_feedback(self):
         all_graders = list(self.get_successful_graders())
         if len(all_graders) == 0:
