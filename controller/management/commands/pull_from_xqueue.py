@@ -63,19 +63,22 @@ class Command(BaseCommand):
 
                 #Check for finalized results from controller, and post back to xqueue
                 submissions_to_post = self.check_for_completed_submissions()
-                for submission in list(submissions_to_post):
-                    xqueue_header, xqueue_body = util.create_xqueue_header_and_body(submission)
-                    (success, msg) = util.post_results_to_xqueue(
-                        self.xqueue_session,
-                        json.dumps(xqueue_header),
-                        json.dumps(xqueue_body),
-                    )
-                    if success:
-                        log.debug("Successful post back to xqueue!")
-                        submission.posted_results_back_to_queue = True
-                        submission.save()
-                    else:
-                        log.debug("Could not post back.  Error: {0}".format(msg))
+                submission_to_post_count=submissions_to_post.count()
+                log.debug("Submission to post count: {0}".format(submissions_to_post.count()))
+                if submissions_to_post.count()>0:
+                    for submission in list(submissions_to_post):
+                        xqueue_header, xqueue_body = util.create_xqueue_header_and_body(submission)
+                        (success, msg) = util.post_results_to_xqueue(
+                            self.xqueue_session,
+                            json.dumps(xqueue_header),
+                            json.dumps(xqueue_body),
+                        )
+                        if success:
+                            log.debug("Successful post back to xqueue!")
+                            submission.posted_results_back_to_queue = True
+                            submission.save()
+                        else:
+                            log.debug("Could not post back.  Error: {0}".format(msg))
 
                 time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
