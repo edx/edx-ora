@@ -47,11 +47,43 @@ def get_latest_created_model(location):
 
 def save_created_model(model_data):
     """
-
+    Creates and saves a createdmodel object from an input dictionary.
+    Input:
+        Dict with keys shown below in the 'tags' variable
+    Output:
+        Boolean success/fail, and model id/error message
     """
 
-    tags=['max_score', 'prompt', 'rubric', 'location', 'course_id', 'submission_ids_used', 'problem_id', 'model_relative_path',
-          'model_full_path', 'number_of_essays', 'cv_kappa', 'cv_mean_absolute_error', 'creation_succeeded']
+    tags=['max_score', 'prompt', 'rubric', 'location', 'course_id',
+          'submission_ids_used', 'problem_id', 'model_relative_path',
+          'model_full_path', 'number_of_essays', 'cv_kappa',
+          'cv_mean_absolute_error', 'creation_succeeded']
+
+    for tag in tags:
+        if tag not in model_data:
+            return False, "Does not contain needed tag {0}".format(tag)
+
+    try:
+        created_model=CreatedModel(
+            max_score=model_data['max_score'],
+            prompt=model_data['prompt'],
+            rubric=model_data['rubric'],
+            location=model_data['location'],
+            course_id=model_data['course_id'],
+            submission_ids_used=model_data['submission_ids_used'],
+            problem_id=model_data['problem_id'],
+            model_relative_path=model_data['model_relative_path'],
+            model_full_path=model_data['model_full_path'],
+            number_of_essays=model_data['number_of_essays'],
+            cv_kappa=model_data['cv_kappa'],
+            cv_mean_absolute_error=model_data['cv_mean_absolute_error'],
+            creation_succeeded=model_data['creation_succeeded'],
+        )
+        created_model.save()
+    except:
+        return False, "Failed to create model!"
+
+    return True, created_model.id
 
 
 def check(model_path):

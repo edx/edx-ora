@@ -75,6 +75,8 @@ class Command(BaseCommand):
                         'creation_succeeded': results['success'],
                      }
 
+
+
                     log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
                         full_model_path,
                         results['created'],
