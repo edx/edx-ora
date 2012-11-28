@@ -92,7 +92,7 @@ class Command(NoArgsCommand):
                 except:
                     log.error("Problem creating model for location {0}".format(location))
 
-            return "Finished looping through."
+            log.debug("Finished looping through.")
 
             time.sleep(settings.TIME_BETWEEN_ML_CREATOR_CHECKS)
 
