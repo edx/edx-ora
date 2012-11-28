@@ -110,7 +110,8 @@ class Submission(models.Model):
     def get_all_successful_scores_and_feedback(self):
         all_graders = list(self.get_successful_graders().order_by("-date_modified"))
         if len(all_graders) == 0:
-            return {'score': 0, 'feedback': "No finished graders!  Please contact course staff."}
+            last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
+            return {'score': 0, 'feedback': last_grader.feedback}
         elif all_graders[0].grader_type in ["IN", "ML"]:
             return {'score': all_graders[0].score, 'feedback': all_graders[0].feedback}
         elif self.previous_grader_type == "PE":
