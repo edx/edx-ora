@@ -1,7 +1,7 @@
 class ControllerURLs():
     controller_base="/grading_controller/"
-    log_in= controller_base + "log_in/"
-    log_out=controller_base +"log_out/"
+    log_in= controller_base + "login/"
+    log_out=controller_base +"logout/"
     status = controller_base + "status/"
     submit = controller_base + "submit/"
     get_submission_ml = controller_base + "get_submission_ml/"
