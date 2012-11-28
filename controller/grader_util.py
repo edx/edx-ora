@@ -57,7 +57,7 @@ def create_and_save_grader_object(grader_dict):
         number_of_failures=sub.get_unsuccessful_graders().count()
         #If it has failed too many times, just return an error
         if number_of_failures>settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
-            expire_submissions.post_expired_submissions_to_xqueue([sub])
+            expire_submissions.finalize_expired_submission(sub)
         else:
             sub.state=SubmissionState.waiting_to_be_graded
 

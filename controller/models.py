@@ -108,7 +108,7 @@ class Submission(models.Model):
         return unsuccessful_graders
 
     def get_all_successful_scores_and_feedback(self):
-        all_graders = list(self.get_successful_graders())
+        all_graders = list(self.get_successful_graders().order_by("-date_modified"))
         if len(all_graders) == 0:
             return {'score': 0, 'feedback': "No finished graders!  Please contact course staff."}
         elif all_graders[0].grader_type in ["IN", "ML"]:
