@@ -16,11 +16,12 @@ from django.conf import settings
 from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
+import project_urls
 
 log = logging.getLogger(__name__)
 
-GET_NEXT="/staff_grading/get_next_submission/"
-SAVE_GRADE="/staff_grading/save_grade/"
+GET_NEXT= project_urls.StaffGradingURLs.get_next_submission
+SAVE_GRADE= project_urls.StaffGradingURLs.save_grade
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"

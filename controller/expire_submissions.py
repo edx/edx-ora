@@ -5,9 +5,26 @@ from django.utils import timezone
 import grader_util
 import util
 import logging
-from models import GraderStatus, SubmissionState
+from models import GraderStatus, SubmissionState, Submission
 
 log = logging.getLogger(__name__)
+
+error_template = u"""
+
+<section>
+    <div class="shortform">
+        <div class="result-errors">
+          There was an error with your submission.  Please contact the course staff.
+        </div>
+    </div>
+    <div class="longform">
+        <div class="result-errors">
+          {errors}
+        </div>
+    </div>
+</section>
+
+"""
 
 def reset_timed_out_submissions(subs):
     """
@@ -48,8 +65,16 @@ def get_submissions_that_have_expired(subs):
 
     return list(expired_subs)
 
+def finalize_expired_submissions(timed_out_list):
 
-def post_expired_submissions_to_xqueue(timed_out_list):
+    for sub in timed_out_list:
+        finalize_expired_submission(sub)
+
+    log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
+
+    return True
+
+def finalize_expired_submission(sub):
     """
     Expire submissions by posting back to LMS with error message.
     Input:
@@ -58,26 +83,19 @@ def post_expired_submissions_to_xqueue(timed_out_list):
         Success code.
     """
 
-    xqueue_session = util.xqueue_login()
+    grader_dict = {
+        'score': 0,
+        'feedback': error_template.format(errors="Error scoring submission."),
+        'status': GraderStatus.failure,
+        'grader_id': "0",
+        'grader_type': sub.next_grader_type,
+        'confidence': 1,
+        'submission_id' : sub.id,
+        }
 
-    if len(timed_out_list)>0:
-        for sub in timed_out_list:
-            sub.state = SubmissionState.finished
-            grader_dict = {
-                'score': 0,
-                'feedback': "Error scoring submission.",
-                'status': GraderStatus.failure,
-                'grader_id': "0",
-                'grader_type': sub.next_grader_type,
-                'confidence': 1,
-                'submission_id' : sub.id,
-            }
-            sub.save()
+    sub.state = SubmissionState.finished
+    sub.save()
 
-            #TODO: Currently looks up submission object twice.  Fix in future.
-            success, header = grader_util.create_and_save_grader_object(grader_dict)
+    grade = grader_util.create_grader(grader_dict,sub)
 
-            success, msg = util.post_results_to_xqueue(xqueue_session, json.dumps(header), json.dumps(grader_dict))
-
-        log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
     return True
