@@ -96,6 +96,6 @@ def finalize_expired_submission(sub):
     sub.state = SubmissionState.finished
     sub.save()
 
-    success, header = grader_util.create_grader(grader_dict,sub)
+    grade = grader_util.create_grader(grader_dict,sub)
 
     return True

@@ -45,6 +45,10 @@ def get_submission_ml(request):
 
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
+@login_required
+def get_ml_pending_count(request):
+    pass
+
 
 @login_required
 def get_submission_instructor(request):
