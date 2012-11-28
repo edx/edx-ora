@@ -34,7 +34,7 @@ class Timing(models.Model):
 
     #Badly named, but it can't be grader_id for obvious reasons!
     #This contains the version # of the grader.  For humans, version number is the lms id for the person.
-    grader_version=models.CharField(CHARFIELD_LEN_SMALL)
+    grader_version=models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     #This is so that we can query on it if we need to get more data
     grader_id=models.IntegerField(blank=True,null=True)
