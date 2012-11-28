@@ -34,11 +34,11 @@ class Command(BaseCommand):
 
         while flag:
             try:
-                response_code, content = self.get_item_from_controller()
-
+                success, content = self.get_item_from_controller()
+                log.debug(content)
                 #Grade and handle here
-                if response_code == 0:
-                    sub = Submission.objects.get(id=content)
+                if success:
+                    sub = Submission.objects.get(id=content['submission_id'])
                     student_response = sub.student_response.encode('ascii', 'ignore')
                     grader_path = sub.location
                     results = grade.grade(grader_path, None,
@@ -71,7 +71,7 @@ class Command(BaseCommand):
                     log.info("Error getting item from controller or no items to get.")
 
             except Exception as err:
-                log.debug("Error getting submission: ".format(err))
+                log.debug("Error getting submission: {0}".format(err))
 
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         Get a single submission from grading controller
         """
         try:
-            response = util._http_get(
+            success, content = util._http_get(
                 self.controller_session,
                 urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
                     '/grading_controller/get_submission_ml/'),
@@ -88,5 +88,5 @@ class Command(BaseCommand):
         except Exception as err:
             return False, "Error getting response: {0}".format(err)
 
-        return response
+        return success, content
 

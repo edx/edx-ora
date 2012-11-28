@@ -16,6 +16,8 @@ from models import Submission
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION=1
+
 @csrf_exempt
 def log_in(request):
     """
@@ -28,13 +30,13 @@ def log_in(request):
             if user is not None:
                 login(request, user)
                 log.debug("Successful login!")
-                return HttpResponse(util.compose_reply(True, 'Logged in'))
+                return util._success_response({'message' : 'logged in'} , _INTERFACE_VERSION)
             else:
-                return HttpResponse(util.compose_reply(False, 'Incorrect login credentials'))
+                return util._error_response('Incorrect login credentials', _INTERFACE_VERSION)
         else:
-            return HttpResponse(util.compose_reply(False, 'Insufficient login info'))
+            return util._error_response('Insufficient login info', _INTERFACE_VERSION)
     else:
-        return HttpResponse(util.compose_reply(False, 'login_required'))
+        return util._error_response('login_required', _INTERFACE_VERSION)
 
 
 def log_out(request):
@@ -42,11 +44,11 @@ def log_out(request):
     Uses django auth to handle a logout request
     """
     logout(request)
-    return HttpResponse(util.compose_reply(success=True, content='Goodbye'))
+    return util._success_response({'message' : 'Goodbye'} , _INTERFACE_VERSION)
 
 
 def status(request):
     """
     Returns a simple status update
     """
-    return HttpResponse(util.compose_reply(success=True, content='OK'))
+    return util._success_response({'content' : 'OK'}, _INTERFACE_VERSION)

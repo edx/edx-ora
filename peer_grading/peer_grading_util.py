@@ -22,7 +22,7 @@ def get_single_peer_grading_item(location, grader_id):
         location=location,
         state=SubmissionState.waiting_to_be_graded,
         next_grader_type="PE",
-    )
+    ).exclude(student_id=grader_id)
 
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:

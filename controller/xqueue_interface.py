@@ -16,6 +16,8 @@ from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION=1
+
 @csrf_exempt
 @login_required
 def submit(request):
@@ -33,7 +35,7 @@ def submit(request):
     Returns status code indicating success (0) or failure (1) and message
     '''
     if request.method != 'POST':
-        return HttpResponse(util.compose_reply(False, "'submit' must use HTTP POST"))
+        return util._error_response("'submit' must use HTTP POST", _INTERFACE_VERSION)
     else:
         #Minimal parsing of reply
         reply_is_valid, header, body = _is_valid_reply(request.POST.copy())
@@ -43,7 +45,7 @@ def submit(request):
                 util.get_request_ip(request),
                 request.POST,
             ))
-            return HttpResponse(util.compose_reply(False, 'Incorrect format'))
+            return util._error_response('Incorrect format' , _INTERFACE_VERSION)
         else:
             try:
                 #Retrieve individual values from xqueue body and header.
@@ -91,12 +93,14 @@ def submit(request):
                         xqueue_submission_id,
                         xqueue_submission_key,
                     ))
-                return HttpResponse(util.compose_reply(False, 'Unable to create submission.'))
+                return util._error_response('Unable to create submission.', _INTERFACE_VERSION)
 
             #Handle submission and write to db
             success = handle_submission(sub)
+            if not success:
+                return util._error_response("Failed to handle submission.")
 
-            return HttpResponse(util.compose_reply(success=success, content=''))
+            return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
 
 def handle_submission(sub):
@@ -122,7 +126,12 @@ def handle_submission(sub):
         else:
             sub.next_grader_type = "IN"
     elif grader_settings['grader_type'] == "PE":
-        sub.next_grader_type = "PE"
+        #Ensures that there will be some calibration essays before peer grading begins!
+        #Calibration essays can be added using command line utility, or through normal instructor grading.
+        if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_PEER):
+            sub.next_grader_type = "PE"
+        else:
+            sub.next_grader_type = "IN"
     else:
         log.debug("Invalid grader type specified in settings file.")
         return False
