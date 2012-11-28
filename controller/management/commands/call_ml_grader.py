@@ -99,6 +99,7 @@ class Command(NoArgsCommand):
             try:
                 #See if there are any submissions waiting
                 success, pending_count=self.get_pending_length_from_controller()
+                log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
                 while success and pending_count>0:
                     success, content = self.get_item_from_controller()
                     log.debug(content)
