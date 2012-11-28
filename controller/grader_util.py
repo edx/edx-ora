@@ -3,10 +3,27 @@ from django.conf import settings
 from models import Submission, Grader
 import logging
 from models import GraderStatus, SubmissionState
+import expire_submissions
 
 log = logging.getLogger(__name__)
 
-def create_and_save_grader_object(grader_dict):
+def create_grader(grader_dict,sub):
+
+    grade = Grader(
+        score=grader_dict['score'],
+        feedback=grader_dict['feedback'],
+        status_code=grader_dict['status'],
+        grader_id=grader_dict['grader_id'],
+        grader_type=grader_dict['grader_type'],
+        confidence=grader_dict['confidence'],
+        submission=sub,
+    )
+
+    grade.save()
+
+    return grade
+
+def create_and_handle_grader_object(grader_dict):
     """
     Creates a Grader object and associates it with a given submission
     Input is grader dictionary with keys:
@@ -22,17 +39,7 @@ def create_and_save_grader_object(grader_dict):
     except:
         return False, "Error getting submission."
 
-    grade = Grader(
-        score=grader_dict['score'],
-        feedback=grader_dict['feedback'],
-        status_code=grader_dict['status'],
-        grader_id=grader_dict['grader_id'],
-        grader_type=grader_dict['grader_type'],
-        confidence=grader_dict['confidence'],
-    )
-
-    grade.submission = sub
-    grade.save()
+    grade=create_grader(grader_dict,sub)
 
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
 
@@ -50,6 +57,15 @@ def create_and_save_grader_object(grader_dict):
         #If number of successful peer graders equals the needed count, finalize submission.
         if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
             sub.state = SubmissionState.finished
+    #If something fails, immediately mark it for regrading
+    #TODO: Get better logic for handling failure cases
+    elif(grade.status_code == GraderStatus.failure and sub.state==SubmissionState.being_graded):
+        number_of_failures=sub.get_unsuccessful_graders().count()
+        #If it has failed too many times, just return an error
+        if number_of_failures>settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
+            expire_submissions.finalize_expired_submission(sub)
+        else:
+            sub.state=SubmissionState.waiting_to_be_graded
 
     sub.save()
 

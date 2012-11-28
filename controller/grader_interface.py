@@ -45,6 +45,28 @@ def get_submission_ml(request):
 
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
+@login_required
+def get_pending_count(request):
+    """
+    Returns the number of submissions pending grading
+    """
+    if request.method != 'GET':
+        return util._error_response("'get_pending_count' must use HTTP GET", _INTERFACE_VERSION)
+
+    grader_type = request.GET.get("grader_type")
+
+    if not grader_type:
+        return util._error_response("grader type is a needed key", _INTERFACE_VERSION)
+
+    if grader_type not in [i[0] for i in GRADER_TYPE]:
+        return util._error_response("invalid grader type", _INTERFACE_VERSION)
+
+    to_be_graded_count = Submission.objects.filter(
+        state=SubmissionState.waiting_to_be_graded,
+        next_grader_type=grader_type,
+    ).count()
+
+    return util._success_response({'to_be_graded_count' : to_be_graded_count}, _INTERFACE_VERSION)
 
 @login_required
 def get_submission_instructor(request):
@@ -112,7 +134,7 @@ def put_result(request):
         except:
             return util._errors_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
 
-        success, header = grader_util.create_and_save_grader_object(post_data)
+        success, header = grader_util.create_and_handle_grader_object(post_data)
         if not success:
             return util._errors_response("Could not save grader.", _INTERFACE_VERSION)
 

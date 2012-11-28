@@ -26,4 +26,5 @@ urlpatterns += patterns('controller.grader_interface',
     url(r'^get_submission_ml/$', 'get_submission_ml'),
     url(r'^get_submission_instructor/$', 'get_submission_instructor'),
     url(r'^put_result/$', 'put_result'),
+    url(r'^get_pending_count/$', 'get_pending_count'),
 )

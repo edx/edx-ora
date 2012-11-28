@@ -67,6 +67,7 @@ class Command(BaseCommand):
                 course_id=course_id,
                 previous_grader_type="IN",
                 next_grader_type=next_grader_type,
+                posted_results_back_to_queue=True,
             )
 
             sub.save()

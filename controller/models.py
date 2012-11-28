@@ -1,5 +1,5 @@
 from django.db import models
-import datetime
+from django.utils import timezone
 
 class GraderStatus():
     failure="F"
@@ -54,7 +54,7 @@ class Submission(models.Model):
     max_score = models.IntegerField(default=1)
     course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     student_response = models.TextField(default="")
-    student_submission_time = models.DateTimeField(default=datetime.datetime.now)
+    student_submission_time = models.DateTimeField(default=timezone.now)
 
     # xqueue details
     xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
@@ -100,12 +100,23 @@ class Submission(models.Model):
         )
         return successful_graders
 
+    def get_unsuccessful_graders(self):
+        all_graders = self.get_all_graders()
+        unsuccessful_graders = all_graders.filter(
+            status_code=GraderStatus.failure,
+        )
+        return unsuccessful_graders
+
     def get_all_successful_scores_and_feedback(self):
-        all_graders = list(self.get_successful_graders())
+        all_graders = list(self.get_successful_graders().order_by("-date_modified"))
+        #If no graders succeeded, send back the feedback from the last unsuccessful submission (which should be an error message).
         if len(all_graders) == 0:
-            return {'score': 0, 'feedback': "No finished graders!  Please contact course staff."}
+            last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
+            return {'score': 0, 'feedback': last_grader.feedback}
+        #If grader is ML or instructor, only send back last successful submission
         elif all_graders[0].grader_type in ["IN", "ML"]:
             return {'score': all_graders[0].score, 'feedback': all_graders[0].feedback}
+        #If grader is peer, send back all peer judgements
         elif self.previous_grader_type == "PE":
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
             score = [p.score for p in peer_graders]

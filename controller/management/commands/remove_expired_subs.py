@@ -26,6 +26,6 @@ class Command(BaseCommand):
             expire_submissions.reset_timed_out_submissions(subs)
             expired_list = expire_submissions.get_submissions_that_have_expired(subs)
             if len(expired_list) > 0:
-                success = expire_submissions.post_expired_submissions_to_xqueue(expired_list)
+                success = expire_submissions.finalize_expired_submissions(expired_list)
 
             time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)

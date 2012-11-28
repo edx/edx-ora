@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
-from controller.grader_util import create_and_save_grader_object
+from controller.grader_util import create_and_handle_grader_object
 
 from controller.models import Submission
 from controller import util
@@ -65,7 +65,7 @@ def peer_grading(request):
 
         elif post_data['type'] == "submission":
             try:
-                created, header = create_and_save_grader_object({
+                created, header = create_and_handle_grader_object({
                     'score': post_data['score'],
                     'status': GraderStatus.success,
                     'grader_id': student_id,

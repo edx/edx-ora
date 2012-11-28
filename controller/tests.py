@@ -24,13 +24,15 @@ from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
 
+import project_urls
+
 log = logging.getLogger(__name__)
 
-LOGIN_URL = "/grading_controller/login/"
-SUBMIT_URL = "/grading_controller/submit/"
-ML_GET_URL = "/grading_controller/get_submission_ml/"
-IN_GET_URL = "/grading_controller/get_submission_instructor/"
-PUT_URL="/grading_controller/put_result/"
+LOGIN_URL = project_urls.ControllerURLs.log_in
+SUBMIT_URL = project_urls.ControllerURLs.submit
+ML_GET_URL = project_urls.ControllerURLs.get_submission_ml
+IN_GET_URL = project_urls.ControllerURLs.get_submission_in
+PUT_URL= project_urls.ControllerURLs.put_result
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
