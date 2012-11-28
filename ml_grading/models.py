@@ -41,7 +41,7 @@ class CreatedModel(models.Model):
     #Mean absolute error is mean(abs(actual_score-predicted_score))
     #A mean absolute error of .5 means that, on average, the predicted score is +/- .5 points from the actual score
     cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10)
-    
+
     creation_succeeded=models.BooleanField(default=False)
 
     def get_submission_ids_used(self):
