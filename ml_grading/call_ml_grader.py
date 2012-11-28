@@ -16,6 +16,8 @@ from controller.models import Submission, Grader
 
 from ml_grading.models import CreatedModel
 
+import ml_grading_util
+
 sys.path.append(settings.ML_PATH)
 import grade
 
@@ -91,13 +93,25 @@ class Command(BaseCommand):
                 #Grade and handle here
                 if success:
                     sub = Submission.objects.get(id=content['submission_id'])
+
+                    #strip out unicode and other characters in student response
+                    #Needed, or grader may potentially fail
+                    #TODO: Handle unicode in student responses properly
                     student_response = sub.student_response.encode('ascii', 'ignore')
-                    grader_path = sub.location
+
+
+                    #Create grader path from location in submission
+                    grader_path = ml_grading_util.get_model_path(sub.location)
+
                     results = grade.grade(grader_path, None,
                         student_response) #grader config is none for now, could be different later
+
+                    #Add feedback/errors to appropriate template
                     formatted_feedback=add_results_to_template(results)
 
                     log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+
+                    #Set grader status according to success/fail
                     if results['success']:
                         status = GraderStatus.success
                     else:
@@ -113,6 +127,7 @@ class Command(BaseCommand):
                         'submission_id': sub.id,
                     }
 
+                    #Create grader object in controller by posting back results
                     created, msg = util._http_post(
                         self.controller_session,
                         urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
@@ -126,7 +141,7 @@ class Command(BaseCommand):
 
             except Exception as err:
                 log.debug("Error getting submission: {0}".format(err))
-
+            #TODO: add in some logic that figures out how many submissions are left to grade and loops based on that
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
     def get_item_from_controller(self):
