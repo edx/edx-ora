@@ -11,6 +11,7 @@ import logging
 import controller.util as util
 from controller.models import Submission
 from controller.models import GraderStatus, SubmissionState
+import project_urls
 
 log = logging.getLogger(__name__)
 
@@ -34,53 +35,57 @@ class Command(BaseCommand):
             #Loop through each queue that is given in arguments
             for queue_name in args:
                 #Check for new submissions on xqueue, and send to controller
-                try:
-                    #Get and parse queue objects
-                    success, queue_length= self.get_queue_length(queue_name)
-                    while success and queue_length>0:
-                        success, queue_item = self.get_from_queue(queue_name)
-                        success, content = util.parse_xobject(queue_item, queue_name)
-                        log.debug(content)
-
-                        #Post to grading controller here!
-                        if  success:
-                            #Post to controller
-                            log.debug("Trying to post.")
-                            util._http_post(
-                                self.controller_session,
-                                urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                    '/grading_controller/submit/'),
-                                content,
-                                settings.REQUESTS_TIMEOUT,
-                            )
-                            log.debug("Successful post!")
-                        else:
-                            log.info("Error getting queue item or no queue items to get.")
-
-                        success, queue_length= self.get_queue_length(queue_name)
-                except Exception as err:
-                    log.debug("Error getting submission: ".format(err))
+                self.pull_from_single_queue(queue_name)
 
                 #Check for finalized results from controller, and post back to xqueue
                 submissions_to_post = self.check_for_completed_submissions()
-                submission_to_post_count=submissions_to_post.count()
-                log.debug("Submission to post count: {0}".format(submissions_to_post.count()))
-                if submissions_to_post.count()>0:
-                    for submission in list(submissions_to_post):
-                        xqueue_header, xqueue_body = util.create_xqueue_header_and_body(submission)
-                        (success, msg) = util.post_results_to_xqueue(
-                            self.xqueue_session,
-                            json.dumps(xqueue_header),
-                            json.dumps(xqueue_body),
-                        )
-                        if success:
-                            log.debug("Successful post back to xqueue!")
-                            submission.posted_results_back_to_queue = True
-                            submission.save()
-                        else:
-                            log.debug("Could not post back.  Error: {0}".format(msg))
+                for submission in list(submissions_to_post):
+                    self.post_one_submission_back_to_queue(submission)
 
                 time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
+
+    def post_one_submission_back_to_queue(self,submission):
+        xqueue_header, xqueue_body = util.create_xqueue_header_and_body(submission)
+        (success, msg) = util.post_results_to_xqueue(
+            self.xqueue_session,
+            json.dumps(xqueue_header),
+            json.dumps(xqueue_body),
+        )
+        if success:
+            log.debug("Successful post back to xqueue!")
+            submission.posted_results_back_to_queue = True
+            submission.save()
+        else:
+            log.warning("Could not post back.  Error: {0}".format(msg))
+
+    def pull_from_single_queue(self,queue_name):
+        try:
+            #Get and parse queue objects
+            success, queue_length= self.get_queue_length(queue_name)
+            while success and queue_length>0:
+                success, queue_item = self.get_from_queue(queue_name)
+                success, content = util.parse_xobject(queue_item, queue_name)
+                log.debug(content)
+
+                #Post to grading controller here!
+                if  success:
+                    #Post to controller
+                    log.debug("Trying to post.")
+                    util._http_post(
+                        self.controller_session,
+                        urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                            project_urls.ControllerURLs.submit),
+                        content,
+                        settings.REQUESTS_TIMEOUT,
+                    )
+                    log.debug("Successful post!")
+                else:
+                    log.info("Error getting queue item or no queue items to get.")
+
+                success, queue_length= self.get_queue_length(queue_name)
+        except Exception as err:
+            log.debug("Error getting submission: ".format(err))
+
 
     def check_for_completed_submissions(self):
         submissions_to_post = Submission.objects.filter(
@@ -96,7 +101,7 @@ class Command(BaseCommand):
         """
         try:
             success, response = util._http_get(self.xqueue_session,
-                urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_submission/'),
+                urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.get_submission),
                 {'queue_name': queue_name})
         except Exception as err:
             return False, "Error getting response: {0}".format(err)
@@ -109,7 +114,7 @@ class Command(BaseCommand):
             """
             try:
                 success, response = util._http_get(self.xqueue_session,
-                    urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_queuelen/'),
+                    urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.get_queuelen),
                     {'queue_name': queue_name})
 
                 if not success:

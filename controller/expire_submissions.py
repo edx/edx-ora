@@ -14,7 +14,7 @@ error_template = u"""
 <section>
     <div class="shortform">
         <div class="result-errors">
-          There was an error with your submission.  Please contact course staff.
+          There was an error with your submission.  Please contact the course staff.
         </div>
     </div>
     <div class="longform">
@@ -66,9 +66,9 @@ def get_submissions_that_have_expired(subs):
     return list(expired_subs)
 
 def finalize_expired_submissions(timed_out_list):
-    if len(timed_out_list)>0:
-        for sub in timed_out_list:
-            finalize_expired_submission(sub)
+
+    for sub in timed_out_list:
+        finalize_expired_submission(sub)
 
     log.debug("Reset {0} submissions that had timed out in their current grader.".format(len(timed_out_list)))
 

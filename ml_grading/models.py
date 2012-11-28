@@ -29,8 +29,19 @@ class CreatedModel(models.Model):
 
     #Properties of the model itself
     number_of_essays=models.IntegerField()
+
+    #CV is cross-validation, which is a statistical technique that ensures that
+    #the models are trained on one part of the data and predicted on another.
+    #so the kappa and error measurements are not biased by the data that was used to create the models
+    #being used to also evaluate them. (ie, this is "True" error)
+    #Kappa is interrater agreement-closer to 1 is better.
+    #If the actual scores and the predicted scores perfectly agree, kappa will be 1.
     cv_kappa=models.DecimalField(max_digits=10,decimal_places=9)
+
+    #Mean absolute error is mean(abs(actual_score-predicted_score))
+    #A mean absolute error of .5 means that, on average, the predicted score is +/- .5 points from the actual score
     cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10)
+
     creation_succeeded=models.BooleanField(default=False)
 
     def get_submission_ids_used(self):

@@ -11,6 +11,7 @@ import sys
 import os
 from path import path
 import logging
+import project_urls
 
 log=logging.getLogger(__name__)
 
@@ -98,73 +99,9 @@ class Command(NoArgsCommand):
             try:
                 #See if there are any submissions waiting
                 success, pending_count=self.get_pending_length_from_controller()
+                log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
                 while success and pending_count>0:
-                    success, content = self.get_item_from_controller()
-                    log.debug(content)
-                    #Grade and handle here
-                    if success:
-                        sub = Submission.objects.get(id=content['submission_id'])
-
-                        #strip out unicode and other characters in student response
-                        #Needed, or grader may potentially fail
-                        #TODO: Handle unicode in student responses properly
-                        student_response = sub.student_response.encode('ascii', 'ignore')
-
-                        #Get the latest created model for the given location
-                        success, created_model=ml_grading_util.get_latest_created_model(sub.location)
-
-                        if not success:
-                            log.debug("Could not identify a valid created model!")
-                            results={'score' : 0}
-                            formatted_feedback="error"
-                            status=GraderStatus.failure
-
-                        else:
-
-                            #Create grader path from location in submission
-                            grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
-
-                            results = grade.grade(grader_path, None,
-                                student_response) #grader config is none for now, could be different later
-
-                            #If the above, try using the full path in the created_model object
-                            if not results['success']:
-                                grader_path=created_model.model_full_path
-                                results = grade.grade(grader_path, None,
-                                    student_response) #grader config is none for now, could be different later
-
-                            #Add feedback/errors to appropriate template
-                            formatted_feedback=add_results_to_template(results)
-
-                            log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
-
-                            #Set grader status according to success/fail
-                            if results['success']:
-                                status = GraderStatus.success
-                            else:
-                                status = GraderStatus.failure
-
-                        grader_dict = {
-                            'score': results['score'],
-                            'feedback': formatted_feedback,
-                            'status': status,
-                            'grader_id': 1,
-                            'grader_type': "ML",
-                            'confidence': 1,
-                            'submission_id': sub.id,
-                        }
-
-                        #Create grader object in controller by posting back results
-                        created, msg = util._http_post(
-                            self.controller_session,
-                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                '/grading_controller/put_result/'),
-                            grader_dict,
-                            settings.REQUESTS_TIMEOUT,
-                        )
-                        log.debug("Got response of {0} from server, message: {1}".format(created, msg))
-                    else:
-                        log.info("Error getting item from controller or no items to get.")
+                    self.handle_single_item()
 
                     #Refresh the pending submission count
                     success, pending_count=self.get_pending_length_from_controller()
@@ -174,11 +111,80 @@ class Command(NoArgsCommand):
             #TODO: add in some logic that figures out how many submissions are left to grade and loops based on that
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
+    def handle_single_item(self):
+        success, content = self.get_item_from_controller()
+        log.debug(content)
+        #Grade and handle here
+        if success:
+            sub = Submission.objects.get(id=content['submission_id'])
+
+            #strip out unicode and other characters in student response
+            #Needed, or grader may potentially fail
+            #TODO: Handle unicode in student responses properly
+            student_response = sub.student_response.encode('ascii', 'ignore')
+
+            #Get the latest created model for the given location
+            success, created_model=ml_grading_util.get_latest_created_model(sub.location)
+
+            if not success:
+                log.debug("Could not identify a valid created model!")
+                results={'score' : 0}
+                formatted_feedback="error"
+                status=GraderStatus.failure
+
+            else:
+
+                #Create grader path from location in submission
+                grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
+
+                results = grade.grade(grader_path, None,
+                    student_response) #grader config is none for now, could be different later
+
+                #If the above, try using the full path in the created_model object
+                if not results['success']:
+                    grader_path=created_model.model_full_path
+                    results = grade.grade(grader_path, None,
+                        student_response) #grader config is none for now, could be different later
+
+                #Add feedback/errors to appropriate template
+                formatted_feedback=add_results_to_template(results)
+
+                log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+
+                #Set grader status according to success/fail
+                if results['success']:
+                    status = GraderStatus.success
+                else:
+                    status = GraderStatus.failure
+
+            grader_dict = {
+                'score': results['score'],
+                'feedback': formatted_feedback,
+                'status': status,
+                'grader_id': 1,
+                'grader_type': "ML",
+                'confidence': 1,
+                'submission_id': sub.id,
+                }
+
+            #Create grader object in controller by posting back results
+            created, msg = util._http_post(
+                self.controller_session,
+                urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                    project_urls.ControllerURLs.put_result),
+                grader_dict,
+                settings.REQUESTS_TIMEOUT,
+            )
+            log.debug("Got response of {0} from server, message: {1}".format(created, msg))
+        else:
+            log.info("Error getting item from controller or no items to get.")
+
+
     def get_item_from_controller(self):
         """
         Get a single submission from grading controller
         """
-        success,content=self.query_controller('/grading_controller/get_submission_ml/')
+        success,content=self.query_controller(project_urls.ControllerURLs.get_submission_ml)
 
         return success, content
 
@@ -186,7 +192,7 @@ class Command(NoArgsCommand):
         """
         Get the number of pending submissions from the controller
         """
-        success,content=self.query_controller('/grading_controller/get_pending_count/', data={'grader_type' : "ML"})
+        success,content=self.query_controller(project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
         return success, content['to_be_graded_count']
 
     def query_controller(self,end_path,data={}):
