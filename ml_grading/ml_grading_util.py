@@ -30,10 +30,15 @@ def get_latest_created_model(location):
     Input:
         location
     Output:
-        Boolean success/fail, id of model file
+        Boolean success/fail, createdmodel object/error message
     """
 
     created_models=CreatedModel.objects.filter(
         location=location,
         creation_succeeded=True,
-    )
+    ).order_by("-date_created")
+
+    if created_models.count()==0:
+        return False, "No valid models for location."
+
+    return created_models[0]

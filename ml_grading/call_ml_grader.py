@@ -8,6 +8,7 @@ import time
 import json
 import logging
 import sys
+import os
 
 import controller.util as util
 from controller.models import SubmissionState, GraderStatus
@@ -99,12 +100,20 @@ class Command(BaseCommand):
                     #TODO: Handle unicode in student responses properly
                     student_response = sub.student_response.encode('ascii', 'ignore')
 
+                    #Get the latest created model for the given location
+                    created_model=ml_grading_util.get_latest_created_model(sub.location)
 
                     #Create grader path from location in submission
-                    grader_path = ml_grading_util.get_model_path(sub.location)
+                    grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
 
                     results = grade.grade(grader_path, None,
                         student_response) #grader config is none for now, could be different later
+
+                    #If the above, try using the full path in the created_model object
+                    if not results['success']:
+                        grader_path=created_model.model_full_path
+                        results = grade.grade(grader_path, None,
+                            student_response) #grader config is none for now, could be different later
 
                     #Add feedback/errors to appropriate template
                     formatted_feedback=add_results_to_template(results)
