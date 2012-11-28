@@ -1,1 +1,3 @@
-# Create your views here.
+
+def query_metrics():
+    pass

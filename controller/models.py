@@ -137,6 +137,16 @@ class Submission(models.Model):
         last_successful_instructor = successful_instructor_graders[0]
         return {'score': last_successful_instructor.score}
 
+    def get_oldest_unassociated_timing_object(self):
+        all_timing=self.timing_set.filter(
+            finished_timing=False,
+        ).order_by("-date_modified")[:1]
+
+        if all_timing.count()==0:
+            return False, "Could not find timing object"
+
+        return True, all_timing[0]
+
 
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
