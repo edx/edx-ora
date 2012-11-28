@@ -16,16 +16,17 @@ from django.conf import settings
 from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
+import project_urls
 
 log = logging.getLogger(__name__)
 
-LOGIN_URL = "/grading_controller/login/"
-SUBMIT_URL = "/grading_controller/submit/"
-GET_NEXT = "/peer_grading/get_next_submission/"
-IS_CALIBRATED="/peer_grading/is_student_calibrated/"
-SAVE_GRADE="/peer_grading/save_grade/"
-SHOW_CALIBRATION="/peer_grading/show_calibration_essay/"
-SAVE_CALIBRATION="/peer_grading/save_calibration_essay/"
+LOGIN_URL = project_urls.ControllerURLs.log_in
+SUBMIT_URL = project_urls.ControllerURLs.submit
+GET_NEXT = project_urls.PeerGradingURLs.get_next_submission
+IS_CALIBRATED= project_urls.PeerGradingURLs.is_student_calibrated
+SAVE_GRADE= project_urls.PeerGradingURLs.save_grade
+SHOW_CALIBRATION= project_urls.PeerGradingURLs.show_calibration_essay
+SAVE_CALIBRATION= project_urls.PeerGradingURLs.save_calibration_essay
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
