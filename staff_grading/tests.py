@@ -1,6 +1,6 @@
 """
 Run me with:
-    python manage.py test --settings=grading_controller.settings staff_grading
+    python manage.py test --settings=grading_controller.test_settings staff_grading
 """
 import json
 import unittest
