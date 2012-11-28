@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 import urlparse
+import project_urls
 
 from django.http import HttpResponse
 
@@ -175,7 +176,7 @@ def post_results_to_xqueue(session, header, body):
         'xqueue_body': body,
     }
 
-    (success, msg) = _http_post(session, settings.XQUEUE_INTERFACE['url'] + '/xqueue/put_result/', request,
+    (success, msg) = _http_post(session, settings.XQUEUE_INTERFACE['url'] + project_urls.XqueueURLs.put_result, request,
         settings.REQUESTS_TIMEOUT)
 
     return success, msg
@@ -183,7 +184,7 @@ def post_results_to_xqueue(session, header, body):
 
 def xqueue_login():
     session = requests.session()
-    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/login/')
+    xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.log_in)
     (success, xqueue_msg) = login(
         session,
         xqueue_login_url,
@@ -196,7 +197,7 @@ def xqueue_login():
 
 def controller_login():
     session = requests.session()
-    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], '/grading_controller/login/')
+    controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], project_urls.ControllerURLs.log_in)
     (success, controller_msg) = login(
         session,
         controller_login_url,

@@ -11,6 +11,7 @@ import logging
 import controller.util as util
 from controller.models import Submission
 from controller.models import GraderStatus, SubmissionState
+import project_urls
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class Command(BaseCommand):
                             util._http_post(
                                 self.controller_session,
                                 urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                    '/grading_controller/submit/'),
+                                    project_urls.ControllerURLs.submit),
                                 content,
                                 settings.REQUESTS_TIMEOUT,
                             )
@@ -96,7 +97,7 @@ class Command(BaseCommand):
         """
         try:
             success, response = util._http_get(self.xqueue_session,
-                urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_submission/'),
+                urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.get_submission),
                 {'queue_name': queue_name})
         except Exception as err:
             return False, "Error getting response: {0}".format(err)
@@ -109,7 +110,7 @@ class Command(BaseCommand):
             """
             try:
                 success, response = util._http_get(self.xqueue_session,
-                    urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], '/xqueue/get_queuelen/'),
+                    urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.get_queuelen),
                     {'queue_name': queue_name})
 
                 if not success:

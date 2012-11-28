@@ -11,6 +11,7 @@ import sys
 import os
 from path import path
 import logging
+import project_urls
 
 log=logging.getLogger(__name__)
 
@@ -158,7 +159,7 @@ class Command(NoArgsCommand):
                         created, msg = util._http_post(
                             self.controller_session,
                             urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                                '/grading_controller/put_result/'),
+                                project_urls.ControllerURLs.put_result),
                             grader_dict,
                             settings.REQUESTS_TIMEOUT,
                         )
@@ -178,7 +179,7 @@ class Command(NoArgsCommand):
         """
         Get a single submission from grading controller
         """
-        success,content=self.query_controller('/grading_controller/get_submission_ml/')
+        success,content=self.query_controller(project_urls.ControllerURLs.get_submission_ml)
 
         return success, content
 
@@ -186,7 +187,7 @@ class Command(NoArgsCommand):
         """
         Get the number of pending submissions from the controller
         """
-        success,content=self.query_controller('/grading_controller/get_pending_count/', data={'grader_type' : "ML"})
+        success,content=self.query_controller(project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
         return success, content['to_be_graded_count']
 
     def query_controller(self,end_path,data={}):
