@@ -15,7 +15,7 @@ def generate_initial_timing_dict(submission_id):
 
     if isinstance(submission_id,int):
         try:
-            Submission.objects.get(id=submission_id)
+            submission_id=Submission.objects.get(id=submission_id)
         except:
             return False, "Could not generate submission object from input id."
 
@@ -46,7 +46,23 @@ def generate_final_timing_dict(submission_id,grader_id):
     if not isinstance(grader_id,int) or not isinstance(grader_id, Grader):
         return False, "Invalid input!  Needs to be int (submission id) or Submission object."
 
-    
+    if isinstance(grader_id,int):
+        try:
+            grader_id=Grader.objects.get(id=grader_id)
+        except:
+            return False, "Could not generate grader object from input id."
+
+    timing_dict.update({
+        'grader_type' : grader_id.grader_type,
+        'status_code' : grader_id.status_code,
+        'confidence' : grader_id.confidence,
+        'is_calibration' : grader_id.is_calibration,
+        'score' : grader_id.score,
+        'grader_version' : grader_id.grader_id,
+        'grader_id' : grader_id.id,
+    })
+
+    return True, timing_dict
 
 
 def instantiate_timing_object(timing_dict):
