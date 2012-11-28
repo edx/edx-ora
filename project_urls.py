@@ -23,8 +23,8 @@ class MLGradingURLs():
 
 class StaffGradingURLs():
     staff_grading_base="/staff_grading/"
-    get_next_submission="get_next_submission/"
-    save_grade="save_grade/"
+    get_next_submission= staff_grading_base + "get_next_submission/"
+    save_grade= staff_grading_base + "save_grade/"
 
 class XqueueURLs():
     xqueue_url_base="/xqueue/"
