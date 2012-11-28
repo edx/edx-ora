@@ -13,6 +13,8 @@ from controller.models import Submission
 import controller.util as util
 from staff_grading import staff_grading_util
 
+from ml_grading.models import CreatedModel
+
 sys.path.append(settings.ML_PATH)
 import create
 

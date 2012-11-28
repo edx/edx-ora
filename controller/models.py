@@ -1,5 +1,5 @@
 from django.db import models
-import datetime
+from django.utils import timezone
 
 class GraderStatus():
     failure="F"
@@ -54,7 +54,7 @@ class Submission(models.Model):
     max_score = models.IntegerField(default=1)
     course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     student_response = models.TextField(default="")
-    student_submission_time = models.DateTimeField(default=datetime.datetime.now)
+    student_submission_time = models.DateTimeField(default=timezone.now)
 
     # xqueue details
     xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
