@@ -75,11 +75,14 @@ class Command(NoArgsCommand):
                         'creation_succeeded': results['success'],
                      }
 
+                    success, id = ml_grading_util.save_created_model(created_model_dict)
 
+                    if not success:
+                        log.debug("ModelCreator creation failed.  Error: {0}".format(id))
 
                     log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
                         full_model_path,
-                        results['created'],
+                        results['success'],
                         results['errors'],
                     ))
 
