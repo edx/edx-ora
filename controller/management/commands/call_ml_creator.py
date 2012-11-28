@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.management.base import NoArgsCommand
 from django.utils import timezone
 
 import requests
@@ -10,23 +10,22 @@ import logging
 import sys
 
 from controller.models import Submission
-import controller.util as util
 from staff_grading import staff_grading_util
 
 from ml_grading.models import CreatedModel
-import ml_grading_util
+import ml_grading.ml_grading_util as ml_grading_util
 
 sys.path.append(settings.ML_PATH)
 import create
 
 log = logging.getLogger(__name__)
 
-class CallMLCreator():
+class Command(NoArgsCommand):
     """
     "Poll grading controller and send items to be graded to ml"
     """
 
-    def run(self):
+    def handle_noargs(self, **options):
         """
         Calls ml model creator to evaluate database, decide what needs to have a model created, and do so.
         """
@@ -85,12 +84,6 @@ class CallMLCreator():
                     ))
 
         return "Finished looping through."
-
-if __name__ == '__main__':
-    call_ml_creator=CallMLCreator()
-    call_ml_creator.run()
-
-
 
 
 

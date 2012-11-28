@@ -1,7 +1,7 @@
-from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.utils import timezone
+from django.core.management.base import NoArgsCommand
 
+from django.utils import timezone
 import requests
 import urlparse
 import time
@@ -9,6 +9,10 @@ import json
 import logging
 import sys
 import os
+from path import path
+import logging
+
+log=logging.getLogger(__name__)
 
 import controller.util as util
 from controller.models import SubmissionState, GraderStatus
@@ -17,7 +21,7 @@ from controller.models import Submission, Grader
 
 from ml_grading.models import CreatedModel
 
-import ml_grading_util
+import ml_grading.ml_grading_util as ml_grading_util
 
 sys.path.append(settings.ML_PATH)
 import grade
@@ -74,7 +78,7 @@ error_template = u"""
 
 """
 
-class CallMLGrader():
+class Command(NoArgsCommand):
     """
     "Poll grading controller and send items to be graded to ml"
     """
@@ -82,7 +86,7 @@ class CallMLGrader():
     def __init__(self):
         self.controller_session = util.controller_login()
 
-    def run(self):
+    def handle_noargs(self, **options):
         """
         Constant loop that polls grading controller
         """
@@ -194,10 +198,5 @@ def add_results_to_template(results):
         )
 
     return feedback
-
-if __name__ == '__main__':
-    call_ml_grader=CallMLGrader()
-    call_ml_grader.run()
-
 
 
