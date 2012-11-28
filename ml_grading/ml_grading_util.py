@@ -38,7 +38,7 @@ def get_latest_created_model(location):
     created_models=CreatedModel.objects.filter(
         location=location,
         creation_succeeded=True,
-    ).order_by("-date_created")
+    ).order_by("-date_created")[:1]
 
     if created_models.count()==0:
         return False, "No valid models for location."
