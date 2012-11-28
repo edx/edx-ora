@@ -31,6 +31,7 @@ class CreatedModel(models.Model):
     number_of_essays=models.IntegerField()
     cv_kappa=models.DecimalField(max_digits=10,decimal_places=9)
     cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10)
+    creation_succeeded=models.BooleanField(default=False)
 
     def get_submission_ids_used(self):
         """

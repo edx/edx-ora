@@ -182,6 +182,7 @@ INSTALLED_APPS = (
     'staff_grading',
     'south',
     'peer_grading',
+    'ml_grading',
     )
 
 LOGGING = get_logger_config(ENV_ROOT / "log",
