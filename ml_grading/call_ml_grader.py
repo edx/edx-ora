@@ -101,50 +101,55 @@ class Command(BaseCommand):
                     student_response = sub.student_response.encode('ascii', 'ignore')
 
                     #Get the latest created model for the given location
-                    created_model=ml_grading_util.get_latest_created_model(sub.location)
+                    success, created_model=ml_grading_util.get_latest_created_model(sub.location)
 
-                    #Create grader path from location in submission
-                    grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
+                    if not success:
+                        log.debug("Could not identify a valid created model!")
 
-                    results = grade.grade(grader_path, None,
-                        student_response) #grader config is none for now, could be different later
+                    else:
 
-                    #If the above, try using the full path in the created_model object
-                    if not results['success']:
-                        grader_path=created_model.model_full_path
+                        #Create grader path from location in submission
+                        grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
+
                         results = grade.grade(grader_path, None,
                             student_response) #grader config is none for now, could be different later
 
-                    #Add feedback/errors to appropriate template
-                    formatted_feedback=add_results_to_template(results)
+                        #If the above, try using the full path in the created_model object
+                        if not results['success']:
+                            grader_path=created_model.model_full_path
+                            results = grade.grade(grader_path, None,
+                                student_response) #grader config is none for now, could be different later
 
-                    log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+                        #Add feedback/errors to appropriate template
+                        formatted_feedback=add_results_to_template(results)
 
-                    #Set grader status according to success/fail
-                    if results['success']:
-                        status = GraderStatus.success
-                    else:
-                        status = GraderStatus.failure
+                        log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
 
-                    grader_dict = {
-                        'score': results['score'],
-                        'feedback': formatted_feedback,
-                        'status': status,
-                        'grader_id': 1,
-                        'grader_type': "ML",
-                        'confidence': 1,
-                        'submission_id': sub.id,
-                    }
+                        #Set grader status according to success/fail
+                        if results['success']:
+                            status = GraderStatus.success
+                        else:
+                            status = GraderStatus.failure
 
-                    #Create grader object in controller by posting back results
-                    created, msg = util._http_post(
-                        self.controller_session,
-                        urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                            '/grading_controller/put_result/'),
-                        grader_dict,
-                        settings.REQUESTS_TIMEOUT,
-                    )
-                    log.debug("Got response of {0} from server, message: {1}".format(created, msg))
+                        grader_dict = {
+                            'score': results['score'],
+                            'feedback': formatted_feedback,
+                            'status': status,
+                            'grader_id': 1,
+                            'grader_type': "ML",
+                            'confidence': 1,
+                            'submission_id': sub.id,
+                        }
+
+                        #Create grader object in controller by posting back results
+                        created, msg = util._http_post(
+                            self.controller_session,
+                            urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                                '/grading_controller/put_result/'),
+                            grader_dict,
+                            settings.REQUESTS_TIMEOUT,
+                        )
+                        log.debug("Got response of {0} from server, message: {1}".format(created, msg))
                 else:
                     log.info("Error getting item from controller or no items to get.")
 

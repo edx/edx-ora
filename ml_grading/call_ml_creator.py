@@ -14,6 +14,7 @@ import controller.util as util
 from staff_grading import staff_grading_util
 
 from ml_grading.models import CreatedModel
+import ml_grading_util
 
 sys.path.append(settings.ML_PATH)
 import create
@@ -37,7 +38,11 @@ class Command(BaseCommand):
                 settings.MIN_TO_USE_ML,
             ))
             if len(subs_graded_by_instructor) >= settings.MIN_TO_USE_ML:
-                if not create.check(location) or len(subs_graded_by_instructor) % 10 == 0:
+
+                relative_model_path, full_model_path= ml_grading_util.get_model_path(location)
+                success, latest_created_model=ml_grading_util.get_latest_created_model(location)
+
+                if not success or len(subs_graded_by_instructor) % 10 == 0:
                     text = [str(i['student_response'].encode('ascii', 'ignore')) for i in
                             list(subs_graded_by_instructor.values('student_response'))]
                     scores = [i.get_last_grader().score for i in list(subs_graded_by_instructor)]
@@ -51,4 +56,7 @@ class Command(BaseCommand):
                     ))
 
         return "Finished looping through."
+
+
+
 

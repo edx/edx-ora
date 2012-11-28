@@ -2,6 +2,7 @@ import os
 from path import path
 from django.conf import settings
 import re
+from django.utils import timezone
 
 from models import CreatedModel
 
@@ -21,8 +22,9 @@ def get_model_path(location):
     create_directory(base_path)
 
     fixed_location=re.sub("/","_",location)
+    fixed_location+="_"+timezone.now().strftime("%Y%m%d%H%M%S")
     full_path=os.path.join(base_path,fixed_location)
-    return full_path
+    return fixed_location,full_path
 
 def get_latest_created_model(location):
     """
@@ -41,4 +43,12 @@ def get_latest_created_model(location):
     if created_models.count()==0:
         return False, "No valid models for location."
 
-    return created_models[0]
+    return True, created_models[0]
+
+def check(model_path):
+    try:
+        with open(model_path) as f: pass
+    except IOError as e:
+        return False
+
+    return True
