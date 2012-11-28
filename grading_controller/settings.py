@@ -26,6 +26,7 @@ GRADER_SETTINGS_DIRECTORY = "grader_settings/"
 #ML
 MIN_TO_USE_ML = 100
 ML_PATH = os.path.join(ENV_ROOT, "machine_learning/")
+ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/")
 
 #Peer
 MIN_TO_USE_PEER=20
