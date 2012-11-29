@@ -34,17 +34,20 @@ def query_metrics(request):
             'grader_type' : grader_type,
             'location' : location
         }
+
+        title= 'Timing Data for Request with params '
         arguments = {}
         for k, v in query_dict.items():
             if v:
                 arguments[k] = v
+                title+= " {0} : {1} ".format(k,v)
 
         timing_set=Timing.objects.filter(**arguments)
         timing_set_values=timing_set.values("start_time", "end_time")
         timing_set_start=[i['start_time'] for i in timing_set_values]
         timing_set_end=[i['end_time'] for i in timing_set_values]
         timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
-        d = BarChartDrawing()
+        d = BarChartDrawing(title=title)
 
         d.chart.data = [timing_set_difference]
         binary_char = d.asString("gif")
@@ -62,11 +65,11 @@ def query_metrics(request):
 
 
 class BarChartDrawing(Drawing):
-    def __init__(self, width=400, height=200, *args, **kw):
+    def __init__(self, width=1000, height=1000, title='Timing Data for Request ',*args, **kw):
         Drawing.__init__(self,width,height,*args,**kw)
         self.add(HorizontalBarChart(), name='chart')
 
-        self.add(String(200,180,'Timing Data for Request'), name='title')
+        self.add(String(200,180,title), name='title')
 
         #set any shapes, fonts, colors you want here.  We'll just
         #set a title font and place the chart within the drawing
