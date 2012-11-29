@@ -8,6 +8,7 @@ from datetime import datetime
 from django.utils import timezone
 import logging
 import urlparse
+from string import lower
 
 from django.contrib.auth.models import User
 from django.test.client import Client
@@ -23,6 +24,10 @@ from models import Submission, Grader
 from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
+
+import management.commands.pull_from_xqueue as pull_from_xqueue
+
+from mock import Mock
 
 import project_urls
 
@@ -252,6 +257,24 @@ class GraderInterfaceTest(unittest.TestCase):
 
         #Make sure that grader object is actually created!
         self.assertEqual(successful_grader_count,1)
+
+class ControllerUtilTests(unittest.TestCase):
+    def setUp(self):
+        test_util.create_user()
+
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def test_parse_xobject_false(self):
+        sample_xqueue_return='blah'
+        return_code, content= util.parse_xobject(sample_xqueue_return, "blah")
+
+        #Should not parse properly
+        self.assertEqual(return_code,False)
+
 
 
 

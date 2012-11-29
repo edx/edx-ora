@@ -1,4 +1,4 @@
-#Tests for this module are in
+#Tests for this module are in tests.py in the controller app
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -9,6 +9,7 @@ import urlparse
 import time
 import json
 import logging
+from statsd import statsd
 
 import controller.util as util
 from controller.models import Submission
@@ -53,6 +54,10 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
         json.dumps(xqueue_header),
         json.dumps(xqueue_body),
     )
+
+    statsd.increment("open_ended_assessment.grading_controller.post_to_xqueue",
+        tags=["success:{0}".format(success)])
+
     if success:
         log.debug("Successful post back to xqueue!")
         submission.posted_results_back_to_queue = True
@@ -81,12 +86,18 @@ def pull_from_single_queue(queue_name,controller_session,xqueue_session):
                     settings.REQUESTS_TIMEOUT,
                 )
                 log.debug("Successful post!")
+                statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
+                    tags=["success:True", "queue_name:{0}".format(queue_name)])
             else:
                 log.info("Error getting queue item or no queue items to get.")
+                statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
+                    tags=["success:False", "queue_name:{0}".format(queue_name)])
 
             success, queue_length= get_queue_length(queue_name, xqueue_session)
     except Exception as err:
-        log.debug("Error getting submission: ".format(err))
+        log.debug("Error getting submission: {0}".format(err))
+        statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
+            tags=["success:Exception", "queue_name:{0}".format(queue_name)])
 
 
 def check_for_completed_submissions():

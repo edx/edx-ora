@@ -12,6 +12,7 @@ import os
 from path import path
 import logging
 import project_urls
+from statsd import statsd
 
 log=logging.getLogger(__name__)
 
@@ -108,6 +109,9 @@ class Command(NoArgsCommand):
 
             except Exception as err:
                 log.debug("Error getting submission: {0}".format(err))
+                statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                    tags=["success:Exception"])
+
             #TODO: add in some logic that figures out how many submissions are left to grade and loops based on that
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
@@ -131,6 +135,8 @@ class Command(NoArgsCommand):
                 results={'score' : 0}
                 formatted_feedback="error"
                 status=GraderStatus.failure
+                statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                    tags=["success:False"])
 
             else:
 
@@ -150,6 +156,8 @@ class Command(NoArgsCommand):
                 formatted_feedback=add_results_to_template(results)
 
                 log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+                statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                    tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
 
                 #Set grader status according to success/fail
                 if results['success']:
@@ -178,6 +186,8 @@ class Command(NoArgsCommand):
             log.debug("Got response of {0} from server, message: {1}".format(created, msg))
         else:
             log.info("Error getting item from controller or no items to get.")
+            statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                tags=["success:False"])
 
 
     def get_item_from_controller(self):
