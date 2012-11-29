@@ -75,7 +75,7 @@ def generate_final_timing_dict(submission_id,grader_id):
     if not success:
         return False, "Invalid submission id."
 
-    if not isinstance(grader_id,int) or not isinstance(grader_id, Grader):
+    if not isinstance(grader_id,int) and not isinstance(grader_id, Grader):
         return False, "Invalid input!  Needs to be int (submission id) or Submission object."
 
     if isinstance(grader_id,int):
