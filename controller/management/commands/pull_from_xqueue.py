@@ -54,6 +54,10 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
         json.dumps(xqueue_header),
         json.dumps(xqueue_body),
     )
+
+    statsd.increment("open_ended_assessment.grading_controller.post_to_xqueue",
+        tags=["success:{0}".format(success)])
+
     if success:
         log.debug("Successful post back to xqueue!")
         submission.posted_results_back_to_queue = True

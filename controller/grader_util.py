@@ -71,7 +71,7 @@ def create_and_handle_grader_object(grader_dict):
             sub.state=SubmissionState.waiting_to_be_graded
 
     #Increment statsd whenever a grader object is saved.
-    statsd.increment("open_ended_assessment.grading_controller.controller.grader_util.create_and_handle_grader_object",
+    statsd.increment("open_ended_assessment.grading_controller.controller.create_grader_object",
         tags=["submission_state:{0}".format(sub.state),
               "grader_type:{0}".format(grade.grader_type),
               "grader_status:{0}".format(grade.status_code),
