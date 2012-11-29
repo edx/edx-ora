@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 _INTERFACE_VERSION=1
 
 @login_required
-@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['get_submission_ml'])
+@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_ml'])
 def get_submission_ml(request):
     """
     Gets a submission for the ML grader
@@ -53,7 +53,7 @@ def get_submission_ml(request):
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 @login_required
-@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['get_pending_count'])
+@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_pending_count'])
 def get_pending_count(request):
     """
     Returns the number of submissions pending grading
@@ -77,7 +77,7 @@ def get_pending_count(request):
     return util._success_response({'to_be_graded_count' : to_be_graded_count}, _INTERFACE_VERSION)
 
 @login_required
-@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['get_submission_instructor'])
+@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_instructor'])
 def get_submission_instructor(request):
     """
     Gets a submission for the Instructor grading view
@@ -99,7 +99,7 @@ def get_submission_instructor(request):
 
 
 @login_required
-@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['get_submission_peer'])
+@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_peer'])
 def get_submission_peer(request):
     """
     Gets a submission for the Peer grading view
@@ -123,7 +123,7 @@ def get_submission_peer(request):
 
 @csrf_exempt
 @login_required
-@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['put_result'])
+@statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:put_result'])
 def put_result(request):
     """
     Used by external interfaces to post results back to controller

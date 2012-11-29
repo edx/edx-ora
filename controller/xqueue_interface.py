@@ -7,6 +7,7 @@ from datetime import datetime
 import logging
 import os
 import json
+from statsd import statsd
 
 from models import Submission, Grader
 from models import GraderStatus, SubmissionState
@@ -20,6 +21,7 @@ _INTERFACE_VERSION=1
 
 @csrf_exempt
 @login_required
+@statsd.timed('open_ended_assessment.grading_controller.controller.xqueue_interface.time', tags=['function:submit'])
 def submit(request):
     '''
     Xqueue pull script posts objects here.
