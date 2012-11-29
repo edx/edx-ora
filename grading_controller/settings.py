@@ -18,30 +18,31 @@ ADMINS = (
 MANAGERS = ADMINS
 
 REQUESTS_TIMEOUT = 5    # seconds
-TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds
-TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds
-GRADER_SETTINGS_DIRECTORY = "grader_settings/"
-MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10
+TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
+TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
+GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
+MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
 
 #Config for specific graders
 #ML
-MIN_TO_USE_ML = 100
-ML_PATH = os.path.join(ENV_ROOT, "machine_learning/")
-ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/")
-TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds
+MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use machine learning
+ML_PATH = os.path.join(ENV_ROOT, "machine_learning/") #Path to ML repo containing grade.py and create.py
+ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
+TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
 
 #Peer
-MIN_TO_USE_PEER=20
-PEER_GRADER_COUNT = 3
-PEER_GRADER_MINIMUM_TO_CALIBRATE = 3
-PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6
+MIN_TO_USE_PEER=20 #Minimum instructor graded (calibration) essays before peer grading can be used
+PEER_GRADER_COUNT = 3 #Number of peer graders for each submission
+PEER_GRADER_MINIMUM_TO_CALIBRATE = 3 #Minimum number of calibration essays each peer grader will see
+PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6 #Maximum number of calibration essays each peer grader will see
 
 #Error units are defined as the absolute value of student calibration score minus actual score divided by maximum score
 #abs(student_score-actual_score)/max_score
+#If they are above this error, student will keep seeing calibration essays until they hit peer_grader_maximum_to_calibrate
 PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
 
-EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds
-RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds
+EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds.  This will send submissions back to lms with failure
+RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds.  This will make submissions that are locked by graders available for grading again
 
 DATABASES = {
     'default': {
@@ -186,6 +187,7 @@ INSTALLED_APPS = (
     'south',
     'peer_grading',
     'ml_grading',
+    'metrics',
     )
 
 LOGGING = get_logger_config(ENV_ROOT / "log",

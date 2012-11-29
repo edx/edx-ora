@@ -2,6 +2,7 @@ from django.db.models import Count
 from controller.models import Submission
 from controller.models import SubmissionState, GraderStatus
 import logging
+from metrics import metrics_util
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +64,9 @@ def get_single_peer_grading_item(location, grader_id):
                     if len(submission_ids) > 1:
                         submission_ids.pop(minimum_index)
                         submission_grader_counts.pop(minimum_index)
+
+    #Insert timing initialization code
+    metrics_util.initialize_timing(sub_id)
 
     return found, sub_id
 

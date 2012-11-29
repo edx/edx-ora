@@ -16,6 +16,8 @@ import grader_util
 from staff_grading import staff_grading_util
 from peer_grading import peer_grading_util
 
+from metrics import metrics_util
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
@@ -41,6 +43,10 @@ def get_submission_ml(request):
                 if to_be_graded is not None:
                     to_be_graded.state = SubmissionState.being_graded
                     to_be_graded.save()
+
+                    #Insert timing initialization code
+                    metrics_util.initialize_timing(to_be_graded)
+
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
@@ -83,6 +89,9 @@ def get_submission_instructor(request):
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
+    #Insert timing initialization code
+    metrics_util.initialize_timing(sub_id)
+
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
 
@@ -101,6 +110,9 @@ def get_submission_peer(request):
 
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
+
+    #Insert timing initialization code
+    metrics_util.initialize_timing(sub_id)
 
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
