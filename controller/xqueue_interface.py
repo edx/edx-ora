@@ -47,6 +47,8 @@ def submit(request):
                 util.get_request_ip(request),
                 request.POST,
             ))
+            statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit",
+                tags=["success:Exception"])
             return util._error_response('Incorrect format' , _INTERFACE_VERSION)
         else:
             try:
@@ -95,10 +97,21 @@ def submit(request):
                         xqueue_submission_id,
                         xqueue_submission_key,
                     ))
+
+                statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit",
+                    tags=["success:Exception"])
+
                 return util._error_response('Unable to create submission.', _INTERFACE_VERSION)
 
             #Handle submission and write to db
             success = handle_submission(sub)
+            statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit",
+                tags=[
+                    "success:{0}".format(success),
+                    "location:{0}".format(sub.location),
+                    "course_id:{0}".format(course_id),
+                ])
+
             if not success:
                 return util._error_response("Failed to handle submission.")
 
@@ -114,35 +127,39 @@ def handle_submission(sub):
     Output:
         True/False status code
     """
-    #try:
-    #Assign whether grader should be ML or IN based on number of graded examples.
-    subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
-        sub.location)
+    try:
+        #Assign whether grader should be ML or IN based on number of graded examples.
+        subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
+            sub.location)
 
-    #TODO: abstract out logic for assigning which grader to go with.
-    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
-    grader_settings = grader_util.get_grader_settings(grader_settings_path)
-    if grader_settings['grader_type'] == "ML":
-        if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML):
-            sub.next_grader_type = "ML"
+        #TODO: abstract out logic for assigning which grader to go with.
+        grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
+        grader_settings = grader_util.get_grader_settings(grader_settings_path)
+        if grader_settings['grader_type'] == "ML":
+            if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML):
+                sub.next_grader_type = "ML"
+            else:
+                sub.next_grader_type = "IN"
+        elif grader_settings['grader_type'] == "PE":
+            #Ensures that there will be some calibration essays before peer grading begins!
+            #Calibration essays can be added using command line utility, or through normal instructor grading.
+            if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_PEER):
+                sub.next_grader_type = "PE"
+            else:
+                sub.next_grader_type = "IN"
         else:
-            sub.next_grader_type = "IN"
-    elif grader_settings['grader_type'] == "PE":
-        #Ensures that there will be some calibration essays before peer grading begins!
-        #Calibration essays can be added using command line utility, or through normal instructor grading.
-        if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_PEER):
-            sub.next_grader_type = "PE"
-        else:
-            sub.next_grader_type = "IN"
-    else:
-        log.debug("Invalid grader type specified in settings file.")
+            log.error("Invalid grader type specified in settings file.")
+
+            return False
+
+        sub.save()
+        log.debug("Submission object created successfully!")
+
+    except:
+        log.error("Submission creation failed!")
+
         return False
 
-    sub.save()
-    log.debug("Created successfully!")
-    #except:
-    #    log.debug("Creation failed!")
-    #return False
 
     return True
 

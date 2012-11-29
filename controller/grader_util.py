@@ -77,7 +77,8 @@ def create_and_handle_grader_object(grader_dict):
               "grader_status:{0}".format(grade.status_code),
               "location:{0}".format(sub.location),
               "course_id:{0}".format(sub.course_id),
-              "next_grader_type:{0}".format(sub.next_grader_type)
+              "next_grader_type:{0}".format(sub.next_grader_type),
+              "score:{0}".format(grade.score),
         ]
     )
 
