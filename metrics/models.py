@@ -12,7 +12,7 @@ class Timing(models.Model):
     #2.  We don't want to tie up the main working submission and grader tables with queries.
 
     #Actual timing
-    start_time=models.DateField(auto_now_add=True)
+    start_time=models.DateTimeField(auto_now_add=True)
     end_time=models.DateTimeField(blank=True, null=True, default=timezone.now)
     finished_timing=models.BooleanField(default=False)
 
