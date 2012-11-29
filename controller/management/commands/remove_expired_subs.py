@@ -29,7 +29,7 @@ class Command(BaseCommand):
                 expired_list = expire_submissions.get_submissions_that_have_expired(subs)
                 if len(expired_list) > 0:
                     success = expire_submissions.finalize_expired_submissions(expired_list)
-                    statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                    statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:{0}".format(success)])
             except:
                 log.error("Could not get submissions to expire!")
