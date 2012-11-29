@@ -11,7 +11,8 @@ from controller import util
 from controller import grader_util
 from django.template.loader import render_to_string
 from reportlab.graphics.shapes import Drawing, String
-from reportlab.graphics.charts.barcharts import HorizontalBarChart
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.lib.colors import gray
 
 from models import Timing
 
@@ -97,8 +98,10 @@ def render_form(post_url):
     return rendered
 
 def render_image(chart_data,title):
+    chart_data.sort()
     d = BarChartDrawing(title=title)
     d.chart.data = [chart_data]
+
     binary_char = d.asString("gif")
     response=HttpResponse(binary_char, 'image/gif')
 
@@ -129,9 +132,9 @@ def get_arguments(request):
 class BarChartDrawing(Drawing):
     def __init__(self, width=1000, height=1000, title='Timing Data for Request ',*args, **kw):
         Drawing.__init__(self,width,height,*args,**kw)
-        self.add(HorizontalBarChart(), name='chart')
+        self.add(VerticalBarChart(), name='chart')
 
-        self.add(String(200,180,title), name='title')
+        self.add(String(int(width/10),height-20,title), name='title')
 
         #set any shapes, fonts, colors you want here.  We'll just
         #set a title font and place the chart within the drawing
