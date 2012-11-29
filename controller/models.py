@@ -31,6 +31,8 @@ STATE_CODES = (
 
 CHARFIELD_LEN_SMALL = 1024
 
+# TODO: DB settings -- utf-8, innodb, store everything in UTC
+
 class Submission(models.Model):
     # controller state
     next_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
@@ -43,6 +45,7 @@ class Submission(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     prompt = models.TextField(default="")
     rubric = models.TextField(default="")
+    # TODO: is this good enough?  unique per problem/student?
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     # specified in the input type--can be reused between many different
