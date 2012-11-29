@@ -41,7 +41,8 @@ def generate_initial_timing_dict(submission_id):
     Output:
         boolean success, timing dictionary or error message
     """
-    if not isinstance(submission_id,int) or not isinstance(submission_id, Submission):
+
+    if not isinstance(submission_id,int) and not isinstance(submission_id, Submission):
         return False, "Invalid input!  Needs to be int (submission id) or Submission object."
 
     if isinstance(submission_id,int):

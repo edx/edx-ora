@@ -1,5 +1,6 @@
 from django.db import models
 from controller.models import GRADER_TYPE, STATUS_CODES, STATE_CODES
+from django.utils import timezone
 
 CHARFIELD_LEN_SMALL=1024
 
@@ -12,7 +13,7 @@ class Timing(models.Model):
 
     #Actual timing
     start_time=models.DateField(auto_now_add=True)
-    end_time=models.DateTimeField()
+    end_time=models.DateTimeField(blank=True, null=True, default=timezone.now)
     finished_timing=models.BooleanField(default=False)
 
     #Essay metadata
@@ -20,21 +21,21 @@ class Timing(models.Model):
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    max_score=models.IntegerField()
+    max_score=models.IntegerField(default=1)
 
     #This is so that we can query on it if we need to get more data
     submission_id=models.IntegerField(blank=True,null=True)
 
     #Grader Metadata
-    grader_type=models.CharField(max_length=2,choices=GRADER_TYPE)
-    status_code = models.CharField(max_length=1, choices=STATUS_CODES)
-    confidence = models.DecimalField(max_digits=10, decimal_places=9)
+    grader_type=models.CharField(max_length=2,choices=GRADER_TYPE,null=True, blank=True)
+    status_code = models.CharField(max_length=1, choices=STATUS_CODES,null=True, blank=True)
+    confidence = models.DecimalField(max_digits=10, decimal_places=9,null=True, blank=True)
     is_calibration = models.BooleanField(default=False)
-    score=models.IntegerField()
+    score=models.IntegerField(null=True, blank=True)
 
     #Badly named, but it can't be grader_id for obvious reasons!
     #This contains the version # of the grader.  For humans, version number is the lms id for the person.
-    grader_version=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    grader_version=models.CharField(max_length=CHARFIELD_LEN_SMALL,null=True, blank=True)
 
     #This is so that we can query on it if we need to get more data
     grader_id=models.IntegerField(blank=True,null=True)
