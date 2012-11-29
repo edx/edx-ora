@@ -8,6 +8,7 @@ import time
 import json
 import logging
 import sys
+from statsd import statsd
 
 from controller.models import Submission
 from staff_grading import staff_grading_util
@@ -95,14 +96,20 @@ class Command(NoArgsCommand):
 
                     if not success:
                         log.error("ModelCreator creation failed.  Error: {0}".format(id))
+                        statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
+                            tags=["success:False"])
 
                     log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
                         full_model_path,
                         results['success'],
                         results['errors'],
                     ))
+                    statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
+                        tags=["success:{0}".format(results['success'])])
         except:
             log.error("Problem creating model for location {0}".format(location))
+            statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
+                tags=["success:Exception"])
 
 
 
