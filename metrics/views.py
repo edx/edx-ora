@@ -12,13 +12,14 @@ from controller import grader_util
 from django.template.loader import render_to_string
 from reportlab.graphics.shapes import Drawing, String
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.lib.colors import gray
+from django.contrib.auth.decorators import login_required
 
 from models import Timing
 
 from controller.models import Submission, Grader, SubmissionState, GraderStatus
 
 @csrf_exempt
+@login_required
 def timing_metrics(request):
     """
     Request is an HTTP get request with the following keys:
@@ -50,6 +51,7 @@ def timing_metrics(request):
         return HttpResponse(rendered)
 
 @csrf_exempt
+@login_required
 def student_performance_metrics(request):
     """
     Request is an HTTP get request with the following keys:
