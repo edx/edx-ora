@@ -24,6 +24,10 @@ from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
 
+import management.commands.pull_from_xqueue as pull_from_xqueue
+
+from mock import Mock
+
 import project_urls
 
 log = logging.getLogger(__name__)
@@ -252,6 +256,27 @@ class GraderInterfaceTest(unittest.TestCase):
 
         #Make sure that grader object is actually created!
         self.assertEqual(successful_grader_count,1)
+
+class XQueuePullTest(unittest.TestCase):
+    def setUp(self):
+        test_util.create_user()
+
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def test_post_to_xqueue_false(self):
+
+        #Mocking xqueue calls so that we can test the post to xqueue from the pull process
+        sample_xqueue_return={"xqueue_files": "{}", "xqueue_header": "{\"submission_id\": 483, \"submission_key\": \"031c36ed804cefb9689de0d92b86f7fe\"}", "xqueue_body": "{\"max_score\": 3, \"student_info\": \"{\\\"anonymous_student_id\\\": \\\"5afe5d9bb03796557ee2614f5c9611fb\\\", \\\"submission_time\\\": \\\"20121129100640\\\"}\", \"grader_payload\": \"{\\\"grader_settings\\\": \\\"ml_grading.conf\\\", \\\"prompt\\\": \\\"\\\\n\\\\tA group of students wrote the following procedure for their investigation. \\\\n\\\\tProcedure: \\\\n\\\\t Determine the mass of four different samples.Pour vinegar in each of four separate, but identical, containers. Place a sample of one material into one container and label. Repeat with remaining samples, placing a single sample into a single container. After 24 hours, remove the samples from the containers and rinse each sample with distilled water. Allow the samples to sit and dry for 30 minutes. Determine the mass of each sample. \\\\n\\\\n\\\\tThe students&#8217; data are recorded in the table below. \\\\n\\\\tSample Starting Mass (g) Ending Mass (g) Difference in Mass (g)  \\\\n\\\\tMarble 9.8 9.4 &#8211;0.4  \\\\n\\\\tLimestone 10.4 9.1 &#8211;1.3  \\\\n\\\\tWood 11.2 11.2 0.0  \\\\n\\\\tPlastic 7.2 7.1 &#8211;0.1   \\\\n\\\\n\\\\tAfter reading the group&#8217;s procedure, describe what additional information you would need in order to replicate the experiment. Make sure to include at least three pieces of information.  \\\\n    \\\", \\\"location\\\": \\\"MITx/6.002x/problem/OETest\\\", \\\"course_id\\\": \\\"MITx/6.002x\\\", \\\"problem_id\\\": \\\"6.002x/Welcome/OETest\\\", \\\"rubric\\\": \\\"\\\\n\\\\tThis is the rubric!\\\\n    \\\"}\", \"student_response\": \"Additional information that you would need to know is what method to use to weigh the samples, what method to use to dry the samples, and how the samples are labeled.\"}"}
+        pull_from_xqueue.get_from_queue=Mock(return_value=(True,sample_xqueue_return))
+        pull_from_xqueue.get_queue_length=Mock(return_value=(True,1))
+
+        
+
+
 
 
 

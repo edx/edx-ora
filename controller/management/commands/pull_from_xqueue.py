@@ -1,4 +1,4 @@
-#Tests for this module are in
+#Tests for this module are in tests.py in the controller app
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
