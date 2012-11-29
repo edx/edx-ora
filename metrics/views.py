@@ -15,7 +15,7 @@ from reportlab.graphics.charts.barcharts import HorizontalBarChart
 
 from models import Timing
 
-from controller.models import Submission, Grader
+from controller.models import Submission, Grader, SubmissionState, GraderStatus
 
 @csrf_exempt
 def timing_metrics(request):
@@ -44,38 +44,57 @@ def timing_metrics(request):
         return response
 
     elif request.method == "GET":
-        url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
-        if not url_base.endswith("/"):
-            url_base += "/"
-        rendered=render_to_string('metrics_display.html',
-            {'ajax_url' : url_base,
-             'post_url' : "metrics/timing/"
-             })
+
+        rendered=render_form("metrics/timing/")
         return HttpResponse(rendered)
 
+@csrf_exempt
 def student_performance_metrics(request):
+    """
+    Request is an HTTP get request with the following keys:
+        Course_id
+        Grader_type
+        Location
+    """
 
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
 
-        grader_set=Grader.objects.filter(**arguments)
+        sub_arguments={}
+        for tag in ['course_id', 'location']:
+            if arguments[tag]:
+                sub_arguments["submission__" + tag]=arguments[tag]
+
+        grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
+
+        if arguments['grader_type']:
+            grader_set=grader_set.filter(grader_type="ML")
+
         if grader_set.count()==0:
             return HttpResponse("Did not find anything matching that query.")
 
-        response=render_image(grader_data,title)
+        grader_scores=[x['score'] for x in grader_set.values("score")]
+
+
+        response=render_image(grader_scores,title)
 
         return response
 
     elif request.method == "GET":
-        url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
-        if not url_base.endswith("/"):
-            url_base += "/"
-        rendered=render_to_string('metrics_display.html',
-            {'ajax_url' : url_base,
-             'post_url' : "metrics/timing/"
-            })
-    return HttpResponse(rendered)
+        rendered=render_form("metrics/student_performance/")
+        return HttpResponse(rendered)
+
+def render_form(post_url):
+    url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
+    if not url_base.endswith("/"):
+        url_base += "/"
+    rendered=render_to_string('metrics_display.html',
+        {'ajax_url' : url_base,
+         'post_url' : post_url
+        })
+
+    return rendered
 
 def render_image(chart_data,title):
     d = BarChartDrawing(title=title)
