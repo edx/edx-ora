@@ -32,5 +32,3 @@ class RoutingTest(unittest.TestCase):
 
     def tearDown(self):
         test_util.delete_all()
-
-    
