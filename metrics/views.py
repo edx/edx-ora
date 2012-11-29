@@ -15,8 +15,10 @@ from reportlab.graphics.charts.barcharts import HorizontalBarChart
 
 from models import Timing
 
+from controller.models import Submission, Grader
+
 @csrf_exempt
-def query_metrics(request):
+def timing_metrics(request):
     """
     Request is an HTTP get request with the following keys:
         Course_id
@@ -25,22 +27,8 @@ def query_metrics(request):
     """
 
     if request.method == "POST":
-        course_id = request.POST.get('course_id')
-        grader_type = request.POST.get('grader_type')
-        location = request.POST.get('location')
 
-        query_dict = {
-            'course_id' : course_id,
-            'grader_type' : grader_type,
-            'location' : location
-        }
-
-        title= 'Timing Data for Request with params '
-        arguments = {}
-        for k, v in query_dict.items():
-            if v:
-                arguments[k] = v
-                title+= " {0} : {1} ".format(k,v)
+        arguments,title=get_arguments(request)
 
         timing_set=Timing.objects.filter(**arguments)
         if timing_set.count()==0:
@@ -50,12 +38,9 @@ def query_metrics(request):
         timing_set_start=[i['start_time'] for i in timing_set_values]
         timing_set_end=[i['end_time'] for i in timing_set_values]
         timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
-        d = BarChartDrawing(title=title)
 
-        d.chart.data = [timing_set_difference]
-        binary_char = d.asString("gif")
-        response=HttpResponse(binary_char, 'image/gif')
-        #response['Content-Disposition'] = 'attachment; filename=output.gif'
+        response=render_image(timing_set_difference,title)
+
         return response
 
     elif request.method == "GET":
@@ -63,8 +48,63 @@ def query_metrics(request):
         if not url_base.endswith("/"):
             url_base += "/"
         rendered=render_to_string('metrics_display.html',
-            {'ajax_url' : url_base})
+            {'ajax_url' : url_base,
+             'post_url' : "metrics/timing/"
+             })
         return HttpResponse(rendered)
+
+def student_performance_metrics(request):
+
+    if request.method == "POST":
+
+        arguments,title=get_arguments(request)
+
+        grader_set=Grader.objects.filter(**arguments)
+        if grader_set.count()==0:
+            return HttpResponse("Did not find anything matching that query.")
+
+        response=render_image(grader_data,title)
+
+        return response
+
+    elif request.method == "GET":
+        url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
+        if not url_base.endswith("/"):
+            url_base += "/"
+        rendered=render_to_string('metrics_display.html',
+            {'ajax_url' : url_base,
+             'post_url' : "metrics/timing/"
+            })
+    return HttpResponse(rendered)
+
+def render_image(chart_data,title):
+    d = BarChartDrawing(title=title)
+    d.chart.data = [chart_data]
+    binary_char = d.asString("gif")
+    response=HttpResponse(binary_char, 'image/gif')
+
+    return response
+
+def get_arguments(request):
+    course_id = request.POST.get('course_id')
+    grader_type = request.POST.get('grader_type')
+    location = request.POST.get('location')
+
+    query_dict = {
+        'course_id' : course_id,
+        'grader_type' : grader_type,
+        'location' : location
+    }
+
+    title= 'Grader Data for Request with params '
+    arguments = {}
+    for k, v in query_dict.items():
+        if v:
+            arguments[k] = v
+            title+= " {0} : {1} ".format(k,v)
+
+    return arguments, title
+
 
 
 class BarChartDrawing(Drawing):
