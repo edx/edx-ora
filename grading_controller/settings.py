@@ -47,12 +47,26 @@ PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds.  This will send submissions back to lms with failure
 RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds.  This will make submissions that are locked by graders available for grading again
 
+#SQLite settings
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'essaydb', # Or path to database file if using sqlite3.
         'USER': '', # Not used with sqlite3.
         'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+    }
+}
+"""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'essaydb', # Or path to database file if using sqlite3.
+        'USER': 'controller', # Not used with sqlite3.
+        'PASSWORD': 'django', # Not used with sqlite3.
         'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
