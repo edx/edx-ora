@@ -43,6 +43,9 @@ def query_metrics(request):
                 title+= " {0} : {1} ".format(k,v)
 
         timing_set=Timing.objects.filter(**arguments)
+        if timing_set.count()==0:
+            return HttpResponse("Did not find anything matching that query.")
+
         timing_set_values=timing_set.values("start_time", "end_time")
         timing_set_start=[i['start_time'] for i in timing_set_values]
         timing_set_end=[i['end_time'] for i in timing_set_values]
