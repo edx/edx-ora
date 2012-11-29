@@ -86,7 +86,7 @@ def pull_from_single_queue(queue_name,controller_session,xqueue_session):
 
             success, queue_length= get_queue_length(queue_name, xqueue_session)
     except Exception as err:
-        log.debug("Error getting submission: ".format(err))
+        log.debug("Error getting submission: {0}".format(err))
 
 
 def check_for_completed_submissions():
