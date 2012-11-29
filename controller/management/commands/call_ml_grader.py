@@ -113,7 +113,7 @@ class Command(NoArgsCommand):
                     tags=["success:Exception"])
 
             #TODO: add in some logic that figures out how many submissions are left to grade and loops based on that
-            time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
+            time.sleep(settings.TIME_BETWEEN_ML_GRADER_CHECKS)
 
     def handle_single_item(self):
         success, content = self.get_item_from_controller()

@@ -28,7 +28,7 @@
             course_id=$("textarea[name=course_id]").first().val()
             grader_type=$("textarea[name=grader_type]").first().val()
             loc=$("textarea[name=location]").first().val()
-            submit("{{ajax_url}}metrics/metrics/", 'POST', [
+            submit("{{ajax_url}}{{post_url}}", 'POST', [
                 { name: 'course_id', value: course_id},
                 { name: 'location', value: loc },
                 { name: 'grader_type', value: grader_type },

@@ -20,6 +20,7 @@ from controller.models import SubmissionState, GraderStatus
 log = logging.getLogger(__name__)
 
 @csrf_exempt
+@login_required
 def peer_grading(request):
     """
     Temporary peer grading view.  Can be removed once real peer grading is wired in.
