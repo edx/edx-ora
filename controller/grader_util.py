@@ -6,6 +6,7 @@ from models import GraderStatus, SubmissionState
 import expire_submissions
 from django.utils import timezone
 from metrics import metrics_util
+from statsd import statsd
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +69,18 @@ def create_and_handle_grader_object(grader_dict):
             expire_submissions.finalize_expired_submission(sub)
         else:
             sub.state=SubmissionState.waiting_to_be_graded
+
+    #Increment statsd whenever a grader object is saved.
+    statsd.increment("open_ended_assessment.grading_controller.controller.create_grader_object",
+        tags=["submission_state:{0}".format(sub.state),
+              "grader_type:{0}".format(grade.grader_type),
+              "grader_status:{0}".format(grade.status_code),
+              "location:{0}".format(sub.location),
+              "course_id:{0}".format(sub.course_id),
+              "next_grader_type:{0}".format(sub.next_grader_type),
+              "score:{0}".format(grade.score),
+        ]
+    )
 
     sub.save()
 

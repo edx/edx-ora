@@ -10,6 +10,7 @@ validate that the passed-in grader_ids correspond to course staff.
 
 import json
 import logging
+from statsd import statsd
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -28,6 +29,7 @@ _INTERFACE_VERSION = 1
 
 # TODO: implement login
 #@login_required
+@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -95,6 +97,7 @@ def get_next_submission(request):
 
 #@login_required
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:save_grade'])
 def save_grade(request):
     """
     Supports POST requests with the following arguments:

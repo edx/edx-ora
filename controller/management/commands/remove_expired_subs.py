@@ -7,6 +7,7 @@ import urlparse
 import time
 import json
 import logging
+from statsd import statsd
 
 import controller.util as util
 from controller.models import Submission
@@ -22,10 +23,17 @@ class Command(BaseCommand):
         flag = True
         log.debug("Starting check for expired subs.")
         while flag:
-            subs = Submission.objects.all()
-            expire_submissions.reset_timed_out_submissions(subs)
-            expired_list = expire_submissions.get_submissions_that_have_expired(subs)
-            if len(expired_list) > 0:
-                success = expire_submissions.finalize_expired_submissions(expired_list)
+            try:
+                subs = Submission.objects.all()
+                expire_submissions.reset_timed_out_submissions(subs)
+                expired_list = expire_submissions.get_submissions_that_have_expired(subs)
+                if len(expired_list) > 0:
+                    success = expire_submissions.finalize_expired_submissions(expired_list)
+                    statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
+                        tags=["success:{0}".format(success)])
+            except:
+                log.error("Could not get submissions to expire!")
+                statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
+                    tags=["success:Exception"])
 
             time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
