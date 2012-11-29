@@ -97,7 +97,7 @@ class Command(NoArgsCommand):
                     if not success:
                         log.error("ModelCreator creation failed.  Error: {0}".format(id))
                         statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
-                            tags=["success:False"])
+                            tags=["success:False", "location:{0}".format(location)])
 
                     log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
                         full_model_path,
@@ -105,11 +105,11 @@ class Command(NoArgsCommand):
                         results['errors'],
                     ))
                     statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
-                        tags=["success:{0}".format(results['success'])])
+                        tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
         except:
             log.error("Problem creating model for location {0}".format(location))
             statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
-                tags=["success:Exception"])
+                tags=["success:Exception", "location:{0}".format(location)])
 
 
 
