@@ -93,6 +93,7 @@ def get_single_instructor_grading_item(course_id):
             to_be_graded = to_be_graded[0]
             if to_be_graded is not None:
                 to_be_graded.state = SubmissionState.being_graded
+                to_be_graded.next_grader_type="IN"
                 to_be_graded.save()
                 found = True
                 sub_id = to_be_graded.id
