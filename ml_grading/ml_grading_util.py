@@ -93,3 +93,27 @@ def check(model_path):
         return False
 
     return True
+
+def get_ml_errors(location):
+    """
+    Gets the latest error metrics from the last created ML model
+    Input:
+        location of the problem
+    Output:
+        boolean success, Dictionary with keys kappa, mean_absolute_error or error message
+    """
+
+    data_dict={'kappa' : 0, 'mean_absolute_error' : 0}
+
+    success, created_model=get_latest_created_model(location)
+
+    if not success:
+        return False, "Cpuld not find a model for the given location!"
+
+    data_dict['kappa']=created_model.cv_kappa
+    data_dict['mean_absolute_error'] = created_model.cv_mean_absolute_error
+
+    return True, data_dict
+
+
+
