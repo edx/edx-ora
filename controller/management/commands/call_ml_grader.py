@@ -30,56 +30,6 @@ import grade
 
 log = logging.getLogger(__name__)
 
-feedback_template = u"""
-
-<section>
-    <header>Feedback</header>
-    <div class="shortform">
-        <div class="result-output">
-          <p>Score: {score}</p>
-          <p>Number of potential problem areas identified: {problem_areas}</p>
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-output">
-          <div class="topicality">
-            Topicality: {topicality}
-          </div>
-          <div class="prompt_overlap">
-            Prompt Overlap : {prompt_overlap}
-          </div>
-          <div class="spelling">
-            Spelling: {spelling}
-          </div>
-          <div class="grammar">
-            Grammar: {grammar}
-          </div>
-          <div class="markup-text">
-            {markup_text}
-          </div>
-        </div>
-    </div>
-</section>
-
-"""
-
-error_template = u"""
-
-<section>
-    <div class="shortform">
-        <div class="result-errors">
-          There was an error with your submission.  Please contact course staff.
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-errors">
-          {errors}
-        </div>
-    </div>
-</section>
-
-"""
-
 class Command(NoArgsCommand):
     """
     "Poll grading controller and send items to be graded to ml"
@@ -219,23 +169,4 @@ class Command(NoArgsCommand):
             return False, "Error getting response: {0}".format(err)
 
         return success, content
-
-def add_results_to_template(results):
-
-    if results['success']:
-        feedback=feedback_template.format(
-            topicality=results['feedback']['topicality'],
-            spelling=results['feedback']['spelling'],
-            grammar=results['feedback']['grammar'],
-            markup_text=results['feedback']['markup_text'],
-            problem_areas=results['feedback']['problem_areas'],
-            score=results['feedback']['score'],
-            prompt_overlap=results['feedback']['prompt_overlap'],
-        )
-    else:
-        feedback=error_template.format(
-            errors=' '.join(results['errors'])
-        )
-
-    return feedback
 

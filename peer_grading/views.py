@@ -42,7 +42,7 @@ def peer_grading(request):
             post_data['max_score'] = int(post_data['max_score'])
             post_data['submission_id'] = int(post_data['submission_id'])
             post_data['student_id'] = post_data['student_id']
-            post_data['feedback'] = "<p>" + post_data['feedback'] + "</p>"
+            post_data['feedback'] = {'feedback' : post_data['feedback']}
         except:
             return HttpResponse("Can't parse score into an int.")
 
