@@ -110,8 +110,8 @@ def get_ml_errors(location):
     if not success:
         return False, "No model exists yet for this problem."
 
-    data_dict['kappa']=created_model.cv_kappa
-    data_dict['mean_absolute_error'] = created_model.cv_mean_absolute_error
+    data_dict['kappa']=round(created_model.cv_kappa,3)
+    data_dict['mean_absolute_error'] = round(created_model.cv_mean_absolute_error,3)
     data_dict['date_created'] = created_model.date_created.strftime("%Y-%m-%d %H:%M")
     data_dict['number_of_essays'] = created_model.number_of_essays
 
