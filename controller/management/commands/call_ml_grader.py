@@ -173,7 +173,7 @@ class Command(NoArgsCommand):
                 'grader_type': "ML",
                 'confidence': 1,
                 'submission_id': sub.id,
-                'errors' : results['errors']
+                'errors' : results['errors'],
                 }
 
 

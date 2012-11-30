@@ -33,7 +33,7 @@ def create_and_handle_grader_object(grader_dict):
      feedback, status, grader_id, grader_type, confidence, score,submission_id
     """
 
-    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", 'errors']:
+    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
         if tag not in grader_dict:
             return False, "{0} tag not in input dictionary.".format(tag)
 
@@ -42,7 +42,11 @@ def create_and_handle_grader_object(grader_dict):
     except:
         return False, "Error getting submission."
 
+    log.debug(grader_dict['feedback'])
+
     grader_dict['feedback']=convert_longform_feedback_to_html(grader_dict)
+
+    log.debug(grader_dict['feedback'])
 
     grade=create_grader(grader_dict,sub)
 
