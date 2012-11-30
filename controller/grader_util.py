@@ -31,7 +31,9 @@ def create_and_handle_grader_object(grader_dict):
     """
     Creates a Grader object and associates it with a given submission
     Input is grader dictionary with keys:
-     feedback, status, grader_id, grader_type, confidence, score,submission_id
+     feedback, status, grader_id, grader_type, confidence, score,submission_id, errors
+        Feedback should be a dictionary with as many keys as needed.
+        Errors is a string containing errors.
     """
 
     for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
