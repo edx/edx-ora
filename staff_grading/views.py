@@ -21,6 +21,7 @@ from controller.models import Submission
 from controller import util
 from controller import grader_util
 import staff_grading_util
+from ml_grading import ml_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ def get_next_submission(request):
     course_id = request.GET.get('course_id')
     grader_id = request.GET.get('grader_id')
 
+
     if not course_id or not grader_id:
         return util._error_response("Missing required parameter", _INTERFACE_VERSION)
 
@@ -77,6 +79,10 @@ def get_next_submission(request):
         log.error("Couldn't find submission %s for instructor grading", id)
         return util._error_response('Failed to load submission %s.  Contact support.' % id, _INTERFACE_VERSION)
 
+    #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
+    success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
+    ml_error_info.update({'success' : success})
+
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
             id, submission.state)
@@ -90,7 +96,9 @@ def get_next_submission(request):
                 # make this just submission.rubric
                 'rubric': submission.prompt + "<br>" + submission.rubric,
                 'prompt': submission.prompt,
-                'max_score': submission.max_score, }
+                'max_score': submission.max_score,
+                'ml_error_info' : ml_error_info,
+                }
 
     return util._success_response(response, _INTERFACE_VERSION)
 

@@ -103,15 +103,16 @@ def get_ml_errors(location):
         boolean success, Dictionary with keys kappa, mean_absolute_error or error message
     """
 
-    data_dict={'kappa' : 0, 'mean_absolute_error' : 0}
+    data_dict={'kappa' : 0, 'mean_absolute_error' : 0, 'date_created' : ""}
 
     success, created_model=get_latest_created_model(location)
 
     if not success:
-        return False, "Cpuld not find a model for the given location!"
+        return False, "Could not find a model for the given location!"
 
     data_dict['kappa']=created_model.cv_kappa
     data_dict['mean_absolute_error'] = created_model.cv_mean_absolute_error
+    data_dict['date_created'] = created_model.date_created.strftime("%Y-%m-%d %H:%M")
 
     return True, data_dict
 
