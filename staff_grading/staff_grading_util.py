@@ -79,23 +79,24 @@ def get_single_instructor_grading_item(course_id):
     for location in locations_for_course:
         subs_graded = finished_submissions_graded_by_instructor(location).count()
         subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
-        if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
-            to_be_graded = Submission.objects.filter(
-                location=location,
-                state=SubmissionState.waiting_to_be_graded,
-                next_grader_type="IN",
-            )
+        #Removing this check allows for instructor grading to be used even after ML models have been trained.
+        #if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
+        to_be_graded = Submission.objects.filter(
+            location=location,
+            state=SubmissionState.waiting_to_be_graded,
+            next_grader_type__in=["IN", "ML"],
+        )
 
-            log.debug("Looking for course_id: {0} and location {1} and got count {2}".format(course_id,location,to_be_graded.count()))
+        log.debug("Looking for course_id: {0} and location {1} and got count {2}".format(course_id,location,to_be_graded.count()))
 
-            if(to_be_graded.count() > 0):
-                to_be_graded = to_be_graded[0]
-                if to_be_graded is not None:
-                    to_be_graded.state = SubmissionState.being_graded
-                    to_be_graded.save()
-                    found = True
-                    sub_id = to_be_graded.id
-                    return found, sub_id
+        if(to_be_graded.count() > 0):
+            to_be_graded = to_be_graded[0]
+            if to_be_graded is not None:
+                to_be_graded.state = SubmissionState.being_graded
+                to_be_graded.save()
+                found = True
+                sub_id = to_be_graded.id
+                return found, sub_id
 
     #Insert timing initialization code
     metrics_util.initialize_timing(sub_id)
