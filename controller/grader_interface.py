@@ -134,7 +134,7 @@ def put_result(request):
         post_data = request.POST.dict().copy()
         log.debug(post_data)
 
-        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score']:
+        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'errors']:
             if not post_data.has_key(tag):
                 return util._error_response("Failed to find needed key {0}.".format(tag), _INTERFACE_VERSION)
 

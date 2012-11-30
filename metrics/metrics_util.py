@@ -28,7 +28,7 @@ def finalize_timing(sub_id, grade_id):
     success, timing_id=save_grader_data_in_timing_object(timing_dict)
 
     if not success:
-        log.warning("Timing object finalization failed with error: {0}".format(timing_dict))
+        log.warning("Timing object finalization failed with error: {0}".format(timing_id))
         return False
 
     return True

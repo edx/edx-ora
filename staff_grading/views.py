@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission
+from controller.models import Submission, GraderStatus
 from controller import util
 from controller import grader_util
 import staff_grading_util
@@ -80,7 +80,10 @@ def get_next_submission(request):
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
-    ml_error_info.update({'success' : success})
+    if success:
+        ml_error_info.update({'success' : success})
+    else:
+        ml_error_info={'success' : success}
 
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
@@ -150,9 +153,11 @@ def save_grade(request):
          'grader_id': grader_id,
          'grader_type': 'IN',
          # Humans always succeed (if they grade at all)...
-         'status': 'S',
+         'status': GraderStatus.success,
          # ...and they're always confident too.
-         'confidence': 1.0}
+         'confidence': 1.0,
+         #And they don't make errors
+         'errors' : ""}
 
     success, header = grader_util.create_and_handle_grader_object(d)
 

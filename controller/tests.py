@@ -237,6 +237,7 @@ class GraderInterfaceTest(unittest.TestCase):
             'confidence' : 1,
             'grader_id' : 1,
             'score' : 1,
+            'errors' : "test",
             }
 
         content = self.c.post(
