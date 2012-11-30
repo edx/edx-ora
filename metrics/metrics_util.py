@@ -20,7 +20,16 @@ def initialize_timing(sub_id):
     return True
 
 def finalize_timing(sub_id, grade_id):
-    success, timing_dict=generate_final_timing_dict(sub_id,grade_id)
+
+    if isinstance(sub_id,Submission):
+        sub_id=Submission.id
+    else:
+        try:
+            sub=Submission.objects.get(id=submission_id)
+        except:
+            return False, "Invalid submission id."
+
+    success, timing_dict=generate_final_timing_dict(submission_id,grade_id)
     if not success:
         log.warning("Final timing dict generation failed with error: {0}".format(timing_dict))
         return False
@@ -71,13 +80,8 @@ def generate_final_timing_dict(submission_id,grader_id):
         boolean success, timing dictionary or error message
     """
 
-    try:
-        sub=Submission.objects.get(id=submission_id)
-    except:
-        return False, "Invalid submission id."
-
     if not isinstance(grader_id,int) and not isinstance(grader_id, Grader):
-        return False, "Invalid input!  Needs to be int (submission id) or Submission object."
+        return False, "Invalid input!  Needs to be int (grader id) or Grader object."
 
     if isinstance(grader_id,int):
         try:
@@ -93,6 +97,7 @@ def generate_final_timing_dict(submission_id,grader_id):
         'score' : grader_id.score,
         'grader_version' : grader_id.grader_id,
         'grader_id' : grader_id.id,
+        'submission_id' : submission_id,
     })
 
     return True, timing_dict
