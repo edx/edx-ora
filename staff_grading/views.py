@@ -81,9 +81,9 @@ def get_next_submission(request):
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
     if success:
-        ml_error_info.update({'success' : success})
+        ml_error_message=staff_grading_util.generate_ml_error_message(ml_error_info)
     else:
-        ml_error_info={'success' : success}
+        ml_error_message=ml_error_info
 
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
@@ -99,7 +99,7 @@ def get_next_submission(request):
                 'rubric': submission.prompt + "<br>" + submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
-                'ml_error_info' : ml_error_info,
+                'ml_error_info' : ml_error_message,
                 }
 
     return util._success_response(response, _INTERFACE_VERSION)

@@ -6,6 +6,29 @@ from metrics import metrics_util
 
 log = logging.getLogger(__name__)
 
+def generate_ml_error_message(ml_error_info):
+    """
+    Generates a message to send to the staff grading service from a dictionary returned by ml_grading_util.get_ml_errors
+    Input:
+        Dictionary with keys kappa, mean absolute error, date created, number of essays
+    Output:
+        String to send to staff grading service
+    """
+
+    ml_message_template="""
+    Latest model created on {date_created}.  Contains {number_of_essays} essays.
+    Mean absolute error is {mean_absolute_error} and kappa is {kappa}.
+    """
+
+    ml_message=ml_message_template.format(
+        date_created=ml_error_info['date_created'],
+        number_of_essays=ml_error_info['number_of_essays'],
+        mean_absolute_error=ml_error_info['mean_absolute_error'],
+        kappa=ml_error_info['kappa'],
+    )
+
+    return ml_message
+
 
 def finished_submissions_graded_by_instructor(location):
     """
