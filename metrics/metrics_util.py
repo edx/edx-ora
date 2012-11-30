@@ -70,9 +70,10 @@ def generate_final_timing_dict(submission_id,grader_id):
     Output:
         boolean success, timing dictionary or error message
     """
-    success, timing_dict=generate_initial_timing_dict(submission_id)
 
-    if not success:
+    try:
+        sub=Submission.objects.get(id=submission_id)
+    except:
         return False, "Invalid submission id."
 
     if not isinstance(grader_id,int) and not isinstance(grader_id, Grader):
@@ -130,7 +131,7 @@ def save_grader_data_in_timing_object(timing_dict):
     Output: Boolean true/false, and then timing id or error message
     """
 
-    timing_lookup_tags=['student_id', 'location', 'problem_id', 'course_id', 'max_score', 'submission_id']
+    timing_lookup_tags=['submission_id']
     to_save_tags=['grader_type', 'status_code', 'confidence', 'is_calibration', 'score', 'grader_version', 'grader_id']
 
     tags= timing_lookup_tags + to_save_tags
@@ -139,11 +140,6 @@ def save_grader_data_in_timing_object(timing_dict):
             return False, "Could not find needed tag : {0}".format(tag)
 
     timing_list=Timing.objects.filter(
-        student_id=timing_dict['student_id'],
-        location=timing_dict['location'],
-        problem_id=timing_dict['problem_id'],
-        course_id=timing_dict['course_id'],
-        max_score=timing_dict['max_score'],
         submission_id=timing_dict['submission_id'],
     )[:1]
 

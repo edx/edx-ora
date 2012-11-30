@@ -43,6 +43,7 @@ class Command(BaseCommand):
         next_grader_type = parser.get(header_name, "next_grader")
         add_grader = parser.get(header_name, "add_grader_object") == "True"
         set_as_calibration = parser.get(header_name, "set_as_calibration") == "True"
+        max_score= parser.get(header_name,"max_score")
 
         score, text = [], []
         combined_raw = open(settings.REPO_PATH / essay_file).read()
@@ -68,6 +69,7 @@ class Command(BaseCommand):
                 previous_grader_type="IN",
                 next_grader_type=next_grader_type,
                 posted_results_back_to_queue=True,
+                max_score=max_score,
             )
 
             sub.save()
