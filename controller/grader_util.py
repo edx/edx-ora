@@ -7,6 +7,7 @@ import expire_submissions
 from django.utils import timezone
 from metrics import metrics_util
 from statsd import statsd
+import json
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def create_and_handle_grader_object(grader_dict):
      feedback, status, grader_id, grader_type, confidence, score,submission_id
     """
 
-    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id"]:
+    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
         if tag not in grader_dict:
             return False, "{0} tag not in input dictionary.".format(tag)
 
@@ -41,6 +42,21 @@ def create_and_handle_grader_object(grader_dict):
         sub = Submission.objects.get(id=grader_dict['submission_id'])
     except:
         return False, "Error getting submission."
+
+    log.debug(grader_dict['feedback'])
+
+    try:
+        grader_dict['feedback']=json.loads(grader_dict['feedback'])
+    except:
+        pass
+
+    if not isinstance(grader_dict['feedback'],dict):
+        grader_dict['feedback']={'feedback' : grader_dict['feedback']}
+
+    if grader_dict['status']==GraderStatus.failure:
+        grader_dict['feedback']=' '.join(grader_dict['errors'])
+
+    grader_dict['feedback']=json.dumps(grader_dict['feedback'])
 
     grade=create_grader(grader_dict,sub)
 

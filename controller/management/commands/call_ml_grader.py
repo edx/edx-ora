@@ -30,56 +30,6 @@ import grade
 
 log = logging.getLogger(__name__)
 
-feedback_template = u"""
-
-<section>
-    <header>Feedback</header>
-    <div class="shortform">
-        <div class="result-output">
-          <p>Score: {score}</p>
-          <p>Number of potential problem areas identified: {problem_areas}</p>
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-output">
-          <div class="topicality">
-            Topicality: {topicality}
-          </div>
-          <div class="prompt_overlap">
-            Prompt Overlap : {prompt_overlap}
-          </div>
-          <div class="spelling">
-            Spelling: {spelling}
-          </div>
-          <div class="grammar">
-            Grammar: {grammar}
-          </div>
-          <div class="markup-text">
-            {markup_text}
-          </div>
-        </div>
-    </div>
-</section>
-
-"""
-
-error_template = u"""
-
-<section>
-    <div class="shortform">
-        <div class="result-errors">
-          There was an error with your submission.  Please contact course staff.
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-errors">
-          {errors}
-        </div>
-    </div>
-</section>
-
-"""
-
 class Command(NoArgsCommand):
     """
     "Poll grading controller and send items to be graded to ml"
@@ -152,9 +102,6 @@ class Command(NoArgsCommand):
                     results = grade.grade(grader_path, None,
                         student_response) #grader config is none for now, could be different later
 
-                #Add feedback/errors to appropriate template
-                formatted_feedback=add_results_to_template(results)
-
                 log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                     tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
@@ -167,13 +114,15 @@ class Command(NoArgsCommand):
 
             grader_dict = {
                 'score': results['score'],
-                'feedback': formatted_feedback,
+                'feedback': json.dumps(results['feedback']),
                 'status': status,
                 'grader_id': 1,
                 'grader_type': "ML",
                 'confidence': 1,
                 'submission_id': sub.id,
+                'errors' : ' ' .join(results['errors']),
                 }
+
 
             #Create grader object in controller by posting back results
             created, msg = util._http_post(
@@ -220,24 +169,4 @@ class Command(NoArgsCommand):
             return False, "Error getting response: {0}".format(err)
 
         return success, content
-
-def add_results_to_template(results):
-
-    if results['success']:
-        feedback=feedback_template.format(
-            topicality=results['feedback']['topicality'],
-            spelling=results['feedback']['spelling'],
-            grammar=results['feedback']['grammar'],
-            markup_text=results['feedback']['markup_text'],
-            problem_areas=results['feedback']['problem_areas'],
-            score=results['feedback']['score'],
-            prompt_overlap=results['feedback']['prompt_overlap'],
-        )
-    else:
-        feedback=error_template.format(
-            errors=' '.join(results['errors'])
-        )
-
-    return feedback
-
 

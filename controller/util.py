@@ -216,9 +216,13 @@ def create_xqueue_header_and_body(submission):
     score_and_feedback = submission.get_all_successful_scores_and_feedback()
     score = score_and_feedback['score']
     feedback = score_and_feedback['feedback']
+    grader_type=score_and_feedback['grader_type']
+    success=score_and_feedback['success']
     xqueue_body = {
         'feedback': feedback,
         'score': score,
+        'grader_type' : grader_type,
+        'success' : success,
     }
 
     return xqueue_header, xqueue_body
@@ -242,7 +246,6 @@ def _success_response(data, version):
                 'success': True}
     response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
-
 
 
 

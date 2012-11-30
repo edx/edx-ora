@@ -13,26 +13,6 @@ import peer_grading_util
 
 log = logging.getLogger(__name__)
 
-feedback_template = u"""
-
-<section>
-    <header>Feedback</header>
-    <div class="shortform">
-        <div class="result-output">
-          <p>Score: {score}</p>
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-output">
-          <div class="feedback">
-            Feedback: {feedback}
-          </div>
-        </div>
-    </div>
-</section>
-
-"""
-
 _INTERFACE_VERSION = 1
 
 @login_required
@@ -117,8 +97,7 @@ def save_grade(request):
     score = post_data['score']
 
     #This is done to ensure that response is properly formatted on the lms side.
-    feedback_string = post_data['feedback']
-    feedback = feedback_template.format(feedback=feedback_string, score=score)
+    feedback_dict = post_data['feedback']
 
     try:
         score = int(score)
@@ -127,13 +106,15 @@ def save_grade(request):
 
     d = {'submission_id': submission_id,
          'score': score,
-         'feedback': feedback,
+         'feedback': feedback_dict,
          'grader_id': grader_id,
          'grader_type': 'PE',
          # Humans always succeed (if they grade at all)...
          'status': 'S',
          # ...and they're always confident too.
-         'confidence': 1.0}
+         'confidence': 1.0,
+         #And they don't make any errors
+         'errors' : ""}
 
     #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.
     (success, header) = grader_util.create_and_handle_grader_object(d)
