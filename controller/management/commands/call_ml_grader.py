@@ -167,13 +167,13 @@ class Command(NoArgsCommand):
 
             grader_dict = {
                 'score': results['score'],
-                'feedback': results['feedback'],
+                'feedback': json.dumps(results['feedback']),
                 'status': status,
                 'grader_id': 1,
                 'grader_type': "ML",
                 'confidence': 1,
                 'submission_id': sub.id,
-                'errors' : results['errors'],
+                'errors' : ' ' .join(results['errors']),
                 }
 
 

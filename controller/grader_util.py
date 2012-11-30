@@ -7,6 +7,7 @@ import expire_submissions
 from django.utils import timezone
 from metrics import metrics_util
 from statsd import statsd
+import json
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +44,11 @@ def create_and_handle_grader_object(grader_dict):
         return False, "Error getting submission."
 
     log.debug(grader_dict['feedback'])
+
+    try:
+        grader_dict['feedback']=json.loads(grader_dict['feedback'])
+    except:
+        pass
 
     grader_dict['feedback']=convert_longform_feedback_to_html(grader_dict)
 
@@ -124,12 +130,12 @@ def convert_longform_feedback_to_html(results):
     feedback_item_start='<div class="{feedback_key}">'
     feedback_item_end='</div>'
 
-    for tag in ['success', 'feedback', 'errors']:
+    for tag in ['status', 'feedback', 'errors']:
         if tag not in results:
             feedback_long=feedback_item_start.format(feedback_key="errors") + "Error getting feedback." + feedback_item_end
 
     feedback_items=results['feedback']
-    success=results['success']
+    success=results['status']==GraderStatus.success
     errors=results['errors']
 
     if not isinstance(feedback_items,dict):
