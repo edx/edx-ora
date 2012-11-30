@@ -128,6 +128,9 @@ def convert_longform_feedback_to_html(results):
     success=results['success']
     errors=results['errors']
 
+    if not isinstance(feedback_items,dict):
+        feedback_items={'feedback' : feedback_items}
+
     if success:
         feedback_long=""
         for k,v in feedback_items.items():
