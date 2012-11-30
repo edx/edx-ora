@@ -152,9 +152,6 @@ class Command(NoArgsCommand):
                     results = grade.grade(grader_path, None,
                         student_response) #grader config is none for now, could be different later
 
-                #Add feedback/errors to appropriate template
-                formatted_feedback=add_results_to_template(results)
-
                 log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                     tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
