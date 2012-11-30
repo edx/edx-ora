@@ -59,9 +59,10 @@ class Command(NoArgsCommand):
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location)
                 #Get last created model for given location
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location)
+                sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
 
                 #Retrain if no model exists, or every 10 graded essays.
-                if not success or graded_sub_count % 10 == 0:
+                if not success or graded_sub_count % 10 == 0 or sub_count_diff>=10:
                     combined_data=list(subs_graded_by_instructor.values('student_response', 'id'))
                     text = [str(i['student_response'].encode('ascii', 'ignore')) for i in combined_data]
                     ids=[i['id'] for i in combined_data]
