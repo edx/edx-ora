@@ -50,9 +50,13 @@ def create_and_handle_grader_object(grader_dict):
     except:
         pass
 
-    grader_dict['feedback']=convert_longform_feedback_to_html(grader_dict)
+    if not isinstance(grader_dict['feedback'],dict):
+        grader_dict['feedback']={'feedback' : grader_dict['feedback']}
 
-    log.debug(grader_dict['feedback'])
+    if grader_dict['status']==GraderStatus.failure:
+        grader_dict['feedback']=' '.join(grader_dict['errors'])
+
+    grader_dict['feedback']=json.dumps(grader_dict['feedback'])
 
     grade=create_grader(grader_dict,sub)
 
@@ -117,41 +121,3 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
-
-def convert_longform_feedback_to_html(results):
-    """
-    Take in a dictionary, and return html formatted strings appropriate for sending via xqueue.
-    Input:
-        Dictionary with keys success, feedback, and errors
-    Output:
-        String
-    """
-
-    feedback_item_start='<div class="{feedback_key}">'
-    feedback_item_end='</div>'
-
-    for tag in ['status', 'feedback', 'errors']:
-        if tag not in results:
-            feedback_long=feedback_item_start.format(feedback_key="errors") + "Error getting feedback." + feedback_item_end
-
-    feedback_items=results['feedback']
-    success=results['status']==GraderStatus.success
-    errors=results['errors']
-
-    if not isinstance(feedback_items,dict):
-        feedback_items={'feedback' : feedback_items}
-
-    if success:
-        feedback_long=""
-        for k,v in feedback_items.items():
-            feedback_long+=feedback_item_start.format(feedback_key=k)
-            feedback_long+=str(v)
-            feedback_long+=feedback_item_end
-
-        if len(feedback_items)==0:
-            feedback_long=feedback_item_start.format(feedback_key="feedback") + "No feedback available." + feedback_item_end
-
-    else:
-        feedback_long=feedback_item_start.format(feedback_key="errors") + ' '.join(str(errors)) + feedback_item_end
-
-    return feedback_long
