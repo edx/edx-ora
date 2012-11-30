@@ -1,1 +1,11 @@
--r requirements/common.txt
+django>=1.4,<1.5
+dogstatsd-python
+path.py
+pip
+numpy
+scipy
+South
+reportlab
+requests
+pytz
+
