@@ -100,9 +100,11 @@ def get_single_instructor_grading_item(course_id):
                 to_be_graded.save()
                 found = True
                 sub_id = to_be_graded.id
+
+                #Insert timing initialization code
+                metrics_util.initialize_timing(sub_id)
+
                 return found, sub_id
 
-    #Insert timing initialization code
-    metrics_util.initialize_timing(sub_id)
 
     return found, sub_id
