@@ -80,7 +80,10 @@ def get_next_submission(request):
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
-    ml_error_info.update({'success' : success})
+    if success:
+        ml_error_info.update({'success' : success})
+    else:
+        ml_error_info={'success' : success}
 
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
