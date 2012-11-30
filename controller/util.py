@@ -216,9 +216,13 @@ def create_xqueue_header_and_body(submission):
     score_and_feedback = submission.get_all_successful_scores_and_feedback()
     score = score_and_feedback['score']
     feedback = score_and_feedback['feedback']
+    grader_type=score_and_feedback['grader_type']
+    success=score_and_feedback['success']
     xqueue_body = {
         'feedback': feedback,
         'score': score,
+        'grader_type' : grader_type,
+        'success' : success,
     }
 
     return xqueue_header, xqueue_body
@@ -242,6 +246,41 @@ def _success_response(data, version):
                 'success': True}
     response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
+
+def convert_longform_feedback_to_html(results):
+    """
+    Take in a dictionary, and return html formatted strings appropriate for sending via xqueue.
+    Input:
+        Dictionary with keys success, feedback, and errors
+    Output:
+        String
+    """
+
+    feedback_item_start='<div class="{feedback_key}">'
+    feedback_item_end='</div>'
+
+    for tag in ['success', 'feedback', 'errors']:
+        if tag not in results:
+            feedback_long=feedback_item_start.format(feedback_key="errors") + "Error getting feedback." + feedback_item_end
+
+    feedback_items=results['feedback']
+    success=results['success']
+    errors=results['errors']
+
+    if success:
+        feedback_long=""
+        for k,v in feedback_items:
+            feedback_long+=feedback_item_start.format(feedback_key=k)
+            feedback_long+=v
+            feedback_long+=feedback_item_end
+
+        if len(feedback_items)==0:
+            feedback_long=feedback_item_start.format(feedback_key="feedback") + "No feedback available." + feedback_item_end
+
+    else:
+        feedback_long=feedback_item_start.format(feedback_key="errors") + ' '.join(errors) + feedback_item_end
+
+    return feedback_long
 
 
 

@@ -167,13 +167,14 @@ class Command(NoArgsCommand):
 
             grader_dict = {
                 'score': results['score'],
-                'feedback': formatted_feedback,
+                'feedback': util.convert_longform_feedback_to_html(results),
                 'status': status,
                 'grader_id': 1,
                 'grader_type': "ML",
                 'confidence': 1,
                 'submission_id': sub.id,
                 }
+
 
             #Create grader object in controller by posting back results
             created, msg = util._http_post(
@@ -239,5 +240,4 @@ def add_results_to_template(results):
         )
 
     return feedback
-
 
