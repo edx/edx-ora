@@ -27,8 +27,7 @@ log = logging.getLogger(__name__)
 _INTERFACE_VERSION = 1
 
 
-# TODO: implement login
-#@login_required
+@login_required
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
 def get_next_submission(request):
     """
@@ -95,9 +94,11 @@ def get_next_submission(request):
     return util._success_response(response, _INTERFACE_VERSION)
 
 
-#@login_required
+@login_required
 @csrf_exempt
-@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:save_grade'])
+@statsd.timed(
+    'open_ended_assessment.grading_controller.staff_grading.views.time',
+    tags=['function:save_grade'])
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
