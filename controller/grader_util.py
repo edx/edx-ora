@@ -33,7 +33,7 @@ def create_and_handle_grader_object(grader_dict):
      feedback, status, grader_id, grader_type, confidence, score,submission_id
     """
 
-    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id"]:
+    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", 'errors']:
         if tag not in grader_dict:
             return False, "{0} tag not in input dictionary.".format(tag)
 
@@ -41,6 +41,8 @@ def create_and_handle_grader_object(grader_dict):
         sub = Submission.objects.get(id=grader_dict['submission_id'])
     except:
         return False, "Error getting submission."
+
+    grader_dict['feedback']=convert_longform_feedback_to_html(grader_dict)
 
     grade=create_grader(grader_dict,sub)
 
@@ -105,3 +107,38 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
+
+def convert_longform_feedback_to_html(results):
+    """
+    Take in a dictionary, and return html formatted strings appropriate for sending via xqueue.
+    Input:
+        Dictionary with keys success, feedback, and errors
+    Output:
+        String
+    """
+
+    feedback_item_start='<div class="{feedback_key}">'
+    feedback_item_end='</div>'
+
+    for tag in ['success', 'feedback', 'errors']:
+        if tag not in results:
+            feedback_long=feedback_item_start.format(feedback_key="errors") + "Error getting feedback." + feedback_item_end
+
+    feedback_items=results['feedback']
+    success=results['success']
+    errors=results['errors']
+
+    if success:
+        feedback_long=""
+        for k,v in feedback_items.items():
+            feedback_long+=feedback_item_start.format(feedback_key=k)
+            feedback_long+=str(v)
+            feedback_long+=feedback_item_end
+
+        if len(feedback_items)==0:
+            feedback_long=feedback_item_start.format(feedback_key="feedback") + "No feedback available." + feedback_item_end
+
+    else:
+        feedback_long=feedback_item_start.format(feedback_key="errors") + ' '.join(str(errors)) + feedback_item_end
+
+    return feedback_long

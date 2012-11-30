@@ -74,6 +74,7 @@ def peer_grading(request):
                     'confidence': 1,
                     'submission_id': post_data['submission_id'],
                     'feedback': post_data['feedback'],
+                    'errors' : "",
                 })
             except:
                 return HttpResponse("Cannot create grader object.")

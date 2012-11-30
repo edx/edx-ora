@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission
+from controller.models import Submission, GraderStatus
 from controller import util
 from controller import grader_util
 import staff_grading_util
@@ -150,9 +150,11 @@ def save_grade(request):
          'grader_id': grader_id,
          'grader_type': 'IN',
          # Humans always succeed (if they grade at all)...
-         'status': 'S',
+         'status': GraderStatus.success,
          # ...and they're always confident too.
-         'confidence': 1.0}
+         'confidence': 1.0,
+         #And they don't make errors
+         'errors' : ""}
 
     success, header = grader_util.create_and_handle_grader_object(d)
 

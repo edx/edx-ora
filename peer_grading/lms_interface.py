@@ -133,7 +133,9 @@ def save_grade(request):
          # Humans always succeed (if they grade at all)...
          'status': 'S',
          # ...and they're always confident too.
-         'confidence': 1.0}
+         'confidence': 1.0,
+         #And they don't make any errors
+         'errors' : ""}
 
     #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.
     (success, header) = grader_util.create_and_handle_grader_object(d)
