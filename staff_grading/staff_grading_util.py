@@ -75,6 +75,7 @@ def get_single_instructor_grading_item(course_id):
     sub_id = 0
     locations_for_course = [x['location'] for x in
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+    log.debug("locations: {0} for course {1}".format(locations_for_course,course_id))
     for location in locations_for_course:
         subs_graded = finished_submissions_graded_by_instructor(location).count()
         subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
@@ -84,6 +85,8 @@ def get_single_instructor_grading_item(course_id):
                 state=SubmissionState.waiting_to_be_graded,
                 next_grader_type="IN",
             )
+
+            log.debug("Looking for course_id: {0} and location {1} and got count {2}".format(course_id,location,to_be_graded.count()))
 
             if(to_be_graded.count() > 0):
                 to_be_graded = to_be_graded[0]

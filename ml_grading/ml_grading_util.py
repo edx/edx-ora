@@ -108,7 +108,7 @@ def get_ml_errors(location):
     success, created_model=get_latest_created_model(location)
 
     if not success:
-        return False, "Could not find a model for the given location!"
+        return False, "No model exists yet for this problem."
 
     data_dict['kappa']=created_model.cv_kappa
     data_dict['mean_absolute_error'] = created_model.cv_mean_absolute_error
