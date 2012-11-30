@@ -79,8 +79,11 @@ def get_single_instructor_grading_item(course_id):
     for location in locations_for_course:
         subs_graded = finished_submissions_graded_by_instructor(location).count()
         subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
+
         #Removing this check allows for instructor grading to be used even after ML models have been trained.
+        #As the above is desirable behavior, leaving it commented out for now.
         #if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
+
         to_be_graded = Submission.objects.filter(
             location=location,
             state=SubmissionState.waiting_to_be_graded,
