@@ -9,6 +9,7 @@ import json
 import logging
 import requests
 import urlparse
+from metrics.timing_functions import initialize_timing
 
 from models import Submission, GRADER_TYPE, Grader, STATUS_CODES, SubmissionState, GraderStatus
 import util
@@ -46,7 +47,7 @@ def get_submission_ml(request):
                     to_be_graded.save()
 
                     #Insert timing initialization code
-                    metrics_util.initialize_timing(to_be_graded)
+                    initialize_timing(to_be_graded)
 
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
@@ -93,7 +94,7 @@ def get_submission_instructor(request):
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
     #Insert timing initialization code
-    metrics_util.initialize_timing(sub_id)
+    initialize_timing(sub_id)
 
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
@@ -116,7 +117,7 @@ def get_submission_peer(request):
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
     #Insert timing initialization code
-    metrics_util.initialize_timing(sub_id)
+    initialize_timing(sub_id)
 
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 

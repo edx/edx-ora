@@ -3,6 +3,7 @@ from controller.models import Submission
 from controller.models import SubmissionState, GraderStatus
 import logging
 from metrics import metrics_util
+from metrics.timing_functions import initialize_timing
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ def get_single_peer_grading_item(location, grader_id):
                     sub_id = grade_item.id
 
                     #Insert timing initialization code
-                    metrics_util.initialize_timing(sub_id)
+                    initialize_timing(sub_id)
 
                     return found, sub_id
                 else:
