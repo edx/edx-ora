@@ -13,6 +13,8 @@ from models import Timing
 
 _INTERFACE_VERSION=1
 
+@csrf_exempt
+@login_required
 def metrics_form(request):
     if request.method == "POST":
 
@@ -31,7 +33,8 @@ def metrics_form(request):
             return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
 
         if metric_type=="timing":
-            pass
+            arguments,title=get_arguments(request)
+            success,response=generate_timing_response(arguments,title)
 
         timing_set=Timing.objects.filter(**arguments)
         if timing_set.count()==0:
@@ -122,6 +125,7 @@ def get_arguments(request):
     course_id = request.POST.get('course_id')
     grader_type = request.POST.get('grader_type')
     location = request.POST.get('location')
+    metric_type=request.POST.get('metric_type')
 
     query_dict = {
         'course_id' : course_id,
@@ -129,7 +133,7 @@ def get_arguments(request):
         'location' : location
     }
 
-    title= 'Grader Data for Request with params '
+    title= 'Data for metric {0} request with params '.format(metric_type)
     arguments = {}
     for k, v in query_dict.items():
         if v:
