@@ -1,36 +1,37 @@
-import json
-import logging
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission
 from controller import util
-from controller import grader_util
 from django.template.loader import render_to_string
 from reportlab.graphics.shapes import Drawing, String
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from django.contrib.auth.decorators import login_required
+import metrics_util
 
 from models import Timing
 
-from controller.models import Submission, Grader, SubmissionState, GraderStatus
+_INTERFACE_VERSION=1
 
-@csrf_exempt
-@login_required
-def timing_metrics(request):
-    """
-    Request is an HTTP get request with the following keys:
-        Course_id
-        Grader_type
-        Location
-    """
-
+def metrics_form(request):
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
+
+        tags=['metric_type']
+        for tag in tags:
+            if tag not in arguments:
+                return HttpResponse("Request missing needed tag metric type.")
+
+        metric_type=arguments.get('metric_type').lower()
+
+        available_metric_types=['timing', 'performance']
+
+        if metric_type not in available_metric_types:
+            return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
+
+        if metric_type=="timing":
+            pass
 
         timing_set=Timing.objects.filter(**arguments)
         if timing_set.count()==0:
@@ -52,6 +53,28 @@ def timing_metrics(request):
 
 @csrf_exempt
 @login_required
+def timing_metrics(request):
+    """
+    Request is an HTTP get request with the following keys:
+        Course_id
+        Grader_type
+        Location
+    """
+
+    if request.method != "POST":
+        return util._error_response("Must make a POST request.", _INTERFACE_VERSION)
+
+    arguments,title=get_arguments(request)
+    success, response=metrics_util.generate_timing_response(arguments,title)
+
+    if not success:
+        return util._error_response(str(response),_INTERFACE_VERSION)
+
+    return util._success_response({'img' : response}, _INTERFACE_VERSION)
+
+
+@csrf_exempt
+@login_required
 def student_performance_metrics(request):
     """
     Request is an HTTP get request with the following keys:
@@ -60,33 +83,19 @@ def student_performance_metrics(request):
         Location
     """
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return util._error_response("Request type must be POST", _INTERFACE_VERSION)
 
-        arguments,title=get_arguments(request)
+    arguments,title=get_arguments(request)
+    success, response=metrics_util.generate_performance_response(arguments,title)
 
-        sub_arguments={}
-        for tag in ['course_id', 'location']:
-            if arguments[tag]:
-                sub_arguments["submission__" + tag]=arguments[tag]
+    if not success:
+        return util._error_response(str(response),_INTERFACE_VERSION)
 
-        grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
-
-        if arguments['grader_type']:
-            grader_set=grader_set.filter(grader_type="ML")
-
-        if grader_set.count()==0:
-            return HttpResponse("Did not find anything matching that query.")
-
-        grader_scores=[x['score'] for x in grader_set.values("score")]
+    return util._success_response({'img' : response},_INTERFACE_VERSION)
 
 
-        response=render_image(grader_scores,title)
 
-        return response
-
-    elif request.method == "GET":
-        rendered=render_form("metrics/student_performance/")
-        return HttpResponse(rendered)
 
 def render_form(post_url):
     url_base = settings.GRADING_CONTROLLER_INTERFACE['url']

@@ -1,6 +1,9 @@
+from django.http import HttpResponse
+from metrics.models import Timing
+from metrics.views import render_image
 from models import Timing
 from django.utils import timezone
-from controller.models import Submission, Grader
+from controller.models import Submission, Grader, GraderStatus
 import logging
 
 log=logging.getLogger(__name__)
@@ -168,3 +171,45 @@ def save_grader_data_in_timing_object(timing_dict):
 
     return True, timing.id
 
+
+def generate_timing_response(arguments,title):
+    try:
+        timing_set=Timing.objects.filter(**arguments)
+        if timing_set.count()==0:
+            return HttpResponse("Did not find anything matching that query.")
+
+        timing_set_values=timing_set.values("start_time", "end_time")
+        timing_set_start=[i['start_time'] for i in timing_set_values]
+        timing_set_end=[i['end_time'] for i in timing_set_values]
+        timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
+
+        response=render_image(timing_set_difference,title)
+
+        return True,response
+    except:
+        return False, "Unexpected error processing image."
+
+
+def generate_performance_response(arguments,title):
+    try:
+        sub_arguments={}
+        for tag in ['course_id', 'location']:
+            if arguments[tag]:
+                sub_arguments["submission__" + tag]=arguments[tag]
+
+        grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
+
+        if arguments['grader_type']:
+            grader_set=grader_set.filter(grader_type="ML")
+
+        if grader_set.count()==0:
+            return False, "Did not find anything matching that query."
+
+        grader_scores=[x['score'] for x in grader_set.values("score")]
+
+
+        response=render_image(grader_scores,title)
+
+        return True, response
+    except:
+        return False, "Unexpected error processing image."
