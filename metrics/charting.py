@@ -23,7 +23,7 @@ def render_image(chart_data,title):
     return response
 
 def render_image2(chart_data,title):
-
+    chart_data.sort()
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
