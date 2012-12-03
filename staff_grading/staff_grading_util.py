@@ -10,7 +10,7 @@ def generate_ml_error_message(ml_error_info):
     """
     Generates a message to send to the staff grading service from a dictionary returned by ml_grading_util.get_ml_errors
     Input:
-        Dictionary with keys kappa, mean absolute error, date created, number of essays
+        Dictionary with keys 'kappa', 'mean_absolute_error', 'date_created', 'number_of_essays'
     Output:
         String to send to staff grading service
     """
@@ -64,8 +64,9 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
     """
     Returns a single instructor grading item for a given location
     Input:
-        Problem location, boolean check_for_ML, which dictates whether or not an ML model has been trained should be
-        checked for.
+        Problem location, boolean check_for_ML, which dictates whether or not problems should be returned
+        to the instructor if there is already an ML model trained for this location or not.  If True, then
+        it does not return submissions for which an ML model has already been trained.
     Output:
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
@@ -73,8 +74,6 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
-    #Removing this check allows for instructor grading to be used even after ML models have been trained.
-    #As the above is desirable behavior, leaving it commented out for now.
     if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ML:
         to_be_graded = Submission.objects.filter(
             location=location,
