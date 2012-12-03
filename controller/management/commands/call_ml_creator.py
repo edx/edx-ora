@@ -59,7 +59,10 @@ class Command(NoArgsCommand):
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location)
                 #Get last created model for given location
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location)
-                sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
+                if success:
+                    sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
+                else:
+                    sub_count_diff = graded_sub_count
 
                 #Retrain if no model exists, or every 10 graded essays.
                 if not success or graded_sub_count % 10 == 0 or sub_count_diff>=10:
@@ -108,7 +111,7 @@ class Command(NoArgsCommand):
                     statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                         tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
         except:
-            log.error("Problem creating model for location {0}".format(location))
+            log.exception("Problem creating model for location {0}".format(location))
             statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                 tags=["success:Exception", "location:{0}".format(location)])
 
