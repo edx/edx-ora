@@ -60,30 +60,22 @@ def count_submissions_graded_and_pending_instructor(location):
     """
     return finished_submissions_graded_by_instructor(location).count(), submissions_pending_instructor(location).count()
 
-
-def get_single_instructor_grading_item(course_id):
+def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
     """
-    Gets instructor grading for a given course id.
-    Returns one submission id corresponding to the course.
+    Returns a single instructor grading item for a given location
     Input:
-        course_id - Id of a course.
-    Returns:
-        found - Boolean indicating whether or not something to grade was found
-        sub_id - If found, the id of a submission to grade
+        Problem location, boolean check_for_ML, which dictates whether or not an ML model has been trained should be
+        checked for.
+    Output:
+        Boolean success/fail, and then either error message or submission id of a valid submission.
     """
-    found = False
-    sub_id = 0
-    locations_for_course = [x['location'] for x in
-                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
-    log.debug("locations: {0} for course {1}".format(locations_for_course,course_id))
-    for location in locations_for_course:
-        subs_graded = finished_submissions_graded_by_instructor(location).count()
-        subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
-        #Removing this check allows for instructor grading to be used even after ML models have been trained.
-        #As the above is desirable behavior, leaving it commented out for now.
-        #if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML:
+    subs_graded = finished_submissions_graded_by_instructor(location).count()
+    subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
+    #Removing this check allows for instructor grading to be used even after ML models have been trained.
+    #As the above is desirable behavior, leaving it commented out for now.
+    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ML:
         to_be_graded = Submission.objects.filter(
             location=location,
             state=SubmissionState.waiting_to_be_graded,
@@ -106,5 +98,36 @@ def get_single_instructor_grading_item(course_id):
 
                 return found, sub_id
 
+        #If nothing is found, return false
+        return False, 0
+
+
+
+def get_single_instructor_grading_item(course_id):
+    """
+    Gets instructor grading for a given course id.
+    Returns one submission id corresponding to the course.
+    Input:
+        course_id - Id of a course.
+    Returns:
+        found - Boolean indicating whether or not something to grade was found
+        sub_id - If found, the id of a submission to grade
+    """
+    found = False
+    sub_id = 0
+    locations_for_course = [x['location'] for x in
+                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+    log.debug("locations: {0} for course {1}".format(locations_for_course,course_id))
+    for location in locations_for_course:
+       success, sub_id = get_single_instructor_grading_item_for_location(location,True)
+        if success:
+            return success, sub_id
+
+    log.debug("ML models already created for all locations in this course.  Getting any potential submisison instead.")
+
+    for location in locations_for_course:
+       success, sub_id = get_single_instructor_grading_item_for_location(location,False)
+       if success:
+           return success, sub_id
 
     return found, sub_id
