@@ -199,3 +199,5 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
     dev_env=True,
     debug=True,
     local_loglevel="DEBUG")
+
+SESSION_COOKIE_NAME="controller_session_id"

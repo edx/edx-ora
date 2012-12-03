@@ -28,7 +28,6 @@ log = logging.getLogger(__name__)
 _INTERFACE_VERSION = 1
 
 
-@login_required
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
 def get_next_submission(request):
     """
@@ -56,11 +55,14 @@ def get_next_submission(request):
       'error': if success is False, will have an error message with more info.
     }
     """
+
     if request.method != "GET":
         raise Http404
 
     course_id = request.GET.get('course_id')
     grader_id = request.GET.get('grader_id')
+
+    log.debug("Getting next submission for instructor grading for course: {0}.".format(course_id))
 
 
     if not course_id or not grader_id:
@@ -81,9 +83,11 @@ def get_next_submission(request):
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
     if success:
-        ml_error_info.update({'success' : success})
+        ml_error_message=staff_grading_util.generate_ml_error_message(ml_error_info)
     else:
-        ml_error_info={'success' : success}
+        ml_error_message=ml_error_info
+
+    ml_error_message="Machine learning error information: " + ml_error_message
 
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
@@ -99,13 +103,13 @@ def get_next_submission(request):
                 'rubric': submission.prompt + "<br>" + submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
-                'ml_error_info' : ml_error_info,
+                'ml_error_info' : ml_error_message,
                 }
 
+    log.debug("Sending success response back to instructor grading!")
     return util._success_response(response, _INTERFACE_VERSION)
 
 
-@login_required
 @csrf_exempt
 @statsd.timed(
     'open_ended_assessment.grading_controller.staff_grading.views.time',

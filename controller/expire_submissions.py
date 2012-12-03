@@ -44,6 +44,12 @@ def reset_timed_out_submissions(subs):
         sub = subs[i]
         if sub.state == SubmissionState.being_graded:
             sub.state = SubmissionState.waiting_to_be_graded
+
+            #If an instructor checks out a submission after ML grading has started,
+            # this resets it to ML if the instructor times out
+            if (sub.next_grader_type=="IN" and
+                staff_grading_util.finished_submissions_graded_by_instructor(sub.location)>settings.MIN_TO_USE_ML):
+                sub.next_grader_type="ML"
             sub.save()
             count += 1
 
