@@ -59,6 +59,7 @@ class Command(NoArgsCommand):
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location)
                 #Get last created model for given location
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location)
+
                 sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
 
                 #Retrain if no model exists, or every 10 graded essays.

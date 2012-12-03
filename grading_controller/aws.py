@@ -29,8 +29,8 @@ MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=int(ENV_TOKENS.get('MAX_NUMBER_OF_TIMES_TO_
 MIN_TO_USE_ML=int(ENV_TOKENS.get('MIN_TO_USE_ML',100))
 ML_PATH=os.path.join(ENV_ROOT, ENV_TOKENS.get('ML_PATH'))
 ML_MODEL_PATH=os.path.join(ENV_ROOT, ENV_TOKENS.get('ML_MODEL_PATH'))
-TIME_BETWEEN_ML_CREATOR_CHECKS=int(os.path.join(ENV_ROOT, ENV_TOKENS.get('TIME_BETWEEN_ML_CREATOR_CHECKS',3000)))
-TIME_BETWEEN_ML_GRADER_CHECKS=int(os.path.join(ENV_ROOT, ENV_TOKENS.get('TIME_BETWEEN_ML_GRADER_CHECKS',5)))
+TIME_BETWEEN_ML_CREATOR_CHECKS=int(ENV_TOKENS.get('TIME_BETWEEN_ML_CREATOR_CHECKS',3000))
+TIME_BETWEEN_ML_GRADER_CHECKS=int(ENV_TOKENS.get('TIME_BETWEEN_ML_GRADER_CHECKS',5))
 
 #Peer
 MIN_TO_USE_PEER=int(ENV_TOKENS.get('MIN_TO_USE_PEER',20))
@@ -46,11 +46,11 @@ RESET_SUBMISSIONS_AFTER=int(ENV_TOKENS.get('RESET_SUBMISSIONS_AFTER',600))
 local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')
 LOG_DIR = ENV_TOKENS.get("LOG_DIR", ENV_ROOT / "log")
 
-LOGGING = get_logger_config(LOG_DIR,
-    logging_env=ENV_TOKENS['LOGGING_ENV'],
-    syslog_addr=(ENV_TOKENS['SYSLOG_SERVER'], 514),
-    local_loglevel=local_loglevel,
-    debug=False)
+#LOGGING = get_logger_config(LOG_DIR,
+#    logging_env=ENV_TOKENS['LOGGING_ENV'],
+#    syslog_addr=(ENV_TOKENS['SYSLOG_SERVER'], 514),
+#    local_loglevel=local_loglevel,
+#    debug=False)
 
 ######################################################################
 # Read secure config
