@@ -18,11 +18,9 @@ import project_urls
 
 log = logging.getLogger(__name__)
 
-class Command(BaseCommand):
-    args = "<queue_name>"
-    help = "Pull items from given queues and send to grading controller"
+class NoArgsCommand(BaseCommand):
 
-    def handle(self, *args, **options):
+    def handle_noargs(self):
         """
         Constant loop that pulls from queue and posts to grading controller
         """
@@ -36,7 +34,7 @@ class Command(BaseCommand):
 
         while flag:
             #Loop through each queue that is given in arguments
-            for queue_name in args:
+            for queue_name in settings.QUEUES_TO_PULL_FROM:
                 #Check for new submissions on xqueue, and send to controller
                 pull_from_single_queue(queue_name,self.controller_session,self.xqueue_session)
 
