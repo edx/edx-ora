@@ -28,15 +28,24 @@
             course_id=$("textarea[name=course_id]").first().val()
             grader_type=$("textarea[name=grader_type]").first().val()
             loc=$("textarea[name=location]").first().val()
+            metric_type=$("select[name=metric_type]").first().find(':selected').text()
             submit("{{ajax_url}}{{post_url}}", 'POST', [
                 { name: 'course_id', value: course_id},
                 { name: 'location', value: loc },
                 { name: 'grader_type', value: grader_type },
+                {name : 'metric_type', value: metric_type},
             ]);
         });
     });
 
 </script>
+
+Metric type:
+<select name="metric_type" class="metric_type">
+    {% for i in available_metric_types %}
+        <option value="{{i}}">{{i}}</option>
+    {% endfor %}
+</select>
 
 Course id:
 <textarea name="course_id" class="course_id" cols="30" rows="1">MITx/6.002x</textarea><br/><br/>

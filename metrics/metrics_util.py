@@ -51,13 +51,15 @@ def generate_performance_response(arguments,title):
         return False, "Unexpected error processing image."
 
 
-def render_form(post_url):
+def render_form(post_url,available_metric_types):
     url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
     if not url_base.endswith("/"):
         url_base += "/"
     rendered=render_to_string('metrics_display.html',
         {'ajax_url' : url_base,
-         'post_url' : post_url
+         'post_url' : post_url,
+         'available_metric_types' : available_metric_types,
+
         })
 
     return rendered

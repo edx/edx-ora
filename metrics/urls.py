@@ -5,4 +5,5 @@ from django.contrib.auth.views import login
 urlpatterns = patterns('metrics.views',
     url(r'^timing/$', 'timing_metrics'),
     url(r'^student_performance/$', 'student_performance_metrics'),
+    url(r'^metrics/$', 'metrics_form'),
 )

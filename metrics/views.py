@@ -14,6 +14,7 @@ _INTERFACE_VERSION=1
 @csrf_exempt
 @login_required
 def metrics_form(request):
+    available_metric_types=['timing', 'performance']
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -24,8 +25,6 @@ def metrics_form(request):
                 return HttpResponse("Request missing needed tag metric type.")
 
         metric_type=arguments.get('metric_type').lower()
-
-        available_metric_types=['timing', 'performance']
 
         if metric_type not in available_metric_types:
             return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
@@ -38,25 +37,11 @@ def metrics_form(request):
             arguments,title=get_arguments(request)
             success,response=metrics_util.generate_performance_response(arguments,title)
 
-        if not success:
-            return util._error_response(response,_INTERFACE_VERSION)
-
-        timing_set=Timing.objects.filter(**arguments)
-        if timing_set.count()==0:
-            return HttpResponse("Did not find anything matching that query.")
-
-        timing_set_values=timing_set.values("start_time", "end_time")
-        timing_set_start=[i['start_time'] for i in timing_set_values]
-        timing_set_end=[i['end_time'] for i in timing_set_values]
-        timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
-
-        response=render_image(timing_set_difference,title)
-
-        return response
+        return HttpResponse(response)
 
     elif request.method == "GET":
 
-        rendered=render_form("metrics/timing/")
+        rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
 
 @csrf_exempt
