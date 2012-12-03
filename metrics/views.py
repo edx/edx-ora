@@ -21,23 +21,21 @@ def metrics_form(request):
 
         tags=['metric_type']
         for tag in tags:
-            if tag not in arguments:
+            if tag not in request.POST:
                 return HttpResponse("Request missing needed tag metric type.")
 
-        metric_type=arguments.get('metric_type').lower()
+        metric_type=request.POST.get('metric_type').lower()
 
         if metric_type not in available_metric_types:
             return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
 
         if metric_type=="timing":
-            arguments,title=get_arguments(request)
             success,response=metrics_util.generate_timing_response(arguments,title)
 
         if metric_type=="performance":
-            arguments,title=get_arguments(request)
             success,response=metrics_util.generate_performance_response(arguments,title)
 
-        return HttpResponse(response)
+        return response
 
     elif request.method == "GET":
 

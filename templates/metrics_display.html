@@ -33,7 +33,7 @@
                 { name: 'course_id', value: course_id},
                 { name: 'location', value: loc },
                 { name: 'grader_type', value: grader_type },
-                {name : 'metric_type', value: metric_type},
+                { name : 'metric_type', value: metric_type},
             ]);
         });
     });
@@ -45,7 +45,7 @@ Metric type:
     {% for i in available_metric_types %}
         <option value="{{i}}">{{i}}</option>
     {% endfor %}
-</select>
+</select><br/><br/>
 
 Course id:
 <textarea name="course_id" class="course_id" cols="30" rows="1">MITx/6.002x</textarea><br/><br/>
