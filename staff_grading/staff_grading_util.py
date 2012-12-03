@@ -3,6 +3,7 @@ from controller.models import Submission
 import logging
 from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
+from metrics.timing_functions import initialize_timing
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
                 sub_id = to_be_graded.id
 
                 #Insert timing initialization code
-                metrics_util.initialize_timing(sub_id)
+                initialize_timing(sub_id)
 
                 return found, sub_id
 

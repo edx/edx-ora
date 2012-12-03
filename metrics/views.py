@@ -1,12 +1,10 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from controller import util
-from django.template.loader import render_to_string
-from reportlab.graphics.shapes import Drawing, String
-from reportlab.graphics.charts.barcharts import VerticalBarChart
+from metrics.charting import render_image
+from metrics.metrics_util import render_form, get_arguments
 import metrics_util
 
 from models import Timing
@@ -96,69 +94,3 @@ def student_performance_metrics(request):
         return util._error_response(str(response),_INTERFACE_VERSION)
 
     return util._success_response({'img' : response},_INTERFACE_VERSION)
-
-
-
-
-def render_form(post_url):
-    url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
-    if not url_base.endswith("/"):
-        url_base += "/"
-    rendered=render_to_string('metrics_display.html',
-        {'ajax_url' : url_base,
-         'post_url' : post_url
-        })
-
-    return rendered
-
-def render_image(chart_data,title):
-    chart_data.sort()
-    d = BarChartDrawing(title=title)
-    d.chart.data = [chart_data]
-
-    binary_char = d.asString("gif")
-    response=HttpResponse(binary_char, 'image/gif')
-
-    return response
-
-def get_arguments(request):
-    course_id = request.POST.get('course_id')
-    grader_type = request.POST.get('grader_type')
-    location = request.POST.get('location')
-    metric_type=request.POST.get('metric_type')
-
-    query_dict = {
-        'course_id' : course_id,
-        'grader_type' : grader_type,
-        'location' : location
-    }
-
-    title= 'Data for metric {0} request with params '.format(metric_type)
-    arguments = {}
-    for k, v in query_dict.items():
-        if v:
-            arguments[k] = v
-            title+= " {0} : {1} ".format(k,v)
-
-    return arguments, title
-
-
-
-class BarChartDrawing(Drawing):
-    def __init__(self, width=1000, height=1000, title='Timing Data for Request ',*args, **kw):
-        Drawing.__init__(self,width,height,*args,**kw)
-        self.add(VerticalBarChart(), name='chart')
-
-        self.add(String(int(width/10),height-20,title), name='title')
-
-        #set any shapes, fonts, colors you want here.  We'll just
-        #set a title font and place the chart within the drawing
-        self.chart.x = 20
-        self.chart.y = 20
-        self.chart.width = self.width - 20
-        self.chart.height = self.height - 40
-
-        self.title.fontName = 'Helvetica-Bold'
-        self.title.fontSize = 12
-
-        self.chart.data = [[100,150,200,235]]
