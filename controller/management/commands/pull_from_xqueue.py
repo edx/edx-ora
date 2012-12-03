@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 class Command(NoArgsCommand):
 
-    def handle_noargs(self):
+    def handle_noargs(self, **options):
         """
         Constant loop that pulls from queue and posts to grading controller
         """
