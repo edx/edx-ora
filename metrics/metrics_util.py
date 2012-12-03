@@ -1,170 +1,90 @@
-from models import Timing
-from django.utils import timezone
-from controller.models import Submission, Grader
+from django.conf import settings
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+import charting
+from metrics.models import Timing
+from controller.models import  Grader, GraderStatus
 import logging
+import matplotlib.pyplot as plt
+import StringIO
+from matplotlib import numpy as np
 
 log=logging.getLogger(__name__)
 
-def initialize_timing(sub_id):
-    success, timing_dict=generate_initial_timing_dict(sub_id)
-    if not success:
-        log.warning("Initial timing dict generation failed with error: {0}".format(timing_dict))
-        return False
+def generate_timing_response(arguments,title):
+    #try:
+    timing_set=Timing.objects.filter(**arguments)
+    if timing_set.count()==0:
+        return HttpResponse("Did not find anything matching that query.")
 
-    success, timing_id = instantiate_timing_object(timing_dict)
+    timing_set_values=timing_set.values("start_time", "end_time")
+    timing_set_start=[i['start_time'] for i in timing_set_values]
+    timing_set_end=[i['end_time'] for i in timing_set_values]
+    timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
 
-    if not success:
-        log.warning("Timing object instantiation failed with error: {0}".format(timing_dict))
-        return False
+    response=charting.render_image(timing_set_difference,title)
 
-    return True
+    return True,response
+    #except:
+    #    return False, "Unexpected error processing image."
 
-def finalize_timing(sub_id, grade_id):
 
-    if isinstance(sub_id,Submission):
-        sub_id=sub_id.id
-    else:
-        try:
-            sub=Submission.objects.get(id=submission_id)
-        except:
-            return False, "Invalid submission id."
+def generate_performance_response(arguments,title):
+    try:
+        sub_arguments={}
+        for tag in ['course_id', 'location']:
+            if arguments[tag]:
+                sub_arguments["submission__" + tag]=arguments[tag]
 
-    success, timing_dict=generate_final_timing_dict(sub_id,grade_id)
-    if not success:
-        log.warning("Final timing dict generation failed with error: {0}".format(timing_dict))
-        return False
+        grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
 
-    success, timing_id=save_grader_data_in_timing_object(timing_dict)
+        if arguments['grader_type']:
+            grader_set=grader_set.filter(grader_type="ML")
 
-    if not success:
-        log.warning("Timing object finalization failed with error: {0}".format(timing_id))
-        return False
+        if grader_set.count()==0:
+            return False, "Did not find anything matching that query."
 
-    return True
+        grader_scores=[x['score'] for x in grader_set.values("score")]
 
-def generate_initial_timing_dict(submission_id):
-    """
-    Generate a timing dictionary from a submission object id.
-    Input:
-        integer submission id or Submission object
-    Output:
-        boolean success, timing dictionary or error message
-    """
 
-    if not isinstance(submission_id,int) and not isinstance(submission_id, Submission):
-        return False, "Invalid input!  Needs to be int (submission id) or Submission object."
+        response=charting.render_image(grader_scores,title)
 
-    if isinstance(submission_id,int):
-        try:
-            submission_id=Submission.objects.get(id=submission_id)
-        except:
-            return False, "Could not generate submission object from input id."
+        return True, response
+    except:
+        return False, "Unexpected error processing image."
 
-    timing_dict={
-        'student_id' : submission_id.student_id,
-        'location' : submission_id.location,
-        'problem_id' : submission_id.problem_id,
-        'course_id' : submission_id.course_id,
-        'max_score' : submission_id.max_score,
-        'submission_id' : submission_id.id,
+
+def render_form(post_url,available_metric_types):
+    url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
+    if not url_base.endswith("/"):
+        url_base += "/"
+    rendered=render_to_string('metrics_display.html',
+        {'ajax_url' : url_base,
+         'post_url' : post_url,
+         'available_metric_types' : available_metric_types,
+
+        })
+
+    return rendered
+
+
+def get_arguments(request):
+    course_id = request.POST.get('course_id')
+    grader_type = request.POST.get('grader_type')
+    location = request.POST.get('location')
+    metric_type=request.POST.get('metric_type')
+
+    query_dict = {
+        'course_id' : course_id,
+        'grader_type' : grader_type,
+        'location' : location
     }
 
-    return True, timing_dict
+    title= 'Data for metric {0} request with params '.format(metric_type)
+    arguments = {}
+    for k, v in query_dict.items():
+        if v:
+            arguments[k] = v
+            title+= " {0} : {1} ".format(k,v)
 
-def generate_final_timing_dict(submission_id,grader_id):
-    """
-    Generate a final timing dictionary from a submission object id and grader id.
-    Input:
-        integer submission id or Submission object and grader id or grader object
-    Output:
-        boolean success, timing dictionary or error message
-    """
-
-    if not isinstance(grader_id,int) and not isinstance(grader_id, Grader):
-        return False, "Invalid input!  Needs to be int (grader id) or Grader object."
-
-    if isinstance(grader_id,int):
-        try:
-            grader_id=Grader.objects.get(id=grader_id)
-        except:
-            return False, "Could not generate grader object from input id."
-
-    timing_dict={
-        'grader_type' : grader_id.grader_type,
-        'status_code' : grader_id.status_code,
-        'confidence' : grader_id.confidence,
-        'is_calibration' : grader_id.is_calibration,
-        'score' : grader_id.score,
-        'grader_version' : grader_id.grader_id,
-        'grader_id' : grader_id.id,
-        'submission_id' : submission_id,
-    }
-
-    return True, timing_dict
-
-
-def instantiate_timing_object(timing_dict):
-    """
-    Input is dictionary with tags specified below in tags variable
-    Output is boolean success/fail, and then either timing id or error message
-    """
-
-    tags=['student_id', 'location', 'problem_id', 'course_id', 'max_score', 'submission_id']
-
-    for tag in tags:
-        if tag not in timing_dict:
-            return False, "Could not find needed tag : {0}".format(tag)
-
-    timing=Timing(
-        start_time=timezone.now(),
-        student_id=timing_dict['student_id'],
-        location=timing_dict['location'],
-        problem_id=timing_dict['problem_id'],
-        course_id=timing_dict['course_id'],
-        max_score=timing_dict['max_score'],
-        submission_id=timing_dict['submission_id'],
-    )
-
-    timing.save()
-
-    return True, timing.id
-
-def save_grader_data_in_timing_object(timing_dict):
-    """
-    Looks up a timing object that was instantiated, and then adds in final data to it.
-    Input: Dictionary with below tags in timing_lookup_tags and to_save_tags
-    Output: Boolean true/false, and then timing id or error message
-    """
-
-    timing_lookup_tags=['submission_id']
-    to_save_tags=['grader_type', 'status_code', 'confidence', 'is_calibration', 'score', 'grader_version', 'grader_id']
-
-    tags= timing_lookup_tags + to_save_tags
-    for tag in tags:
-        if tag not in timing_dict:
-            return False, "Could not find needed tag : {0}".format(tag)
-
-    timing_list=Timing.objects.filter(
-        submission_id=timing_dict['submission_id'],
-    )[:1]
-
-    if timing_list.count()==0:
-        return False, "Could not find a matching timing object."
-
-    timing=timing_list[0]
-
-    timing.grader_type=timing_dict['grader_type']
-    timing.status_code=timing_dict['status_code']
-    timing.confidence=timing_dict['confidence']
-    timing.is_calibration=timing_dict['is_calibration']
-    timing.score=timing_dict['score']
-    timing.grader_version=timing_dict['grader_version']
-    timing.grader_id=timing_dict['grader_id']
-
-    timing.end_time=timezone.now()
-    timing.finished_timing=True
-
-    timing.save()
-
-    return True, timing.id
-
+    return arguments, title
