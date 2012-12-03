@@ -1,29 +1,32 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from metrics.charting import render_image
+import charting
 from metrics.models import Timing
 from controller.models import  Grader, GraderStatus
 import logging
+import matplotlib.pyplot as plt
+import StringIO
+from matplotlib import numpy as np
 
 log=logging.getLogger(__name__)
 
 def generate_timing_response(arguments,title):
-    try:
-        timing_set=Timing.objects.filter(**arguments)
-        if timing_set.count()==0:
-            return HttpResponse("Did not find anything matching that query.")
+    #try:
+    timing_set=Timing.objects.filter(**arguments)
+    if timing_set.count()==0:
+        return HttpResponse("Did not find anything matching that query.")
 
-        timing_set_values=timing_set.values("start_time", "end_time")
-        timing_set_start=[i['start_time'] for i in timing_set_values]
-        timing_set_end=[i['end_time'] for i in timing_set_values]
-        timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
+    timing_set_values=timing_set.values("start_time", "end_time")
+    timing_set_start=[i['start_time'] for i in timing_set_values]
+    timing_set_end=[i['end_time'] for i in timing_set_values]
+    timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
 
-        response=render_image(timing_set_difference,title)
+    response=charting.render_image(timing_set_difference,title)
 
-        return True,response
-    except:
-        return False, "Unexpected error processing image."
+    return True,response
+    #except:
+    #    return False, "Unexpected error processing image."
 
 
 def generate_performance_response(arguments,title):
@@ -44,7 +47,7 @@ def generate_performance_response(arguments,title):
         grader_scores=[x['score'] for x in grader_set.values("score")]
 
 
-        response=render_image(grader_scores,title)
+        response=charting.render_image(grader_scores,title)
 
         return True, response
     except:
