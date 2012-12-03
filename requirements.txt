@@ -8,4 +8,5 @@ South
 reportlab
 requests
 pytz
+matplotlib
 

@@ -59,14 +59,15 @@ def get_single_peer_grading_item(location, grader_id):
                     grade_item.save()
                     found = True
                     sub_id = grade_item.id
+
+                    #Insert timing initialization code
+                    metrics_util.initialize_timing(sub_id)
+
                     return found, sub_id
                 else:
                     if len(submission_ids) > 1:
                         submission_ids.pop(minimum_index)
                         submission_grader_counts.pop(minimum_index)
-
-    #Insert timing initialization code
-    metrics_util.initialize_timing(sub_id)
 
     return found, sub_id
 
