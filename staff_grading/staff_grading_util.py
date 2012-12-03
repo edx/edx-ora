@@ -99,7 +99,7 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
                 return found, sub_id
 
         #If nothing is found, return false
-        return False, 0
+    return False, 0
 
 
 
