@@ -21,7 +21,7 @@ def get_model_path(location):
     #Ensure that directory exists, create if it doesn't
     create_directory(base_path)
 
-    fixed_location=re.sub("/","_",location)
+    fixed_location=re.sub("[/:]","_",location)
     fixed_location+="_"+timezone.now().strftime("%Y%m%d%H%M%S")
     full_path=os.path.join(base_path,fixed_location)
     return fixed_location,full_path
