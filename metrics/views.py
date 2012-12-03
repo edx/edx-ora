@@ -32,7 +32,14 @@ def metrics_form(request):
 
         if metric_type=="timing":
             arguments,title=get_arguments(request)
-            success,response=generate_timing_response(arguments,title)
+            success,response=metrics_util.generate_timing_response(arguments,title)
+
+        if metric_type=="performance":
+            arguments,title=get_arguments(request)
+            success,response=metrics_util.generate_performance_response(arguments,title)
+
+        if not success:
+            return util._error_response(response,_INTERFACE_VERSION)
 
         timing_set=Timing.objects.filter(**arguments)
         if timing_set.count()==0:
