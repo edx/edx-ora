@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.shapes import Drawing, String
+import logging
 
 import StringIO
 import numpy as np
@@ -8,6 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 
 __author__ = 'vik'
+
+log=logging.getLogger(__name__)
 
 def render_image(chart_data,title):
     chart_data.sort()
@@ -24,15 +27,13 @@ def render_image2(chart_data,title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    # the histogram of the data
-    n, bins, patches = ax.hist(chart_data, 50, normed=1, facecolor='green', alpha=0.75)
+    # the bar chart of the data
+    log.debug(chart_data)
+    ax.bar([i for i in xrange(0,len(chart_data))], chart_data, width=1)
 
     ax.set_xlabel('Smarts')
     ax.set_ylabel('Probability')
-    #ax.set_title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
-    ax.set_xlim(40, 160)
-    ax.set_ylim(0, 0.03)
-    ax.grid(True)
+    ax.set_title(title)
 
     imgdata = StringIO.StringIO()
     fig.savefig(imgdata, format='png')

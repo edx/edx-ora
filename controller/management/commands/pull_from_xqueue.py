@@ -1,6 +1,6 @@
 #Tests for this module are in tests.py in the controller app
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import NoArgsCommand
 from django.conf import settings
 from django.utils import timezone
 
@@ -18,7 +18,7 @@ import project_urls
 
 log = logging.getLogger(__name__)
 
-class NoArgsCommand(BaseCommand):
+class Command(NoArgsCommand):
 
     def handle_noargs(self):
         """
