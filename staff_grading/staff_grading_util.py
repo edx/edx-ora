@@ -82,7 +82,7 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
             next_grader_type__in=["IN", "ML"],
         )
 
-        log.debug("Looking for course_id: {0} and location {1} and got count {2}".format(course_id,location,to_be_graded.count()))
+        log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded.count()))
 
         if(to_be_graded.count() > 0):
             to_be_graded = to_be_graded[0]
