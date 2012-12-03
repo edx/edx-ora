@@ -119,7 +119,7 @@ def get_single_instructor_grading_item(course_id):
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     log.debug("locations: {0} for course {1}".format(locations_for_course,course_id))
     for location in locations_for_course:
-       success, sub_id = get_single_instructor_grading_item_for_location(location,True)
+        success, sub_id = get_single_instructor_grading_item_for_location(location,True)
         if success:
             return success, sub_id
 
