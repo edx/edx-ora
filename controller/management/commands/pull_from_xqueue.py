@@ -38,12 +38,12 @@ class Command(NoArgsCommand):
                 #Check for new submissions on xqueue, and send to controller
                 pull_from_single_queue(queue_name,self.controller_session,self.xqueue_session)
 
-                #Check for finalized results from controller, and post back to xqueue
-                submissions_to_post = check_for_completed_submissions()
-                for submission in list(submissions_to_post):
-                    post_one_submission_back_to_queue(submission, self.xqueue_session)
+            #Check for finalized results from controller, and post back to xqueue
+            submissions_to_post = check_for_completed_submissions()
+            for submission in list(submissions_to_post):
+                post_one_submission_back_to_queue(submission, self.xqueue_session)
 
-                time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
+            time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
 def post_one_submission_back_to_queue(submission,xqueue_session):
     xqueue_header, xqueue_body = util.create_xqueue_header_and_body(submission)
