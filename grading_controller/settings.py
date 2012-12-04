@@ -1,6 +1,7 @@
 from logsettings import get_logger_config
 from path import path
 import os
+import logging
 
 
 # Django settings for grading_controller project.
@@ -202,3 +203,6 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
     local_loglevel="DEBUG")
 
 SESSION_COOKIE_NAME="controller_session_id"
+
+log=logging.getLogger(__name__)
+log.info(ENV_ROOT / "env.json")
