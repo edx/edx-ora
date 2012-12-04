@@ -1,10 +1,7 @@
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-#from http://jamesmckay.net/2009/03/django-custom-managepy-commands-not-committing-transactions/
-#Fix issue where db data in manage.py commands is not refreshed at all once they start running
 from django.db import transaction
-transaction.commit_unless_managed()
 
 from django.utils import timezone
 import requests
@@ -75,7 +72,9 @@ class Command(NoArgsCommand):
         log.debug(content)
         #Grade and handle here
         if success:
-            sub = Submission.objects.get(id=int(content['submission_id']))
+            with transaction.commit_manually():
+                sub = Submission.objects.get(id=int(content['submission_id']))
+                transaction.commit()
 
             #strip out unicode and other characters in student response
             #Needed, or grader may potentially fail
