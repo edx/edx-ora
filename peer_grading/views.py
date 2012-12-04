@@ -106,7 +106,7 @@ def peer_grading(request):
 
             try:
                 sub_id = post_data['submission_id']
-                sub = Submission.objects.get(id=sub_id)
+                sub = Submission.objects.get(id=int(sub_id))
             except:
                 try:
                     post_data.pop('submission_id')

@@ -70,7 +70,7 @@ class Command(NoArgsCommand):
         log.debug(content)
         #Grade and handle here
         if success:
-            sub = Submission.objects.get(id=content['submission_id'])
+            sub = Submission.objects.get(id=int(content['submission_id']))
 
             #strip out unicode and other characters in student response
             #Needed, or grader may potentially fail

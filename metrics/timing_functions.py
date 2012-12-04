@@ -26,7 +26,7 @@ def finalize_timing(sub_id, grade_id):
         sub_id=sub_id.id
     else:
         try:
-            sub=Submission.objects.get(id=submission_id)
+            sub=Submission.objects.get(id=int(submission_id))
         except:
             return False, "Invalid submission id."
 
@@ -58,7 +58,7 @@ def generate_initial_timing_dict(submission_id):
 
     if isinstance(submission_id,int):
         try:
-            submission_id=Submission.objects.get(id=submission_id)
+            submission_id=Submission.objects.get(id=int(submission_id))
         except:
             return False, "Could not generate submission object from input id."
 
@@ -88,7 +88,7 @@ def generate_final_timing_dict(submission_id,grader_id):
 
     if isinstance(grader_id,int):
         try:
-            grader_id=Grader.objects.get(id=grader_id)
+            grader_id=Grader.objects.get(id=int(grader_id))
         except:
             return False, "Could not generate grader object from input id."
 

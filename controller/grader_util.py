@@ -42,7 +42,7 @@ def create_and_handle_grader_object(grader_dict):
             return False, "{0} tag not in input dictionary.".format(tag)
 
     try:
-        sub = Submission.objects.get(id=grader_dict['submission_id'])
+        sub = Submission.objects.get(id=int(grader_dict['submission_id']))
     except:
         return False, "Error getting submission."
 
