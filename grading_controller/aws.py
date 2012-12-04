@@ -11,7 +11,7 @@ import logging
 ######################################################################
 #General config
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = False
 
 ######################################################################
@@ -47,11 +47,11 @@ RESET_SUBMISSIONS_AFTER=int(ENV_TOKENS.get('RESET_SUBMISSIONS_AFTER',600))
 local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')
 LOG_DIR = ENV_TOKENS.get("LOG_DIR", ENV_ROOT / "log")
 
-#LOGGING = get_logger_config(LOG_DIR,
-#    logging_env=ENV_TOKENS['LOGGING_ENV'],
-#    syslog_addr=(ENV_TOKENS['SYSLOG_SERVER'], 514),
-#    local_loglevel=local_loglevel,
-#    debug=False)
+LOGGING = get_logger_config(LOG_DIR,
+    logging_env=ENV_TOKENS['LOGGING_ENV'],
+    syslog_addr=(ENV_TOKENS['SYSLOG_SERVER'], 514),
+    local_loglevel=local_loglevel,
+    debug=DEBUG)
 
 ######################################################################
 # Read secure config

@@ -107,6 +107,8 @@ def login(session, url, username, password):
     Login to given url with given username and password.
     Use given request session (requests.session)
     """
+
+    log.debug("Trying to login to {0} with user: {1} and pass {2}".format(url,username,password))
     response = session.post(url,
         {'username': username,
          'password': password,

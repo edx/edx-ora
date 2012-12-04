@@ -29,7 +29,7 @@ def peer_grading(request):
     post_data = {}
     saved = False
     location = "MITx/6.002x/problem/OETest"
-    student_id = "4"
+    student_id = "2"
 
     if request.method == 'POST':
         post_data = request.POST.dict().copy()
