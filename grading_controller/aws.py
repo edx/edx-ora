@@ -6,6 +6,9 @@ import os
 
 from .logsettings import get_logger_config
 from .settings import *
+import logging
+
+log=logging.getLogger(__name__)
 
 ######################################################################
 #General config
@@ -15,6 +18,7 @@ TEMPLATE_DEBUG = False
 
 ######################################################################
 #Read config from json file
+log.info("env json path: {0}".format(ENV_ROOT / "env.json"))
 with open(ENV_ROOT / "env.json") as env_file:
     ENV_TOKENS = json.load(env_file)
 
