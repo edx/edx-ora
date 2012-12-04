@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from statsd import statsd
-from django.forms.models import model_to_dict
 
 import json
 import logging
@@ -53,32 +52,6 @@ def get_submission_ml(request):
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
-
-@login_required
-@csrf_exempt
-def get_submission_by_id(request):
-    """
-    Get a submission by id for various manage.py functions
-    Input:
-        Get request with parameter submission id
-    Output:
-        All data from the submission object
-    """
-
-    if request.method != 'GET':
-        return util._error_response("Must use HTTP GET", _INTERFACE_VERSION)
-
-    request_data=request.GET
-
-    try:
-        sub=Submission.objects.get(id=int(request['id'])
-    except:
-        return util._error_response("Invalid submission id", _INTERFACE_VERSION)
-
-    sub_dict=model_to_dict(sub, fields=[field.name for field in sub._meta.fields])
-
-    return util._success_response({'submission': sub_dict}, _INTERFACE_VERSION)
-
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_pending_count'])

@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
+from django.db import transaction
+
 from django.utils import timezone
 import requests
 import urlparse
@@ -70,19 +72,17 @@ class Command(NoArgsCommand):
         log.debug(content)
         #Grade and handle here
         if success:
-            success, sub = self.get_submission_by_id(int(content['submission_id']))
+            with transaction.commit_manually():
+                sub = Submission.objects.get(id=int(content['submission_id']))
+                transaction.commit()
 
-            if not success:
-                log.exception("Could not find a valid submission for id {0}. Message: {1}".format(content['submission_id'],sub))
+            #strip out unicode and other characters in student response
+            #Needed, or grader may potentially fail
+            #TODO: Handle unicode in student responses properly
+            student_response = sub.student_response.encode('ascii', 'ignore')
 
-            if success:
-                #strip out unicode and other characters in student response
-                #Needed, or grader may potentially fail
-                #TODO: Handle unicode in student responses properly
-                student_response = sub.student_response.encode('ascii', 'ignore')
-
-                #Get the latest created model for the given location
-                success, created_model=ml_grading_util.get_latest_created_model(sub.location)
+            #Get the latest created model for the given location
+            success, created_model=ml_grading_util.get_latest_created_model(sub.location)
 
             if not success:
                 log.debug("Could not identify a valid created model!")
@@ -141,22 +141,6 @@ class Command(NoArgsCommand):
             log.info("Error getting item from controller or no items to get.")
             statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                 tags=["success:False"])
-
-    def get_latest_created_model_from_controller(self,location):
-        """
-        Get model for latest created submission from controller
-        """
-        success,content=self.query_controller(project_urls.ControllerURLs.get_submission_by_id,data={'id' : id})
-
-        return success, content
-
-    def get_submission_by_id(self,id):
-        """
-        Get metadata for a single submission from grading controller
-        """
-        success,content=self.query_controller(project_urls.ControllerURLs.get_submission_by_id,data={'id' : id})
-
-        return success, content
 
 
     def get_item_from_controller(self):

@@ -8,7 +8,6 @@ class ControllerURLs():
     get_submission_in = controller_base + "get_submission_instructor/"
     put_result = controller_base + "put_result/"
     get_pending_count = controller_base + "get_pending_count/"
-    get_submission_by_id= controller_base + "get_submission_by_id/"
 
 class PeerGradingURLs():
     peer_grading_base="/peer_grading/"
@@ -20,8 +19,7 @@ class PeerGradingURLs():
     peer_grading = peer_grading_base + "peer_grading/"
 
 class MLGradingURLs():
-    ml_grading_base="/ml_grading/"
-    request_latest_created_model= ml_grading_base + "request_latest_created_model/"
+    pass
 
 class StaffGradingURLs():
     staff_grading_base="/staff_grading/"
