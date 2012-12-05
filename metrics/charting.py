@@ -22,7 +22,7 @@ def render_image(chart_data,title):
 
     return response
 
-def render_image2(chart_data,title):
+def render_image2(chart_data,title,x_label,y_label):
     chart_data.sort()
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -31,8 +31,8 @@ def render_image2(chart_data,title):
     log.debug(chart_data)
     ax.bar([i for i in xrange(0,len(chart_data))], chart_data, width=1)
 
-    ax.set_xlabel('Smarts')
-    ax.set_ylabel('Probability')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     ax.set_title(title)
 
     imgdata = StringIO.StringIO()

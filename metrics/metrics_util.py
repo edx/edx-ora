@@ -22,7 +22,7 @@ def generate_timing_response(arguments,title):
     timing_set_end=[i['end_time'] for i in timing_set_values]
     timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
 
-    response=charting.render_image2(timing_set_difference,title)
+    response=charting.render_image2(timing_set_difference,title, "Number", "Time taken")
 
     return True,response
     #except:
@@ -47,7 +47,7 @@ def generate_performance_response(arguments,title):
         grader_scores=[x['score'] for x in grader_set.values("score")]
 
 
-        response=charting.render_image2(grader_scores,title)
+        response=charting.render_image2(grader_scores,title,"Number", "Score")
 
         return True, response
     except:

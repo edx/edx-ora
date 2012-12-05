@@ -28,7 +28,7 @@ def peer_grading(request):
     """
     post_data = {}
     saved = False
-    location = "MITx/6.002x/problem/OETest"
+    location = "i4x://MITx/6.002x/problem/OETest"
     student_id = "2"
 
     if request.method == 'POST':
