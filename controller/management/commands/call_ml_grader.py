@@ -72,9 +72,8 @@ class Command(NoArgsCommand):
         log.debug(content)
         #Grade and handle here
         if success:
-            with transaction.commit_manually():
-                sub = Submission.objects.get(id=int(content['submission_id']))
-                transaction.commit()
+            transaction.commit_unless_managed()
+            sub = Submission.objects.get(id=int(content['submission_id']))
 
             #strip out unicode and other characters in student response
             #Needed, or grader may potentially fail
@@ -82,6 +81,7 @@ class Command(NoArgsCommand):
             student_response = sub.student_response.encode('ascii', 'ignore')
 
             #Get the latest created model for the given location
+            transaction.commit_unless_managed()
             success, created_model=ml_grading_util.get_latest_created_model(sub.location)
 
             if not success:

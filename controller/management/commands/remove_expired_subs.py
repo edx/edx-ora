@@ -5,7 +5,6 @@ from django.utils import timezone
 #from http://jamesmckay.net/2009/03/django-custom-managepy-commands-not-committing-transactions/
 #Fix issue where db data in manage.py commands is not refreshed at all once they start running
 from django.db import transaction
-transaction.commit_unless_managed()
 
 import requests
 import urlparse
@@ -29,6 +28,7 @@ class Command(BaseCommand):
         log.debug("Starting check for expired subs.")
         while flag:
             try:
+                transaction.commit_unless_managed()
                 subs = Submission.objects.all()
                 expire_submissions.reset_timed_out_submissions(subs)
                 expired_list = expire_submissions.get_submissions_that_have_expired(subs)

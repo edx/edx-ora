@@ -5,7 +5,6 @@ from django.utils import timezone
 #from http://jamesmckay.net/2009/03/django-custom-managepy-commands-not-committing-transactions/
 #Fix issue where db data in manage.py commands is not refreshed at all once they start running
 from django.db import transaction
-transaction.commit_unless_managed()
 
 import requests
 import urlparse
@@ -49,6 +48,7 @@ class Command(NoArgsCommand):
 
     def handle_single_location(self,location):
         try:
+            transaction.commit_unless_managed()
             subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
             log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
                 location,
@@ -63,6 +63,7 @@ class Command(NoArgsCommand):
                 #Get paths to ml model from database
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location)
                 #Get last created model for given location
+                transaction.commit_unless_managed()
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location)
 
                 if success:
@@ -102,6 +103,7 @@ class Command(NoArgsCommand):
                         'creation_succeeded': results['success'],
                         }
 
+                    transaction.commit_unless_managed()
                     success, id = ml_grading_util.save_created_model(created_model_dict)
 
                     if not success:
