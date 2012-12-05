@@ -18,4 +18,5 @@ mysql-server
 libmysqlclient-dev
 libreadline6
 libreadline6-dev
-python-matlibplot
+super
+aspell
