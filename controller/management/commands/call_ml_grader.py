@@ -58,6 +58,7 @@ class Command(NoArgsCommand):
 
                     #Refresh the pending submission count
                     success, pending_count=self.get_pending_length_from_controller()
+                transaction.commit_unless_managed()
 
             except Exception as err:
                 log.debug("Error getting submission: {0}".format(err))

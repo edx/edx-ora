@@ -47,6 +47,7 @@ class Command(NoArgsCommand):
             submissions_to_post = check_for_completed_submissions()
             for submission in list(submissions_to_post):
                 post_one_submission_back_to_queue(submission, self.xqueue_session)
+            transaction.commit_unless_managed()
 
             time.sleep(settings.TIME_BETWEEN_XQUEUE_PULLS)
 
@@ -62,7 +63,7 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
         tags=["success:{0}".format(success)])
 
     if success:
-        log.debug("Successful post back to xqueue!")
+        log.debug("Successful post back to xqueue! Success: {0} Message: {1}".format(success,message))
         submission.posted_results_back_to_queue = True
         submission.save()
     else:

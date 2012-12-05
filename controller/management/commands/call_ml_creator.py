@@ -41,6 +41,7 @@ class Command(NoArgsCommand):
             unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
             for location in unique_locations:
                 self.handle_single_location(location)
+            transaction.commit_unless_managed()
 
             log.debug("Finished looping through.")
 

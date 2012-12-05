@@ -40,5 +40,5 @@ class Command(BaseCommand):
                 log.error("Could not get submissions to expire! Error: {0}".format(err))
                 statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                     tags=["success:Exception"])
-
+            transaction.commit_unless_managed()
             time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
