@@ -51,6 +51,8 @@ def get_next_submission(request):
 
       'rubric': the rubric, also rendered as html.
 
+      'prompt': the question prompt, also rendered as html.
+
       'message': if there was no submission available, but nothing went wrong,
                 there will be a message field.
     else:
@@ -106,8 +108,6 @@ def get_next_submission(request):
 
     response = {'submission_id': id,
                 'submission': submission.student_response,
-                # TODO: once client properly handles the 'prompt' field,
-                # make this just submission.rubric
                 'rubric': submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
