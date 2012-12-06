@@ -203,3 +203,6 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
     local_loglevel="DEBUG")
 
 SESSION_COOKIE_NAME="controller_session_id"
+
+AWS_ACCESS_KEY_ID= ""
+AWS_SECRET_ACCESS_KEY= ""
