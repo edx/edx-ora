@@ -84,10 +84,11 @@ def save_created_model(model_data):
             creation_succeeded=model_data['creation_succeeded'],
             model_stored_in_s3=model_data['save_to_s3'],
             s3_public_url=model_data['s3_public_url'],
-            s3_bucketname=model_data['s3_bucket'],
+            s3_bucketname=model_data['s3_bucketname'],
         )
         created_model.save()
     except:
+        log.exception("Could not make ModelCreator object.")
         return False, "Failed to create model!"
 
     return True, created_model.id
