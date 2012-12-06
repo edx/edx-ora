@@ -37,7 +37,7 @@ def simple_quality_check(string):
     try:
         basic_check, e_set=perform_spelling_and_grammar_checks(string)
         total_length=len(string)
-        word_length_ratio=len(e_set._tokens[0])/float(total_length)
+        word_length_ratio=total_length/float(len(e_set._tokens[0]))
     except:
         quality_dict['status']=GraderStatus.failure
         return False, quality_dict
