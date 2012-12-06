@@ -117,5 +117,24 @@ def get_ml_errors(location):
 
     return True, data_dict
 
+def upload_to_s3(file_to_upload, keyname, bucketname):
+    '''
+    Upload file to S3 using provided keyname.
+
+    Returns:
+        public_url: URL to access uploaded file
+    '''
+    conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    bucketname = settings.AWS_ACCESS_KEY_ID + '_' + bucketname
+    bucket = conn.create_bucket(bucketname.lower())
+
+    k = Key(bucket)
+    k.key = keyname
+    k.set_metadata('filename',file_to_upload.name)
+    k.set_contents_from_file(file_to_upload)
+    public_url = k.generate_url(60*60*24*365) # URL timeout in seconds.
+
+    return public_url
+
 
 

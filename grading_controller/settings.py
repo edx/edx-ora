@@ -31,6 +31,7 @@ ML_PATH = os.path.join(ENV_ROOT, "machine_learning/") #Path to ML repo containin
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
 TIME_BETWEEN_ML_GRADER_CHECKS= 5 # seconds.  Time between ML grader checking to see if models need to be made.
+USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 
 #Peer
 MIN_TO_USE_PEER=20 #Minimum instructor graded (calibration) essays before peer grading can be used
