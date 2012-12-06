@@ -1,9 +1,11 @@
 from django.conf import settings
+import sys
 
 sys.path.append(settings.ML_PATH)
-import util_functions
 import feature_extractor
 import essay_set
+import json
+
 from controller.models import GraderStatus
 
 
@@ -40,7 +42,7 @@ def simple_quality_check(string):
         quality_dict['status']=GraderStatus.failure
         return False, quality_dict
 
-    quality_dict['feedback']=basic_check
+    quality_dict['feedback']=json.dumps(basic_check)
     if(total_length<10 or word_length_ratio<=3 or
        basic_check['grammar_per_char']>.1 or basic_check['spelling_per_char']>.3):
         quality_dict['score']=0

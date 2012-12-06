@@ -32,9 +32,10 @@ def add_additional_tags_to_dict(dict,sub_id):
     for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
         if tag not in dict:
             if tag!="submission_id":
-                dict.update({tag : 1})
+                dict.update({tag : "1"})
             else:
                 dict.update({tag : sub_id})
+    return dict
 
 def create_and_handle_grader_object(grader_dict):
     """

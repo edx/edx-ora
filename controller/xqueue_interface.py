@@ -114,7 +114,7 @@ def submit(request):
                 ])
 
             if not success:
-                return util._error_response("Failed to handle submission.")
+                return util._error_response("Failed to handle submission.", _INTERFACE_VERSION)
 
             return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
@@ -132,7 +132,7 @@ def handle_submission(sub):
         #Run some basic sanity checks on submission
         success, check_dict=basic_check_util.simple_quality_check(sub.student_response)
         if not success:
-            log.info("could not run basic checks on {0}".format(sub.student_response))
+            log.exception("could not run basic checks on {0}".format(sub.student_response))
             return False
 
         #If the checks result in a score of 0 (out of 1), then the submission fails basic sanity checks
@@ -165,8 +165,7 @@ def handle_submission(sub):
             else:
                 sub.next_grader_type = "IN"
         else:
-            log.error("Invalid grader type specified in settings file.")
-
+            log.exception("Invalid grader type specified in settings file.")
             return False
 
         sub.save()
