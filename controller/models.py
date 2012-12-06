@@ -16,6 +16,7 @@ GRADER_TYPE = (
     ('PE', 'Peer'),
     ('SE', 'Self'),
     ('NA', 'None'),
+    ('BC', 'Basic Check'),
     )
 
 STATUS_CODES = (
