@@ -104,7 +104,7 @@ class Command(NoArgsCommand):
 
                 success, grader_data=self.load_model_file(created_model,use_full_path=False)
                 if success:
-                    results = grade.grade(grader_data, grader_path, None,
+                    results = grade.grade(grader_data, None,
                         student_response) #grader config is none for now, could be different later
                 else:
                     results=RESULT_FAILURE_DICT
@@ -124,7 +124,7 @@ class Command(NoArgsCommand):
                         log.exception(error_message)
                         results=RESULT_FAILURE_DICT
 
-                log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+                log.debug("ML Grader:  Success: {0} Errors: {1} Feedback: {2}".format(results['success'], results['errors'], results['feedback']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                     tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
 
