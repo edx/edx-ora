@@ -28,6 +28,14 @@ def create_grader(grader_dict,sub):
 
     return grade
 
+def add_additional_tags_to_dict(dict,sub_id):
+    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
+        if tag not in dict:
+            if tag!="submission_id":
+                dict.update({tag : 1})
+            else:
+                dict.update({tag : sub_id})
+
 def create_and_handle_grader_object(grader_dict):
     """
     Creates a Grader object and associates it with a given submission
@@ -70,8 +78,11 @@ def create_and_handle_grader_object(grader_dict):
 
     #TODO: Some kind of logic to decide when sub is finished grading.
 
+    #If we are calling this after a basic check, that means that the submission is bad, so mark as finished
+    if(grade.status_code== GraderStatus.success and grade.grader_type in ["BC"]):
+        sub.state = SubmissionState.finished
     #If submission is ML or IN graded, and was successful, state is finished
-    if(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
+    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
         sub.state = SubmissionState.finished
     elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
         #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.

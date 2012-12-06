@@ -4,6 +4,7 @@ sys.path.append(settings.ML_PATH)
 import util_functions
 import feature_extractor
 import essay_set
+from controller.models import GraderStatus
 
 
 def perform_spelling_and_grammar_checks(string):
@@ -30,23 +31,24 @@ def simple_quality_check(string):
     Output:
         Boolean indicating success/failure and dictionary with sanity checks
     """
-    
-    quality_dict={'is_acceptable' : False, 'feedback' : {}, 'score' : 1, 'grader_type' : 'BC'}
-
+    quality_dict={'feedback' : {}, 'score' : 1, 'grader_type' : 'BC', 'status' : GraderStatus.success}
     try:
         basic_check, e_set=perform_spelling_and_grammar_checks(string)
         total_length=len(string)
         word_length_ratio=len(e_set._tokens[0])/float(total_length)
     except:
+        quality_dict['status']=GraderStatus.failure
         return False, quality_dict
 
     quality_dict['feedback']=basic_check
-
     if(total_length<10 or word_length_ratio<=3 or
        basic_check['grammar_per_char']>.1 or basic_check['spelling_per_char']>.3):
         quality_dict['score']=0
 
     return True, quality_dict
+
+
+
 
 
 

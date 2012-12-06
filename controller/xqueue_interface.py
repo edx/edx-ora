@@ -14,6 +14,7 @@ from models import GraderStatus, SubmissionState
 import util
 import grader_util
 from staff_grading import staff_grading_util
+from basic_check import basic_check_util
 
 log = logging.getLogger(__name__)
 
@@ -128,6 +129,22 @@ def handle_submission(sub):
         True/False status code
     """
     try:
+        #Run some basic sanity checks on submission
+        success, check_dict=basic_check_util.simple_quality_check(sub.student_response)
+        if not success:
+            log.info("could not run basic checks on {0}".format(sub.student_response))
+            return False
+
+        #If the checks result in a score of 0 (out of 1), then the submission fails basic sanity checks
+        if check_dict['score']==0:
+            #add additional tags needed to create a grader object
+            check_dict=grader_util.add_additional_tags_to_dict(check_dict,sub.id)
+            sub.next_grader_type= "BC"
+            sub.save()
+            #Create and handle the grader, and return
+            grader_util.create_and_handle_grader_object(check_dict)
+            return True
+
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
             sub.location)
@@ -156,10 +173,8 @@ def handle_submission(sub):
         log.debug("Submission object created successfully!")
 
     except:
-        log.error("Submission creation failed!")
-
+        log.exception("Submission creation failed!")
         return False
-
 
     return True
 
