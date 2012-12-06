@@ -7,6 +7,9 @@ from django.db import transaction
 
 from models import CreatedModel
 
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+
 def create_directory(model_path):
     directory=path(model_path).dirname()
     if not os.path.exists(directory):
@@ -57,7 +60,7 @@ def save_created_model(model_data):
     tags=['max_score', 'prompt', 'rubric', 'location', 'course_id',
           'submission_ids_used', 'problem_id', 'model_relative_path',
           'model_full_path', 'number_of_essays', 'cv_kappa',
-          'cv_mean_absolute_error', 'creation_succeeded', 'save_to_s3']
+          'cv_mean_absolute_error', 'creation_succeeded', 'save_to_s3', 's3_public_url', 's3_bucketname']
 
     for tag in tags:
         if tag not in model_data:
@@ -78,7 +81,9 @@ def save_created_model(model_data):
             cv_kappa=model_data['cv_kappa'],
             cv_mean_absolute_error=model_data['cv_mean_absolute_error'],
             creation_succeeded=model_data['creation_succeeded'],
-            model_stored_in_s3=model_data['save_to_s3']
+            model_stored_in_s3=model_data['save_to_s3'],
+            s3_public_url=model_data['s3_public_url'],
+            s3_bucketname=model_data['s3_bucket'],
         )
         created_model.save()
     except:
@@ -118,7 +123,7 @@ def get_ml_errors(location):
 
     return True, data_dict
 
-def upload_to_s3(file_to_upload, keyname, bucketname):
+def upload_to_s3(string_to_upload, keyname, bucketname):
     '''
     Upload file to S3 using provided keyname.
 
@@ -131,8 +136,7 @@ def upload_to_s3(file_to_upload, keyname, bucketname):
 
     k = Key(bucket)
     k.key = keyname
-    k.set_metadata('filename',file_to_upload.name)
-    k.set_contents_from_file(file_to_upload)
+    k.set_contents_from_string(string_to_upload)
     public_url = k.generate_url(60*60*24*365) # URL timeout in seconds.
 
     return public_url
@@ -150,14 +154,6 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, mode
         pickle.dump(model_file, file=open(model_path, "w"))
 
     return pickle.dumps(model_file)
-
-def make_hashkey(seed):
-    '''
-    Generate a hashkey (string)
-    '''
-    h = hashlib.md5()
-    h.update(str(seed))
-    return h.hexdigest()
 
 
 

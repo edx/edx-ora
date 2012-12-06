@@ -93,7 +93,8 @@ class Command(NoArgsCommand):
                                    'relative_model_path' : relative_model_path, 'prompt' : prompt}
 
                     try:
-                        self.save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
+                        success, s3_public_url = self.save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
+                        results.update({'s3_public_url' : s3_public_url})
 
                     created_model_dict={
                         'max_score' : first_sub.max_score,
@@ -109,6 +110,7 @@ class Command(NoArgsCommand):
                         'cv_kappa' : results['cv_kappa'],
                         'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
                         'creation_succeeded': results['success'],
+                        's3_public_url' : results['s3_public_url'],
                         }
 
                     transaction.commit_unless_managed()
@@ -132,14 +134,18 @@ class Command(NoArgsCommand):
                 tags=["success:Exception", "location:{0}".format(location)])
 
     def save_model_file(self,results, save_to_s3):
-        pickled_model=model_creator.dump_model_to_file(results['prompt', results['feature_ext'],
+        pickled_model=model_creator.dump_model_to_file(results['prompt'], results['feature_ext'],
                                                               results['classifier'], results['text'],
                                                               results['score'], results['model_path'], save_to_s3)
 
         if not save_to_s3:
-            return True, "Save successfully."
+            return True, "Model in File."
 
-        s3_key=ml_grading_util.make_hashkey()
+        s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)
+
+        return True, s3_public_url
+
+
 
 
 
