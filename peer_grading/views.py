@@ -28,8 +28,8 @@ def peer_grading(request):
     """
     post_data = {}
     saved = False
-    location = "MITx/6.002x/problem/OETest"
-    student_id = "4"
+    location = "i4x://MITx/6.002x/problem/OETest"
+    student_id = "2"
 
     if request.method == 'POST':
         post_data = request.POST.dict().copy()
@@ -106,7 +106,7 @@ def peer_grading(request):
 
             try:
                 sub_id = post_data['submission_id']
-                sub = Submission.objects.get(id=sub_id)
+                sub = Submission.objects.get(id=int(sub_id))
             except:
                 try:
                     post_data.pop('submission_id')

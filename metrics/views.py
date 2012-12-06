@@ -35,7 +35,7 @@ def metrics_form(request):
         if metric_type=="performance":
             success,response=metrics_util.generate_performance_response(arguments,title)
 
-        return HttpResponse(response)
+        return response
 
     elif request.method == "GET":
 

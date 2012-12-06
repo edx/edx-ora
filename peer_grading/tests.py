@@ -54,11 +54,11 @@ def create_calibration_essays(num_to_create,scores,is_calibration):
     return sub_ids
 
 def create_calibration_records(location,student_id,num_to_create,sub_ids,scores,actual_scores):
-    cal_hist,success=CalibrationHistory.objects.get_or_create(location=location,student_id=student_id)
+    cal_hist,success=CalibrationHistory.objects.get_or_create(location=location,student_id=int(student_id))
     cal_hist.save()
 
     for i in xrange(0,num_to_create):
-        sub=Submission.objects.get(id=sub_ids[i])
+        sub=Submission.objects.get(id=int(sub_ids[i]))
         cal_record=CalibrationRecord(
             submission=sub,
             calibration_history=cal_hist,

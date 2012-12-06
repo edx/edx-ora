@@ -202,7 +202,7 @@ class GraderInterfaceTest(unittest.TestCase):
         #Ensure that submission is retrieved successfully
         self.assertEqual(body['success'],True)
 
-        sub=Submission.objects.get(id=body['submission_id'])
+        sub=Submission.objects.get(id=int(body['submission_id']))
         self.assertEqual(sub.prompt,"prompt")
 
     def test_get_sub_in(self):
@@ -223,7 +223,7 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(return_code, True)
 
         #Ensure that the submission exists and is the right one
-        sub = Submission.objects.get(id=sub_id)
+        sub = Submission.objects.get(id=int(sub_id))
         self.assertEqual(sub.prompt, "prompt")
 
     def test_put_result(self):

@@ -69,7 +69,7 @@ def get_calibration_essay_data(calibration_essay_id):
     """
 
     try:
-        sub = Submission.objects.get(id=calibration_essay_id)
+        sub = Submission.objects.get(id=int(calibration_essay_id))
     except:
         return "Could not find submission!"
 

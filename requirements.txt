@@ -9,4 +9,5 @@ reportlab
 requests
 pytz
 matplotlib
+MySQL-python
 

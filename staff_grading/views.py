@@ -75,7 +75,7 @@ def get_next_submission(request):
         return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
 
     try:
-        submission = Submission.objects.get(id=id)
+        submission = Submission.objects.get(id=int(id))
     except Submission.DoesNotExist:
         log.error("Couldn't find submission %s for instructor grading", id)
         return util._error_response('Failed to load submission %s.  Contact support.' % id, _INTERFACE_VERSION)

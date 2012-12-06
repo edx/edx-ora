@@ -3,6 +3,7 @@ from path import path
 from django.conf import settings
 import re
 from django.utils import timezone
+from django.db import transaction
 
 from models import CreatedModel
 
@@ -34,7 +35,6 @@ def get_latest_created_model(location):
     Output:
         Boolean success/fail, createdmodel object/error message
     """
-
     created_models=CreatedModel.objects.filter(
         location=location,
         creation_succeeded=True,
