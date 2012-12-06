@@ -98,6 +98,7 @@ class Command(NoArgsCommand):
                 #Create grader path from location in submission
                 grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
                 model_stored_in_s3=created_model.model_stored_in_s3
+                s3_public_url=created_model.s3_public_url
 
                 results = grade.grade(grader_path, None,
                     student_response) #grader config is none for now, could be different later

@@ -92,9 +92,16 @@ class Command(NoArgsCommand):
                     results.update{'text' : text, 'score' : scores, 'model_path' : full_model_path,
                                    'relative_model_path' : relative_model_path, 'prompt' : prompt}
 
-                    try:
-                        success, s3_public_url = self.save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
-                        results.update({'s3_public_url' : s3_public_url})
+                    #Try to create model if ml model creator was successful
+                    if results['success']:
+                        try:
+                            success, s3_public_url = self.save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
+                            results.update({'s3_public_url' : s3_public_url, 'success' : success})
+                            if not success:
+                                results['errors'].append("Could not save model.")
+                        except:
+                            results['errors'].append("Could not save model.")
+                            log.exception("Problem saving ML model.")
 
                     created_model_dict={
                         'max_score' : first_sub.max_score,
@@ -134,16 +141,26 @@ class Command(NoArgsCommand):
                 tags=["success:Exception", "location:{0}".format(location)])
 
     def save_model_file(self,results, save_to_s3):
-        pickled_model=model_creator.dump_model_to_file(results['prompt'], results['feature_ext'],
+        success=False
+        pickled_model=model_creator.get_pickle_data(results['prompt'], results['feature_ext'],
                                                               results['classifier'], results['text'],
-                                                              results['score'], results['model_path'], save_to_s3)
+                                                              results['score'])
 
-        if not save_to_s3:
-            return True, "Model in File."
+        if save_to_s3:
+            success, s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)
 
-        s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)
+        if success:
+            return True, s3_public_url
 
-        return True, s3_public_url
+        try:
+            ml_grading_util.dump_model_to_file(pickled_model,results['model_path'])
+            return True, "Saved model to file."
+        except:
+            return False, "Could not save model."
+
+
+
+
 
 
 
