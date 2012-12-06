@@ -1,4 +1,5 @@
 from django.conf import settings
+from functools import wraps
 import json
 import logging
 import requests
@@ -8,6 +9,22 @@ import project_urls
 from django.http import HttpResponse
 
 log = logging.getLogger(__name__)
+
+def error_if_not_logged_in(view):
+    """
+    Check whether the user calling the view is logged in.
+    If so, pass through to the view.
+    If not, return {'success': False, 'error': 'login_required'}.
+    """
+    @wraps(view)
+    def wrapper(request, *args, **kwds):
+        # If not logged in, bail
+        if not request.user.is_authenticated():
+            error = {'success': False, 'error': 'login_required'}
+            log.debug('login required')
+            return HttpResponse(json.dumps(error), mimetype='application/json')
+        return view(request, *args, **kwds)
+    return wrapper
 
 def get_request_ip(request):
     '''

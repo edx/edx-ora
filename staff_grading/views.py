@@ -30,7 +30,7 @@ _INTERFACE_VERSION = 1
 
 @csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
-@login_required
+@util.error_if_not_logged_in
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -126,7 +126,7 @@ def get_next_submission(request):
 @statsd.timed(
     'open_ended_assessment.grading_controller.staff_grading.views.time',
     tags=['function:save_grade'])
-@login_required()
+@util.error_if_not_logged_in
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -184,8 +184,19 @@ def save_grade(request):
     return util._success_response({}, _INTERFACE_VERSION)
 
 @csrf_exempt
-@login_required()
+@util.error_if_not_logged_in
 def get_problem_list(request):
+    """
+    Get the list of problems that need grading in course request.GET['course_id'].
+
+    Returns:
+        list of dicts with keys
+           'location'
+           'problem_name'
+           'num_graded' -- number graded
+           'num_pending' -- number pending in the queue
+           'min_for_ml' -- minimum needed to make ML model
+    """
 
     if request.method!="GET":
         return util._error_response("Request needs to be GET.", _INTERFACE_VERSION)
@@ -203,16 +214,17 @@ def get_problem_list(request):
 
     location_info=[]
     for location in locations_for_course:
-        problem_name=Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending=staff_grading_util.submissions_pending_for_location(location).count()
-        finished_instructor_graded=staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        problem_name = Submission.objects.filter(location=location)[0].problem_id
+        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+        finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
         location_dict={
             'location' : location,
             'problem_name' : problem_name,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
             'min_for_ml' : settings.MIN_TO_USE_ML,
-                       }
+            }
         location_info.append(location_dict)
 
-    return util._success_response({'problem_list' : location_info},_INTERFACE_VERSION)
+    return util._success_response({'problem_list' : location_info},
+                                  _INTERFACE_VERSION)
