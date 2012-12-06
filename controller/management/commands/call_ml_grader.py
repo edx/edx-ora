@@ -123,7 +123,7 @@ class Command(NoArgsCommand):
                 'status': status,
                 'grader_id': 1,
                 'grader_type': "ML",
-                'confidence': 1,
+                'confidence': results['confidence'],
                 'submission_id': sub.id,
                 'errors' : ' ' .join(results['errors']),
                 }
