@@ -119,6 +119,7 @@ class Command(NoArgsCommand):
                         'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
                         'creation_succeeded': results['success'],
                         's3_public_url' : results['s3_public_url'],
+                        'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
                         }
 
                     transaction.commit_unless_managed()
