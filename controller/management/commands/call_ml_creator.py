@@ -146,7 +146,7 @@ class Command(NoArgsCommand):
     def save_model_file(self,results, save_to_s3):
         success=False
         if save_to_s3:
-            pickled_model=model_creator.get_pickle_data(results['prompt'], results['feature_ext'],
+            pickled_model=ml_grading_util.get_pickle_data(results['prompt'], results['feature_ext'],
                 results['classifier'], results['text'],
                 results['score'])
             success, s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)

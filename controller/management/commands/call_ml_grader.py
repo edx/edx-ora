@@ -124,7 +124,7 @@ class Command(NoArgsCommand):
                         log.exception(error_message)
                         results=RESULT_FAILURE_DICT
 
-                log.debug("ML Grader:  Success: {0} Errors: {1} Feedback: {2}".format(results['success'], results['errors'], results['feedback']))
+                log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                     tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
 
@@ -201,7 +201,7 @@ class Command(NoArgsCommand):
             return True, grader_data
 
         try:
-            r = requests.get(created_model.s3_public_url, timeout=timeout)
+            r = requests.get(created_model.s3_public_url, timeout=2)
             grader_data=pickle.loads(r.text)
         except:
             log.exception("Problem with S3 connection.")
