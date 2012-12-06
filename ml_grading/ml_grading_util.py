@@ -4,6 +4,7 @@ from django.conf import settings
 import re
 from django.utils import timezone
 from django.db import transaction
+import pickle
 
 from models import CreatedModel
 

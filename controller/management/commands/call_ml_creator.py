@@ -13,6 +13,7 @@ import json
 import logging
 import sys
 from statsd import statsd
+import pickle
 
 from controller.models import Submission
 from staff_grading import staff_grading_util

@@ -46,8 +46,8 @@ class CreatedModel(models.Model):
 
     #Amazon S3 stuff if we do use it
     model_stored_in_s3=models.BooleanField(default=False)
-    s3_public_url=models.TextField()
-    s3_bucketname=models.TextField()
+    s3_public_url=models.TextField(default="")
+    s3_bucketname=models.TextField(default="")
 
     def get_submission_ids_used(self):
         """
