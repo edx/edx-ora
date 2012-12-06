@@ -44,6 +44,8 @@ class CreatedModel(models.Model):
 
     creation_succeeded=models.BooleanField(default=False)
 
+    model_stored_in_s3=models.BooleanField(default=False)
+
     def get_submission_ids_used(self):
         """
         Returns a list of submission ids of essays used to create the model.

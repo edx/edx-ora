@@ -97,6 +97,7 @@ class Command(NoArgsCommand):
 
                 #Create grader path from location in submission
                 grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
+                model_stored_in_s3=created_model.model_stored_in_s3
 
                 results = grade.grade(grader_path, None,
                     student_response) #grader config is none for now, could be different later
@@ -104,8 +105,14 @@ class Command(NoArgsCommand):
                 #If the above, try using the full path in the created_model object
                 if not results['success']:
                     grader_path=created_model.model_full_path
-                    results = grade.grade(grader_path, None,
-                        student_response) #grader config is none for now, could be different later
+                    try:
+                        grader_data=self.load_model_file(grader_path,model_stored_in_s3)
+                        results = grade.grade(grader_data, None,
+                            student_response) #grader config is none for now, could be different later
+                    except:
+                        error_message="Could not find a valid model file."
+                        log.exception(error_message)
+                        results={'success' : False, 'errors' : error_message, 'confidence' : 0, 'feedback' : ""}
 
                 log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
@@ -174,4 +181,18 @@ class Command(NoArgsCommand):
             return False, "Error getting response: {0}".format(err)
 
         return success, content
+
+    def load_model_file(self,grader_path,model_stored_in_s3):
+        if not model_stored_in_s3:
+            grader_data=pickle.load(file(grader_path,"r"))
+            return True, grader_data
+
+        try:
+            r = requests.get(grader_path, timeout=timeout)
+        except (ConnectionError, Timeout):
+        success = False
+        log.error('Could not fetch uploaded files at %s in timeout=%f' % (url, timeout))
+        return HttpResponse(compose_reply(False, "Error fetching submission. Please try again." % queue_name))
+
+
 
