@@ -155,7 +155,8 @@ def get_pickle_data(prompt_string, feature_ext, classifier, text, score):
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     return pickle.dumps(model_file)
 
-def dump_model_to_file(model_file,model_path):
+def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model_path):
+    model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     pickle.dump(model_file, file=open(model_path, "w"))
 
 

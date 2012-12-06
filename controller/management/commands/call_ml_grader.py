@@ -32,6 +32,8 @@ import grade
 
 log = logging.getLogger(__name__)
 
+RESULT_FAILURE_DICT={'success' : False, 'errors' : error_message, 'confidence' : 0, 'feedback' : ""}
+
 class Command(NoArgsCommand):
     """
     "Poll grading controller and send items to be graded to ml"
@@ -100,20 +102,26 @@ class Command(NoArgsCommand):
                 model_stored_in_s3=created_model.model_stored_in_s3
                 s3_public_url=created_model.s3_public_url
 
-                results = grade.grade(grader_path, None,
-                    student_response) #grader config is none for now, could be different later
+                success, grader_data=self.load_model_file(created_model,use_full_path=False)
+                if success:
+                    results = grade.grade(grader_path, None,
+                        student_response) #grader config is none for now, could be different later
 
                 #If the above, try using the full path in the created_model object
-                if not results['success']:
+                if not results['success'] and not created_model.model_stored_in_s3:
                     grader_path=created_model.model_full_path
                     try:
-                        grader_data=self.load_model_file(grader_path,model_stored_in_s3)
-                        results = grade.grade(grader_data, None,
-                            student_response) #grader config is none for now, could be different later
+                        success, grader_data=self.load_model_file(created_model,use_full_path=True)
+                        if success:
+                            results = grade.grade(grader_data, None,
+                                student_response) #grader config is none for now, could be different later
                     except:
                         error_message="Could not find a valid model file."
                         log.exception(error_message)
-                        results={'success' : False, 'errors' : error_message, 'confidence' : 0, 'feedback' : ""}
+                        results=RESULT_FAILURE_DICT
+
+                if not success:
+                    results=RESULT_FAILURE_DICT
 
                 log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
@@ -183,17 +191,23 @@ class Command(NoArgsCommand):
 
         return success, content
 
-    def load_model_file(self,grader_path,model_stored_in_s3):
-        if not model_stored_in_s3:
-            grader_data=pickle.load(file(grader_path,"r"))
+    def load_model_file(self,created_model,use_full_path):
+        if not self.model_stored_in_s3:
+            if use_full_path:
+                grader_data=pickle.load(file(created_model.model_full_path,"r"))
+            else:
+                grader_data=pickle.load(file(created_model.model_relative_path,"r"))
             return True, grader_data
 
         try:
             r = requests.get(grader_path, timeout=timeout)
-        except (ConnectionError, Timeout):
-        success = False
-        log.error('Could not fetch uploaded files at %s in timeout=%f' % (url, timeout))
-        return HttpResponse(compose_reply(False, "Error fetching submission. Please try again." % queue_name))
+            grader_data=pickle.loads(r.text)
+        except:
+            log.exception("Problem with S3 connection.")
+            return False, "Could not load."
+
+        return True, grader_data
+
 
 
 
