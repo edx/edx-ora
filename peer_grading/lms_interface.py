@@ -40,7 +40,7 @@ def get_next_submission(request):
         return  util._error_response("No current grading.", _INTERFACE_VERSION)
 
     try:
-        sub = Submission.objects.get(id=sub_id)
+        sub = Submission.objects.get(id=int(sub_id))
     except:
         log.debug("Could not find submission with id {0}".format(sub_id))
         return util._error_response("Error getting grading.", _INTERFACE_VERSION)

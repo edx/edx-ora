@@ -4,7 +4,7 @@
     <title></title>
 </head>
 <body>
-<script src="/static/jquery.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script>
     $(document).ready(function(){
         function submit(action, method, values) {
@@ -48,11 +48,11 @@ Metric type:
 </select><br/><br/>
 
 Course id:
-<textarea name="course_id" class="course_id" cols="30" rows="1">MITx/6.002x</textarea><br/><br/>
+<textarea name="course_id" class="course_id" cols="30" rows="1">MITx/6.002x/2012_Fall</textarea><br/><br/>
 Grader Type:
 <textarea name="grader_type" class="grader_type" cols="20" rows="1">ML</textarea><br/><br/>
 Location:
-<textarea name="location" class="location" cols="30" rows="1">MITx/6.002x/problem/OETest</textarea><br/><br/>
+<textarea name="location" class="location" cols="30" rows="1">i4x://MITx/6.002x/problem/OETest</textarea><br/><br/>
 <input type="button" value="Show" class="show-button" name="show"/>
 <div id="result"></div>
 </body>

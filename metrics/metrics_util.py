@@ -15,14 +15,14 @@ def generate_timing_response(arguments,title):
     #try:
     timing_set=Timing.objects.filter(**arguments)
     if timing_set.count()==0:
-        return HttpResponse("Did not find anything matching that query.")
+        return False, HttpResponse("Did not find anything matching that query.")
 
     timing_set_values=timing_set.values("start_time", "end_time")
     timing_set_start=[i['start_time'] for i in timing_set_values]
     timing_set_end=[i['end_time'] for i in timing_set_values]
     timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
 
-    response=charting.render_image(timing_set_difference,title)
+    response=charting.render_image2(timing_set_difference,title, "Number", "Time taken")
 
     return True,response
     #except:
@@ -39,19 +39,19 @@ def generate_performance_response(arguments,title):
         grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
 
         if arguments['grader_type']:
-            grader_set=grader_set.filter(grader_type="ML")
+            grader_set=grader_set.filter(grader_type=arguments['grader_type'])
 
         if grader_set.count()==0:
-            return False, "Did not find anything matching that query."
+            return False, HttpResponse("Did not find anything matching that query.")
 
         grader_scores=[x['score'] for x in grader_set.values("score")]
 
 
-        response=charting.render_image(grader_scores,title)
+        response=charting.render_image2(grader_scores,title,"Number", "Score")
 
         return True, response
     except:
-        return False, "Unexpected error processing image."
+        return False, HttpResponse("Unexpected error processing image.")
 
 
 def render_form(post_url,available_metric_types):

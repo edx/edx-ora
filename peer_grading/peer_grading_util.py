@@ -24,7 +24,7 @@ def get_single_peer_grading_item(location, grader_id):
         location=location,
         state=SubmissionState.waiting_to_be_graded,
         next_grader_type="PE",
-    ).exclude(student_id=grader_id)
+    ).exclude(student_id=int(grader_id))
 
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
@@ -53,7 +53,7 @@ def get_single_peer_grading_item(location, grader_id):
             #Also ensures that all submissions are searched through if student has graded the minimum one
             for i in xrange(0, len(submission_ids)):
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
-                grade_item = Submission.objects.get(id=submission_ids[minimum_index])
+                grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
                 if grader_id not in previous_graders:
                     grade_item.state = SubmissionState.being_graded
