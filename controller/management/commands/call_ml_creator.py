@@ -13,6 +13,7 @@ import json
 import logging
 import sys
 from statsd import statsd
+import pickle
 
 from controller.models import Submission
 from staff_grading import staff_grading_util
@@ -88,6 +89,21 @@ class Command(NoArgsCommand):
 
                     results = create.create(text, scores, prompt, full_model_path)
 
+                    #Add in needed stuff that ml creator does not pass back
+                    results.update({'text' : text, 'score' : scores, 'model_path' : full_model_path,
+                                   'relative_model_path' : relative_model_path, 'prompt' : prompt})
+
+                    #Try to create model if ml model creator was successful
+                    if results['success']:
+                        try:
+                            success, s3_public_url = self.save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
+                            results.update({'s3_public_url' : s3_public_url, 'success' : success})
+                            if not success:
+                                results['errors'].append("Could not save model.")
+                        except:
+                            results['errors'].append("Could not save model.")
+                            log.exception("Problem saving ML model.")
+
                     created_model_dict={
                         'max_score' : first_sub.max_score,
                         'prompt' : prompt,
@@ -102,6 +118,9 @@ class Command(NoArgsCommand):
                         'cv_kappa' : results['cv_kappa'],
                         'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
                         'creation_succeeded': results['success'],
+                        's3_public_url' : results['s3_public_url'],
+                        'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
+                        's3_bucketname' : str(settings.AWS_ACCESS_KEY_ID) + '_' + str(settings.S3_BUCKETNAME),
                         }
 
                     transaction.commit_unless_managed()
@@ -123,6 +142,32 @@ class Command(NoArgsCommand):
             log.exception("Problem creating model for location {0}".format(location))
             statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                 tags=["success:Exception", "location:{0}".format(location)])
+
+    def save_model_file(self,results, save_to_s3):
+        success=False
+        if save_to_s3:
+            pickled_model=ml_grading_util.get_pickle_data(results['prompt'], results['feature_ext'],
+                results['classifier'], results['text'],
+                results['score'])
+            success, s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)
+
+        if success:
+            return True, s3_public_url
+
+        try:
+            ml_grading_util.dump_model_to_file(results['prompt'], results['feature_ext'],
+                results['classifier'], results['text'],results['score'],results['model_path'])
+            return True, "Saved model to file."
+        except:
+            return False, "Could not save model."
+
+
+
+
+
+
+
+
 
 
 
