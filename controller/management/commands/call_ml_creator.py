@@ -120,7 +120,7 @@ class Command(NoArgsCommand):
                         'creation_succeeded': results['success'],
                         's3_public_url' : results['s3_public_url'],
                         'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
-                        's3_bucketname' : settings.AWS_ACCESS_KEY_ID + '_' + settings.S3_BUCKETNAME,
+                        's3_bucketname' : str(settings.AWS_ACCESS_KEY_ID) + '_' + str(settings.S3_BUCKETNAME),
                         }
 
                     transaction.commit_unless_managed()
