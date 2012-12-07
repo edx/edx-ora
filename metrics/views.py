@@ -14,7 +14,7 @@ _INTERFACE_VERSION=1
 @csrf_exempt
 @login_required
 def metrics_form(request):
-    available_metric_types=['timing', 'performance']
+    available_metric_types=['timing', 'student_performance']
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -32,8 +32,8 @@ def metrics_form(request):
         if metric_type=="timing":
             success,response=metrics_util.generate_timing_response(arguments,title)
 
-        if metric_type=="performance":
-            success,response=metrics_util.generate_performance_response(arguments,title)
+        if metric_type=="student_performance":
+            success,response=metrics_util.generate_student_performance_response(arguments,title)
 
         return response
 

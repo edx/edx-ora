@@ -34,7 +34,7 @@ def generate_timing_response(arguments,title):
         return False, IMAGE_ERROR_MESSAGE
 
 
-def generate_performance_response(arguments,title):
+def generate_student_performance_response(arguments,title):
     try:
         sub_arguments={}
         for tag in ['course_id', 'location']:
