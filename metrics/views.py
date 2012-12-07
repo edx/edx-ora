@@ -14,7 +14,9 @@ _INTERFACE_VERSION=1
 @csrf_exempt
 @login_required
 def metrics_form(request):
-    available_metric_types=['timing', 'student_performance', 'attempt_counts', 'response_counts', 'grader_counts', 'pending_counts']
+    available_metric_types=['timing', 'student_performance', 'attempt_counts',
+                            'response_counts', 'grader_counts', 'pending_counts',
+                            'currently_being_graded']
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -46,6 +48,9 @@ def metrics_form(request):
 
         if metric_type=="pending_counts":
             success,response = metrics_util.generate_pending_counts_per_problem(arguments,title)
+
+        if metric_type=="currently_being_graded":
+            success,response = metrics_util.generate_currently_being_graded_counts_per_problem(arguments,title)
 
         return response
 

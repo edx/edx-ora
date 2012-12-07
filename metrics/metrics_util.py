@@ -14,9 +14,9 @@ log=logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE="Error processing image."
 
-def generate_pending_counts_per_problem(arguments,title):
+def generate_counts_per_problem(arguments,title, state):
     try:
-        pend_counts=Submission.objects.filter(state=SubmissionState.waiting_to_be_graded).values('location').annotate(pend_count=Count('location'))
+        pend_counts=Submission.objects.filter(state=state).values('location').annotate(pend_count=Count('location'))
 
         pend_counts_list=[i['pend_count'] for i in pend_counts]
         pend_names=[i['location'] for i in pend_counts]
@@ -63,25 +63,13 @@ def generate_grader_types_per_problem(arguments,title):
         return False, HttpResponse(IMAGE_ERROR_MESSAGE)
 
 def generate_number_of_responses_per_problem(arguments,title):
-    try:
-        loc_counts=Submission.objects.filter(state=SubmissionState.finished).values('location').annotate(loc_count=Count('location'))
+    return generate_counts_per_problem(SubmissionState.finished)
 
-        loc_counts_list=[i['loc_count'] for i in loc_counts]
-        location_names=[i['location'] for i in loc_counts]
+def generate_pending_counts_per_problem(arguments,title):
+    return generate_counts_per_problem(SubmissionState.waiting_to_be_graded)
 
-        if len(loc_counts_list)==0:
-            return False, HttpResponse("Did not find anything matching that query.")
-
-        loc_counts_list.sort()
-        x_data=[i for i in xrange(0,len(loc_counts_list))]
-
-        response=charting.render_bar(x_data,loc_counts_list,title,"Number", "Count",x_tick_labels=location_names)
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
-
+def generate_currently_being_graded_counts_per_problem:
+    return generate_counts_per_problem(SubmissionState.currently_being_graded)
 
 def generate_student_attempt_count_response(arguments,title):
     try:
