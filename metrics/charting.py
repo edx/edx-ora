@@ -22,14 +22,12 @@ def render_image(chart_data,title):
 
     return response
 
-def render_image2(chart_data,title,x_label,y_label):
-    chart_data.sort()
+def render_bar(x_data,y_data,title,x_label,y_label):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
     # the bar chart of the data
-    log.debug(chart_data)
-    ax.bar([i for i in xrange(0,len(chart_data))], chart_data, width=1)
+    ax.bar(x_data, y_data, width=1)
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)

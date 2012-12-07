@@ -11,22 +11,27 @@ from matplotlib import numpy as np
 
 log=logging.getLogger(__name__)
 
+IMAGE_ERROR_MESSAGE="Error processing image."
+
 def generate_timing_response(arguments,title):
-    #try:
-    timing_set=Timing.objects.filter(**arguments)
-    if timing_set.count()==0:
-        return False, HttpResponse("Did not find anything matching that query.")
+    try:
+        timing_set=Timing.objects.filter(**arguments)
+        if timing_set.count()==0:
+            return False, HttpResponse("Did not find anything matching that query.")
 
-    timing_set_values=timing_set.values("start_time", "end_time")
-    timing_set_start=[i['start_time'] for i in timing_set_values]
-    timing_set_end=[i['end_time'] for i in timing_set_values]
-    timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
+        timing_set_values=timing_set.values("start_time", "end_time")
+        timing_set_start=[i['start_time'] for i in timing_set_values]
+        timing_set_end=[i['end_time'] for i in timing_set_values]
+        timing_set_difference=[(timing_set_end[i]-timing_set_start[i]).total_seconds() for i in xrange(0,len(timing_set_end))]
+        timing_set_difference.sort()
+        x_data=[i for i in xrange(0,len(timing_set_difference))]
 
-    response=charting.render_image2(timing_set_difference,title, "Number", "Time taken")
+        response=charting.render_bar(x_data,timing_set_difference,title, "Number", "Time taken")
 
-    return True,response
-    #except:
-    #    return False, "Unexpected error processing image."
+        return True,response
+    except:
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, IMAGE_ERROR_MESSAGE
 
 
 def generate_performance_response(arguments,title):
@@ -45,13 +50,15 @@ def generate_performance_response(arguments,title):
             return False, HttpResponse("Did not find anything matching that query.")
 
         grader_scores=[x['score'] for x in grader_set.values("score")]
+        grader_scores.sort()
+        x_data=[i for i in xrange(0,len(grader_scores))]
 
-
-        response=charting.render_image2(grader_scores,title,"Number", "Score")
+        response=charting.render_bar(x_data,grader_scores,title,"Number", "Score")
 
         return True, response
     except:
-        return False, HttpResponse("Unexpected error processing image.")
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
 
 
 def render_form(post_url,available_metric_types):
