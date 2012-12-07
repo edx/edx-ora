@@ -14,6 +14,27 @@ log=logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE="Error processing image."
 
+def generate_pending_counts_per_problem(arguments,title):
+    try:
+        pend_counts=Submission.objects.filter(state=SubmissionState.waiting_to_be_graded).values('location').annotate(pend_count=Count('location'))
+
+        pend_counts_list=[i['pend_count'] for i in pend_counts]
+        pend_names=[i['location'] for i in pend_counts]
+
+        if len(pend_counts_list)==0:
+            return False, HttpResponse("Did not find anything matching that query.")
+
+        pend_counts_list.sort()
+        x_data=[i for i in xrange(0,len(pend_counts_list))]
+
+        response=charting.render_bar(x_data,pend_counts_list,title,"Number", "Count",x_tick_labels=pend_names)
+
+        return True, response
+    except:
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+
+
 def generate_grader_types_per_problem(arguments,title):
     try:
 
