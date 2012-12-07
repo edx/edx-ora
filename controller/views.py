@@ -58,7 +58,7 @@ def status(request):
 
 def request_eta_for_submission(request):
     """
-    Gets the ETA for a student submission to be graded for a given location
+    Gets the ETA (in seconds) for a student submission to be graded for a given location
     Input:
         A problem location
     Output:
