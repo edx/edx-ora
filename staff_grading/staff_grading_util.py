@@ -71,7 +71,7 @@ def count_submissions_graded_and_pending_instructor(location):
     """
     return finished_submissions_graded_by_instructor(location).count(), submissions_pending_instructor(location).count()
 
-def get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True,types_to_check_for=["IN", "ML"],
+def get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True,types_to_check_for=None,
                                                                  submission_state_to_check_for=SubmissionState.waiting_to_be_graded):
     """
     Returns a single instructor grading item for a given location
@@ -82,6 +82,9 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     Output:
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
+
+    if not types_to_check_for:
+        types_to_check_for=["ML","IN"]
 
     if not check_for_ml and rescore_finalized_ML:
         return False, "Cannot disallow rescoring of submissions that are graded by ML and "

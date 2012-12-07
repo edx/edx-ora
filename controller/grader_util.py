@@ -41,7 +41,7 @@ def add_additional_tags_to_dict(grader_dict, sub_id):
     Output:
         A full grader dictionary
     """
-    
+
     default_grader_dict={
         'feedback' : 'blah',
         'status' : GraderStatus.success,
