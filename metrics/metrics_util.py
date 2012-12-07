@@ -63,13 +63,13 @@ def generate_grader_types_per_problem(arguments,title):
         return False, HttpResponse(IMAGE_ERROR_MESSAGE)
 
 def generate_number_of_responses_per_problem(arguments,title):
-    return generate_counts_per_problem(SubmissionState.finished)
+    return generate_counts_per_problem(arguments,title,SubmissionState.finished)
 
 def generate_pending_counts_per_problem(arguments,title):
-    return generate_counts_per_problem(SubmissionState.waiting_to_be_graded)
+    return generate_counts_per_problem(arguments,title,SubmissionState.waiting_to_be_graded)
 
-def generate_currently_being_graded_counts_per_problem:
-    return generate_counts_per_problem(SubmissionState.currently_being_graded)
+def generate_currently_being_graded_counts_per_problem(arguments,title):
+    return generate_counts_per_problem(arguments,title,SubmissionState.currently_being_graded)
 
 def generate_student_attempt_count_response(arguments,title):
     try:
