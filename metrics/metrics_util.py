@@ -14,6 +14,33 @@ log=logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE="Error processing image."
 
+def generate_grader_types_per_problem(arguments,title):
+    try:
+
+        sub_arguments={"submission__" + k : arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
+        sub_arguments.update({'status_code' : GraderStatus.success})
+
+        if 'grader_type' in arguments:
+            sub_arguments.update({'grader_type' : arguments['grader_type']})
+
+        grader_counts=Grader.objects.filter(**sub_arguments).values('grader_type').annotate(grader_count=Count('grader_type'))
+
+        grader_counts_list=[i['grader_count'] for i in grader_counts]
+        grader_names=[i['grader_type'] for i in grader_counts]
+
+        if len(grader_counts_list)==0:
+            return False, HttpResponse("Did not find anything matching that query.")
+
+        grader_counts_list.sort()
+        x_data=[i for i in xrange(0,len(grader_counts_list))]
+
+        response=charting.render_bar(x_data,grader_counts_list,title,"Number", "Count",x_tick_labels=grader_names)
+
+        return True, response
+    except:
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+
 def generate_number_of_responses_per_problem(arguments,title):
     try:
         loc_counts=Submission.objects.filter(state=SubmissionState.finished).values('location').annotate(loc_count=Count('location'))
@@ -27,7 +54,7 @@ def generate_number_of_responses_per_problem(arguments,title):
         loc_counts_list.sort()
         x_data=[i for i in xrange(0,len(loc_counts_list))]
 
-        response=charting.render_bar(x_data,loc_counts_list,title,"Number", "Attempt Count",x_tick_labels=location_names)
+        response=charting.render_bar(x_data,loc_counts_list,title,"Number", "Count",x_tick_labels=location_names)
 
         return True, response
     except:
