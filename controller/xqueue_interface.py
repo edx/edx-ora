@@ -135,15 +135,20 @@ def handle_submission(sub):
             log.exception("could not run basic checks on {0}".format(sub.student_response))
             return False
 
+        #add additional tags needed to create a grader object
+        check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
+        sub.next_grader_type = "BC"
+        sub.save()
+
+        #Create and handle the grader, and return
+        grader_util.create_and_handle_grader_object(check_dict)
+
         #If the checks result in a score of 0 (out of 1), then the submission fails basic sanity checks
+        #Return to student and don't process further
         if check_dict['score'] == 0:
-            #add additional tags needed to create a grader object
-            check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
-            sub.next_grader_type = "BC"
-            sub.save()
-            #Create and handle the grader, and return
-            grader_util.create_and_handle_grader_object(check_dict)
             return True
+        else:
+            sub.state=SubmissionState.waiting_to_be_graded
 
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(

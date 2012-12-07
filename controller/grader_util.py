@@ -100,8 +100,8 @@ def create_and_handle_grader_object(grader_dict):
 
     #TODO: Some kind of logic to decide when sub is finished grading.
 
-    #If we are calling this after a basic check, that means that the submission is bad, so mark as finished
-    if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"]):
+    #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
+    if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
         sub.state = SubmissionState.finished
     #If submission is ML or IN graded, and was successful, state is finished
     elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
