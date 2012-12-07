@@ -22,18 +22,22 @@ def render_image(chart_data,title):
 
     return response
 
-def render_image2(chart_data,title,x_label,y_label):
-    chart_data.sort()
-    fig = plt.figure()
+def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None):
+    epsilon = .01
+    y_data=[i+epsilon for i in y_data]
+    fig = plt.figure(figsize=(20,10))
     ax = fig.add_subplot(111)
 
     # the bar chart of the data
-    log.debug(chart_data)
-    ax.bar([i for i in xrange(0,len(chart_data))], chart_data, width=1)
+    ax.bar(x_data, y_data, align='center')
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(title)
+
+    if x_tick_labels:
+        ax.set_xticks(x_data)
+        ax.set_xticklabels(x_tick_labels)
 
     imgdata = StringIO.StringIO()
     fig.savefig(imgdata, format='png')

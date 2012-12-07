@@ -15,6 +15,7 @@ import util
 import grader_util
 from staff_grading import staff_grading_util
 from basic_check import basic_check_util
+from metrics import timing_functions
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +131,9 @@ def handle_submission(sub):
     """
     try:
         #Run some basic sanity checks on submission
+        sub.next_grader_type = "BC"
+        sub.save()
+        timing_functions.initialize_timing(sub.id)
         success, check_dict = basic_check_util.simple_quality_check(sub.student_response)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
@@ -137,8 +141,6 @@ def handle_submission(sub):
 
         #add additional tags needed to create a grader object
         check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
-        sub.next_grader_type = "BC"
-        sub.save()
 
         #Create and handle the grader, and return
         grader_util.create_and_handle_grader_object(check_dict)

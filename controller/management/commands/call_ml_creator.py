@@ -102,6 +102,7 @@ class Command(NoArgsCommand):
                                 results['errors'].append("Could not save model.")
                         except:
                             results['errors'].append("Could not save model.")
+                            results['s3_public_url'] = ""
                             log.exception("Problem saving ML model.")
 
                     created_model_dict={

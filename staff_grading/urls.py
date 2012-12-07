@@ -3,7 +3,9 @@ from django.conf import settings
 
 urlpatterns = patterns('staff_grading.views',
     url(r'^get_next_submission/$', 'get_next_submission'),
-    url(r'^save_grade/$', 'save_grade'))
+    url(r'^save_grade/$', 'save_grade'),
+    url(r'^get_problem_list/$', 'get_problem_list'),
+)
 
 
 # Also have proxies for the login and logout views--this allows

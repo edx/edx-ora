@@ -28,7 +28,9 @@ log = logging.getLogger(__name__)
 _INTERFACE_VERSION = 1
 
 
+@csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
+@login_required
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -106,7 +108,7 @@ def get_next_submission(request):
                 'submission': submission.student_response,
                 # TODO: once client properly handles the 'prompt' field,
                 # make this just submission.rubric
-                'rubric': submission.prompt + "<br>" + submission.rubric,
+                'rubric': submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
                 'ml_error_info' : ml_error_message,
@@ -124,6 +126,7 @@ def get_next_submission(request):
 @statsd.timed(
     'open_ended_assessment.grading_controller.staff_grading.views.time',
     tags=['function:save_grade'])
+@login_required()
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -141,7 +144,7 @@ def save_grade(request):
     error: string, present if not success
     """
     if request.method != "POST":
-        raise Http404
+        return util._error_response("Request needs to be GET", _INTERFACE_VERSION)
 
     course_id = request.POST.get('course_id')
     grader_id = request.POST.get('grader_id')
@@ -179,3 +182,37 @@ def save_grade(request):
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 
     return util._success_response({}, _INTERFACE_VERSION)
+
+@csrf_exempt
+@login_required()
+def get_problem_list(request):
+
+    if request.method!="GET":
+        return util._error_response("Request needs to be GET.", _INTERFACE_VERSION)
+
+    course_id=request.GET.get("course_id")
+
+    if not course_id:
+        return util._error_response("Missing needed tag course_id", _INTERFACE_VERSION)
+
+    locations_for_course = [x['location'] for x in
+                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+
+    if len(locations_for_course)==0:
+        return util._error_response("No problems associated with course.", _INTERFACE_VERSION)
+
+    location_info=[]
+    for location in locations_for_course:
+        problem_name=Submission.objects.filter(location=location)[0].problem_id
+        submissions_pending=staff_grading_util.submissions_pending_for_location(location).count()
+        finished_instructor_graded=staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        location_dict={
+            'location' : location,
+            'problem_name' : problem_name,
+            'num_graded' : finished_instructor_graded,
+            'num_pending' : submissions_pending,
+            'min_for_ml' : settings.MIN_TO_USE_ML,
+                       }
+        location_info.append(location_dict)
+
+    return util._success_response({'problem_list' : location_info},_INTERFACE_VERSION)
