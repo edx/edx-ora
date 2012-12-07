@@ -61,16 +61,22 @@ def get_next_submission(request):
 
     course_id = request.GET.get('course_id')
     grader_id = request.GET.get('grader_id')
+    location = request.GET.get('location')
 
     log.debug("Getting next submission for instructor grading for course: {0}.".format(course_id))
 
 
-    if not course_id or not grader_id:
+    if not (course_id or location) or not grader_id:
         return util._error_response("Missing required parameter", _INTERFACE_VERSION)
+
+    if location:
+        (found, id) = staff_grading_util.get_single_instructor_grading_item_for_location(location)
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
-    (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
+    if not location:
+        (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
+
     if not found:
         return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
 
@@ -104,6 +110,10 @@ def get_next_submission(request):
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
                 'ml_error_info' : ml_error_message,
+                'problem_name' : submission.problem_id,
+                'num_graded' : staff_grading_util.finished_submissions_graded_by_instructor(submission.location).count(),
+                'num_pending' : staff_grading_util.submissions_pending_for_location(submission.location).count(),
+                'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
     log.debug("Sending success response back to instructor grading!")
@@ -169,4 +179,3 @@ def save_grade(request):
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
 
     return util._success_response({}, _INTERFACE_VERSION)
-

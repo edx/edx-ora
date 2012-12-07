@@ -30,6 +30,16 @@ def generate_ml_error_message(ml_error_info):
 
     return ml_message
 
+def submissions_pending_for_location(location):
+    """
+    Get submissions that are graded by instructor
+    """
+    subs_graded = Submission.objects.filter(location=location,
+        state__in=[SubmissionState.waiting_to_be_graded],
+    )
+
+    return subs_graded
+
 
 def finished_submissions_graded_by_instructor(location):
     """
