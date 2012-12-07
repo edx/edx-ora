@@ -179,7 +179,7 @@ def get_eta_for_submission(location):
     if grader_settings['grader_type'] in ["ML", "IN"]:
         subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
         if (subs_graded + subs_pending) > settings.MIN_TO_USE_ML:
-            eta = 5 * 60
+            eta = settings.ML_ESTIMATED_GRADING_TIME
     elif grader_settings['grader_type'] in "PE":
         #Just use the default timing for now.
         pass
