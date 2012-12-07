@@ -41,13 +41,21 @@ def add_additional_tags_to_dict(grader_dict, sub_id):
     Output:
         A full grader dictionary
     """
-    for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
-        if tag not in grader_dict:
-            if tag != "submission_id":
-                grader_dict.update({tag: "1"})
-            else:
-                grader_dict.update({tag: sub_id})
-    return grader_dict
+    
+    default_grader_dict={
+        'feedback' : 'blah',
+        'status' : GraderStatus.success,
+        'grader_id' : 1,
+        'grader_type' : "BC",
+        'confidence' : 1,
+        'score' : 0,
+        'submission_id' : 1,
+        'errors' : ""
+    }
+    grader_dict.update({'submission_id' : sub_id})
+    default_grader_dict.update(grader_dict)
+
+    return default_grader_dict
 
 
 def create_and_handle_grader_object(grader_dict):
