@@ -149,7 +149,7 @@ def get_single_instructor_grading_item(course_id):
            return success, sub_id
 
     for location in locations_for_course:
-       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,False, "ML",
+       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,False, ["ML"],
            SubmissionState.finished)
        if success:
            return success, sub_id
