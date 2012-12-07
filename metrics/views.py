@@ -14,7 +14,7 @@ _INTERFACE_VERSION=1
 @csrf_exempt
 @login_required
 def metrics_form(request):
-    available_metric_types=['timing', 'student_performance', 'attempt_counts']
+    available_metric_types=['timing', 'student_performance', 'attempt_counts', 'response_counts']
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -37,6 +37,9 @@ def metrics_form(request):
 
         if metric_type=="attempt_counts":
             success,response=metrics_util.generate_student_attempt_count_response(arguments, title)
+
+        if metric_type=="response_counts":
+            success,response=metrics_util.generate_number_of_responses_per_problem(arguments, title)
 
         return response
 

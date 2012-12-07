@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 import charting
 from django.db.models import Count
 from metrics.models import Timing
-from controller.models import  Submission, Grader, GraderStatus
+from controller.models import  Submission, SubmissionState, Grader, GraderStatus
 import logging
 import matplotlib.pyplot as plt
 import StringIO
@@ -13,6 +13,27 @@ from matplotlib import numpy as np
 log=logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE="Error processing image."
+
+def generate_number_of_responses_per_problem(arguments,title):
+    try:
+        loc_counts=Submission.objects.filter(state=SubmissionState.finished).values('location').annotate(loc_count=Count('location'))
+
+        loc_counts_list=[i['loc_count'] for i in loc_counts]
+        location_names=[i['location'] for i in loc_counts]
+
+        if len(loc_counts_list)==0:
+            return False, HttpResponse("Did not find anything matching that query.")
+
+        loc_counts_list.sort()
+        x_data=[i for i in xrange(0,len(loc_counts_list))]
+
+        response=charting.render_bar(x_data,loc_counts_list,title,"Number", "Attempt Count",x_tick_labels=location_names)
+
+        return True, response
+    except:
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+
 
 def generate_student_attempt_count_response(arguments,title):
     try:
