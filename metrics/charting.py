@@ -23,7 +23,9 @@ def render_image(chart_data,title):
     return response
 
 def render_bar(x_data,y_data,title,x_label,y_label):
-    fig = plt.figure()
+    epsilon = .01
+    y_data=[i+epsilon for i in y_data]
+    fig = plt.figure(figsize=(20,10))
     ax = fig.add_subplot(111)
 
     # the bar chart of the data

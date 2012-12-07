@@ -2,8 +2,9 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 import charting
+from django.db.models import Count
 from metrics.models import Timing
-from controller.models import  Grader, GraderStatus
+from controller.models import  Submission, Grader, GraderStatus
 import logging
 import matplotlib.pyplot as plt
 import StringIO
@@ -12,6 +13,32 @@ from matplotlib import numpy as np
 log=logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE="Error processing image."
+
+def generate_student_attempt_count_response(arguments,title):
+    try:
+        sub_arguments={k : arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
+        sub_arguments.update({'grader__status_code' : GraderStatus.success})
+
+        if 'grader_type' in arguments:
+            sub_arguments.update({'grader__grader_type' : arguments['grader_type']})
+
+        attempt_counts = (Submission.objects.filter(**sub_arguments).
+                          annotate(num_graders=Count('grader')).values('num_graders'))
+
+        attempt_count_list=[i['num_graders'] for i in attempt_counts]
+
+        if len(attempt_count_list)==0:
+            return False, HttpResponse("Did not find anything matching that query.")
+
+        attempt_count_list.sort()
+        x_data=[i for i in xrange(0,len(attempt_count_list))]
+
+        response=charting.render_bar(x_data,attempt_count_list,title,"Number", "Attempt Count")
+
+        return True, response
+    except:
+        log.exception(IMAGE_ERROR_MESSAGE)
+        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
 
 def generate_timing_response(arguments,title):
     try:
@@ -43,7 +70,7 @@ def generate_student_performance_response(arguments,title):
 
         grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
 
-        if arguments['grader_type']:
+        if 'grader_type' in arguments:
             grader_set=grader_set.filter(grader_type=arguments['grader_type'])
 
         if grader_set.count()==0:
