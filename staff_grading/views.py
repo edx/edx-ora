@@ -29,6 +29,7 @@ _INTERFACE_VERSION = 1
 
 
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
+@login_required
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -124,6 +125,7 @@ def get_next_submission(request):
 @statsd.timed(
     'open_ended_assessment.grading_controller.staff_grading.views.time',
     tags=['function:save_grade'])
+@login_required()
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -181,6 +183,7 @@ def save_grade(request):
     return util._success_response({}, _INTERFACE_VERSION)
 
 @csrf_exempt
+@login_required()
 def get_problem_list(request):
 
     if request.method!="GET":
