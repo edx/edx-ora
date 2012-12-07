@@ -14,10 +14,11 @@ from models import GraderStatus, SubmissionState
 import util
 import grader_util
 from staff_grading import staff_grading_util
+from basic_check import basic_check_util
 
 log = logging.getLogger(__name__)
 
-_INTERFACE_VERSION=1
+_INTERFACE_VERSION = 1
 
 @csrf_exempt
 @login_required
@@ -49,7 +50,7 @@ def submit(request):
             ))
             statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit",
                 tags=["success:Exception"])
-            return util._error_response('Incorrect format' , _INTERFACE_VERSION)
+            return util._error_response('Incorrect format', _INTERFACE_VERSION)
         else:
             try:
                 #Retrieve individual values from xqueue body and header.
@@ -113,9 +114,9 @@ def submit(request):
                 ])
 
             if not success:
-                return util._error_response("Failed to handle submission.")
+                return util._error_response("Failed to handle submission.", _INTERFACE_VERSION)
 
-            return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
+            return util._success_response({'message': "Saved successfully."}, _INTERFACE_VERSION)
 
 
 def handle_submission(sub):
@@ -128,6 +129,27 @@ def handle_submission(sub):
         True/False status code
     """
     try:
+        #Run some basic sanity checks on submission
+        success, check_dict = basic_check_util.simple_quality_check(sub.student_response)
+        if not success:
+            log.exception("could not run basic checks on {0}".format(sub.student_response))
+            return False
+
+        #add additional tags needed to create a grader object
+        check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
+        sub.next_grader_type = "BC"
+        sub.save()
+
+        #Create and handle the grader, and return
+        grader_util.create_and_handle_grader_object(check_dict)
+
+        #If the checks result in a score of 0 (out of 1), then the submission fails basic sanity checks
+        #Return to student and don't process further
+        if check_dict['score'] == 0:
+            return True
+        else:
+            sub.state=SubmissionState.waiting_to_be_graded
+
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
             sub.location)
@@ -148,18 +170,15 @@ def handle_submission(sub):
             else:
                 sub.next_grader_type = "IN"
         else:
-            log.error("Invalid grader type specified in settings file.")
-
+            log.exception("Invalid grader type specified in settings file.")
             return False
 
         sub.save()
         log.debug("Submission object created successfully!")
 
     except:
-        log.error("Submission creation failed!")
-
+        log.exception("Submission creation failed!")
         return False
-
 
     return True
 

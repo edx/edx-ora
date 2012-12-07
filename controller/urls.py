@@ -12,6 +12,7 @@ urlpatterns = patterns('controller.views',
     url(r'^login/$', 'log_in'),
     url(r'^logout/$', 'log_out'),
     url(r'^status/$', 'status'),
+    url(r'^get_submission_eta/$', 'request_eta_for_submission'),
 )
 
 # Xqueue submission interface (xqueue pull script uses this)

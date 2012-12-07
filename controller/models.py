@@ -16,6 +16,7 @@ GRADER_TYPE = (
     ('PE', 'Peer'),
     ('SE', 'Self'),
     ('NA', 'None'),
+    ('BC', 'Basic Check'),
     )
 
 STATUS_CODES = (
@@ -117,7 +118,7 @@ class Submission(models.Model):
             last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
             return {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type, 'success' : False}
         #If grader is ML or instructor, only send back last successful submission
-        elif all_graders[0].grader_type in ["IN", "ML"]:
+        elif all_graders[0].grader_type in ["IN", "ML", "BC"]:
             return {'score': all_graders[0].score, 'feedback': all_graders[0].feedback,
                     'grader_type' : all_graders[0].grader_type, 'success' : True}
         #If grader is peer, send back all peer judgements
