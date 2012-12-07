@@ -108,7 +108,7 @@ def get_next_submission(request):
                 'submission': submission.student_response,
                 # TODO: once client properly handles the 'prompt' field,
                 # make this just submission.rubric
-                'rubric': submission.prompt + "<br>" + submission.rubric,
+                'rubric': submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
                 'ml_error_info' : ml_error_message,
