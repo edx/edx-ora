@@ -136,3 +136,30 @@ def get_grader_settings(settings_file):
     }
 
     return grader_settings
+
+def get_eta_for_submission(location):
+    """
+    Gets an eta for a given location
+    Input:
+        Problem location
+    Output:
+        Boolean success, and an error message or eta
+    """
+    try:
+        sub_graders=Submission.objects.filter(location=location)[0]
+    except:
+        return False, "No current problems for given location."
+
+    eta=settings.DEFAULT_ESTIMATED_GRADING_TIME
+    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
+    grader_settings = grader_util.get_grader_settings(grader_settings_path)
+
+    if grader_settings['grader_type'] in ["ML", "IN"]:
+        subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
+        if (subs_graded+subs_pending)>settings.MIN_TO_USE_ML:
+            eta=5 * 60
+    elif grader_settings['grader_type'] in "PE":
+        #Just use the default timing for now.
+        pass
+
+    return True, eta
