@@ -32,7 +32,21 @@ def simple_quality_check(string):
         Any string
     Output:
         Boolean indicating success/failure and dictionary with sanity checks
+        Dictionary contains keys feedback, score, grader_type, and status
+        Dictionary key feedback contains further keys markup_text, spelling, and grammar
     """
+
+    #Maximum proportion of characters in a string that can be badly spelled or grammatically incorrect
+    #before it is rejected
+    SPELLING_MAXIMUM=.3
+    GRAMMAR_MAXIMUM=.1
+
+    #Minimum number of characters needed in a string before it is ok
+    LENGTH_MINIMUM=10
+
+    #Minimum characters per word needed in a response (below is rejected)
+    CHARS_PER_WORD_MINIMUM=3
+
     quality_dict={'feedback' : {}, 'score' : 1, 'grader_type' : 'BC', 'status' : GraderStatus.success}
     try:
         basic_check, e_set=perform_spelling_and_grammar_checks(string)
@@ -43,8 +57,8 @@ def simple_quality_check(string):
         return False, quality_dict
 
     quality_dict['feedback']=json.dumps({ k: basic_check[k] for k in ['markup_text','spelling','grammar'] })
-    if(total_length<10 or word_length_ratio<=3 or
-       basic_check['grammar_per_char']>.1 or basic_check['spelling_per_char']>.3):
+    if(total_length<LENGTH_MINIMUM or word_length_ratio<=CHARS_PER_WORD_MINIMUM or
+       basic_check['grammar_per_char']>GRAMMAR_MAXIMUM or basic_check['spelling_per_char']>SPELLING_MAXIMUM):
         quality_dict['score']=0
 
     return True, quality_dict
