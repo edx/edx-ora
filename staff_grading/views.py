@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 _INTERFACE_VERSION = 1
 
 
+@csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
 @login_required
 def get_next_submission(request):
