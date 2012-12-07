@@ -199,7 +199,7 @@ def get_problem_list(request):
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
 
     if len(locations_for_course)==0:
-        return util._error_response("No problems associated with course.")
+        return util._error_response("No problems associated with course.", _INTERFACE_VERSION)
 
     location_info=[]
     for location in locations_for_course:
@@ -215,4 +215,4 @@ def get_problem_list(request):
                        }
         location_info.append(location_dict)
 
-    return util.success_response({'problem_list' : location_info},_INTERFACE_VERSION)
+    return util._success_response({'problem_list' : location_info},_INTERFACE_VERSION)
