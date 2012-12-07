@@ -69,7 +69,7 @@ def generate_pending_counts_per_problem(arguments,title):
     return generate_counts_per_problem(arguments,title,SubmissionState.waiting_to_be_graded)
 
 def generate_currently_being_graded_counts_per_problem(arguments,title):
-    return generate_counts_per_problem(arguments,title,SubmissionState.currently_being_graded)
+    return generate_counts_per_problem(arguments,title,SubmissionState.being_graded)
 
 def generate_student_attempt_count_response(arguments,title):
     try:
@@ -122,7 +122,7 @@ def generate_student_performance_response(arguments,title):
     try:
         sub_arguments={}
         for tag in ['course_id', 'location']:
-            if arguments[tag]:
+            if tag in arguments:
                 sub_arguments["submission__" + tag]=arguments[tag]
 
         grader_set=Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
