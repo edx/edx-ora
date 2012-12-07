@@ -126,7 +126,7 @@ class XQueueInterfaceTest(unittest.TestCase):
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
             'student_info': json.dumps(student_info),
-            'student_response': "Test!",
+            'student_response': "Test! And longer now so tests pass.",
             'max_score': 1,
         }
         content = {

@@ -23,6 +23,7 @@ TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds.  Time between pull_from_xqueue checking 
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
 MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
+DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to display to students
 
 #Config for specific graders
 #ML
@@ -33,6 +34,7 @@ TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator check
 TIME_BETWEEN_ML_GRADER_CHECKS= 5 # seconds.  Time between ML grader checking to see if models need to be made.
 USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 S3_BUCKETNAME="OpenEnded"
+ML_ESTIMATED_GRADING_TIME= 5 * 60 #Estimated grading time for machine learning in seconds
 
 #Peer
 MIN_TO_USE_PEER=20 #Minimum instructor graded (calibration) essays before peer grading can be used

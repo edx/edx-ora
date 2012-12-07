@@ -11,6 +11,9 @@ import requests
 import urlparse
 
 import util
+import grader_util
+
+from staff_grading import staff_grading_util
 
 from models import Submission
 
@@ -52,3 +55,37 @@ def status(request):
     Returns a simple status update
     """
     return util._success_response({'content' : 'OK'}, _INTERFACE_VERSION)
+
+def request_eta_for_submission(request):
+    """
+    Gets the ETA (in seconds) for a student submission to be graded for a given location
+    Input:
+        A problem location
+    Output:
+        Dictionary containing success, and eta indicating time a new submission for given location will take to be graded
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    location=request.GET.get("location")
+    if not location:
+        return util._error_response("Missing required key location", _INTERFACE_VERSION)
+
+    success, eta = grader_util.get_eta_for_submission(location)
+
+    if not success:
+        return util._error_response(eta,_INTERFACE_VERSION)
+
+    return util._success_response({
+        'eta' : eta,
+    }, _INTERFACE_VERSION)
+
+
+
+
+
+
+
+
+
+

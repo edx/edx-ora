@@ -30,6 +30,16 @@ def generate_ml_error_message(ml_error_info):
 
     return ml_message
 
+def submissions_pending_for_location(location):
+    """
+    Get submissions that are graded by instructor
+    """
+    subs_graded = Submission.objects.filter(location=location,
+        state__in=[SubmissionState.waiting_to_be_graded],
+    )
+
+    return subs_graded
+
 
 def finished_submissions_graded_by_instructor(location):
     """
@@ -61,7 +71,8 @@ def count_submissions_graded_and_pending_instructor(location):
     """
     return finished_submissions_graded_by_instructor(location).count(), submissions_pending_instructor(location).count()
 
-def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
+def get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True,types_to_check_for=None,
+                                                                 submission_state_to_check_for=SubmissionState.waiting_to_be_graded):
     """
     Returns a single instructor grading item for a given location
     Input:
@@ -72,14 +83,17 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
 
+    if not types_to_check_for:
+        types_to_check_for=["ML","IN"]
+
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
     if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ML:
         to_be_graded = Submission.objects.filter(
             location=location,
-            state=SubmissionState.waiting_to_be_graded,
-            next_grader_type__in=["IN", "ML"],
+            state=submission_state_to_check_for,
+            next_grader_type__in=types_to_check_for,
         )
 
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded.count()))
@@ -101,7 +115,24 @@ def get_single_instructor_grading_item_for_location(location,check_for_ML=True):
         #If nothing is found, return false
     return False, 0
 
+def get_single_instructor_grading_item_for_location(location):
+    found = False
+    sub_id = 0
+    #Looks through first all submissions that are marked for instructor grading and are pending, then looks
+    #through submissions that are marked for instructor or ML grading and are pending, then finally
+    #looks through submisisons that have been marked finished and have been graded already by ML.
+    success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
+    if success:
+        return success, sub_id
+    success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
+    if success:
+        return success, sub_id
+    success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
+        types_to_check_for=["ML"], submission_state_to_check_for=SubmissionState.finished)
+    if success:
+        return success, sub_id
 
+    return found, sub_id
 
 def get_single_instructor_grading_item(course_id):
     """
@@ -118,15 +149,25 @@ def get_single_instructor_grading_item(course_id):
     locations_for_course = [x['location'] for x in
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     log.debug("locations: {0} for course {1}".format(locations_for_course,course_id))
+
+    #Looks through first all submissions that are marked for instructor grading and are pending, then looks
+    #through submissions that are marked for instructor or ML grading and are pending, then finally
+    #looks through submisisons that have been marked finished and have been graded already by ML.
     for location in locations_for_course:
-        success, sub_id = get_single_instructor_grading_item_for_location(location,True)
+        success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
         if success:
             return success, sub_id
 
     log.debug("ML models already created for all locations in this course.  Getting any potential submisison instead.")
 
     for location in locations_for_course:
-       success, sub_id = get_single_instructor_grading_item_for_location(location,False)
+       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
+       if success:
+           return success, sub_id
+
+    for location in locations_for_course:
+       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
+           types_to_check_for=["ML"], submission_state_to_check_for=SubmissionState.finished)
        if success:
            return success, sub_id
 
