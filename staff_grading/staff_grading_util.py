@@ -83,7 +83,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
 
-    if not check_for_ML and rescore_finalized_ML:
+    if not check_for_ml and rescore_finalized_ML:
         return False, "Cannot disallow rescoring of submissions that are graded by ML and "
 
     subs_graded = finished_submissions_graded_by_instructor(location).count()
