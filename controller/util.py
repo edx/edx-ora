@@ -247,13 +247,15 @@ def create_xqueue_header_and_body(submission):
     return xqueue_header, xqueue_body
 
 
-def _error_response(msg, version):
+def _error_response(msg, version, data={}):
     """
     Return a failing response with the specified message.
+    If data is specified, it's included in the response.
     """
     response = {'version': version,
                 'success': False,
                 'error': msg}
+    response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 
