@@ -43,6 +43,7 @@ def get_sub(grader_type,student_id,location, course_id="course_id"):
         max_score=3,
         next_grader_type=grader_type,
         previous_grader_type=grader_type,
+        grader_settings="ml_grading.conf",
     )
     return test_sub
 

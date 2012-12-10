@@ -8,6 +8,7 @@ class ControllerURLs():
     get_submission_in = controller_base + "get_submission_instructor/"
     put_result = controller_base + "put_result/"
     get_pending_count = controller_base + "get_pending_count/"
+    get_eta_for_submission= controller_base + "get_submission_eta/"
 
 class PeerGradingURLs():
     peer_grading_base="/peer_grading/"

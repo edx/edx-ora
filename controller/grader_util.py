@@ -9,6 +9,8 @@ from django.utils import timezone
 from metrics import metrics_util
 from statsd import statsd
 import json
+import os
+from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -173,8 +175,8 @@ def get_eta_for_submission(location):
         return False, "No current problems for given location."
 
     eta = settings.DEFAULT_ESTIMATED_GRADING_TIME
-    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
-    grader_settings = grader_util.get_grader_settings(grader_settings_path)
+    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub_graders.grader_settings)
+    grader_settings = get_grader_settings(grader_settings_path)
 
     if grader_settings['grader_type'] in ["ML", "IN"]:
         subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
