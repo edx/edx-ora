@@ -29,8 +29,9 @@ _INTERFACE_VERSION = 1
 
 
 @csrf_exempt
-@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
-@login_required
+@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time',
+              tags=['function:get_next_submission'])
+@util.error_if_not_logged_in
 def get_next_submission(request):
     """
     Supports GET request with the following arguments:
@@ -51,6 +52,8 @@ def get_next_submission(request):
 
       'rubric': the rubric, also rendered as html.
 
+      'prompt': the question prompt, also rendered as html.
+
       'message': if there was no submission available, but nothing went wrong,
                 there will be a message field.
     else:
@@ -65,11 +68,13 @@ def get_next_submission(request):
     grader_id = request.GET.get('grader_id')
     location = request.GET.get('location')
 
-    log.debug("Getting next submission for instructor grading for course: {0}.".format(course_id))
+    log.debug("Getting next submission for instructor grading for course: {0}."
+              .format(course_id))
 
 
     if not (course_id or location) or not grader_id:
-        return util._error_response("Missing required parameter", _INTERFACE_VERSION)
+   
+        return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if location:
         (found, id) = staff_grading_util.get_single_instructor_grading_item_for_location(location)
@@ -80,13 +85,16 @@ def get_next_submission(request):
         (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
 
     if not found:
-        return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
+        return util._success_response({'message': 'No more submissions to grade.'},
+                                      _INTERFACE_VERSION)
 
     try:
         submission = Submission.objects.get(id=int(id))
     except Submission.DoesNotExist:
         log.error("Couldn't find submission %s for instructor grading", id)
-        return util._error_response('Failed to load submission %s.  Contact support.' % id, _INTERFACE_VERSION)
+        return util._error_response('failed_to_load_submission',
+                                    _INTERFACE_VERSION,
+                                    data={'submission_id': id})
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
@@ -100,14 +108,15 @@ def get_next_submission(request):
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
             id, submission.state)
-        return util._error_response(
-            'Wrong internal state for submission %s: %s. Contact support.' % (
-                id, submission.state), _INTERFACE_VERSION)
+        return util._error_response('wrong_internal_state',
+                                    _INTERFACE_VERSION,
+                                    data={'submission_id': id,
+                                     'submission_state': submission.state})
+
+    num_graded, num_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(submission.location)
 
     response = {'submission_id': id,
                 'submission': submission.student_response,
-                # TODO: once client properly handles the 'prompt' field,
-                # make this just submission.rubric
                 'rubric': submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
@@ -126,7 +135,7 @@ def get_next_submission(request):
 @statsd.timed(
     'open_ended_assessment.grading_controller.staff_grading.views.time',
     tags=['function:save_grade'])
-@login_required()
+@util.error_if_not_logged_in
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -156,13 +165,15 @@ def save_grade(request):
         not (course_id and grader_id and submission_id) or
         # These have to be non-None
         score is None or feedback is None):
-        return util._error_response("Missing required parameters", _INTERFACE_VERSION)
+        return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     try:
         score = int(score)
     except ValueError:
-        return util._error_response("Expected integer score.  Got {0}"
-        .format(score), _INTERFACE_VERSION)
+        return util._error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": "Expected integer score.  Got {0}".format(score)})
 
     d = {'submission_id': submission_id,
          'score': score,
@@ -179,13 +190,25 @@ def save_grade(request):
     success, header = grader_util.create_and_handle_grader_object(d)
 
     if not success:
-        return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
+        return util._error_response("grade_save_error", _INTERFACE_VERSION,
+                                    data={'msg': 'Internal error'})
 
     return util._success_response({}, _INTERFACE_VERSION)
 
 @csrf_exempt
-@login_required()
+@util.error_if_not_logged_in
 def get_problem_list(request):
+    """
+    Get the list of problems that need grading in course request.GET['course_id'].
+
+    Returns:
+        list of dicts with keys
+           'location'
+           'problem_name'
+           'num_graded' -- number graded
+           'num_pending' -- number pending in the queue
+           'min_for_ml' -- minimum needed to make ML model
+    """
 
     if request.method!="GET":
         return util._error_response("Request needs to be GET.", _INTERFACE_VERSION)
@@ -203,16 +226,17 @@ def get_problem_list(request):
 
     location_info=[]
     for location in locations_for_course:
-        problem_name=Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending=staff_grading_util.submissions_pending_for_location(location).count()
-        finished_instructor_graded=staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        problem_name = Submission.objects.filter(location=location)[0].problem_id
+        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+        finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
         location_dict={
             'location' : location,
             'problem_name' : problem_name,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
             'min_for_ml' : settings.MIN_TO_USE_ML,
-                       }
+            }
         location_info.append(location_dict)
 
-    return util._success_response({'problem_list' : location_info},_INTERFACE_VERSION)
+    return util._success_response({'problem_list' : location_info},
+                                  _INTERFACE_VERSION)
