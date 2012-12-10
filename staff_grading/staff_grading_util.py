@@ -128,9 +128,6 @@ def get_single_instructor_grading_item_for_location(location):
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
     if success:
         return success, sub_id
-    success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
-    if success:
-        return success, sub_id
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
         types_to_check_for=["ML"], submission_state_to_check_for=SubmissionState.finished)
     if success:
@@ -162,12 +159,7 @@ def get_single_instructor_grading_item(course_id):
         if success:
             return success, sub_id
 
-    log.debug("ML models already created for all locations in this course.  Getting any potential submisison instead.")
-
-    for location in locations_for_course:
-       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
-       if success:
-           return success, sub_id
+    log.debug("ML models already created for all locations in this course.  Getting low confidence finished ML submissions.")
 
     for location in locations_for_course:
        success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
