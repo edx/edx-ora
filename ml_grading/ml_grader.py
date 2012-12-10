@@ -136,7 +136,7 @@ def get_pending_length_from_controller(controller_session):
     """
     Get the number of pending submissions from the controller
     """
-    success,content=query_controller(project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
+    success,content=query_controller(controller_session,project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
     return success, content['to_be_graded_count']
 
 def query_controller(controller_session,end_path,data={}):
