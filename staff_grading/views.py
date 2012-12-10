@@ -94,7 +94,7 @@ def get_next_submission(request):
         log.error("Couldn't find submission %s for instructor grading", id)
         return util._error_response('failed_to_load_submission',
                                     _INTERFACE_VERSION,
-                                    {'submission_id', id})
+                                    data={'submission_id': id})
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
@@ -110,7 +110,7 @@ def get_next_submission(request):
             id, submission.state)
         return util._error_response('wrong_internal_state',
                                     _INTERFACE_VERSION,
-                                    {'submission_id': id,
+                                    data={'submission_id': id,
                                      'submission_state': submission.state})
 
     num_graded, num_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(submission.location)
@@ -173,7 +173,7 @@ def save_grade(request):
         return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
-            {"msg": "Expected integer score.  Got {0}".format(score)})
+            data={"msg": "Expected integer score.  Got {0}".format(score)})
 
     d = {'submission_id': submission_id,
          'score': score,
@@ -191,7 +191,7 @@ def save_grade(request):
 
     if not success:
         return util._error_response("grade_save_error", _INTERFACE_VERSION,
-                                    {'msg': 'Internal error'})
+                                    data={'msg': 'Internal error'})
 
     return util._success_response({}, _INTERFACE_VERSION)
 
