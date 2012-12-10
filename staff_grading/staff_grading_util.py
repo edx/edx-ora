@@ -96,6 +96,10 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
             next_grader_type__in=types_to_check_for,
         )
 
+        #Order by confidence if we are looking for finished ML submissions
+        if types_to_check_for == ["ML"] and submission_state_to_check_for == SubmissionState.finished:
+            to_be_graded = to_be_graded.order_by('grader__confidence')
+
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded.count()))
 
         if(to_be_graded.count() > 0):
