@@ -10,6 +10,8 @@ from django.http import HttpResponse
 
 log = logging.getLogger(__name__)
 
+_INTERFACE_VERSION = 1
+
 def error_if_not_logged_in(view):
     """
     Check whether the user calling the view is logged in.
@@ -20,9 +22,7 @@ def error_if_not_logged_in(view):
     def wrapper(request, *args, **kwds):
         # If not logged in, bail
         if not request.user.is_authenticated():
-            error = {'success': False, 'error': 'login_required'}
-            log.debug('login required')
-            return HttpResponse(json.dumps(error), mimetype='application/json')
+            return _error_response('login_required', _INTERFACE_VERSION)
         return view(request, *args, **kwds)
     return wrapper
 
