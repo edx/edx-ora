@@ -29,7 +29,8 @@ _INTERFACE_VERSION = 1
 
 
 @csrf_exempt
-@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time', tags=['function:get_next_submission'])
+@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time',
+              tags=['function:get_next_submission'])
 @util.error_if_not_logged_in
 def get_next_submission(request):
     """
@@ -67,11 +68,13 @@ def get_next_submission(request):
     grader_id = request.GET.get('grader_id')
     location = request.GET.get('location')
 
-    log.debug("Getting next submission for instructor grading for course: {0}.".format(course_id))
+    log.debug("Getting next submission for instructor grading for course: {0}."
+              .format(course_id))
 
 
     if not (course_id or location) or not grader_id:
-        return util._error_response("Missing required parameter", _INTERFACE_VERSION)
+   
+        return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if location:
         (found, id) = staff_grading_util.get_single_instructor_grading_item_for_location(location)
@@ -82,13 +85,16 @@ def get_next_submission(request):
         (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
 
     if not found:
-        return util._success_response({'message': 'No more submissions to grade.'}, _INTERFACE_VERSION)
+        return util._success_response({'message': 'No more submissions to grade.'},
+                                      _INTERFACE_VERSION)
 
     try:
         submission = Submission.objects.get(id=int(id))
     except Submission.DoesNotExist:
         log.error("Couldn't find submission %s for instructor grading", id)
-        return util._error_response('Failed to load submission %s.  Contact support.' % id, _INTERFACE_VERSION)
+        return util._error_response('failed_to_load_submission',
+                                    _INTERFACE_VERSION,
+                                    {'submission_id', id})
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
@@ -102,9 +108,12 @@ def get_next_submission(request):
     if submission.state != 'C':
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
             id, submission.state)
-        return util._error_response(
-            'Wrong internal state for submission %s: %s. Contact support.' % (
-                id, submission.state), _INTERFACE_VERSION)
+        return util._error_response('wrong_internal_state',
+                                    _INTERFACE_VERSION,
+                                    {'submission_id': id,
+                                     'submission_state': submission.state})
+
+    num_graded, num_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(submission.location)
 
     response = {'submission_id': id,
                 'submission': submission.student_response,
@@ -156,13 +165,15 @@ def save_grade(request):
         not (course_id and grader_id and submission_id) or
         # These have to be non-None
         score is None or feedback is None):
-        return util._error_response("Missing required parameters", _INTERFACE_VERSION)
+        return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     try:
         score = int(score)
     except ValueError:
-        return util._error_response("Expected integer score.  Got {0}"
-        .format(score), _INTERFACE_VERSION)
+        return util._error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            {"msg": "Expected integer score.  Got {0}".format(score)})
 
     d = {'submission_id': submission_id,
          'score': score,
@@ -179,7 +190,8 @@ def save_grade(request):
     success, header = grader_util.create_and_handle_grader_object(d)
 
     if not success:
-        return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
+        return util._error_response("grade_save_error", _INTERFACE_VERSION,
+                                    {'msg': 'Internal error'})
 
     return util._success_response({}, _INTERFACE_VERSION)
 
