@@ -27,7 +27,7 @@ def delete_all():
     for cal_record in CalibrationRecord.objects.all():
         cal_record.delete()
 
-def get_sub(grader_type,student_id,location):
+def get_sub(grader_type,student_id,location, course_id="course_id"):
     test_sub = Submission(
         prompt="prompt",
         student_id=student_id,
@@ -39,7 +39,7 @@ def get_sub(grader_type,student_id,location):
         xqueue_submission_key="key",
         xqueue_queue_name="MITx-6.002x",
         location=location,
-        course_id="course_id",
+        course_id=course_id,
         max_score=3,
         next_grader_type=grader_type,
         previous_grader_type=grader_type,

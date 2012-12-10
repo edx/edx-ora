@@ -25,6 +25,7 @@ class StaffGradingURLs():
     staff_grading_base="/staff_grading/"
     get_next_submission= staff_grading_base + "get_next_submission/"
     save_grade= staff_grading_base + "save_grade/"
+    get_problem_list= staff_grading_base + "get_problem_list/"
 
 class XqueueURLs():
     xqueue_url_base="/xqueue/"
