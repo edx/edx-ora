@@ -84,7 +84,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     """
 
     if not types_to_check_for:
-        types_to_check_for=["ML","IN"]
+        types_to_check_for=["IN"]
 
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
