@@ -4,6 +4,7 @@ import logging
 from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
+from controller import grader_util
 
 log = logging.getLogger(__name__)
 
@@ -187,8 +188,19 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     else:
         sub=submission_id
 
+    grader_dict={
+        'feedback' : 'Instructor skipped',
+        'status' : GraderStatus.failure,
+        'grader_id' : 1,
+        'grader_type' : "IN",
+        'confidence' : 1,
+        'score' : 0,
+        'errors' : "Instructor skipped the submission."
+    }
+
     sub.next_grader_type="ML"
     sub.state=SubmissionState.waiting_to_be_graded
     sub.save()
+    grader_util.create_grader(grader_dict,sub)
 
     return True, sub
