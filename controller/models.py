@@ -184,6 +184,12 @@ class Grader(models.Model):
             self.date_modified)
         return sub_row
 
+class Message(models.Model):
+    grader = models.ForeignKey('Grader')
+    message = models.TextField()
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 
 
 
