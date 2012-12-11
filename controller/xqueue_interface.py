@@ -244,7 +244,7 @@ def _is_valid_reply_message(external_reply):
     if not success:
         return fail
 
-    for tag in ['message']:
+    for tag in ['message', 'submission_id', 'grader_id']:
         if not body.has_key(tag):
             log.debug("{0} not found in body".format(tag))
             return fail
@@ -270,6 +270,38 @@ def submit_message(request):
             tags=["success:Exception"])
         return util._error_response('Incorrect format', _INTERFACE_VERSION)
 
-    
+    message = body['message']
+    grader_id = body['grader_id']
+    submission_id = body['submission_id']
+    originator = body['originator']
+
+    try:
+        grade = Grader.objects.get(id=grader_id)
+    except:
+        error_message="Could not find a grader object for message from xqueue"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    try:
+        submission = Submission.objects.get(id=submission_id)
+    except:
+        error_message="Could not find a submission object for message from xqueue"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if grade.submission.id!=submission.id:
+        error_message="Grader id does not match submission id that was passed in"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if originator not in [submission.student_id, grade.grader_id, 'controller']:
+        error_message="Message originator is not the grader, the person being graded, or the controller"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+
+
+
+
 
 

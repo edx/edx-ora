@@ -187,6 +187,8 @@ class Grader(models.Model):
 class Message(models.Model):
     grader = models.ForeignKey('Grader')
     message = models.TextField()
+    originator = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    recipient= models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
