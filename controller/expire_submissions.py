@@ -108,7 +108,7 @@ def finalize_expired_submission(sub):
 
 def reset_ml_to_in_if_too_few(sub):
     """
-    Resets a submission marked for instructor grading to ML grading if there are too few instructor graded submissions
+    Resets a submission marked for ml grading to instructor grading if there are too few instructor graded submissions
     in the queue.  This happens when the instructor skips a lot of submissions.
     Input:
         A submission
