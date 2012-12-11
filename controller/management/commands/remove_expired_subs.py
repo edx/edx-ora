@@ -14,7 +14,7 @@ import logging
 from statsd import statsd
 
 import controller.util as util
-from controller.models import Submission
+from controller.models import Submission, SubmissionState
 import controller.expire_submissions as expire_submissions
 from staff_grading import staff_grading_util
 
@@ -41,7 +41,8 @@ class Command(BaseCommand):
                 unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
                 for location in unique_locations:
                     subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
-                    
+                    subs_pending_total= Submission.objects.filter(location=location, state=SubmissionState.waiting_to_be_graded)
+                    if (subs_graded+subs_pending) < settings.MIN_TO_USE_ML and
 
             except Exception as err:
                         log.error("Could not get submissions to expire! Error: {0}".format(err))
