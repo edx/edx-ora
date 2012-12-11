@@ -244,7 +244,7 @@ def _is_valid_reply_message(external_reply):
     if not success:
         return fail
 
-    for tag in ['message', 'submission_id', 'grader_id']:
+    for tag in ['message', 'submission_id', 'grader_id', 'originator', 'recipient_type', 'message_type']:
         if not body.has_key(tag):
             log.debug("{0} not found in body".format(tag))
             return fail
@@ -274,6 +274,8 @@ def submit_message(request):
     grader_id = body['grader_id']
     submission_id = body['submission_id']
     originator = body['originator']
+    recipient_type = body['recipient_type']
+    message_type = body['message_type']
 
     try:
         grade = Grader.objects.get(id=grader_id)
@@ -294,8 +296,24 @@ def submit_message(request):
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-    if originator not in [submission.student_id, grade.grader_id, 'controller']:
-        error_message="Message originator is not the grader, the person being graded, or the controller"
+    if originator not in [submission.student_id, grade.grader_id]:
+        error_message="Message originator is not the grader, or the person being graded"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if recipient_type!='controller':
+        if originator==submission.student_id:
+            recipient=grade.grader_id
+        elif originator==grade.grader_id:
+            recipient=submission.student_id
+
+    if recipient not in [submission.student_id, grade.grader_id, 'controller']:
+        error_message="Message recipient is not the grader, the person being graded, or the controller"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if originator==recipient:
+        error_message="Message recipient is the same as originator"
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
