@@ -43,7 +43,8 @@ class Command(BaseCommand):
                 unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
                 for location in unique_locations:
                     subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
-                    subs_pending_total= Submission.objects.filter(location=location, state=SubmissionState.waiting_to_be_graded)
+                    subs_pending_total= Submission.objects.filter(
+                        location=location, state=SubmissionState.waiting_to_be_graded).order_by('-date_created')
                     if (subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending:
                         counter=0
                         for sub in subs_pending_total:
