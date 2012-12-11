@@ -168,3 +168,25 @@ def get_single_instructor_grading_item(course_id):
            return success, sub_id
 
     return found, sub_id
+
+def set_instructor_grading_item_back_to_ml(submission_id):
+    """
+    Sets a submission from instructor grading to ML without creating a grader object.
+    Input:
+        Submission id
+    Output:
+        Boolean success, submission or error message
+    """
+
+    try:
+        sub=Submission.objects.get(id=submission_id)
+    except:
+        error_message="Could not find a submission id."
+        log.exception(error_message)
+        return False, error_message
+
+    sub.next_grader_type="ML"
+    sub.state=SubmissionState.waiting_to_be_graded
+    sub.save()
+
+    return True, sub
