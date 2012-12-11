@@ -29,6 +29,7 @@ def log_in(request):
     if request.method == 'POST':
         p = request.POST.copy()
         if p.has_key('username') and p.has_key('password'):
+            log.debug("Username: {0} Password: {1}".format(p['username'], p['password']))
             user = authenticate(username=p['username'], password=p['password'])
             if user is not None:
                 login(request, user)

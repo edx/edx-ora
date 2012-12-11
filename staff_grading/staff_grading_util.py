@@ -89,7 +89,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
-    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ML:
+    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ml:
         to_be_graded = Submission.objects.filter(
             location=location,
             state=submission_state_to_check_for,
