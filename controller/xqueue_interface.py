@@ -199,20 +199,10 @@ def _is_valid_reply(external_reply):
     '''
     fail = (False, -1, '')
 
-    try:
-        header = json.loads(external_reply['xqueue_header'])
-        body = json.loads(external_reply['xqueue_body'])
-    except KeyError:
-        log.debug("Cannot load header or body.")
-        return fail
+    success, header,body = _is_valid_reply_generic(external_reply)
 
-    if not isinstance(header, dict) or not isinstance(body, dict):
+    if not success:
         return fail
-
-    for tag in ['submission_id', 'submission_key', 'queue_name']:
-        if not header.has_key(tag):
-            log.debug("{0} not found in header".format(tag))
-            return fail
 
     for tag in ['grader_payload', 'student_response', 'student_info']:
         if not body.has_key(tag):
@@ -227,4 +217,59 @@ def _is_valid_reply(external_reply):
         return fail
 
     return True, header, body
+
+def _is_valid_reply_generic(external_reply):
+
+    try:
+        header = json.loads(external_reply['xqueue_header'])
+        body = json.loads(external_reply['xqueue_body'])
+    except KeyError:
+        log.debug("Cannot load header or body.")
+        return False , "" , ""
+
+    if not isinstance(header, dict) or not isinstance(body, dict):
+        return False, "", ""
+
+    for tag in ['submission_id', 'submission_key', 'queue_name']:
+        if not header.has_key(tag):
+            log.debug("{0} not found in header".format(tag))
+            return False, "",""
+    return True, header, body
+
+def _is_valid_reply_message(external_reply):
+    fail = (False, -1, '')
+
+    success, header,body = _is_valid_reply_generic(external_reply)
+
+    if not success:
+        return fail
+
+    for tag in ['message']:
+        if not body.has_key(tag):
+            log.debug("{0} not found in body".format(tag))
+            return fail
+
+    return True, header, body
+
+def submit_message(request):
+    """
+    Submits a message to the grading controller.
+
+    """
+    if request.method != 'POST':
+        return util._error_response("'submit_message' must use HTTP POST", _INTERFACE_VERSION)
+
+    reply_is_valid, header, body = _is_valid_reply_message(request.POST.copy())
+
+    if not reply_is_valid:
+        log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
+            util.get_request_ip(request),
+            request.POST,
+        ))
+        statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit_message",
+            tags=["success:Exception"])
+        return util._error_response('Incorrect format', _INTERFACE_VERSION)
+
+    
+
 
