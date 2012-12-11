@@ -38,9 +38,13 @@ class Command(NoArgsCommand):
 
         while flag:
             #Loop through each queue that is given in arguments
-            for queue_name in settings.QUEUES_TO_PULL_FROM:
+            for queue_name in settings.GRADING_QUEUES_TO_PULL_FROM:
                 #Check for new submissions on xqueue, and send to controller
-                pull_from_single_queue(queue_name,self.controller_session,self.xqueue_session)
+                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session)
+
+            #Loop through message queues to see if there are any messages
+            for queue_name in settings.MESSAGE_QUEUES_TO_PULL_FROM:
+                pass
 
             #Check for finalized results from controller, and post back to xqueue
             transaction.commit_unless_managed()
@@ -69,7 +73,7 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
     else:
         log.warning("Could not post back.  Error: {0}".format(msg))
 
-def pull_from_single_queue(queue_name,controller_session,xqueue_session):
+def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session):
     try:
         #Get and parse queue objects
         success, queue_length= get_queue_length(queue_name,xqueue_session)

@@ -17,7 +17,8 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #General
-QUEUES_TO_PULL_FROM=['open-ended']
+GRADING_QUEUES_TO_PULL_FROM=['open-ended']
+MESSAGE_QUEUES_TO_PULL_FROM=['open-ended-message']
 REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
