@@ -38,8 +38,12 @@ class Command(NoArgsCommand):
                 success, pending_count=ml_grader.get_pending_length_from_controller(self.controller_session)
                 log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
                 while success and pending_count>0:
-                    ml_grader.handle_single_item(self.controller_session)
-
+                    sub_get_success = ml_grader.handle_single_item(self.controller_session)
+                    if not sub_get_success:
+                        log.info("Could not get a submission even though pending count is above 0."
+                                 "Could be an error, or could just be that instructor has "
+                                 "skipped submissions.")
+                        break
                     #Refresh the pending submission count
                     success, pending_count=ml_grader.get_pending_length_from_controller(self.controller_session)
                 transaction.commit_unless_managed()

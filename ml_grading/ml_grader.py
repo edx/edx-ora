@@ -36,10 +36,10 @@ log = logging.getLogger(__name__)
 RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : ""}
 
 def handle_single_item(controller_session):
-    success, content = get_item_from_controller(controller_session)
+    sub_get_success, content = get_item_from_controller(controller_session)
     log.debug(content)
     #Grade and handle here
-    if success:
+    if sub_get_success:
         transaction.commit_unless_managed()
         sub = Submission.objects.get(id=int(content['submission_id']))
 
@@ -123,6 +123,8 @@ def handle_single_item(controller_session):
         log.info("Error getting item from controller or no items to get.")
         statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
             tags=["success:False"])
+
+    return sub_get_success
 
 def get_item_from_controller(controller_session):
     """
