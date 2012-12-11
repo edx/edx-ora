@@ -177,13 +177,15 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     Output:
         Boolean success, submission or error message
     """
-
-    try:
-        sub=Submission.objects.get(id=submission_id)
-    except:
-        error_message="Could not find a submission id."
-        log.exception(error_message)
-        return False, error_message
+    if not isinstance(submission_id,Submission):
+        try:
+            sub=Submission.objects.get(id=submission_id)
+        except:
+            error_message="Could not find a submission id."
+            log.exception(error_message)
+            return False, error_message
+    else:
+        sub=submission_id
 
     sub.next_grader_type="ML"
     sub.state=SubmissionState.waiting_to_be_graded
