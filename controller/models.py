@@ -116,17 +116,21 @@ class Submission(models.Model):
         #If no graders succeeded, send back the feedback from the last unsuccessful submission (which should be an error message).
         if len(all_graders) == 0:
             last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
-            return {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type, 'success' : False}
+            return {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type,
+                    'success' : False, 'grader_id' : last_grader.id, 'submission_id' : self.id}
         #If grader is ML or instructor, only send back last successful submission
         elif all_graders[0].grader_type in ["IN", "ML", "BC"]:
             return {'score': all_graders[0].score, 'feedback': all_graders[0].feedback,
-                    'grader_type' : all_graders[0].grader_type, 'success' : True}
+                    'grader_type' : all_graders[0].grader_type, 'success' : True,
+                    'grader_id' : all_graders[0].id , 'submission_id' : self.id}
         #If grader is peer, send back all peer judgements
         elif self.previous_grader_type == "PE":
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
             score = [p.score for p in peer_graders]
             feedback = [p.feedback for p in peer_graders]
-            return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True}
+            grader_ids=[p.id for p in peer_graders]
+            return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
+                    'grader_id' : grader_ids, 'submission_id' : self.id}
         else:
             return {'score': -1}
 
