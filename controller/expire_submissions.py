@@ -105,3 +105,19 @@ def finalize_expired_submission(sub):
     grade = grader_util.create_grader(grader_dict,sub)
 
     return True
+
+def reset_ml_to_in_if_too_few(sub):
+    """
+    Resets a submission marked for instructor grading to ML grading if there are too few instructor graded submissions
+    in the queue.  This happens when the instructor skips a lot of submissions.
+    Input:
+        A submission
+    Output:
+        Success code
+    """
+
+    sub.state=SubmissionState.waiting_to_be_graded
+    sub.next_grader_type="IN"
+    sub.save()
+
+    return True

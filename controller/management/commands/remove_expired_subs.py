@@ -16,6 +16,7 @@ from statsd import statsd
 import controller.util as util
 from controller.models import Submission
 import controller.expire_submissions as expire_submissions
+from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -36,9 +37,15 @@ class Command(BaseCommand):
                     success = expire_submissions.finalize_expired_submissions(expired_list)
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:{0}".format(success)])
+
+                unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
+                for location in unique_locations:
+                    subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
+                    
+
             except Exception as err:
-                log.error("Could not get submissions to expire! Error: {0}".format(err))
-                statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
-                    tags=["success:Exception"])
-            transaction.commit_unless_managed()
-            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
+                        log.error("Could not get submissions to expire! Error: {0}".format(err))
+                        statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
+                            tags=["success:Exception"])
+                    transaction.commit_unless_managed()
+                    time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
