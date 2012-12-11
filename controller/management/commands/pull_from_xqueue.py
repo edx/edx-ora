@@ -40,11 +40,11 @@ class Command(NoArgsCommand):
             #Loop through each queue that is given in arguments
             for queue_name in settings.GRADING_QUEUES_TO_PULL_FROM:
                 #Check for new submissions on xqueue, and send to controller
-                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session)
+                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit)
 
             #Loop through message queues to see if there are any messages
             for queue_name in settings.MESSAGE_QUEUES_TO_PULL_FROM:
-                pass
+                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit_message)
 
             #Check for finalized results from controller, and post back to xqueue
             transaction.commit_unless_managed()
@@ -73,7 +73,7 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
     else:
         log.warning("Could not post back.  Error: {0}".format(msg))
 
-def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session):
+def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,post_url):
     try:
         #Get and parse queue objects
         success, queue_length= get_queue_length(queue_name,xqueue_session)
@@ -89,7 +89,7 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session)
                 util._http_post(
                     controller_session,
                     urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
-                        project_urls.ControllerURLs.submit),
+                        post_url),
                     content,
                     settings.REQUESTS_TIMEOUT,
                 )

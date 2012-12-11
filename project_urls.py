@@ -4,6 +4,7 @@ class ControllerURLs():
     log_out=controller_base +"logout/"
     status = controller_base + "status/"
     submit = controller_base + "submit/"
+    submit_message = controller_base + "submit_message/"
     get_submission_ml = controller_base + "get_submission_ml/"
     get_submission_in = controller_base + "get_submission_instructor/"
     put_result = controller_base + "put_result/"
