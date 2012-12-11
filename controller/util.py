@@ -1,4 +1,5 @@
 from django.conf import settings
+from functools import wraps
 import json
 import logging
 import requests
@@ -8,6 +9,22 @@ import project_urls
 from django.http import HttpResponse
 
 log = logging.getLogger(__name__)
+
+_INTERFACE_VERSION = 1
+
+def error_if_not_logged_in(view):
+    """
+    Check whether the user calling the view is logged in.
+    If so, pass through to the view.
+    If not, return {'success': False, 'error': 'login_required'}.
+    """
+    @wraps(view)
+    def wrapper(request, *args, **kwds):
+        # If not logged in, bail
+        if not request.user.is_authenticated():
+            return _error_response('login_required', _INTERFACE_VERSION)
+        return view(request, *args, **kwds)
+    return wrapper
 
 def get_request_ip(request):
     '''
@@ -230,13 +247,21 @@ def create_xqueue_header_and_body(submission):
     return xqueue_header, xqueue_body
 
 
-def _error_response(msg, version):
+def _error_response(msg, version, data=None):
     """
     Return a failing response with the specified message.
+
+    Args:
+        msg: used as the 'error' key
+        version: specifies the protocol version
+        data: if specified, a dict that's included in the response
     """
     response = {'version': version,
                 'success': False,
                 'error': msg}
+
+    if data is not None:
+        response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 
