@@ -7,6 +7,7 @@ import urlparse
 import project_urls
 
 from django.http import HttpResponse
+from django.contrib.auth.models import User
 
 log = logging.getLogger(__name__)
 
@@ -273,6 +274,29 @@ def _success_response(data, version):
                 'success': True}
     response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
+
+def update_users_from_file():
+    auth_path = settings.ENV_ROOT / "auth.json"
+    log.info(' [*] reading {0}'.format(auth_path))
+
+    with open(auth_path) as auth_file:
+        AUTH_TOKENS = json.load(auth_file)
+        users = AUTH_TOKENS.get('USERS', {})
+        for username, pwd in users.items():
+            log.info(' [*] Creating/updating user {0}'.format(username))
+            try:
+                user = User.objects.get(username=username)
+                user.set_password(pwd)
+                user.save()
+            except User.DoesNotExist:
+                log.info('     ... {0} does not exist. Creating'.format(username))
+
+                user = User.objects.create(username=username,
+                    email=username + '@dummy.edx.org',
+                    is_active=True)
+                user.set_password(pwd)
+                user.save()
+        log.info(' [*] All done!')
 
 
 
