@@ -22,10 +22,12 @@ log = logging.getLogger(__name__)
 
 GET_NEXT= project_urls.StaffGradingURLs.get_next_submission
 SAVE_GRADE= project_urls.StaffGradingURLs.save_grade
+GET_PROBLEM_LIST=project_urls.StaffGradingURLs.get_problem_list
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
 COURSE_ID="course_id"
+
 
 
 class StaffGradingViewTest(unittest.TestCase):
@@ -108,3 +110,38 @@ class StaffGradingViewTest(unittest.TestCase):
         body=json.loads(content.content)
 
         self.assertEqual(body['success'], should_work)
+
+    def test_get_problem_list_false(self):
+        get_data={
+            'course_id' : 0,
+        }
+
+        content=self.c.get(
+            GET_PROBLEM_LIST,
+            get_data,
+        )
+
+        body=json.loads(content.content)
+
+        self.assertEqual(body['success'], False)
+        self.assertEqual(body['error'], "No problems associated with course.")
+
+    def test_get_problem_list_true(self):
+
+        for i in xrange(0,10):
+            test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID, course_id=COURSE_ID)
+            test_sub.save()
+
+        get_data={
+            'course_id' : COURSE_ID,
+            }
+
+        content=self.c.get(
+            GET_PROBLEM_LIST,
+            get_data,
+        )
+
+        body=json.loads(content.content)
+
+        self.assertEqual(body['problem_list'][0]['num_graded'],0)
+        self.assertEqual(body['problem_list'][0]['num_pending'],10)

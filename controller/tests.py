@@ -38,6 +38,7 @@ SUBMIT_URL = project_urls.ControllerURLs.submit
 ML_GET_URL = project_urls.ControllerURLs.get_submission_ml
 IN_GET_URL = project_urls.ControllerURLs.get_submission_in
 PUT_URL= project_urls.ControllerURLs.put_result
+ETA_URL=project_urls.ControllerURLs.get_eta_for_submission
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
@@ -275,6 +276,38 @@ class ControllerUtilTests(unittest.TestCase):
 
         #Should not parse properly
         self.assertEqual(return_code,False)
+
+    def test_request_eta_for_submission_false(self):
+        get_data={
+            'location' : 'blah'
+        }
+
+        content=self.c.get(
+            ETA_URL,
+            get_data
+        )
+
+        body=json.loads(content.content)
+
+        self.assertEqual(body['success'], False)
+
+    def test_request_eta_for_submission_in_true(self):
+        test_sub=test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        get_data={
+            'location' : LOCATION
+        }
+
+        content=self.c.get(
+            ETA_URL,
+            get_data
+        )
+
+        body=json.loads(content.content)
+
+        self.assertEqual(body['success'], True)
+        self.assertEqual(body['eta'], settings.DEFAULT_ESTIMATED_GRADING_TIME)
 
 
 

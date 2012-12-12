@@ -116,17 +116,21 @@ class Submission(models.Model):
         #If no graders succeeded, send back the feedback from the last unsuccessful submission (which should be an error message).
         if len(all_graders) == 0:
             last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
-            return {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type, 'success' : False}
+            return {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type,
+                    'success' : False, 'grader_id' : last_grader.id, 'submission_id' : self.id}
         #If grader is ML or instructor, only send back last successful submission
         elif all_graders[0].grader_type in ["IN", "ML", "BC"]:
             return {'score': all_graders[0].score, 'feedback': all_graders[0].feedback,
-                    'grader_type' : all_graders[0].grader_type, 'success' : True}
+                    'grader_type' : all_graders[0].grader_type, 'success' : True,
+                    'grader_id' : all_graders[0].id , 'submission_id' : self.id}
         #If grader is peer, send back all peer judgements
         elif self.previous_grader_type == "PE":
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
             score = [p.score for p in peer_graders]
             feedback = [p.feedback for p in peer_graders]
-            return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True}
+            grader_ids=[p.id for p in peer_graders]
+            return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
+                    'grader_id' : grader_ids, 'submission_id' : self.id}
         else:
             return {'score': -1}
 
@@ -151,6 +155,9 @@ class Submission(models.Model):
             return False, "Could not find timing object"
 
         return True, all_timing[0]
+
+    def generate_rubric_object(self):
+        pass
 
 
 # TODO: what's a better name for this?  GraderResult?
@@ -180,7 +187,60 @@ class Grader(models.Model):
             self.date_modified)
         return sub_row
 
+class Message(models.Model):
+    grader = models.ForeignKey('Grader')
+    message = models.TextField()
+    originator = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    recipient= models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    message_type= models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+class Rubric(models.Model):
+    """
+    Each rubric encapsulates how a student was graded according to a particular rubric
+    """
+    submission = models.ForeignKey('Grader')
+    rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    def format_rubric(self):
+        formatted_rubric="<table>"
+        rubric_items = self.rubricitem_set.all().order_by('item_number')
+        for ri in rubric_items:
+            formatted_rubric+=ri.format_rubric_item()
+        formatted_rubric+="</table>"
+        return formatted_rubric
+
+
+class RubricItem(models.Model):
+    """
+    Each one encapsulates one item in a rubric, along with comments and the score on the item
+    """
+
+    rubric=models.ForeignKey('Rubric')
+    text=models.TextField()
+    short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    comment = models.TextField()
+    score=models.DecimalField(max_digits=10, decimal_places=2)
+    max_score= models.IntegerField()
+
+    #Ensures that rubric items are ordered properly
+    item_number = models.IntegerField()
+
+    #Everybody likes date/time information!
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    def format_rubric_item(self):
+        formatted_item+="<tr>"
+        formatted_item+="<td>{0}</td>".format(self.text)
+        formatted_item+="<td>{0}</td>".format(self.max_score)
+        formatted_item+="</tr>"
+        return formatted_item
 
 
 

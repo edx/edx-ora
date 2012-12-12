@@ -19,6 +19,7 @@ urlpatterns = patterns('controller.views',
 #------------------------------------------------------------
 urlpatterns += patterns('controller.xqueue_interface',
     url(r'^submit/$', 'submit'),
+    url(r'^submit_message/$', 'submit_message'),
 )
 
 # Grader pull interface
