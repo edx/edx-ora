@@ -14,6 +14,33 @@ log = logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE = "Error processing image."
 
+AVAILABLE_METRICS={
+    'timing' : generate_timing_response,
+    'student_performance' : generate_student_performance_response,
+    'attempt_counts' : generate_student_attempt_count_response,
+    'response_counts' : generate_number_of_responses_per_problem,
+    'grader_counts' : generate_grader_types_per_problem,
+    'pending_counts' : generate_pending_counts_per_problem,
+    'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
+}
+
+def render_requested_metric(metric_type,arguments,title):
+    """
+    Returns a graph for a custom input metric
+    Input:
+        Metric type, parameters
+    Output:
+        Boolean success/fail, error message or rendered image
+    """
+    available_metric_types=[k for k in available_metric_types]
+
+    if metric_type not in available_metric_types:
+        return False, "Could not find the requested type of metric: {0}".format(metric_type)
+
+    success,response=AVAILABLE_METRICS[metric_type](arguments,title)
+
+    return success,response
+
 def generate_counts_per_problem(arguments, title, state):
     """
     Generate counts of number of attempted problems with a specific state.  Aggreggate by location.
@@ -39,7 +66,7 @@ def generate_counts_per_problem(arguments, title, state):
         return True, response
     except:
         log.exception(IMAGE_ERROR_MESSAGE)
-        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+        return False, IMAGE_ERROR_MESSAGE
 
 
 def generate_grader_types_per_problem(arguments, title):
@@ -74,7 +101,7 @@ def generate_grader_types_per_problem(arguments, title):
         return True, response
     except:
         log.exception(IMAGE_ERROR_MESSAGE)
-        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+        return False, IMAGE_ERROR_MESSAGE
 
 
 def generate_number_of_responses_per_problem(arguments, title):
@@ -141,7 +168,7 @@ def generate_student_attempt_count_response(arguments, title):
         return True, response
     except:
         log.exception(IMAGE_ERROR_MESSAGE)
-        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+        return False, IMAGE_ERROR_MESSAGE
 
 
 def generate_timing_response(arguments, title):
@@ -204,7 +231,7 @@ def generate_student_performance_response(arguments, title):
         return True, response
     except:
         log.exception(IMAGE_ERROR_MESSAGE)
-        return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+        return False, IMAGE_ERROR_MESSAGE
 
 
 def render_form(post_url, available_metric_types):
