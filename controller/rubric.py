@@ -5,8 +5,8 @@ RUBRIC_VERSION=1
 
 sample_rubric="""
 <table>
-<tr><td>Rubric item 1</td><td>2</td></tr>
-<tr><td>Rubric item 2</td><td>2</td></tr>
+<tr><td>Rubric item 1</td><td>0</td><td>2</td></tr>
+<tr><td>Rubric item 2</td><td>0</td><td>2</td></tr>
 </table>
 """
 
@@ -37,6 +37,7 @@ def generate_rubric_object(submission):
                 score=score,
                 item_number=i,
                 max_score=max_score,
+                finished_scoring=False,
             )
             rubric_item.save()
     except:
