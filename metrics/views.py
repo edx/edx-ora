@@ -14,9 +14,7 @@ _INTERFACE_VERSION=1
 @csrf_exempt
 @login_required
 def metrics_form(request):
-    available_metric_types=['timing', 'student_performance', 'attempt_counts',
-                            'response_counts', 'grader_counts', 'pending_counts',
-                            'currently_being_graded']
+
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -27,30 +25,10 @@ def metrics_form(request):
                 return HttpResponse("Request missing needed tag metric type.")
 
         metric_type=request.POST.get('metric_type').lower()
+        success,response = metrics_util.render_requested_metric(metric_type,arguments,title)
 
-        if metric_type not in available_metric_types:
-            return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
-
-        if metric_type=="timing":
-            success,response=metrics_util.generate_timing_response(arguments,title)
-
-        if metric_type=="student_performance":
-            success,response=metrics_util.generate_student_performance_response(arguments,title)
-
-        if metric_type=="attempt_counts":
-            success,response=metrics_util.generate_student_attempt_count_response(arguments, title)
-
-        if metric_type=="response_counts":
-            success,response=metrics_util.generate_number_of_responses_per_problem(arguments, title)
-
-        if metric_type=="grader_counts":
-            success,response=metrics_util.generate_grader_types_per_problem(arguments,title)
-
-        if metric_type=="pending_counts":
-            success,response = metrics_util.generate_pending_counts_per_problem(arguments,title)
-
-        if metric_type=="currently_being_graded":
-            success,response = metrics_util.generate_currently_being_graded_counts_per_problem(arguments,title)
+        if not success:
+            return HttpResponse(response)
 
         return response
 
@@ -58,6 +36,7 @@ def metrics_form(request):
 
         rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
+
 
 @csrf_exempt
 @login_required
