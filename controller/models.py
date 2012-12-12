@@ -228,6 +228,10 @@ class RubricItem(models.Model):
     #Ensures that rubric items are ordered properly
     item_number = models.IntegerField()
 
+    #Everybody likes date/time information!
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
     def format_rubric_item(self):
         formatted_item+="<tr>"
         formatted_item+="<td>{0}</td>".format(self.text)
