@@ -14,16 +14,6 @@ log = logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE = "Error processing image."
 
-AVAILABLE_METRICS={
-    'timing' : generate_timing_response,
-    'student_performance' : generate_student_performance_response,
-    'attempt_counts' : generate_student_attempt_count_response,
-    'response_counts' : generate_number_of_responses_per_problem,
-    'grader_counts' : generate_grader_types_per_problem,
-    'pending_counts' : generate_pending_counts_per_problem,
-    'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
-}
-
 def render_requested_metric(metric_type,arguments,title):
     """
     Returns a graph for a custom input metric
@@ -32,7 +22,7 @@ def render_requested_metric(metric_type,arguments,title):
     Output:
         Boolean success/fail, error message or rendered image
     """
-    available_metric_types=[k for k in available_metric_types]
+    available_metric_types=[k for k in AVAILABLE_METRICS]
 
     if metric_type not in available_metric_types:
         return False, "Could not find the requested type of metric: {0}".format(metric_type)
@@ -268,3 +258,13 @@ def get_arguments(request):
             title += " {0} : {1} ".format(k, v)
 
     return arguments, title
+
+AVAILABLE_METRICS={
+    'timing' : generate_timing_response,
+    'student_performance' : generate_student_performance_response,
+    'attempt_counts' : generate_student_attempt_count_response,
+    'response_counts' : generate_number_of_responses_per_problem,
+    'grader_counts' : generate_grader_types_per_problem,
+    'pending_counts' : generate_pending_counts_per_problem,
+    'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
+    }

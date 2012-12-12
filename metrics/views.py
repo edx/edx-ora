@@ -33,7 +33,7 @@ def metrics_form(request):
         return response
 
     elif request.method == "GET":
-
+        available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
         rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
 
