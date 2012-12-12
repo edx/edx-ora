@@ -16,6 +16,7 @@ import grader_util
 from staff_grading import staff_grading_util
 from basic_check import basic_check_util
 from metrics import timing_functions
+import message_util
 
 log = logging.getLogger(__name__)
 
@@ -277,12 +278,10 @@ def submit_message(request):
             tags=["success:Exception"])
         return util._error_response('Incorrect format', _INTERFACE_VERSION)
 
-    message = body['message']
+    message = body['feedback']
     grader_id = body['grader_id']
     submission_id = body['submission_id']
-    originator = body['originator']
-    recipient_type = body['recipient_type']
-    message_type = body['message_type']
+    originator = body['student_info']['anonymous_student_id']
 
     try:
         grade = Grader.objects.get(id=grader_id)
@@ -308,6 +307,12 @@ def submit_message(request):
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
+    if grader.grader_type in ["ML", "IN"]:
+        recipient_type="controller"
+        recipient="controller"
+    else:
+        recipient_type="human"
+
     if recipient_type!='controller':
         if originator==submission.student_id:
             recipient=grade.grader_id
@@ -323,6 +328,22 @@ def submit_message(request):
         error_message="Message recipient is the same as originator"
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
+
+    message_dict={
+        'grader_id' : grader_id,
+        'originator' : originator,
+        'submission_id' : submission_id,
+        'message' : message,
+        'recipient' : recipient,
+        'message_type': "feedback",
+    }
+
+    success, error = message_util.create_message(message_dict)
+
+    if not success:
+        return util._error_response(error,_INTERFACE_VERSION)
+
+    return util._success_response({'message_id' : error}, _INTERFACE_VERSION)
 
 
 

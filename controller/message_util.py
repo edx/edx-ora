@@ -24,3 +24,12 @@ def create_message(message_dict):
         message_type=message_dict['message_type']
     )
 
+    try:
+        msg.save()
+    except:
+        error="Could not save the message"
+        log.exception(error)
+        return False, error
+
+    return True, msg.id
+
