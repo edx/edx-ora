@@ -37,6 +37,12 @@ def metrics_form(request):
         rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
 
+def error_dashboard(request):
+    if request.method != "GET":
+        return util._error_response("Must use Http get request")
+
+
+
 
 @csrf_exempt
 @login_required

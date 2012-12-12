@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE = "Error processing image."
 
-def render_requested_metric(metric_type,arguments,title):
+def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     """
     Returns a graph for a custom input metric
     Input:
@@ -27,9 +27,29 @@ def render_requested_metric(metric_type,arguments,title):
     if metric_type not in available_metric_types:
         return False, "Could not find the requested type of metric: {0}".format(metric_type)
 
-    success,response=AVAILABLE_METRICS[metric_type](arguments,title)
+    metrics_renderer=MetricsRenderer(metric_type,)
+    success,response="blah"
 
     return success,response
+
+class MetricsRenderer(object):
+   def _init_(self,metric_type,xsize,ysize):
+       self.metric_type=metric_type
+       self.xsize=xsize
+       self.ysize=ysize
+
+   def run_query(self,arguments,title):
+       try:
+           self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title = AVAILABLE_METRICS[self.metric_type](arguments,title)
+       except:
+           log.exception(IMAGE_ERROR_MESSAGE)
+           return False, IMAGE_ERROR_MESSAGE
+       return True, "Success."
+
+   def chart_image(self,x_title="Number", y_title="Count"):
+       response = charting.render_bar(self.x_data, self.y_data, title, x_title, y_title, x_tick_labels=self.x_labels, xsize)
+       return True, response
+
 
 def generate_counts_per_problem(arguments, title, state):
     """
@@ -39,25 +59,18 @@ def generate_counts_per_problem(arguments, title, state):
     Output:
         PNG image
     """
-    try:
-        pend_counts = Submission.objects.filter(state=state).values('location').annotate(pend_count=Count('location'))
+    pend_counts = Submission.objects.filter(state=state).values('location').annotate(pend_count=Count('location'))
 
-        pend_counts_list = [i['pend_count'] for i in pend_counts]
-        pend_names = [i['location'] for i in pend_counts]
+    pend_counts_list = [i['pend_count'] for i in pend_counts]
+    pend_names = [i['location'] for i in pend_counts]
 
-        if len(pend_counts_list) == 0:
-            return False, HttpResponse("Did not find anything matching that query.")
+    if len(pend_counts_list) == 0:
+        return False, HttpResponse("Did not find anything matching that query.")
 
-        pend_counts_list.sort()
-        x_data = [i for i in xrange(0, len(pend_counts_list))]
+    pend_counts_list.sort()
+    x_data = [i for i in xrange(0, len(pend_counts_list))]
 
-        response = charting.render_bar(x_data, pend_counts_list, title, "Number", "Count", x_tick_labels=pend_names)
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, IMAGE_ERROR_MESSAGE
-
+    return x_data, pend_counts_list, pend_names, "Number", "Count"
 
 def generate_grader_types_per_problem(arguments, title):
     """
@@ -67,32 +80,25 @@ def generate_grader_types_per_problem(arguments, title):
     Output:
         PNG image
     """
-    try:
-        sub_arguments = {"submission__" + k: arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
-        sub_arguments.update({'status_code': GraderStatus.success})
+    sub_arguments = {"submission__" + k: arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
+    sub_arguments.update({'status_code': GraderStatus.success})
 
-        if 'grader_type' in arguments:
-            sub_arguments.update({'grader_type': arguments['grader_type']})
+    if 'grader_type' in arguments:
+        sub_arguments.update({'grader_type': arguments['grader_type']})
 
-        grader_counts = Grader.objects.filter(**sub_arguments).values('grader_type').annotate(
-            grader_count=Count('grader_type'))
+    grader_counts = Grader.objects.filter(**sub_arguments).values('grader_type').annotate(
+        grader_count=Count('grader_type'))
 
-        grader_counts_list = [i['grader_count'] for i in grader_counts]
-        grader_names = [i['grader_type'] for i in grader_counts]
+    grader_counts_list = [i['grader_count'] for i in grader_counts]
+    grader_names = [i['grader_type'] for i in grader_counts]
 
-        if len(grader_counts_list) == 0:
-            return False, HttpResponse("Did not find anything matching that query.")
+    if len(grader_counts_list) == 0:
+        return False, HttpResponse("Did not find anything matching that query.")
 
-        grader_counts_list.sort()
-        x_data = [i for i in xrange(0, len(grader_counts_list))]
+    grader_counts_list.sort()
+    x_data = [i for i in xrange(0, len(grader_counts_list))]
 
-        response = charting.render_bar(x_data, grader_counts_list, title, "Number", "Count", x_tick_labels=grader_names)
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, IMAGE_ERROR_MESSAGE
-
+    return x_data, grader_counts_list, grader_names, "Number", "Count"
 
 def generate_number_of_responses_per_problem(arguments, title):
     """
@@ -135,31 +141,24 @@ def generate_student_attempt_count_response(arguments, title):
     Output:
         PNG image
     """
-    try:
-        sub_arguments = {k: arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
-        sub_arguments.update({'grader__status_code': GraderStatus.success})
+    sub_arguments = {k: arguments[k] for k in arguments.keys() if k in ['course_id', 'location']}
+    sub_arguments.update({'grader__status_code': GraderStatus.success})
 
-        if 'grader_type' in arguments:
-            sub_arguments.update({'grader__grader_type': arguments['grader_type']})
+    if 'grader_type' in arguments:
+        sub_arguments.update({'grader__grader_type': arguments['grader_type']})
 
-        attempt_counts = (Submission.objects.filter(**sub_arguments).filter(state=SubmissionState.finished).
-                          values('student_id').annotate(student_count=Count('student_id')))
+    attempt_counts = (Submission.objects.filter(**sub_arguments).filter(state=SubmissionState.finished).
+                      values('student_id').annotate(student_count=Count('student_id')))
 
-        attempt_count_list = [i['student_count'] for i in attempt_counts]
+    attempt_count_list = [i['student_count'] for i in attempt_counts]
 
-        if len(attempt_count_list) == 0:
-            return False, HttpResponse("Did not find anything matching that query.")
+    if len(attempt_count_list) == 0:
+        return False, HttpResponse("Did not find anything matching that query.")
 
-        attempt_count_list.sort()
-        x_data = [i for i in xrange(0, len(attempt_count_list))]
+    attempt_count_list.sort()
+    x_data = [i for i in xrange(0, len(attempt_count_list))]
 
-        response = charting.render_bar(x_data, attempt_count_list, title, "Number", "Attempt Count")
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, IMAGE_ERROR_MESSAGE
-
+    return x_data, attempt_count_list, None, "Number", "Attempt Count"
 
 def generate_timing_response(arguments, title):
     """
@@ -169,26 +168,19 @@ def generate_timing_response(arguments, title):
     Output:
         PNG image
     """
-    try:
-        timing_set = Timing.objects.filter(**arguments)
-        if timing_set.count() == 0:
-            return False, HttpResponse("Did not find anything matching that query.")
+    timing_set = Timing.objects.filter(**arguments)
+    if timing_set.count() == 0:
+        return False, HttpResponse("Did not find anything matching that query.")
 
-        timing_set_values = timing_set.values("start_time", "end_time")
-        timing_set_start = [i['start_time'] for i in timing_set_values]
-        timing_set_end = [i['end_time'] for i in timing_set_values]
-        timing_set_difference = [(timing_set_end[i] - timing_set_start[i]).total_seconds() for i in
-                                 xrange(0, len(timing_set_end))]
-        timing_set_difference.sort()
-        x_data = [i for i in xrange(0, len(timing_set_difference))]
+    timing_set_values = timing_set.values("start_time", "end_time")
+    timing_set_start = [i['start_time'] for i in timing_set_values]
+    timing_set_end = [i['end_time'] for i in timing_set_values]
+    timing_set_difference = [(timing_set_end[i] - timing_set_start[i]).total_seconds() for i in
+                             xrange(0, len(timing_set_end))]
+    timing_set_difference.sort()
+    x_data = [i for i in xrange(0, len(timing_set_difference))]
 
-        response = charting.render_bar(x_data, timing_set_difference, title, "Number", "Time taken")
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, IMAGE_ERROR_MESSAGE
-
+    return x_data, timing_set_difference, None, "Number", "Time taken"
 
 def generate_student_performance_response(arguments, title):
     """
@@ -198,30 +190,24 @@ def generate_student_performance_response(arguments, title):
     Output:
         PNG image
     """
-    try:
-        sub_arguments = {}
-        for tag in ['course_id', 'location']:
-            if tag in arguments:
-                sub_arguments["submission__" + tag] = arguments[tag]
+    sub_arguments = {}
+    for tag in ['course_id', 'location']:
+        if tag in arguments:
+            sub_arguments["submission__" + tag] = arguments[tag]
 
-        grader_set = Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
+    grader_set = Grader.objects.filter(**sub_arguments).filter(status_code=GraderStatus.success)
 
-        if 'grader_type' in arguments:
-            grader_set = grader_set.filter(grader_type=arguments['grader_type'])
+    if 'grader_type' in arguments:
+        grader_set = grader_set.filter(grader_type=arguments['grader_type'])
 
-        if grader_set.count() == 0:
-            return False, HttpResponse("Did not find anything matching that query.")
+    if grader_set.count() == 0:
+        return False, HttpResponse("Did not find anything matching that query.")
 
-        grader_scores = [x['score'] for x in grader_set.values("score")]
-        grader_scores.sort()
-        x_data = [i for i in xrange(0, len(grader_scores))]
+    grader_scores = [x['score'] for x in grader_set.values("score")]
+    grader_scores.sort()
+    x_data = [i for i in xrange(0, len(grader_scores))]
 
-        response = charting.render_bar(x_data, grader_scores, title, "Number", "Score")
-
-        return True, response
-    except:
-        log.exception(IMAGE_ERROR_MESSAGE)
-        return False, IMAGE_ERROR_MESSAGE
+    return x_data, grader_scores, None, "Number", "Score"
 
 
 def render_form(post_url, available_metric_types):

@@ -22,10 +22,10 @@ def render_image(chart_data,title):
 
     return response
 
-def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None):
+def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None,xsize=20,ysize=10):
     epsilon = .01
     y_data=[i+epsilon for i in y_data]
-    fig = plt.figure(figsize=(20,10))
+    fig = plt.figure(figsize=(xsize,ysize))
     ax = fig.add_subplot(111)
 
     # the bar chart of the data
