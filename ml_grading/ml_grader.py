@@ -183,7 +183,7 @@ def load_model_file(created_model,use_full_path):
 
     return True, grader_data
 
-def store_model_locally(created_model,location,results):
+def store_model_locally(created_model,results):
     relative_model_path= created_model.model_relative_path
     full_model_path = os.path.join(settings.ML_MODEL_PATH,relative_model_path)
     try:
