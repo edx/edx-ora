@@ -128,6 +128,7 @@ def get_next_submission(request):
                 }
 
     log.debug("Sending success response back to instructor grading!")
+    log.debug("Sub id from get next: {0}".format(submission.id))
     return util._success_response(response, _INTERFACE_VERSION)
 
 
@@ -160,12 +161,22 @@ def save_grade(request):
     submission_id = request.POST.get('submission_id')
     score = request.POST.get('score')
     feedback = request.POST.get('feedback')
+    skipped = request.POST.get('skipped')=="True"
 
     if (# These have to be truthy
         not (course_id and grader_id and submission_id) or
         # These have to be non-None
         score is None or feedback is None):
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
+
+    if skipped:
+        log.debug(submission_id)
+        success, sub=staff_grading_util.set_instructor_grading_item_back_to_ml(submission_id)
+
+        if not success:
+            return util._error_response(sub, _INTERFACE_VERSION)
+
+        return util._success_response({}, _INTERFACE_VERSION)
 
     try:
         score = int(score)

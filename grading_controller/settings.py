@@ -17,7 +17,8 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #General
-QUEUES_TO_PULL_FROM=['open-ended']
+GRADING_QUEUES_TO_PULL_FROM=['open-ended']
+MESSAGE_QUEUES_TO_PULL_FROM=['open-ended-message']
 REQUESTS_TIMEOUT = 5    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
@@ -28,7 +29,7 @@ DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to d
 #Config for specific graders
 #ML
 MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use machine learning
-ML_PATH = os.path.join(ENV_ROOT, "machine_learning/") #Path to ML repo containing grade.py and create.py
+ML_PATH = os.path.join(ENV_ROOT, "machine-learning/") #Path to ML repo containing grade.py and create.py
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
 TIME_BETWEEN_ML_GRADER_CHECKS= 5 # seconds.  Time between ML grader checking to see if models need to be made.

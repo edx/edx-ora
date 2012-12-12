@@ -2,6 +2,7 @@ import datetime
 import json
 from django.conf import settings
 from django.utils import timezone
+from create_grader import create_grader
 import grader_util
 import util
 import logging
@@ -102,6 +103,22 @@ def finalize_expired_submission(sub):
     sub.state = SubmissionState.finished
     sub.save()
 
-    grade = grader_util.create_grader(grader_dict,sub)
+    grade = create_grader(grader_dict,sub)
+
+    return True
+
+def reset_ml_to_in_if_too_few(sub):
+    """
+    Resets a submission marked for ml grading to instructor grading if there are too few instructor graded submissions
+    in the queue.  This happens when the instructor skips a lot of submissions.
+    Input:
+        A submission
+    Output:
+        Success code
+    """
+
+    sub.state=SubmissionState.waiting_to_be_graded
+    sub.next_grader_type="IN"
+    sub.save()
 
     return True

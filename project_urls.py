@@ -4,10 +4,12 @@ class ControllerURLs():
     log_out=controller_base +"logout/"
     status = controller_base + "status/"
     submit = controller_base + "submit/"
+    submit_message = controller_base + "submit_message/"
     get_submission_ml = controller_base + "get_submission_ml/"
     get_submission_in = controller_base + "get_submission_instructor/"
     put_result = controller_base + "put_result/"
     get_pending_count = controller_base + "get_pending_count/"
+    get_eta_for_submission= controller_base + "get_submission_eta/"
 
 class PeerGradingURLs():
     peer_grading_base="/peer_grading/"
@@ -25,6 +27,7 @@ class StaffGradingURLs():
     staff_grading_base="/staff_grading/"
     get_next_submission= staff_grading_base + "get_next_submission/"
     save_grade= staff_grading_base + "save_grade/"
+    get_problem_list= staff_grading_base + "get_problem_list/"
 
 class XqueueURLs():
     xqueue_url_base="/xqueue/"

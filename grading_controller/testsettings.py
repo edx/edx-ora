@@ -19,6 +19,7 @@ LOGGING = get_logger_config(log_dir,
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
+        'NAME' : 'test_essaydb',
         }
 }
 

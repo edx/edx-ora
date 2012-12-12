@@ -1,9 +1,11 @@
 from django.conf import settings
+from controller.create_grader import create_grader
 from controller.models import Submission
 import logging
 from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
+from controller import util
 
 log = logging.getLogger(__name__)
 
@@ -84,17 +86,21 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     """
 
     if not types_to_check_for:
-        types_to_check_for=["ML","IN"]
+        types_to_check_for=["IN"]
 
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
-    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ML:
+    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ml:
         to_be_graded = Submission.objects.filter(
             location=location,
             state=submission_state_to_check_for,
             next_grader_type__in=types_to_check_for,
         )
+
+        #Order by confidence if we are looking for finished ML submissions
+        if types_to_check_for == ["ML"] and submission_state_to_check_for == SubmissionState.finished:
+            to_be_graded = to_be_graded.order_by('grader__confidence')
 
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded.count()))
 
@@ -122,9 +128,6 @@ def get_single_instructor_grading_item_for_location(location):
     #through submissions that are marked for instructor or ML grading and are pending, then finally
     #looks through submisisons that have been marked finished and have been graded already by ML.
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
-    if success:
-        return success, sub_id
-    success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
     if success:
         return success, sub_id
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
@@ -158,12 +161,7 @@ def get_single_instructor_grading_item(course_id):
         if success:
             return success, sub_id
 
-    log.debug("ML models already created for all locations in this course.  Getting any potential submisison instead.")
-
-    for location in locations_for_course:
-       success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False)
-       if success:
-           return success, sub_id
+    log.debug("ML models already created for all locations in this course.  Getting low confidence finished ML submissions.")
 
     for location in locations_for_course:
        success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
@@ -172,3 +170,38 @@ def get_single_instructor_grading_item(course_id):
            return success, sub_id
 
     return found, sub_id
+
+def set_instructor_grading_item_back_to_ml(submission_id):
+    """
+    Sets a submission from instructor grading to ML without creating a grader object.
+    Input:
+        Submission id
+    Output:
+        Boolean success, submission or error message
+    """
+    if not isinstance(submission_id,Submission):
+        try:
+            sub=Submission.objects.get(id=submission_id)
+        except:
+            error_message="Could not find a submission id."
+            log.exception(error_message)
+            return False, error_message
+    else:
+        sub=submission_id
+
+    grader_dict={
+        'feedback' : 'Instructor skipped',
+        'status' : GraderStatus.failure,
+        'grader_id' : 1,
+        'grader_type' : "IN",
+        'confidence' : 1,
+        'score' : 0,
+        'errors' : "Instructor skipped the submission."
+    }
+
+    sub.next_grader_type="ML"
+    sub.state=SubmissionState.waiting_to_be_graded
+    sub.save()
+    create_grader(grader_dict,sub)
+
+    return True, sub

@@ -7,6 +7,7 @@ import urlparse
 import project_urls
 
 from django.http import HttpResponse
+from django.contrib.auth.models import User
 
 log = logging.getLogger(__name__)
 
@@ -237,11 +238,15 @@ def create_xqueue_header_and_body(submission):
     feedback = score_and_feedback['feedback']
     grader_type=score_and_feedback['grader_type']
     success=score_and_feedback['success']
+    grader_id = score_and_feedback['grader_id']
+    submission_id = score_and_feedback['submission_id']
     xqueue_body = {
         'feedback': feedback,
         'score': score,
         'grader_type' : grader_type,
         'success' : success,
+        'grader_id' : grader_id,
+        'submission_id' : submission_id,
     }
 
     return xqueue_header, xqueue_body
@@ -274,8 +279,25 @@ def _success_response(data, version):
     response.update(data)
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
+def update_users_from_file():
+    auth_path = settings.ENV_ROOT / "auth.json"
+    log.info(' [*] reading {0}'.format(auth_path))
 
+    with open(auth_path) as auth_file:
+        AUTH_TOKENS = json.load(auth_file)
+        users = AUTH_TOKENS.get('USERS', {})
+        for username, pwd in users.items():
+            log.info(' [*] Creating/updating user {0}'.format(username))
+            try:
+                user = User.objects.get(username=username)
+                user.set_password(pwd)
+                user.save()
+            except User.DoesNotExist:
+                log.info('     ... {0} does not exist. Creating'.format(username))
 
-
-
-
+                user = User.objects.create(username=username,
+                    email=username + '@dummy.edx.org',
+                    is_active=True)
+                user.set_password(pwd)
+                user.save()
+        log.info(' [*] All done!')

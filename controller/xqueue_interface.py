@@ -16,6 +16,7 @@ import grader_util
 from staff_grading import staff_grading_util
 from basic_check import basic_check_util
 from metrics import timing_functions
+import message_util
 
 log = logging.getLogger(__name__)
 
@@ -150,7 +151,7 @@ def handle_submission(sub):
         if check_dict['score'] == 0:
             return True
         else:
-            sub.state=SubmissionState.waiting_to_be_graded
+            sub.state = SubmissionState.waiting_to_be_graded
 
         #Assign whether grader should be ML or IN based on number of graded examples.
         subs_graded_by_instructor, subs_pending_instructor = staff_grading_util.count_submissions_graded_and_pending_instructor(
@@ -199,20 +200,10 @@ def _is_valid_reply(external_reply):
     '''
     fail = (False, -1, '')
 
-    try:
-        header = json.loads(external_reply['xqueue_header'])
-        body = json.loads(external_reply['xqueue_body'])
-    except KeyError:
-        log.debug("Cannot load header or body.")
-        return fail
+    success, header, body = _is_valid_reply_generic(external_reply)
 
-    if not isinstance(header, dict) or not isinstance(body, dict):
+    if not success:
         return fail
-
-    for tag in ['submission_id', 'submission_key', 'queue_name']:
-        if not header.has_key(tag):
-            log.debug("{0} not found in header".format(tag))
-            return fail
 
     for tag in ['grader_payload', 'student_response', 'student_info']:
         if not body.has_key(tag):
@@ -227,4 +218,138 @@ def _is_valid_reply(external_reply):
         return fail
 
     return True, header, body
+
+
+def _is_valid_reply_generic(external_reply):
+    try:
+        header = json.loads(external_reply['xqueue_header'])
+        body = json.loads(external_reply['xqueue_body'])
+    except KeyError:
+        log.debug("Cannot load header or body.")
+        return False, "", ""
+
+    if not isinstance(header, dict) or not isinstance(body, dict):
+        return False, "", ""
+
+    for tag in ['submission_id', 'submission_key', 'queue_name']:
+        if not header.has_key(tag):
+            log.debug("{0} not found in header".format(tag))
+            return False, "", ""
+    return True, header, body
+
+
+def _is_valid_reply_message(external_reply):
+    fail = (False, -1, '')
+
+    success, header, body = _is_valid_reply_generic(external_reply)
+
+    if not success:
+        return fail
+
+    for tag in ['student_info', 'submission_id', 'grader_id', 'feedback']:
+        if not body.has_key(tag):
+            log.debug("{0} not found in body".format(tag))
+            return fail
+
+    body['student_info'] = json.loads(body['student_info'])
+    for tag in ['anonymous_student_id']:
+        if not body['student_info'].has_key(tag):
+            log.debug("{0} not found in student info".format(tag))
+            return fail
+
+    return True, header, body
+
+
+@csrf_exempt
+def submit_message(request):
+    """
+    Submits a message to the grading controller.
+
+    """
+    if request.method != 'POST':
+        return util._error_response("'submit_message' must use HTTP POST", _INTERFACE_VERSION)
+
+    reply_is_valid, header, body = _is_valid_reply_message(request.POST.copy())
+
+    if not reply_is_valid:
+        log.error("Invalid xqueue object added: request_ip: {0} request.POST: {1}".format(
+            util.get_request_ip(request),
+            request.POST,
+        ))
+        statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.submit_message",
+            tags=["success:Exception"])
+        return util._error_response('Incorrect format', _INTERFACE_VERSION)
+
+    message = body['feedback']
+    grader_id = body['grader_id']
+    submission_id = body['submission_id']
+    originator = body['student_info']['anonymous_student_id']
+
+    try:
+        grade = Grader.objects.get(id=grader_id)
+    except:
+        error_message = "Could not find a grader object for message from xqueue"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    try:
+        submission = Submission.objects.get(id=submission_id)
+    except:
+        error_message = "Could not find a submission object for message from xqueue"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if grade.submission.id != submission.id:
+        error_message = "Grader id does not match submission id that was passed in"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if originator not in [submission.student_id, grade.grader_id]:
+        error_message = "Message originator is not the grader, or the person being graded"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if grade.grader_type in ["ML", "IN"]:
+        recipient_type = "controller"
+        recipient = "controller"
+    else:
+        recipient_type = "human"
+
+    if recipient_type != 'controller':
+        if originator == submission.student_id:
+            recipient = grade.grader_id
+        elif originator == grade.grader_id:
+            recipient = submission.student_id
+
+    if recipient not in [submission.student_id, grade.grader_id, 'controller']:
+        error_message = "Message recipient is not the grader, the person being graded, or the controller"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    if originator == recipient:
+        error_message = "Message recipient is the same as originator"
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    message_dict = {
+        'grader_id': grader_id,
+        'originator': originator,
+        'submission_id': submission_id,
+        'message': message,
+        'recipient': recipient,
+        'message_type': "feedback",
+    }
+
+    success, error = message_util.create_message(message_dict)
+
+    if not success:
+        return util._error_response(error, _INTERFACE_VERSION)
+
+    return util._success_response({'message_id': error}, _INTERFACE_VERSION)
+
+
+
+
+
+
 
