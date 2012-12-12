@@ -99,7 +99,7 @@ def handle_single_location(location):
                     'creation_succeeded': results['success'],
                     's3_public_url' : results['s3_public_url'],
                     'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
-                    's3_bucketname' : str(settings.AWS_ACCESS_KEY_ID) + '_' + str(settings.S3_BUCKETNAME),
+                    's3_bucketname' : str(settings.S3_BUCKETNAME),
                     }
 
                 transaction.commit_unless_managed()
@@ -128,7 +128,7 @@ def save_model_file(results, save_to_s3):
         pickled_model=ml_grading_util.get_pickle_data(results['prompt'], results['feature_ext'],
             results['classifier'], results['text'],
             results['score'])
-        success, s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], settings.S3_BUCKETNAME)
+        success, s3_public_url=ml_grading_util.upload_to_s3(pickled_model, results['relative_model_path'], str(settings.S3_BUCKETNAME))
 
     if success:
         return True, s3_public_url

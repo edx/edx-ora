@@ -5,6 +5,8 @@ sys.path.append(settings.ML_PATH)
 import feature_extractor
 import essay_set
 import json
+import logging
+log=logging.getLogger(__name__)
 
 from controller.models import GraderStatus
 
@@ -54,6 +56,7 @@ def simple_quality_check(string):
         total_length = len(string)
         word_length_ratio = total_length / float(len(e_set._tokens[0]))
     except:
+        log.exception("could not run basic checks.")
         quality_dict['status'] = GraderStatus.failure
         return False, quality_dict
 

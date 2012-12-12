@@ -134,7 +134,7 @@ def upload_to_s3(string_to_upload, keyname, bucketname):
     '''
     try:
         conn = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
-        bucketname = str(settings.AWS_ACCESS_KEY_ID) + '_' + str(bucketname)
+        bucketname = str(bucketname)
         bucket = conn.create_bucket(bucketname.lower())
 
         k = Key(bucket)
