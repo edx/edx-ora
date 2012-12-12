@@ -194,6 +194,46 @@ class Message(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
+class Rubric(models.Model):
+    """
+    Each rubric encapsulates how a student was graded according to a particular rubric
+    """
+    submission = models.ForeignKey('Grader')
+    rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    def format_rubric(self):
+        formatted_rubric="<table>"
+        rubric_items = self.rubricitem_set.all().order_by('item_number')
+        for ri in rubric_items:
+            formatted_rubric+=ri.format_rubric_item()
+        formatted_rubric+="</table>"
+        return formatted_rubric
+
+
+class RubricItem(models.Model):
+    """
+    Each one encapsulates one item in a rubric, along with comments and the score on the item
+    """
+
+    rubric=models.ForeignKey('Rubric')
+    text=models.TextField()
+    short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    comment = models.TextField()
+    score=models.DecimalField(max_digits=10, decimal_places=2)
+    max_score= models.IntegerField()
+
+    #Ensures that rubric items are ordered properly
+    item_number = models.IntegerField()
+
+    def format_rubric_item(self):
+        formatted_item+="<tr>"
+        formatted_item+="<td>{0}</td>".format(self.text)
+        formatted_item+="<td>{0}</td>".format(self.max_score)
+        formatted_item+="</tr>"
+        return formatted_item
 
 
 
