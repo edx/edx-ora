@@ -244,13 +244,20 @@ def _is_valid_reply_message(external_reply):
     if not success:
         return fail
 
-    for tag in ['message', 'submission_id', 'grader_id', 'originator', 'recipient_type', 'message_type']:
+    for tag in ['student_info', 'submission_id', 'grader_id', 'feedback']:
         if not body.has_key(tag):
             log.debug("{0} not found in body".format(tag))
             return fail
 
+    body['student_info'] = json.loads(body['student_info'])
+    for tag in ['anonymous_student_id']:
+        if not body['student_info'].has_key(tag):
+            log.debug("{0} not found in student info".format(tag))
+            return fail
+
     return True, header, body
 
+@csrf_exempt
 def submit_message(request):
     """
     Submits a message to the grading controller.
