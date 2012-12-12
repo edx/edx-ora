@@ -156,6 +156,9 @@ class Submission(models.Model):
 
         return True, all_timing[0]
 
+    def generate_rubric_object(self):
+        pass
+
 
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
