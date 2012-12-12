@@ -20,7 +20,11 @@ with open(ENV_ROOT / "env.json") as env_file:
 
 #Debug
 DEBUG = ENV_TOKENS.get('DEBUG', False)
+if isinstance(DEBUG,basestring):
+    DEBUG= DEBUG=="True"
 TEMPLATE_DEBUG = ENV_TOKENS.get('TEMPLATE_DEBUG', False)
+if isinstance(TEMPLATE_DEBUG,basestring):
+    TEMPLATE_DEBUG= TEMPLATE_DEBUG=="True"
 
 #General
 REQUESTS_TIMEOUT = int(ENV_TOKENS.get('REQUESTS_TIMEOUT', 5))
