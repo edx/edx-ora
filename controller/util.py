@@ -301,9 +301,3 @@ def update_users_from_file():
                 user.set_password(pwd)
                 user.save()
         log.info(' [*] All done!')
-
-
-
-
-
-

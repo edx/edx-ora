@@ -2,6 +2,7 @@ import datetime
 import json
 from django.conf import settings
 from django.utils import timezone
+from create_grader import create_grader
 import grader_util
 import util
 import logging
@@ -102,7 +103,7 @@ def finalize_expired_submission(sub):
     sub.state = SubmissionState.finished
     sub.save()
 
-    grade = grader_util.create_grader(grader_dict,sub)
+    grade = create_grader(grader_dict,sub)
 
     return True
 

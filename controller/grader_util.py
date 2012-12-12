@@ -1,34 +1,17 @@
 import ConfigParser
 from django.conf import settings
+from create_grader import create_grader
 from metrics.timing_functions import finalize_timing
-from models import Submission, Grader
+from models import Submission
 import logging
 from models import GraderStatus, SubmissionState
 import expire_submissions
-from django.utils import timezone
-from metrics import metrics_util
 from statsd import statsd
 import json
 import os
 from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
-
-def create_grader(grader_dict, sub):
-    grade = Grader(
-        score=grader_dict['score'],
-        feedback=grader_dict['feedback'],
-        status_code=grader_dict['status'],
-        grader_id=grader_dict['grader_id'],
-        grader_type=grader_dict['grader_type'],
-        confidence=grader_dict['confidence'],
-        submission=sub,
-    )
-
-    grade.save()
-
-    return grade
-
 
 def add_additional_tags_to_dict(grader_dict, sub_id):
     """

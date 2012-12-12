@@ -1,10 +1,11 @@
 from django.conf import settings
+from controller.create_grader import create_grader
 from controller.models import Submission
 import logging
 from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
-from controller import grader_util
+from controller import util
 
 log = logging.getLogger(__name__)
 
@@ -201,6 +202,6 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     sub.next_grader_type="ML"
     sub.state=SubmissionState.waiting_to_be_graded
     sub.save()
-    grader_util.create_grader(grader_dict,sub)
+    create_grader(grader_dict,sub)
 
     return True, sub
