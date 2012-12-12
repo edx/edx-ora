@@ -11,13 +11,16 @@ import logging
 ######################################################################
 #General config
 
-DEBUG = True
-TEMPLATE_DEBUG = False
+
 
 ######################################################################
 #Read config from json file
 with open(ENV_ROOT / "env.json") as env_file:
     ENV_TOKENS = json.load(env_file)
+
+#Debug
+DEBUG = ENV_TOKENS.get('DEBUG', False)
+TEMPLATE_DEBUG = ENV_TOKENS.get('TEMPLATE_DEBUG', False)
 
 #General
 REQUESTS_TIMEOUT = int(ENV_TOKENS.get('REQUESTS_TIMEOUT', 5))
