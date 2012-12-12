@@ -158,12 +158,15 @@ def query_controller(controller_session,end_path,data={}):
     return success, content
 
 def load_model_file(created_model,use_full_path):
-    if not created_model.model_stored_in_s3:
+    try:
         if use_full_path:
             grader_data=pickle.load(file(created_model.model_full_path,"r"))
         else:
             grader_data=pickle.load(file(os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path),"r"))
         return True, grader_data
+    except:
+        #Move on to trying S3
+        pass
 
     try:
         r = requests.get(created_model.s3_public_url, timeout=2)
@@ -172,4 +175,23 @@ def load_model_file(created_model,use_full_path):
         log.exception("Problem with S3 connection.")
         return False, "Could not load."
 
+    try:
+        store_model_locally(created_model,grader_data)
+    except:
+        #This is okay if it isn't possible to save locally
+        pass
+
     return True, grader_data
+
+def store_model_locally(created_model,location,results):
+    relative_model_path= created_model.model_relative_path
+    full_model_path = os.path.join(settings.ML_MODEL_PATH,relative_model_path)
+    try:
+        ml_grading_util.dump_model_to_file(results['prompt'], results['feature_ext'],
+            results['classifier'], results['text'],results['score'],full_model_path)
+    except:
+        return False, "Could not save model to file."
+
+    return True, "Saved file."
+
+
