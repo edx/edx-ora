@@ -307,7 +307,7 @@ def submit_message(request):
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-    if grader.grader_type in ["ML", "IN"]:
+    if grade.grader_type in ["ML", "IN"]:
         recipient_type="controller"
         recipient="controller"
     else:

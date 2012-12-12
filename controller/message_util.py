@@ -1,4 +1,7 @@
-from controller.models import Message, Grader, Submission
+from models import Message, Grader, Submission
+import logging
+
+log=logging.getLogger(__name__)
 
 def create_message(message_dict):
     """
