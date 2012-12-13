@@ -33,25 +33,29 @@ def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     return success,response
 
 class MetricsRenderer(object):
-   def _init_(self,metric_type,xsize,ysize):
-       self.metric_type=metric_type
+   def __init__(self,xsize,ysize):
        self.xsize=xsize
        self.ysize=ysize
+       self.x_title="Number"
+       self.y_title="Count"
+       self.x_labels=""
+       self.title=""
 
-   def run_query(self,arguments,title):
+   def run_query(self,arguments,metric_type):
        try:
-           self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title = AVAILABLE_METRICS[self.metric_type](arguments,title)
+           self.title=get_title(arguments,metric_type)
+           self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title = AVAILABLE_METRICS[metric_type](arguments)
        except:
            log.exception(IMAGE_ERROR_MESSAGE)
            return False, IMAGE_ERROR_MESSAGE
        return True, "Success."
 
-   def chart_image(self,x_title="Number", y_title="Count"):
-       response = charting.render_bar(self.x_data, self.y_data, title, x_title, y_title, x_tick_labels=self.x_labels, xsize)
+   def chart_image(self):
+       response = charting.render_bar(self.x_data, self.y_data, self.title, self.x_title, self.y_title, x_tick_labels=self.x_labels, xsize=self.xsize, ysize=self.ysize)
        return True, response
 
 
-def generate_counts_per_problem(arguments, title, state):
+def generate_counts_per_problem(arguments, state):
     """
     Generate counts of number of attempted problems with a specific state.  Aggreggate by location.
     Input:
@@ -72,7 +76,7 @@ def generate_counts_per_problem(arguments, title, state):
 
     return x_data, pend_counts_list, pend_names, "Number", "Count"
 
-def generate_grader_types_per_problem(arguments, title):
+def generate_grader_types_per_problem(arguments):
     """
     Generate counts of graders aggeggrated by grader type.
     Input:
@@ -100,7 +104,7 @@ def generate_grader_types_per_problem(arguments, title):
 
     return x_data, grader_counts_list, grader_names, "Number", "Count"
 
-def generate_number_of_responses_per_problem(arguments, title):
+def generate_number_of_responses_per_problem(arguments):
     """
     Generate counts of number of attempted problems that have been finished grading.
     Input:
@@ -108,10 +112,10 @@ def generate_number_of_responses_per_problem(arguments, title):
     Output:
         PNG image
     """
-    return generate_counts_per_problem(arguments, title, SubmissionState.finished)
+    return generate_counts_per_problem(arguments, SubmissionState.finished)
 
 
-def generate_pending_counts_per_problem(arguments, title):
+def generate_pending_counts_per_problem(arguments):
     """
     Generate counts of number of submissions that are pending aggreggated by location.
     Input:
@@ -119,10 +123,10 @@ def generate_pending_counts_per_problem(arguments, title):
     Output:
         PNG image
     """
-    return generate_counts_per_problem(arguments, title, SubmissionState.waiting_to_be_graded)
+    return generate_counts_per_problem(arguments, SubmissionState.waiting_to_be_graded)
 
 
-def generate_currently_being_graded_counts_per_problem(arguments, title):
+def generate_currently_being_graded_counts_per_problem(arguments):
     """
     Generate counts of number of submissions that are currently being graded aggreggated by location.
     Input:
@@ -130,10 +134,10 @@ def generate_currently_being_graded_counts_per_problem(arguments, title):
     Output:
         PNG image
     """
-    return generate_counts_per_problem(arguments, title, SubmissionState.being_graded)
+    return generate_counts_per_problem(arguments, SubmissionState.being_graded)
 
 
-def generate_student_attempt_count_response(arguments, title):
+def generate_student_attempt_count_response(arguments):
     """
     Generate counts of number of attempts per student with given criteria
     Input:
@@ -160,7 +164,7 @@ def generate_student_attempt_count_response(arguments, title):
 
     return x_data, attempt_count_list, None, "Number", "Attempt Count"
 
-def generate_timing_response(arguments, title):
+def generate_timing_response(arguments):
     """
     Generate data on number of seconds each submission has taken
     Input:
@@ -182,7 +186,7 @@ def generate_timing_response(arguments, title):
 
     return x_data, timing_set_difference, None, "Number", "Time taken"
 
-def generate_student_performance_response(arguments, title):
+def generate_student_performance_response(arguments):
     """
     Generate data on student performance on specific problems/across the course
     Input:
@@ -223,6 +227,15 @@ def render_form(post_url, available_metric_types):
 
     return rendered
 
+def get_title(query_dict,metric_type):
+    title = 'Data for metric {0} request with params '.format(metric_type)
+    arguments = {}
+    for k, v in query_dict.items():
+        if v:
+            arguments[k] = v
+            title += " {0} : {1} ".format(k, v)
+
+    return title
 
 def get_arguments(request):
     course_id = request.POST.get('course_id')
@@ -236,12 +249,7 @@ def get_arguments(request):
         'location': location
     }
 
-    title = 'Data for metric {0} request with params '.format(metric_type)
-    arguments = {}
-    for k, v in query_dict.items():
-        if v:
-            arguments[k] = v
-            title += " {0} : {1} ".format(k, v)
+    title=get_title(query_dict,metric_type)
 
     return arguments, title
 
