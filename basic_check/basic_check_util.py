@@ -54,7 +54,7 @@ def simple_quality_check(string):
     try:
         basic_check, e_set = perform_spelling_and_grammar_checks(string)
         total_length = len(string)
-        word_length_ratio = total_length / float(len(e_set._tokens[0]))
+        word_length_ratio = total_length / float(len(e_set._tokens[0])+.1)
     except:
         log.exception("could not run basic checks.")
         quality_dict['status'] = GraderStatus.failure
