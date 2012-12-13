@@ -28,7 +28,7 @@ def add_additional_tags_to_dict(grader_dict, sub_id):
     """
 
     default_grader_dict={
-        'feedback' : 'blah',
+        'feedback' : 'Errors with your submission.  Please try again or contact course staff.',
         'status' : GraderStatus.success,
         'grader_id' : 1,
         'grader_type' : "BC",

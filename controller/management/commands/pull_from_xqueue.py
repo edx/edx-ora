@@ -67,7 +67,8 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
         tags=["success:{0}".format(success)])
 
     if success:
-        log.debug("Successful post back to xqueue! Success: {0} Message: {1}".format(success,msg))
+        log.debug("Successful post back to xqueue! Success: {0} Message: {1} Xqueue Header: {2} Xqueue body: {3}".format(
+            success,msg, xqueue_header, xqueue_body))
         submission.posted_results_back_to_queue = True
         submission.save()
     else:
