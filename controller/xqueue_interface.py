@@ -138,7 +138,6 @@ def handle_submission(sub):
         success, check_dict = basic_check_util.simple_quality_check(sub.student_response)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
-            return False
 
         #add additional tags needed to create a grader object
         check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
