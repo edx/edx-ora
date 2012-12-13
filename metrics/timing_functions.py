@@ -54,6 +54,7 @@ def generate_initial_timing_dict(submission_id):
     """
 
     if not isinstance(submission_id,int) and not isinstance(submission_id, Submission):
+        log.debug("submission id: {0}".format(submission_id))
         return False, "Invalid input!  Needs to be int (submission id) or Submission object."
 
     if isinstance(submission_id,int):

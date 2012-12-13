@@ -6,4 +6,5 @@ urlpatterns = patterns('metrics.views',
     url(r'^timing/$', 'timing_metrics'),
     url(r'^student_performance/$', 'student_performance_metrics'),
     url(r'^metrics/$', 'metrics_form'),
+    url(r'^error_dash/$', 'error_dashboard'),
 )

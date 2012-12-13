@@ -8,6 +8,7 @@ import util
 import logging
 from models import GraderStatus, SubmissionState, Submission
 from staff_grading import staff_grading_util
+from xqueue_interface import handle_submission
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +54,15 @@ def reset_timed_out_submissions(subs):
                 sub.next_grader_type="ML"
             sub.save()
             count += 1
+
+    #Reset submissions that are stuck in basic check state
+    subs_stuck_in_basic_check=subs.filter(
+        next_grader_type="BC",
+        state__in=[SubmissionState.waiting_to_be_graded, SubmissionState.being_graded]
+    )
+
+    for sub in subs_stuck_in_basic_check:
+        handle_submission(sub)
 
     if count>0:
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))

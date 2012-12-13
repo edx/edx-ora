@@ -6,17 +6,19 @@ from controller import util
 from metrics.charting import render_image
 from metrics.metrics_util import render_form, get_arguments
 import metrics_util
+from django.template.loader import render_to_string
 
 from models import Timing
+import logging
+
+log=logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
 
 @csrf_exempt
 @login_required
 def metrics_form(request):
-    available_metric_types=['timing', 'student_performance', 'attempt_counts',
-                            'response_counts', 'grader_counts', 'pending_counts',
-                            'currently_being_graded']
+
     if request.method == "POST":
 
         arguments,title=get_arguments(request)
@@ -27,37 +29,39 @@ def metrics_form(request):
                 return HttpResponse("Request missing needed tag metric type.")
 
         metric_type=request.POST.get('metric_type').lower()
+        success,response = metrics_util.render_requested_metric(metric_type,arguments,title)
 
-        if metric_type not in available_metric_types:
-            return HttpResponse("Could not find the requested type of metric: {0}".format(metric_type))
+        if not success:
+            return HttpResponse(response)
 
-        if metric_type=="timing":
-            success,response=metrics_util.generate_timing_response(arguments,title)
-
-        if metric_type=="student_performance":
-            success,response=metrics_util.generate_student_performance_response(arguments,title)
-
-        if metric_type=="attempt_counts":
-            success,response=metrics_util.generate_student_attempt_count_response(arguments, title)
-
-        if metric_type=="response_counts":
-            success,response=metrics_util.generate_number_of_responses_per_problem(arguments, title)
-
-        if metric_type=="grader_counts":
-            success,response=metrics_util.generate_grader_types_per_problem(arguments,title)
-
-        if metric_type=="pending_counts":
-            success,response = metrics_util.generate_pending_counts_per_problem(arguments,title)
-
-        if metric_type=="currently_being_graded":
-            success,response = metrics_util.generate_currently_being_graded_counts_per_problem(arguments,title)
-
-        return response
+        return HttpResponse(response,"image/png")
 
     elif request.method == "GET":
-
+        available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
         rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
+
+@csrf_exempt
+@login_required
+def error_dashboard(request):
+    """
+    Display a dashboard with good debugging/error metrics
+    """
+    base_xsize=20
+    base_ysize=10
+    if request.method != "GET":
+        return util._error_response("Must use Http get request")
+
+    m_renderer=metrics_util.MetricsRenderer(base_xsize,base_ysize)
+    success, msg = m_renderer.run_query({'grader_type' : "ML"},'currently_being_graded')
+    if not success:
+        return HttpResponse(msg)
+
+    success, currently_being_graded=m_renderer.chart_image()
+
+    return HttpResponse(currently_being_graded,"image/png")
+
+
 
 @csrf_exempt
 @login_required

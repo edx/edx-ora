@@ -156,10 +156,6 @@ class Submission(models.Model):
 
         return True, all_timing[0]
 
-    def generate_rubric_object(self):
-        pass
-
-
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
     submission = models.ForeignKey('Submission')
@@ -223,10 +219,11 @@ class RubricItem(models.Model):
 
     rubric=models.ForeignKey('Rubric')
     text=models.TextField()
-    short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    comment = models.TextField()
-    score=models.DecimalField(max_digits=10, decimal_places=2)
-    max_score= models.IntegerField()
+    short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    comment = models.TextField(default="")
+    score=models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    max_score= models.IntegerField(default=1)
+    finished_scoring = models.BooleanField(default=False)
 
     #Ensures that rubric items are ordered properly
     item_number = models.IntegerField()
@@ -238,6 +235,7 @@ class RubricItem(models.Model):
     def format_rubric_item(self):
         formatted_item+="<tr>"
         formatted_item+="<td>{0}</td>".format(self.text)
+        formatted_item+="<td>{0}</td>".format(self.score)
         formatted_item+="<td>{0}</td>".format(self.max_score)
         formatted_item+="</tr>"
         return formatted_item
