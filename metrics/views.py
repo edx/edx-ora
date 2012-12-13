@@ -53,7 +53,10 @@ def error_dashboard(request):
         return util._error_response("Must use Http get request")
 
     m_renderer=metrics_util.MetricsRenderer(base_xsize,base_ysize)
-    success, msg = m_renderer.run_query({},'currently_being_graded')
+    success, msg = m_renderer.run_query({'grader_type' : "ML"},'currently_being_graded')
+    if not success:
+        return HttpResponse(msg)
+
     success, currently_being_graded=m_renderer.chart_image()
 
     return HttpResponse(currently_being_graded,"image/png")

@@ -41,18 +41,25 @@ class MetricsRenderer(object):
        self.y_title="Count"
        self.x_labels=""
        self.title=""
+       self.success=False
 
    def run_query(self,arguments,metric_type):
        try:
            self.title=get_title(arguments,metric_type)
-           self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title = AVAILABLE_METRICS[metric_type](arguments)
+           log.debug(AVAILABLE_METRICS[metric_type](arguments))
+           (self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title) = AVAILABLE_METRICS[metric_type](arguments)
+           self.success=True
        except:
            log.exception(IMAGE_ERROR_MESSAGE)
            return False, IMAGE_ERROR_MESSAGE
        return True, "Success."
 
    def chart_image(self):
-       response = charting.render_bar(self.x_data, self.y_data, self.title, self.x_title, self.y_title, x_tick_labels=self.x_labels, xsize=self.xsize, ysize=self.ysize)
+       if self.success:
+           response = charting.render_bar(self.x_data, self.y_data, self.title, self.x_title, self.y_title, x_tick_labels=self.x_labels, xsize=self.xsize, ysize=self.ysize)
+       else:
+           return False, IMAGE_ERROR_MESSAGE
+
        return True, response
 
 
@@ -70,7 +77,7 @@ def generate_counts_per_problem(arguments, state):
     pend_names = [i['location'] for i in pend_counts]
 
     if len(pend_counts_list) == 0:
-        return False, HttpResponse("Did not find anything matching that query.")
+        return False, "Did not find anything matching that query."
 
     pend_counts_list.sort()
     x_data = [i for i in xrange(0, len(pend_counts_list))]
