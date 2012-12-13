@@ -27,10 +27,11 @@ def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     if metric_type not in available_metric_types:
         return False, "Could not find the requested type of metric: {0}".format(metric_type)
 
-    metrics_renderer=MetricsRenderer(metric_type,)
-    success,response="blah"
+    m_renderer=MetricsRenderer(xsize,ysize)
+    success, msg = m_renderer.run_query(arguments,metric_type)
+    success, currently_being_graded=m_renderer.chart_image()
 
-    return success,response
+    return success,currently_being_graded
 
 class MetricsRenderer(object):
    def __init__(self,xsize,ysize):
@@ -250,6 +251,12 @@ def get_arguments(request):
     }
 
     title=get_title(query_dict,metric_type)
+
+    arguments = {}
+    for k, v in query_dict.items():
+        if v:
+            arguments[k] = v
+            title += " {0} : {1} ".format(k, v)
 
     return arguments, title
 
