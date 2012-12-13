@@ -47,8 +47,8 @@ def error_dashboard(request):
     """
     Display a dashboard with good debugging/error metrics
     """
-    base_xsize=5
-    base_ysize=3
+    base_xsize=20
+    base_ysize=10
     if request.method != "GET":
         return util._error_response("Must use Http get request")
 
@@ -56,11 +56,7 @@ def error_dashboard(request):
     success, msg = m_renderer.run_query({},'currently_being_graded')
     success, currently_being_graded=m_renderer.chart_image()
 
-    rendered = render_to_string('error_dashboard.html', {
-        'metric_images' : [HttpResponse(currently_being_graded,"image/png")]
-    })
-
-    return HttpResponse(rendered)
+    return HttpResponse(currently_being_graded,"image/png")
 
 
 

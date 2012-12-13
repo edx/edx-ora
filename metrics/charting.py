@@ -22,7 +22,7 @@ def render_image(chart_data,title):
     return response
 
 def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None,xsize=20,ysize=10):
-    matplotlib.rcParams.update({'font.size': min(20,xsize)})
+    matplotlib.rcParams.update({'font.size': min(12,xsize)})
     epsilon = .01
     y_data=[i+epsilon for i in y_data]
     fig = matplotlib.pyplot.figure(figsize=(xsize,ysize))
