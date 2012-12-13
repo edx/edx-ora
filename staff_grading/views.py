@@ -229,7 +229,9 @@ def get_problem_list(request):
     course_id=request.GET.get("course_id")
 
     if not course_id:
-        return util._error_response("Missing needed tag course_id", _INTERFACE_VERSION)
+        error_message="Missing needed tag course_id"
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
 
     locations_for_course = [x['location'] for x in
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
@@ -253,5 +255,6 @@ def get_problem_list(request):
             }
         location_info.append(location_dict)
 
+    log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
                                   _INTERFACE_VERSION)
