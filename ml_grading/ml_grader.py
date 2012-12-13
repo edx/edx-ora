@@ -33,7 +33,7 @@ import grade
 
 log = logging.getLogger(__name__)
 
-RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : ""}
+RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : "", 'score' : 0}
 
 def handle_single_item(controller_session):
     sub_get_success, content = get_item_from_controller(controller_session)
@@ -54,7 +54,7 @@ def handle_single_item(controller_session):
 
         if not success:
             log.debug("Could not identify a valid created model!")
-            results={'score' : 0}
+            results= RESULT_FAILURE_DICT
             formatted_feedback="error"
             status=GraderStatus.failure
             statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
@@ -98,6 +98,7 @@ def handle_single_item(controller_session):
             else:
                 status = GraderStatus.failure
 
+        log.debug(results)
         grader_dict = {
             'score': results['score'],
             'feedback': json.dumps(results['feedback']),

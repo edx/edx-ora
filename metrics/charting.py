@@ -5,8 +5,7 @@ import logging
 
 import StringIO
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
+import matplotlib
 
 __author__ = 'vik'
 
@@ -22,10 +21,11 @@ def render_image(chart_data,title):
 
     return response
 
-def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None):
+def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None,xsize=20,ysize=10):
+    matplotlib.rcParams.update({'font.size': min(12,xsize)})
     epsilon = .01
     y_data=[i+epsilon for i in y_data]
-    fig = plt.figure(figsize=(20,10))
+    fig = matplotlib.pyplot.figure(figsize=(xsize,ysize))
     ax = fig.add_subplot(111)
 
     # the bar chart of the data
@@ -44,7 +44,7 @@ def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None):
     imgdata.seek(0)
     svg_dta = imgdata.buf
 
-    return HttpResponse(svg_dta,"image/png")
+    return svg_dta
 
 
 class BarChartDrawing(Drawing):
