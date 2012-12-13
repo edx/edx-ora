@@ -222,7 +222,9 @@ def get_problem_list(request):
     """
 
     if request.method!="GET":
-        return util._error_response("Request needs to be GET.", _INTERFACE_VERSION)
+        error_message="Request needs to be GET."
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
 
     course_id=request.GET.get("course_id")
 
@@ -233,7 +235,9 @@ def get_problem_list(request):
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
 
     if len(locations_for_course)==0:
-        return util._error_response("No problems associated with course.", _INTERFACE_VERSION)
+        error_message="No problems associated with course."
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
 
     location_info=[]
     for location in locations_for_course:
