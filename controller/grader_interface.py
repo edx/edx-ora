@@ -152,11 +152,11 @@ def put_result(request):
         try:
             post_data['score'] = int(post_data['score'])
         except:
-            return util._errors_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
+            return util._error_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
 
         success, header = grader_util.create_and_handle_grader_object(post_data)
         if not success:
-            return util._errors_response("Could not save grader.", _INTERFACE_VERSION)
+            return util._error_response("Could not save grader.", _INTERFACE_VERSION)
 
         return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
