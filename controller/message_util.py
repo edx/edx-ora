@@ -18,13 +18,19 @@ def create_message(message_dict):
 
     grade=Grader.objects.get(id=message_dict['grader_id'])
     submission = Submission.objects.get(id = message_dict['submission_id'])
+    if 'score' in message_dict:
+        score = message_dict['score'] 
+    else:
+        score = None
+
 
     msg=Message(
         grader=grade,
         message=message_dict['message'],
         originator=message_dict['originator'],
         recipient=message_dict['recipient'],
-        message_type=message_dict['message_type']
+        message_type=message_dict['message_type'],
+        score=score
     )
 
     try:

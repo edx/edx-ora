@@ -189,6 +189,7 @@ class Message(models.Model):
     originator = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     recipient= models.CharField(max_length=CHARFIELD_LEN_SMALL)
     message_type= models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    score = models.IntegerField(null=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)

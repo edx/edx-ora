@@ -340,6 +340,9 @@ def submit_message(request):
         'recipient': recipient,
         'message_type': "feedback",
     }
+    if 'score' in body:
+        message_dict['score'] = body['score']
+        
 
     success, error = message_util.create_message(message_dict)
 
