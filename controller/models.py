@@ -168,11 +168,11 @@ class Grader(models.Model):
     # For human grading, this is the id of the user that graded the submission.
     # For machine grading, it's the name and version of the algorithm that was
     # used.
-    grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="1")
     grader_type = models.CharField(max_length=2, choices=GRADER_TYPE)
 
     # should be between 0 and 1, with 1 being most confident.
-    confidence = models.DecimalField(max_digits=10, decimal_places=9)
+    confidence = models.DecimalField(max_digits=10, decimal_places=9, default=0)
 
     #User for instructor grading to mark essays as calibration or not.
     is_calibration = models.BooleanField(default=False)
