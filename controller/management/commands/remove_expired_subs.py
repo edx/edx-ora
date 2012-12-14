@@ -47,18 +47,20 @@ class Command(BaseCommand):
                         location=location,
                         state=SubmissionState.waiting_to_be_graded
                     ).order_by('-date_created')[:settings.MIN_TO_USE_ML]
-                    if (subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending:
+                    if ((subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending):
                         counter=0
                         for sub in subs_pending_total:
-                            if sub.next_grader_type=="ML":
+                            if sub.next_grader_type=="ML" and sub.get_unsuccessful_graders().count()==0:
                                 staff_grading_util.set_instructor_grading_item_back_to_ml(sub)
                                 counter+=1
                             if (counter+subs_graded + subs_pending)> settings.MIN_TO_USE_ML:
                                 break
+                        log.debug("Reset {0} submission from ML to IN".format(counter))
 
             except Exception as err:
                     log.error("Could not get submissions to expire! Error: {0}".format(err))
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:Exception"])
                     transaction.commit_unless_managed()
-                    time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
+
+            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
