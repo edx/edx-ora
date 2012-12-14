@@ -17,6 +17,7 @@ from staff_grading import staff_grading_util
 from basic_check import basic_check_util
 from metrics import timing_functions
 import message_util
+from ml_grading import ml_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -160,7 +161,8 @@ def handle_submission(sub):
         grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
         grader_settings = grader_util.get_grader_settings(grader_settings_path)
         if grader_settings['grader_type'] == "ML":
-            if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML):
+            success, model = ml_grading_util.get_latest_created_model(sub.location)
+            if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML and success):
                 sub.next_grader_type = "ML"
             else:
                 sub.next_grader_type = "IN"
