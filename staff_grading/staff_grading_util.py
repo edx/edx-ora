@@ -6,7 +6,6 @@ from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
 from controller import util
-from django.db import connection
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ def submissions_pending_for_location(location):
     Get submissions that are graded by instructor
     """
     subs_graded = Submission.objects.filter(location=location,
-        state__in=[SubmissionState.waiting_to_be_graded],
+        state=SubmissionState.waiting_to_be_graded,
     )
 
     return subs_graded
@@ -49,8 +48,8 @@ def finished_submissions_graded_by_instructor(location):
     Get submissions that are graded by instructor
     """
     subs_graded = Submission.objects.filter(location=location,
-        previous_grader_type__in=["IN"],
-        state__in=[SubmissionState.finished],
+        previous_grader_type="IN",
+        state=SubmissionState.finished,
     )
 
     return subs_graded
@@ -60,10 +59,17 @@ def submissions_pending_instructor(location, state_in=[SubmissionState.being_gra
     """
     Get submissions that are pending instructor grading.
     """
-    subs_pending = Submission.objects.filter(location=location,
-        next_grader_type__in=["IN"],
-        state__in=state_in,
-    )
+    if len(state_in)==1:
+        state_in = state_in[0]
+        subs_pending = Submission.objects.filter(location=location,
+            next_grader_type="IN",
+            state=state_in,
+        )
+    else:
+        subs_pending = Submission.objects.filter(location=location,
+            next_grader_type="IN",
+            state__in=state_in,
+        )
 
     return subs_pending
 
@@ -87,7 +93,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     """
 
     if not types_to_check_for:
-        types_to_check_for=["IN"]
+        types_to_check_for="IN"
 
     log.debug("Looking for  location {0}, state {1}, next_grader_type {2}".format(location,
         submission_state_to_check_for, types_to_check_for))
@@ -99,20 +105,18 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         to_be_graded = Submission.objects.filter(
             location=location,
             state=submission_state_to_check_for,
-            next_grader_type__in=types_to_check_for,
+            next_grader_type=types_to_check_for,
         )
 
         #Order by confidence if we are looking for finished ML submissions
-        if types_to_check_for == ["ML"] and submission_state_to_check_for == SubmissionState.finished:
+        if types_to_check_for == "ML" and submission_state_to_check_for == SubmissionState.finished:
             to_be_graded = to_be_graded.order_by('grader__confidence')
 
         to_be_graded_count=to_be_graded.count()
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
-        log.debug(connection.queries)
+
         if(to_be_graded_count > 0):
             to_be_graded = to_be_graded[0]
-            log.debug(connection.queries)
-            log.debug(to_be_graded)
             if to_be_graded is not None:
                 to_be_graded.state = SubmissionState.being_graded
                 to_be_graded.next_grader_type="IN"
@@ -139,7 +143,7 @@ def get_single_instructor_grading_item_for_location(location):
     if success:
         return success, sub_id
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
-        types_to_check_for=["ML"], submission_state_to_check_for=SubmissionState.finished)
+        types_to_check_for="ML", submission_state_to_check_for=SubmissionState.finished)
     if success:
         return success, sub_id
 
@@ -173,7 +177,7 @@ def get_single_instructor_grading_item(course_id):
 
     for location in locations_for_course:
        success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
-           types_to_check_for=["ML"], submission_state_to_check_for=SubmissionState.finished)
+           types_to_check_for="ML", submission_state_to_check_for=SubmissionState.finished)
        if success:
            return success, sub_id
 
