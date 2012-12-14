@@ -114,7 +114,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
 
         to_be_graded_count=to_be_graded.count()
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
-        
+
         if(to_be_graded_count > 0):
             to_be_graded = to_be_graded[0]
             if to_be_graded is not None:
