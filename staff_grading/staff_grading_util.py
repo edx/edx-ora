@@ -110,7 +110,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
 
         #Order by confidence if we are looking for finished ML submissions
         if types_to_check_for == "ML" and submission_state_to_check_for == SubmissionState.finished:
-            to_be_graded = to_be_graded.filter(grader__status=GraderStatus.success).order_by('grader__confidence')
+            to_be_graded = to_be_graded.filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
 
         to_be_graded_count=to_be_graded.count()
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
