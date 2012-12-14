@@ -10,6 +10,7 @@ from statsd import statsd
 import json
 import os
 from staff_grading import staff_grading_util
+from ml_grading import ml_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -162,8 +163,8 @@ def get_eta_for_submission(location):
     grader_settings = get_grader_settings(grader_settings_path)
 
     if grader_settings['grader_type'] in ["ML", "IN"]:
-        subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
-        if (subs_graded + subs_pending) > settings.MIN_TO_USE_ML:
+        success, model = ml_grading_util.get_latest_created_model(location)
+        if success:
             eta = settings.ML_ESTIMATED_GRADING_TIME
     elif grader_settings['grader_type'] in "PE":
         #Just use the default timing for now.
