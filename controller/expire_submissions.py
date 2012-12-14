@@ -66,8 +66,8 @@ def reset_in_subs_to_ml(subs):
         success, model = ml_grading_util.get_latest_created_model(sub.location)
         if (sub.next_grader_type=="IN" and success):
             sub.next_grader_type="ML"
-        sub.save()
-        count+=1
+            sub.save()
+            count+=1
 
     if count>0:
         log.debug("Reset {0} instructor subs to ML".format(count))
