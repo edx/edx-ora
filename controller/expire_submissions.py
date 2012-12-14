@@ -30,6 +30,66 @@ error_template = u"""
 
 """
 
+def reset_ml_subs_to_in():
+    """
+    Reset submissions marked ML to instructor if there are not enough instructor submissions to grade
+    This happens if the instructor skips too many submissions
+    """
+    counter=0
+    unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
+    for location in unique_locations:
+        subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
+        subs_pending_total= Submission.objects.filter(
+            location=location,
+            state=SubmissionState.waiting_to_be_graded
+        ).order_by('-date_created')[:settings.MIN_TO_USE_ML]
+        if ((subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending):
+            for sub in subs_pending_total:
+                if sub.next_grader_type=="ML" and sub.get_unsuccessful_graders().count()==0:
+                    staff_grading_util.set_instructor_grading_item_back_to_ml(sub)
+                    counter+=1
+                if (counter+subs_graded + subs_pending)> settings.MIN_TO_USE_ML:
+                    break
+    if counter>0:
+        log.debug("Reset {0} submission from ML to IN".format(counter))
+
+def reset_in_subs_to_ml(subs):
+    count=0
+    in_subs=Submission.objects.filter(
+        state=SubmissionState.waiting_to_be_graded,
+        next_grader_type="IN"
+    )
+
+    for sub in in_subs:
+        #If an instructor checks out a submission after ML grading has started,
+        # this resets it to ML if the instructor times out
+        success, model = ml_grading_util.get_latest_created_model(sub.location)
+        if (sub.next_grader_type=="IN" and success):
+            sub.next_grader_type="ML"
+        sub.save()
+        count+=1
+
+    if count>0:
+        log.debug("Reset {0} instructor subs to ML".format(count))
+
+    return True
+
+def reset_subs_in_basic_check(subs):
+    #Reset submissions that are stuck in basic check state
+    subs_stuck_in_basic_check=subs.filter(
+        next_grader_type="BC",
+        state__in=[SubmissionState.waiting_to_be_graded, SubmissionState.being_graded]
+    )
+
+    count=0
+    for sub in subs_stuck_in_basic_check:
+        handle_submission(sub)
+        count+=1
+
+    if count>0:
+        log.debug("Reset {0} basic check subs properly.".format(count))
+    return True
+
 def reset_timed_out_submissions(subs):
     """
     Check if submissions have timed out, and reset them to waiting to grade state if they have
@@ -48,23 +108,8 @@ def reset_timed_out_submissions(subs):
         sub = subs[i]
         if sub.state == SubmissionState.being_graded:
             sub.state = SubmissionState.waiting_to_be_graded
-
-            #If an instructor checks out a submission after ML grading has started,
-            # this resets it to ML if the instructor times out
-            success, model = ml_grading_util.get_latest_created_model(sub.location)
-            if (sub.next_grader_type=="IN" and success):
-                sub.next_grader_type="ML"
             sub.save()
             count += 1
-
-    #Reset submissions that are stuck in basic check state
-    subs_stuck_in_basic_check=subs.filter(
-        next_grader_type="BC",
-        state__in=[SubmissionState.waiting_to_be_graded, SubmissionState.being_graded]
-    )
-
-    for sub in subs_stuck_in_basic_check:
-        handle_submission(sub)
 
     if count>0:
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
