@@ -19,7 +19,6 @@ def initialize_timing(sub_id):
 
     return True
 
-
 def finalize_timing(sub_id, grade_id):
 
     if isinstance(sub_id,Submission):
