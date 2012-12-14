@@ -110,6 +110,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
 
         if(to_be_graded_count() > 0):
             to_be_graded = to_be_graded[0]
+            log.debug(to_be_graded)
             if to_be_graded is not None:
                 to_be_graded.state = SubmissionState.being_graded
                 to_be_graded.next_grader_type="IN"
