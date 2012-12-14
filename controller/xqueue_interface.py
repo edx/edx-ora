@@ -171,6 +171,8 @@ def handle_submission(sub):
                 sub.next_grader_type = "PE"
             else:
                 sub.next_grader_type = "IN"
+        elif grader_settings['grader_type'] == "IN":
+            sub.next_grader_type = "IN"
         else:
             log.exception("Invalid grader type specified in settings file.")
             return False
