@@ -287,6 +287,18 @@ def submit_message(request):
     originator = body['student_info']['anonymous_student_id']
 
     try:
+        if 'score' in body:
+            score = int(body['score'])
+        else:
+            score = None
+    except:
+        error_message = "Score was not an integer, received \"{0}\" instead.".format(score)
+        log.exception(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+
+
+    try:
         grade = Grader.objects.get(id=grader_id)
     except:
         error_message = "Could not find a grader object for message from xqueue"
@@ -339,9 +351,8 @@ def submit_message(request):
         'message': message,
         'recipient': recipient,
         'message_type': "feedback",
+        'score': score
     }
-    if 'score' in body:
-        message_dict['score'] = body['score']
         
 
     success, error = message_util.create_message(message_dict)

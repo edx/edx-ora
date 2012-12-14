@@ -12,16 +12,12 @@ def create_message(message_dict):
         Boolean true/false, message id or error message
     """
 
-    for tag in ['grader_id', 'originator', 'submission_id', 'message', 'recipient', 'message_type']:
+    for tag in ['grader_id', 'originator', 'submission_id', 'message', 'recipient', 'message_type', 'score']:
         if not message_dict.has_key(tag):
             return False, "Needed tag '{0}' missing".format(tag)
 
     grade=Grader.objects.get(id=message_dict['grader_id'])
     submission = Submission.objects.get(id = message_dict['submission_id'])
-    if 'score' in message_dict:
-        score = message_dict['score'] 
-    else:
-        score = None
 
 
     msg=Message(
@@ -30,7 +26,7 @@ def create_message(message_dict):
         originator=message_dict['originator'],
         recipient=message_dict['recipient'],
         message_type=message_dict['message_type'],
-        score=score
+        score=message_dict['score']
     )
 
     try:
