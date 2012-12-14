@@ -6,6 +6,7 @@ from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
 from controller import util
+from ml_grading import ml_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -100,8 +101,9 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
 
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
+    success, model = ml_grading_util.get_latest_created_model(location)
 
-    if (subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not check_for_ml:
+    if ((subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not success) or not check_for_ml:
         to_be_graded = Submission.objects.filter(
             location=location,
             state=submission_state_to_check_for,
