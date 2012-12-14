@@ -88,6 +88,9 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     if not types_to_check_for:
         types_to_check_for=["IN"]
 
+    log.debug("Looking for  location {0}, state {1}, next_grader_type {2}".format(location,
+        submission_state_to_check_for, types_to_check_for))
+
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
 
@@ -102,9 +105,10 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         if types_to_check_for == ["ML"] and submission_state_to_check_for == SubmissionState.finished:
             to_be_graded = to_be_graded.order_by('grader__confidence')
 
-        log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded.count()))
+        to_be_graded_count=to_be_graded.count()
+        log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
 
-        if(to_be_graded.count() > 0):
+        if(to_be_graded_count() > 0):
             to_be_graded = to_be_graded[0]
             if to_be_graded is not None:
                 to_be_graded.state = SubmissionState.being_graded
@@ -128,6 +132,7 @@ def get_single_instructor_grading_item_for_location(location):
     #through submissions that are marked for instructor or ML grading and are pending, then finally
     #looks through submisisons that have been marked finished and have been graded already by ML.
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
+    log.debug("Checked for ml.")
     if success:
         return success, sub_id
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
