@@ -201,6 +201,7 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     else:
         sub=submission_id
 
+    log.debug("Setting back to ML.")
     grader_dict={
         'feedback' : 'Instructor skipped',
         'status' : GraderStatus.failure,
