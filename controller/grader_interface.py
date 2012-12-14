@@ -35,7 +35,7 @@ def get_submission_ml(request):
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
         subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
-        success, message = get_latest_created_model(location)
+        success, message = ml_grading_util.get_latest_created_model(location)
         if subs_graded_by_instructor >= settings.MIN_TO_USE_ML and success:
             to_be_graded = Submission.objects.filter(
                 location=location,
