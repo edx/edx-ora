@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
                 expire_submissions.reset_in_subs_to_ml(subs)
                 expire_submissions.reset_subs_in_basic_check(subs)
-
+                expire_submissions.reset_ml_subs_to_in()
 
 
             except Exception as err:
