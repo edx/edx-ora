@@ -109,11 +109,6 @@ class XQueueInterfaceTest(unittest.TestCase):
         self.assertEqual(error, True)
 
     def test_xqueue_submit(self):
-        xqueue_header = {
-            'submission_id': 1,
-            'submission_key': 1,
-            'queue_name': "MITx-6.002x",
-        }
         grader_payload = {
             'location': LOCATION,
             'course_id': u'MITx/6.002x',
@@ -123,18 +118,14 @@ class XQueueInterfaceTest(unittest.TestCase):
             'rubric' : 'This is a rubric.',
             'grader_settings' : "ml_grading.conf",
         }
-        student_info = {
-            'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
-            'anonymous_student_id': STUDENT_ID
-        }
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
-            'student_info': json.dumps(student_info),
+            'student_info': test_util.get_student_info(STUDENT_ID),
             'student_response': "Test! And longer now so tests pass.",
             'max_score': 1,
         }
         content = {
-            'xqueue_header': json.dumps(xqueue_header),
+            'xqueue_header': test_util.get_xqueue_header(),
             'xqueue_body': json.dumps(xqueue_body),
         }
 
@@ -151,38 +142,25 @@ class XQueueInterfaceTest(unittest.TestCase):
 
         self.assertEqual(body['success'], True)
 
-    def test_message_submission_success(self):
-        # submit a fake one first
+
+    def test_message_submission_with_score_success(self):
         sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
         grade=test_util.get_grader("IN")
         grade.submission=sub
         grade.save()
-
-
-
         grader_id = grade.grader_id
         submission_id = sub.id
-        log.debug('grader_id: {0}, submission_id {1}'.format(grader_id, submission_id))
-        xqueue_header = {
-            'submission_id': 1,
-            'submission_key': 1,
-            'queue_name': "MITx-6.002x",
-        }
-
-        student_info = {
-            'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
-            'anonymous_student_id': STUDENT_ID
-        }
         # now send a new message
         message = {
             'grader_id': grader_id,
             'submission_id': submission_id,
             'feedback': 'Testing feedback for the message controller. Yay.',
-            'student_info': json.dumps(student_info)
+            'student_info': test_util.get_student_info(STUDENT_ID),
+            'score': '3'
         }
         content = {
-            'xqueue_header': json.dumps(xqueue_header),
+            'xqueue_header': test_util.get_xqueue_header(),
             'xqueue_body': json.dumps(message),
         }
 
@@ -191,12 +169,9 @@ class XQueueInterfaceTest(unittest.TestCase):
                 content
         )
         log.debug(content)
-
         body = json.loads(content.content)
 
         self.assertEqual(body['success'], True)
-
-
 
 
 class GraderInterfaceTest(unittest.TestCase):

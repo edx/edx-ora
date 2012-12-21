@@ -8,6 +8,7 @@ from django.utils import timezone
 from controller.models import Submission,Grader
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 import random
+import json
 
 MAX_SCORE = 3
 
@@ -62,4 +63,19 @@ def get_grader(grader_type):
     )
 
     return test_grader
+
+def get_student_info(student_id):
+    student_info = {
+        'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
+        'anonymous_student_id': student_id
+    }
+    return json.dumps(student_info)
+
+def get_xqueue_header():
+    xqueue_header = {
+        'submission_id': 1,
+        'submission_key': 1,
+        'queue_name': "MITx-6.002x",
+    }
+    return json.dumps(xqueue_header)
 
