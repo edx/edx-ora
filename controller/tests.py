@@ -36,10 +36,12 @@ log = logging.getLogger(__name__)
 
 LOGIN_URL = project_urls.ControllerURLs.log_in
 SUBMIT_URL = project_urls.ControllerURLs.submit
+SUBMIT_MESSAGE_URL = project_urls.ControllerURLs.submit_message
 ML_GET_URL = project_urls.ControllerURLs.get_submission_ml
 IN_GET_URL = project_urls.ControllerURLs.get_submission_in
 PUT_URL= project_urls.ControllerURLs.put_result
 ETA_URL=project_urls.ControllerURLs.get_eta_for_submission
+
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
@@ -148,6 +150,53 @@ class XQueueInterfaceTest(unittest.TestCase):
         body = json.loads(content.content)
 
         self.assertEqual(body['success'], True)
+
+    def test_message_submission_success(self):
+        # submit a fake one first
+        sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        sub.save()
+        grade=test_util.get_grader("IN")
+        grade.submission=sub
+        grade.save()
+
+
+
+        grader_id = grade.grader_id
+        submission_id = sub.id
+        log.debug('grader_id: {0}, submission_id {1}'.format(grader_id, submission_id))
+        xqueue_header = {
+            'submission_id': 1,
+            'submission_key': 1,
+            'queue_name': "MITx-6.002x",
+        }
+
+        student_info = {
+            'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
+            'anonymous_student_id': STUDENT_ID
+        }
+        # now send a new message
+        message = {
+            'grader_id': grader_id,
+            'submission_id': submission_id,
+            'feedback': 'Testing feedback for the message controller. Yay.',
+            'student_info': json.dumps(student_info)
+        }
+        content = {
+            'xqueue_header': json.dumps(xqueue_header),
+            'xqueue_body': json.dumps(message),
+        }
+
+        content = self.c.post(
+                SUBMIT_MESSAGE_URL,
+                content
+        )
+        log.debug(content)
+
+        body = json.loads(content.content)
+
+        self.assertEqual(body['success'], True)
+
+
 
 
 class GraderInterfaceTest(unittest.TestCase):
