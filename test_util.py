@@ -7,6 +7,9 @@ from django.utils import timezone
 
 from controller.models import Submission,Grader
 from peer_grading.models import CalibrationHistory,CalibrationRecord
+import random
+
+MAX_SCORE = 3
 
 def create_user():
 
@@ -40,7 +43,7 @@ def get_sub(grader_type,student_id,location, course_id="course_id"):
         xqueue_queue_name="MITx-6.002x",
         location=location,
         course_id=course_id,
-        max_score=3,
+        max_score=MAX_SCORE,
         next_grader_type=grader_type,
         previous_grader_type=grader_type,
         grader_settings="ml_grading.conf",
@@ -49,7 +52,7 @@ def get_sub(grader_type,student_id,location, course_id="course_id"):
 
 def get_grader(grader_type):
     test_grader=Grader(
-        score=0,
+        score= random.randint(0, MAX_SCORE),
         feedback="",
         status_code=GraderStatus.success,
         grader_id="1",

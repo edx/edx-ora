@@ -24,6 +24,7 @@ from models import Submission, Grader
 from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
+from ml_grading import ml_model_creation
 
 import management.commands.pull_from_xqueue as pull_from_xqueue
 
@@ -188,6 +189,10 @@ class GraderInterfaceTest(unittest.TestCase):
             grade=test_util.get_grader("IN")
             grade.submission=sub
             grade.save()
+
+
+        # Create ML Model
+        ml_model_creation.handle_single_location(LOCATION)
 
         #Create a submission that requires ML grading
         sub=test_util.get_sub("ML",STUDENT_ID,LOCATION)
