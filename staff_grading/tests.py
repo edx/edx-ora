@@ -92,6 +92,9 @@ class StaffGradingViewTest(unittest.TestCase):
 
         #Should work because submission was just created
         self.save_grade(True, False)
+        test_sub = Submission.objects.get(id=test_sub.id)
+        # make sure the submission isn't skipped
+        self.assertNotEqual(test_sub.next_grader_type,"ML")
 
     def save_grade(self, should_work, skipped):
         post_data={

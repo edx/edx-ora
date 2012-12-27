@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test.client import Client
+from django.conf import settings
 
 from controller.models import Submission, Grader, SubmissionState , GraderStatus
 
@@ -9,6 +10,7 @@ from controller.models import Submission,Grader
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 import random
 import json
+from ml_grading import ml_model_creation
 
 MAX_SCORE = 3
 
@@ -79,3 +81,16 @@ def get_xqueue_header():
     }
     return json.dumps(xqueue_header)
 
+def create_ml_model(student_id, location):
+    #Create enough instructor graded submissions that ML will work
+    for i in xrange(0,settings.MIN_TO_USE_ML):
+        sub=get_sub("IN",student_id,location)
+        sub.state=SubmissionState.finished
+        sub.save()
+
+        grade=get_grader("IN")
+        grade.submission=sub
+        grade.save()
+
+    # Create ML Model
+    ml_model_creation.handle_single_location(location)

@@ -24,7 +24,7 @@ from models import Submission, Grader
 from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
-from ml_grading import ml_model_creation
+import expire_submissions
 
 import management.commands.pull_from_xqueue as pull_from_xqueue
 
@@ -203,20 +203,7 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
 
     def test_get_ml_subs_true(self):
-
-        #Create enough instructor graded submissions that ML will work
-        for i in xrange(0,settings.MIN_TO_USE_ML):
-            sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
-            sub.state=SubmissionState.finished
-            sub.save()
-
-            grade=test_util.get_grader("IN")
-            grade.submission=sub
-            grade.save()
-
-
-        # Create ML Model
-        ml_model_creation.handle_single_location(LOCATION)
+        test_util.create_ml_model(STUDENT_ID, LOCATION)
 
         #Create a submission that requires ML grading
         sub=test_util.get_sub("ML",STUDENT_ID,LOCATION)
@@ -337,6 +324,40 @@ class ControllerUtilTests(unittest.TestCase):
 
         self.assertEqual(body['success'], True)
         self.assertEqual(body['eta'], settings.DEFAULT_ESTIMATED_GRADING_TIME)
+
+class ExpireSubmissionsTests(unittest.TestCase):
+    def setUp(self):
+        test_util.create_user()
+
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def test_reset_subs_to_in(self):
+        test_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
+        test_sub.save()
+        
+        expire_submissions.reset_ml_subs_to_in()
+
+        test_sub = Submission.objects.get(id=test_sub.id)
+
+        self.assertEqual(test_sub.next_grader_type, "IN")
+
+    def test_reset_in_subs_to_ml(self):
+        test_util.create_ml_model(STUDENT_ID, LOCATION)
+
+        new_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        new_sub.save()
+
+        expire_submissions.reset_in_subs_to_ml([new_sub])
+        
+        new_sub = Submission.objects.get(id = new_sub.id)
+
+        self.assertEqual(new_sub.next_grader_type, "ML")
+
+
 
 
 
