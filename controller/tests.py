@@ -357,8 +357,14 @@ class ExpireSubmissionsTests(unittest.TestCase):
 
         self.assertEqual(new_sub.next_grader_type, "ML")
 
+    def test_reset_subs_in_back_check(self):
+        test_sub = test_util.get_sub("BC", STUDENT_ID, LOCATION)
+        test_sub.save()
+        subs = Submission.objects.all()
 
+        expire_submissions.reset_subs_in_basic_check(subs)
 
+        test_sub = Submission.objects.get(id = test_sub.id)
 
-
+        self.assertNotEqual(test_sub.next_grader_type, "BC")
 
