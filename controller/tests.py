@@ -4,7 +4,7 @@ Run me with:
 """
 import json
 import unittest
-from datetime import datetime
+import datetime
 from django.utils import timezone
 import logging
 import urlparse
@@ -286,6 +286,8 @@ class ControllerUtilTests(unittest.TestCase):
     def tearDown(self):
         test_util.delete_all()
 
+
+
     def test_parse_xobject_false(self):
         sample_xqueue_return='blah'
         return_code, content= util.parse_xobject(sample_xqueue_return, "blah")
@@ -326,6 +328,7 @@ class ControllerUtilTests(unittest.TestCase):
         self.assertEqual(body['eta'], settings.DEFAULT_ESTIMATED_GRADING_TIME)
 
 class ExpireSubmissionsTests(unittest.TestCase):
+    fixtures = ['/controller/test_data.json']
     def setUp(self):
         test_util.create_user()
 
@@ -339,11 +342,12 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
         test_sub.save()
         
-        expire_submissions.reset_ml_subs_to_in()
+        success = expire_submissions.reset_ml_subs_to_in()
 
         test_sub = Submission.objects.get(id=test_sub.id)
 
         self.assertEqual(test_sub.next_grader_type, "IN")
+        self.assertTrue(success)
 
     def test_reset_in_subs_to_ml(self):
         test_util.create_ml_model(STUDENT_ID, LOCATION)
@@ -351,20 +355,41 @@ class ExpireSubmissionsTests(unittest.TestCase):
         new_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         new_sub.save()
 
-        expire_submissions.reset_in_subs_to_ml([new_sub])
+        success = expire_submissions.reset_in_subs_to_ml([new_sub])
         
         new_sub = Submission.objects.get(id = new_sub.id)
 
         self.assertEqual(new_sub.next_grader_type, "ML")
+        self.assertTrue(success)
 
     def test_reset_subs_in_back_check(self):
         test_sub = test_util.get_sub("BC", STUDENT_ID, LOCATION)
         test_sub.save()
         subs = Submission.objects.all()
 
-        expire_submissions.reset_subs_in_basic_check(subs)
+        success = expire_submissions.reset_subs_in_basic_check(subs)
 
         test_sub = Submission.objects.get(id = test_sub.id)
 
+        self.assertTrue(success)
         self.assertNotEqual(test_sub.next_grader_type, "BC")
+
+
+    def test_reset_ml_to_in_if_too_few(self):
+        new_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
+        new_sub.state = SubmissionState.being_graded
+        new_sub.save()
+
+        success = expire_submissions.reset_ml_to_in_if_too_few(new_sub)
+
+        self.assertTrue(success)
+        new_sub = Submission.objects.get(id = new_sub.id)
+
+        self.assertEqual(new_sub.next_grader_type, "IN")
+        self.assertEqual(new_sub.state, SubmissionState.waiting_to_be_graded)
+
+
+
+
+
 
