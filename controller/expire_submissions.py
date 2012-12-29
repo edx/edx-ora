@@ -125,7 +125,7 @@ def get_submissions_that_have_expired(subs):
     """
     now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
-    expired_subs=subs.filter(date_modified__lt=now-min_time, posted_results_back_to_queue=False, state-SubmissionState.waiting_to_be_graded)
+    expired_subs=subs.filter(date_modified__lt=now-min_time, posted_results_back_to_queue=False, state=SubmissionState.waiting_to_be_graded)
 
     return list(expired_subs)
 
