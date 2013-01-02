@@ -45,7 +45,7 @@ def simple_quality_check(string):
     GRAMMAR_MAXIMUM = .1
 
     #Minimum number of characters needed in a string before it is ok
-    LENGTH_MINIMUM = 10
+    LENGTH_MINIMUM = 25
 
     #Minimum characters per word needed in a response (below is rejected)
     CHARS_PER_WORD_MINIMUM = 3
