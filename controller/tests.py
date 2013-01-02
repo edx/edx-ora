@@ -4,7 +4,7 @@ Run me with:
 """
 import json
 import unittest
-from datetime import datetime
+import datetime
 from django.utils import timezone
 import logging
 import urlparse
@@ -24,6 +24,7 @@ from models import Submission, Grader
 from models import GraderStatus, SubmissionState
 
 from staff_grading import staff_grading_util
+import expire_submissions
 
 import management.commands.pull_from_xqueue as pull_from_xqueue
 
@@ -35,10 +36,12 @@ log = logging.getLogger(__name__)
 
 LOGIN_URL = project_urls.ControllerURLs.log_in
 SUBMIT_URL = project_urls.ControllerURLs.submit
+SUBMIT_MESSAGE_URL = project_urls.ControllerURLs.submit_message
 ML_GET_URL = project_urls.ControllerURLs.get_submission_ml
 IN_GET_URL = project_urls.ControllerURLs.get_submission_in
 PUT_URL= project_urls.ControllerURLs.put_result
 ETA_URL=project_urls.ControllerURLs.get_eta_for_submission
+
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
@@ -106,11 +109,6 @@ class XQueueInterfaceTest(unittest.TestCase):
         self.assertEqual(error, True)
 
     def test_xqueue_submit(self):
-        xqueue_header = {
-            'submission_id': 1,
-            'submission_key': 1,
-            'queue_name': "MITx-6.002x",
-        }
         grader_payload = {
             'location': LOCATION,
             'course_id': u'MITx/6.002x',
@@ -120,18 +118,14 @@ class XQueueInterfaceTest(unittest.TestCase):
             'rubric' : 'This is a rubric.',
             'grader_settings' : "ml_grading.conf",
         }
-        student_info = {
-            'submission_time': timezone.now().strftime("%Y%m%d%H%M%S"),
-            'anonymous_student_id': STUDENT_ID
-        }
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
-            'student_info': json.dumps(student_info),
+            'student_info': test_util.get_student_info(STUDENT_ID),
             'student_response': "Test! And longer now so tests pass.",
             'max_score': 1,
         }
         content = {
-            'xqueue_header': json.dumps(xqueue_header),
+            'xqueue_header': test_util.get_xqueue_header(),
             'xqueue_body': json.dumps(xqueue_body),
         }
 
@@ -147,6 +141,50 @@ class XQueueInterfaceTest(unittest.TestCase):
         body = json.loads(content.content)
 
         self.assertEqual(body['success'], True)
+
+
+    def _message_submission(self, success, score=None, submission_id=None):
+        sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        sub.save()
+        grade=test_util.get_grader("IN")
+        grade.submission=sub
+        grade.save()
+        grader_id = grade.grader_id
+        if submission_id is None:
+            submission_id = sub.id
+
+        message = {
+            'grader_id': grader_id,
+            'submission_id': submission_id,
+            'feedback': "This is test feedback",
+            'student_info': test_util.get_student_info(STUDENT_ID),
+        }
+        if score is not None:
+            message['score'] = score
+        
+        content = {
+            'xqueue_header': test_util.get_xqueue_header(),
+            'xqueue_body': json.dumps(message),
+        }
+        content = self.c.post(
+                SUBMIT_MESSAGE_URL,
+                content
+        )
+        log.debug(content)
+        body = json.loads(content.content)
+        self.assertEqual(body['success'], success)
+
+
+    def test_message_submission_success(self):
+        self._message_submission(True) 
+        
+    def test_message_submission_with_score_success(self):
+        self._message_submission(True, score=3)
+
+    def test_message_submission_without_base_submission_fail(self):
+        self._message_submission(False, submission_id=5)
+
+
 
 
 class GraderInterfaceTest(unittest.TestCase):
@@ -178,16 +216,7 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
 
     def test_get_ml_subs_true(self):
-
-        #Create enough instructor graded submissions that ML will work
-        for i in xrange(0,settings.MIN_TO_USE_ML):
-            sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
-            sub.state=SubmissionState.finished
-            sub.save()
-
-            grade=test_util.get_grader("IN")
-            grade.submission=sub
-            grade.save()
+        test_util.create_ml_model(STUDENT_ID, LOCATION)
 
         #Create a submission that requires ML grading
         sub=test_util.get_sub("ML",STUDENT_ID,LOCATION)
@@ -270,6 +299,8 @@ class ControllerUtilTests(unittest.TestCase):
     def tearDown(self):
         test_util.delete_all()
 
+
+
     def test_parse_xobject_false(self):
         sample_xqueue_return='blah'
         return_code, content= util.parse_xobject(sample_xqueue_return, "blah")
@@ -309,6 +340,52 @@ class ControllerUtilTests(unittest.TestCase):
         self.assertEqual(body['success'], True)
         self.assertEqual(body['eta'], settings.DEFAULT_ESTIMATED_GRADING_TIME)
 
+class ExpireSubmissionsTests(unittest.TestCase):
+    fixtures = ['/controller/test_data.json']
+    def setUp(self):
+        test_util.create_user()
 
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+    def tearDown(self):
+        test_util.delete_all()
+
+    def test_reset_subs_to_in(self):
+        test_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
+        test_sub.save()
+        
+        expire_submissions.reset_ml_subs_to_in()
+
+        test_sub = Submission.objects.get(id=test_sub.id)
+
+        self.assertEqual(test_sub.next_grader_type, "IN")
+
+    def test_reset_in_subs_to_ml(self):
+        test_util.create_ml_model(STUDENT_ID, LOCATION)
+
+        new_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        new_sub.save()
+
+        success = expire_submissions.reset_in_subs_to_ml([new_sub])
+        
+        new_sub = Submission.objects.get(id = new_sub.id)
+
+        self.assertEqual(new_sub.next_grader_type, "ML")
+        self.assertTrue(success)
+
+    def test_reset_subs_in_basic_check(self):
+        test_sub = test_util.get_sub("BC", STUDENT_ID, LOCATION)
+        test_sub.save()
+        subs = Submission.objects.all()
+
+        success = expire_submissions.reset_subs_in_basic_check(subs)
+
+        test_sub = Submission.objects.get(id = test_sub.id)
+        test_grader = Grader.objects.get(submission_id = test_sub.id)
+
+        self.assertTrue(success)
+        self.assertNotEqual(test_sub.next_grader_type, "BC")
+        self.assertEqual(test_grader.grader_type, "BC")
 
 

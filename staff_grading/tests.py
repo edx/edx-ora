@@ -24,7 +24,7 @@ GET_NEXT= project_urls.StaffGradingURLs.get_next_submission
 SAVE_GRADE= project_urls.StaffGradingURLs.save_grade
 GET_PROBLEM_LIST=project_urls.StaffGradingURLs.get_problem_list
 
-LOCATION="MITx/6.002x"
+LOCATION="idx://MITx/6.002x/OETest"
 STUDENT_ID="5"
 COURSE_ID="course_id"
 
@@ -84,22 +84,26 @@ class StaffGradingViewTest(unittest.TestCase):
 
     def test_save_grade_submission_id_does_not_exist(self):
         #Should fail, the submission id that is posted to the view does not exist
-        self.save_grade(False)
+        self.save_grade(False, False)
 
     def test_save_grade_true(self):
         test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID)
         test_sub.save()
 
         #Should work because submission was just created
-        self.save_grade(True)
+        self.save_grade(True, False)
+        test_sub = Submission.objects.get(id=test_sub.id)
+        # make sure the submission isn't skipped
+        self.assertNotEqual(test_sub.next_grader_type,"ML")
 
-    def save_grade(self, should_work):
+    def save_grade(self, should_work, skipped):
         post_data={
             'course_id' : COURSE_ID,
             'grader_id' : STUDENT_ID,
             'submission_id' : 1,
             'score' : 0,
             'feedback' : 'string',
+            'skipped': skipped
         }
 
         content = self.c.post(
@@ -129,7 +133,7 @@ class StaffGradingViewTest(unittest.TestCase):
     def test_get_problem_list_true(self):
 
         for i in xrange(0,10):
-            test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID, course_id=COURSE_ID)
+            test_sub=test_util.get_sub("IN",STUDENT_ID,LOCATION, course_id=COURSE_ID)
             test_sub.save()
 
         get_data={
@@ -145,3 +149,12 @@ class StaffGradingViewTest(unittest.TestCase):
 
         self.assertEqual(body['problem_list'][0]['num_graded'],0)
         self.assertEqual(body['problem_list'][0]['num_pending'],10)
+
+
+    def test_skip_problem_success(self):
+        test_sub = test_util.get_sub("IN", LOCATION, STUDENT_ID, course_id=COURSE_ID)
+        test_sub.save()
+        self.save_grade(True, True)
+        test_sub = Submission.objects.get(id=test_sub.id)
+        self.assertEqual(test_sub.next_grader_type,"ML")
+
