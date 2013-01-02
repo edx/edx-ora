@@ -46,7 +46,7 @@ def reset_ml_subs_to_in():
         if ((subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending):
             for sub in subs_pending_total:
                 if sub.next_grader_type=="ML" and sub.get_unsuccessful_graders().count()==0:
-                    staff_grading_util.set_instructor_grading_item_back_to_ml(sub)
+                    staff_grading_util.set_ml_grading_item_back_to_instructor(sub)
                     counter+=1
                 if (counter+subs_graded + subs_pending)> settings.MIN_TO_USE_ML:
                     break
@@ -161,21 +161,5 @@ def finalize_expired_submission(sub):
     sub.save()
 
     grade = create_grader(grader_dict,sub)
-
-    return True
-
-def reset_ml_to_in_if_too_few(sub):
-    """
-    Resets a submission marked for ml grading to instructor grading if there are too few instructor graded submissions
-    in the queue.  This happens when the instructor skips a lot of submissions.
-    Input:
-        A submission
-    Output:
-        Success code
-    """
-
-    sub.state=SubmissionState.waiting_to_be_graded
-    sub.next_grader_type="IN"
-    sub.save()
 
     return True

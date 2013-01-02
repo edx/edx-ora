@@ -187,21 +187,16 @@ def get_single_instructor_grading_item(course_id):
 
 def set_instructor_grading_item_back_to_ml(submission_id):
     """
-    Sets a submission from instructor grading to ML without creating a grader object.
+    Sets a submission from instructor grading to ML.
     Input:
         Submission id
     Output:
         Boolean success, submission or error message
     """
-    if not isinstance(submission_id,Submission):
-        try:
-            sub=Submission.objects.get(id=submission_id)
-        except:
-            error_message="Could not find a submission id."
-            log.exception(error_message)
-            return False, error_message
-    else:
-        sub=submission_id
+    success, sub=check_submission_id(submission_id)
+
+    if not success:
+        return success, sub
 
     log.debug("Setting back to ML.")
     grader_dict={
@@ -218,5 +213,39 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     sub.state=SubmissionState.waiting_to_be_graded
     sub.save()
     create_grader(grader_dict,sub)
+
+    return True, sub
+
+def check_submission_id(submission_id):
+
+    if not isinstance(submission_id,Submission):
+        try:
+            sub=Submission.objects.get(id=submission_id)
+        except:
+            error_message="Could not find a submission id."
+            log.exception(error_message)
+            return False, error_message
+    else:
+        sub=submission_id
+
+    return True, sub
+
+def set_ml_grading_item_back_to_instructor(submission_id):
+    """
+    Sets a submission from ML grading to instructor without creating a grader object.
+    Input:
+        Submission id
+    Output:
+        Boolean success, submission or error message
+    """
+    success, sub=check_submission_id(submission_id)
+
+    if not success:
+        return success, sub
+
+    log.debug("Setting back to Instructor.")
+    sub.next_grader_type="IN"
+    sub.state=SubmissionState.waiting_to_be_graded
+    sub.save()
 
     return True, sub
