@@ -25,9 +25,9 @@
 
 
         $("input[name=show]").click(function(event){
-            location=$("select[name=location]").first().find(':selected').text()
+            loc=$("select[name=location]").first().find(':selected').text()
             submit("{{ajax_url}}{{post_url}}", 'POST', [
-                { name: 'location', value: location },
+                { name: 'location', value: loc },
             ]);
         });
     });
