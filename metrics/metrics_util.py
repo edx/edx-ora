@@ -18,7 +18,7 @@ IMAGE_ERROR_MESSAGE = "Error processing image."
 
 def sub_commas(text):
     fixed_text=re.sub(","," ",text)
-    return text
+    return fixed_text
 
 def encode_ascii(text):
     return text.encode('ascii', 'ignore')
