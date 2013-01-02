@@ -41,6 +41,8 @@ def metrics_form(request):
         rendered=render_form("metrics/metrics/",available_metric_types)
         return HttpResponse(rendered)
 
+@csrf_exempt
+@login_required
 def data_dump_form(request):
     unique_locations=[x['location'] for x in
                       list(Submission.objects.all().values('location').distinct())]
@@ -57,7 +59,7 @@ def data_dump_form(request):
         if location not in unique_locations:
             return HttpResponse("Invalid problem location specified")
 
-        success,response = metrics_util.render_requested_metric(metric_type,arguments,title)
+        success,response = metrics_util.get_data_in_csv_format(location)
 
         if not success:
             return HttpResponse(response)
@@ -65,8 +67,7 @@ def data_dump_form(request):
         return HttpResponse(response,"image/png")
 
     elif request.method == "GET":
-        available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
-        rendered=render_form("metrics/metrics/",unique_locations)
+        rendered=render_data_dump_form("metrics/data_dump/",unique_locations)
         return HttpResponse(rendered)
 
 @csrf_exempt
