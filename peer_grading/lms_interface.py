@@ -223,3 +223,53 @@ def save_calibration_essay(request):
         return util._error_response("Failed to create and save calibration record.", _INTERFACE_VERSION)
 
     return util._success_response({'message' : "Successfully saved calibration record."}, _INTERFACE_VERSION)
+
+@util.error_if_not_logged_in
+def get_problem_list(request):
+    """
+    Get the list of problems that need grading in course_id request.GET['course_id'].
+
+    Returns:
+        list of dicts with keys
+           'location'
+           'problem_name'
+           'num_graded' -- number graded
+           'num_pending' -- number pending in the queue
+    """
+
+    if request.method!="GET":
+        error_message="Request needs to be GET."
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    course_id=request.GET.get("course_id")
+    student_id = request.GET.get("student_id")
+
+    if not course_id or not student_id:
+        error_message="Missing needed tag course_id or student_id"
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    locations_for_course = [x['location'] for x in
+                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+    location_info=[]
+    for location in locations_for_course:
+        student_sub_count=Submission.objects.filter(student_id=student_id, location=location).count()
+        if student_sub_count>0:
+            problem_name = Submission.objects.filter(location=location)[0].problem_id
+            submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location).count()
+            submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
+
+            problem_name_from_location=location.split("://")[1]
+            location_dict={
+                'location' : location,
+                'problem_name' : problem_name_from_location,
+                'num_graded' : submissions_graded,
+                'num_pending' : submissions_pending,
+                }
+            location_info.append(location_dict)
+
+    log.debug(location_info)
+    return util._success_response({'problem_list' : location_info},
+        _INTERFACE_VERSION)
+
