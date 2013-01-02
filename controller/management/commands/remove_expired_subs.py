@@ -31,12 +31,16 @@ class Command(BaseCommand):
             try:
                 transaction.commit_unless_managed()
                 subs = Submission.objects.all()
+
+                #Comment out submission expiration for now.  Not really needed while testing.
                 expire_submissions.reset_timed_out_submissions(subs)
+                """
                 expired_list = expire_submissions.get_submissions_that_have_expired(subs)
                 if len(expired_list) > 0:
                     success = expire_submissions.finalize_expired_submissions(expired_list)
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:{0}".format(success)])
+                """
 
                 expire_submissions.reset_in_subs_to_ml(subs)
                 expire_submissions.reset_subs_in_basic_check(subs)

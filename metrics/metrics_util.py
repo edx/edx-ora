@@ -9,10 +9,38 @@ import logging
 import matplotlib.pyplot as plt
 import StringIO
 from matplotlib import numpy as np
+import re
+import csv
 
 log = logging.getLogger(__name__)
 
 IMAGE_ERROR_MESSAGE = "Error processing image."
+
+def sub_commas(text):
+    fixed_text=re.sub(","," ",text)
+    return text
+
+def get_data_in_csv_format(location):
+    fixed_location=re.sub("[/:]","_",location)
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(fixed_location)
+    writer = csv.writer(response)
+
+    subs=Submission.objects.filter(location=location,state=SubmissionState.finished)
+    grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
+    grader_type=[grade['grader_type'] for grade in grader_info]
+    score=[grade['score'] for grade in grader_info]
+    feedback=[sub_commas(grade['feedback']) for grade in grader_info]
+    success=[grade['success'] for grade in grader_info]
+    submission_text=[sub_commas(sub.student_response) for sub in subs]
+    max_score=[sub.max_score for sub in subs]
+
+    writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text"])
+    for i in xrange(0,len(grader_info)):
+        writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i]])
+
+    return True, response
+
 
 def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     """
@@ -234,6 +262,19 @@ def render_form(post_url, available_metric_types):
         })
 
     return rendered
+
+def render_data_dump_form(post_url, unique_locations):
+    url_base = settings.GRADING_CONTROLLER_INTERFACE['url']
+    if not url_base.endswith("/"):
+        url_base += "/"
+    rendered = render_to_string('data_dump_display.html',
+        {'ajax_url': url_base,
+         'post_url': post_url,
+         'unique_locations': unique_locations,
+         })
+
+    return rendered
+
 
 def get_title(query_dict,metric_type):
     title = 'Data for metric {0} request with params '.format(metric_type)

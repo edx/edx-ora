@@ -4,9 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from controller import util
 from metrics.charting import render_image
-from metrics.metrics_util import render_form, get_arguments
 import metrics_util
 from django.template.loader import render_to_string
+
+from controller.models import Submission
 
 from models import Timing
 import logging
@@ -21,7 +22,7 @@ def metrics_form(request):
 
     if request.method == "POST":
 
-        arguments,title=get_arguments(request)
+        arguments,title=metrics_util.get_arguments(request)
 
         tags=['metric_type']
         for tag in tags:
@@ -38,7 +39,34 @@ def metrics_form(request):
 
     elif request.method == "GET":
         available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
-        rendered=render_form("metrics/metrics/",available_metric_types)
+        rendered=metrics_util.render_form("metrics/metrics/",available_metric_types)
+        return HttpResponse(rendered)
+
+@csrf_exempt
+@login_required
+def data_dump_form(request):
+    unique_locations=[x['location'] for x in
+                      list(Submission.objects.all().values('location').distinct())]
+    if request.method == "POST":
+        tags=['location']
+        for tag in tags:
+            if tag not in request.POST:
+                return HttpResponse("Request missing needed tag location.")
+
+        location=request.POST.get('location')
+        log.debug(location)
+        if location not in unique_locations:
+            return HttpResponse("Invalid problem location specified")
+
+        success,response = metrics_util.get_data_in_csv_format(location)
+
+        if not success:
+            return response
+
+        return response
+
+    elif request.method == "GET":
+        rendered=metrics_util.render_data_dump_form("metrics/data_dump/",unique_locations)
         return HttpResponse(rendered)
 
 @csrf_exempt
@@ -76,7 +104,7 @@ def timing_metrics(request):
     if request.method != "POST":
         return util._error_response("Must make a POST request.", _INTERFACE_VERSION)
 
-    arguments,title=get_arguments(request)
+    arguments,title=metrics_util.get_arguments(request)
     success, response=metrics_util.generate_timing_response(arguments,title)
 
     if not success:
@@ -98,7 +126,7 @@ def student_performance_metrics(request):
     if request.method != "POST":
         return util._error_response("Request type must be POST", _INTERFACE_VERSION)
 
-    arguments,title=get_arguments(request)
+    arguments,title=metrics_util.get_arguments(request)
     success, response=metrics_util.generate_performance_response(arguments,title)
 
     if not success:
