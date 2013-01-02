@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
 
-@login_required
+@util.error_if_not_logged_in
 def get_next_submission(request):
     """
     Gets next submission from controller for peer grading.
@@ -61,7 +61,7 @@ def get_next_submission(request):
     return util._success_response(response, _INTERFACE_VERSION)
 
 
-@login_required
+@util.error_if_not_logged_in
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -127,7 +127,7 @@ def save_grade(request):
     return util._success_response({'msg': "Posted to queue."}, _INTERFACE_VERSION)
 
 
-@login_required
+@util.error_if_not_logged_in
 def is_student_calibrated(request):
     """
     Decides if student has fulfilled criteria for peer grading calibration for a given location (problem id).
@@ -153,7 +153,7 @@ def is_student_calibrated(request):
     return util._success_response(data, _INTERFACE_VERSION)
 
 
-@login_required
+@util.error_if_not_logged_in
 def show_calibration_essay(request):
     """
     Shows a calibration essay when it receives a GET request.
@@ -177,7 +177,7 @@ def show_calibration_essay(request):
     return util._success_response(data, _INTERFACE_VERSION)
 
 
-@login_required
+@util.error_if_not_logged_in
 def save_calibration_essay(request):
     """
     Saves a calibration essay sent back from LMS.
