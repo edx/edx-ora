@@ -21,10 +21,16 @@ def get_data_in_csv(location):
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(fixed_location)
     writer = csv.writer(response)
+
     subs=Submission.objects.filter(location=location,state=SubmissionState.finished)
     grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
     grader_type=[grade['grader_type'] for grade in grader_info]
-    
+    score=[grade['score'] for grade in grader_info]
+    feedback=[grade['feedback'] for grade in grader_info]
+    success=[grade['success'] for grade in grader_info]
+    submission_text=[sub.student_response for sub in subs]
+    max_score=[sub.max_score for sub in subs]
+
 
 def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     """
