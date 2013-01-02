@@ -143,35 +143,48 @@ class XQueueInterfaceTest(unittest.TestCase):
         self.assertEqual(body['success'], True)
 
 
-    def test_message_submission_with_score_success(self):
+    def _message_submission(self, success, score=None, submission_id=None):
         sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
         grade=test_util.get_grader("IN")
         grade.submission=sub
         grade.save()
         grader_id = grade.grader_id
-        submission_id = sub.id
-        # now send a new message
+        if submission_id is None:
+            submission_id = sub.id
+
         message = {
             'grader_id': grader_id,
             'submission_id': submission_id,
-            'feedback': 'Testing feedback for the message controller. Yay.',
+            'feedback': "This is test feedback",
             'student_info': test_util.get_student_info(STUDENT_ID),
-            'score': '3'
         }
+        if score is not None:
+            message['score'] = score
+        
         content = {
             'xqueue_header': test_util.get_xqueue_header(),
             'xqueue_body': json.dumps(message),
         }
-
         content = self.c.post(
                 SUBMIT_MESSAGE_URL,
                 content
         )
         log.debug(content)
         body = json.loads(content.content)
+        self.assertEqual(body['success'], success)
 
-        self.assertEqual(body['success'], True)
+
+    def test_message_submission_success(self):
+        self._message_submission(True) 
+        
+    def test_message_submission_with_score_success(self):
+        self._message_submission(True, score=3)
+
+    def test_message_submission_without_base_submission_fail(self):
+        self._message_submission(False, submission_id=5)
+
+
 
 
 class GraderInterfaceTest(unittest.TestCase):
