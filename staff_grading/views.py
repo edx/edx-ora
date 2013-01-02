@@ -246,9 +246,11 @@ def get_problem_list(request):
         problem_name = Submission.objects.filter(location=location)[0].problem_id
         submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
         finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+
+        problem_name_from_location=location.split("://")[1]
         location_dict={
             'location' : location,
-            'problem_name' : problem_name,
+            'problem_name' : problem_name_from_location,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
             'min_for_ml' : settings.MIN_TO_USE_ML,
