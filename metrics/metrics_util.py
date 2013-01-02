@@ -31,6 +31,12 @@ def get_data_in_csv(location):
     submission_text=[sub.student_response for sub in subs]
     max_score=[sub.max_score for sub in subs]
 
+    writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text", "Feedback"])
+    for i in xrange(0,len(grader_info)):
+        writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i], feedback[i]])
+
+    return response
+
 
 def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
     """
