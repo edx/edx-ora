@@ -14,3 +14,10 @@ urlpatterns = patterns('peer_grading.lms_interface',
 urlpatterns += patterns('peer_grading.views',
     url(r'^peer_grading/$', 'peer_grading'),
 )
+
+# Also have proxies for the login and logout views--this allows
+# clients to view peer grading as a self-contained interface.
+urlpatterns += patterns('controller.views',
+    url(r'^login/$', 'log_in'),
+    url(r'^logout/$', 'log_out'),
+)
