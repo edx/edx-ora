@@ -24,7 +24,7 @@ GET_NEXT= project_urls.StaffGradingURLs.get_next_submission
 SAVE_GRADE= project_urls.StaffGradingURLs.save_grade
 GET_PROBLEM_LIST=project_urls.StaffGradingURLs.get_problem_list
 
-LOCATION="MITx/6.002x"
+LOCATION="idx://MITx/6.002x/OETest"
 STUDENT_ID="5"
 COURSE_ID="course_id"
 
@@ -133,7 +133,7 @@ class StaffGradingViewTest(unittest.TestCase):
     def test_get_problem_list_true(self):
 
         for i in xrange(0,10):
-            test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID, course_id=COURSE_ID)
+            test_sub=test_util.get_sub("IN",STUDENT_ID,LOCATION, course_id=COURSE_ID)
             test_sub.save()
 
         get_data={

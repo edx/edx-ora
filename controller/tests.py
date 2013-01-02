@@ -342,12 +342,11 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
         test_sub.save()
         
-        success = expire_submissions.reset_ml_subs_to_in()
+        expire_submissions.reset_ml_subs_to_in()
 
         test_sub = Submission.objects.get(id=test_sub.id)
 
         self.assertEqual(test_sub.next_grader_type, "IN")
-        self.assertTrue(success)
 
     def test_reset_in_subs_to_ml(self):
         test_util.create_ml_model(STUDENT_ID, LOCATION)
@@ -362,7 +361,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         self.assertEqual(new_sub.next_grader_type, "ML")
         self.assertTrue(success)
 
-    def test_reset_subs_in_back_check(self):
+    def test_reset_subs_in_basic_check(self):
         test_sub = test_util.get_sub("BC", STUDENT_ID, LOCATION)
         test_sub.save()
         subs = Submission.objects.all()
@@ -370,26 +369,10 @@ class ExpireSubmissionsTests(unittest.TestCase):
         success = expire_submissions.reset_subs_in_basic_check(subs)
 
         test_sub = Submission.objects.get(id = test_sub.id)
+        test_grader = Grader.objects.get(submission_id = test_sub.id)
 
         self.assertTrue(success)
         self.assertNotEqual(test_sub.next_grader_type, "BC")
-
-
-    def test_reset_ml_to_in_if_too_few(self):
-        new_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
-        new_sub.state = SubmissionState.being_graded
-        new_sub.save()
-
-        success = expire_submissions.reset_ml_to_in_if_too_few(new_sub)
-
-        self.assertTrue(success)
-        new_sub = Submission.objects.get(id = new_sub.id)
-
-        self.assertEqual(new_sub.next_grader_type, "IN")
-        self.assertEqual(new_sub.state, SubmissionState.waiting_to_be_graded)
-
-
-
-
+        self.assertEqual(test_grader.grader_type, "BC")
 
 
