@@ -49,6 +49,7 @@ class Command(BaseCommand):
         add_grader = parser.get(header_name, "add_grader_object") == "True"
         set_as_calibration = parser.get(header_name, "set_as_calibration") == "True"
         max_score= parser.get(header_name,"max_score")
+        student_id = parser.get(header_name,student_id)
 
         score, text = [], []
         combined_raw = open(settings.REPO_PATH / essay_file).read()
@@ -61,7 +62,7 @@ class Command(BaseCommand):
         for i in range(0, min(essay_limit, len(text))):
             sub = Submission(
                 prompt=prompt,
-                student_id="",
+                student_id=student_id,
                 problem_id=problem_id,
                 state=state,
                 student_response=text[i],
@@ -71,14 +72,16 @@ class Command(BaseCommand):
                 xqueue_queue_name="",
                 location=location,
                 course_id=course_id,
-                previous_grader_type="IN",
                 next_grader_type=next_grader_type,
                 posted_results_back_to_queue=True,
+                sub.previous_grader_type="BC",
                 max_score=max_score,
             )
 
             sub.save()
             if add_grader:
+                sub.previous_grader_type="IN"
+                sub.save()
                 grade = Grader(
                     score=score[i],
                     feedback="",
