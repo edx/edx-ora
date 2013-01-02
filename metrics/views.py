@@ -66,7 +66,7 @@ def data_dump_form(request):
 
     elif request.method == "GET":
         available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
-        rendered=render_form("metrics/metrics/",available_metric_types)
+        rendered=render_form("metrics/metrics/",unique_locations)
         return HttpResponse(rendered)
 
 @csrf_exempt

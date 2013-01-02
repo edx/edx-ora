@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        function submit(action, method, values) {
+            var form = $('<form/>', {
+                action: action,
+                method: method
+            });
+            $.each(values, function() {
+                form.append($('<input/>', {
+                    type: 'hidden',
+                    name: this.name,
+                    value: this.value
+                }));
+            });
+            form.appendTo('body').submit();
+        }
+
+
+
+        $("input[name=show]").click(function(event){
+            location=$("select[name=location]").first().find(':selected').text()
+            submit("{{ajax_url}}{{post_url}}", 'POST', [
+                { name: 'location', value: location },
+            ]);
+        });
+    });
+
+</script>
+
+Metric type:
+<select name="location" class="location">
+    {% for i in unique_locations %}
+        <option value="{{i}}">{{i}}</option>
+    {% endfor %}
+</select><br/><br/>
+
+<input type="button" value="Show" class="show-button" name="show"/>
+<div id="result"></div>
+</body>
+</html>
