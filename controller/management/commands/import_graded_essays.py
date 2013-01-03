@@ -50,6 +50,7 @@ class Command(BaseCommand):
         set_as_calibration = parser.get(header_name, "set_as_calibration") == "True"
         max_score= parser.get(header_name,"max_score")
         student_id = parser.get(header_name,'student_id')
+        increment_ids = parser.get(header_name,'increment_ids')
 
         score, text = [], []
         combined_raw = open(settings.REPO_PATH / essay_file).read()
@@ -58,6 +59,9 @@ class Command(BaseCommand):
             score1, text1 = raw_lines[row].strip().split("\t")
             text.append(text1)
             score.append(int(score1))
+
+        if increment_ids:
+            student_id = int(student_id)
 
         for i in range(0, min(essay_limit, len(text))):
             sub = Submission(
@@ -94,6 +98,9 @@ class Command(BaseCommand):
 
                 grade.submission = sub
                 grade.save()
+
+            if increment_ids:
+                student_id+=1
 
         print ("Successfully imported {0} essays using configuration in file {1}.".format(
             min(essay_limit, len(text)),
