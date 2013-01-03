@@ -92,6 +92,8 @@ def submit(request):
                     course_id=course_id,
                     max_score=max_score,
                     grader_settings=grader_settings,
+                    initial_display=initial_display,
+                    answer=answer,
                 )
 
             except Exception as err:
