@@ -3,6 +3,7 @@ import logging
 from django.http import  Http404
 from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
+from django.views.decorators.csrf import csrf_exempt
 
 from controller.models import Submission
 from controller.models import SubmissionState, GraderStatus
@@ -15,6 +16,7 @@ log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
 
+@csrf_exempt
 @util.error_if_not_logged_in
 def get_next_submission(request):
     """
@@ -60,7 +62,7 @@ def get_next_submission(request):
 
     return util._success_response(response, _INTERFACE_VERSION)
 
-
+@csrf_exempt
 @util.error_if_not_logged_in
 def save_grade(request):
     """
@@ -126,7 +128,7 @@ def save_grade(request):
 
     return util._success_response({'msg': "Posted to queue."}, _INTERFACE_VERSION)
 
-
+@csrf_exempt
 @util.error_if_not_logged_in
 def is_student_calibrated(request):
     """
@@ -152,7 +154,7 @@ def is_student_calibrated(request):
 
     return util._success_response(data, _INTERFACE_VERSION)
 
-
+@csrf_exempt
 @util.error_if_not_logged_in
 def show_calibration_essay(request):
     """
@@ -176,7 +178,7 @@ def show_calibration_essay(request):
 
     return util._success_response(data, _INTERFACE_VERSION)
 
-
+@csrf_exempt
 @util.error_if_not_logged_in
 def save_calibration_essay(request):
     """
@@ -224,6 +226,7 @@ def save_calibration_essay(request):
 
     return util._success_response({'message' : "Successfully saved calibration record."}, _INTERFACE_VERSION)
 
+@csrf_exempt
 @util.error_if_not_logged_in
 def get_problem_list(request):
     """
