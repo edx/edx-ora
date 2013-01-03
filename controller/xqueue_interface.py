@@ -59,6 +59,8 @@ def submit(request):
                 #Retrieve individual values from xqueue body and header.
                 prompt = util._value_or_default(body['grader_payload']['prompt'], "")
                 rubric = util._value_or_default(body['grader_payload']['rubric'], "")
+                initial_display = util._value_or_default(body['grader_payload']['initial_display'], "")
+                answer = util._value_or_default(body['grader_payload']['answer'], "")
                 student_id = util._value_or_default(body['student_info']['anonymous_student_id'])
                 location = util._value_or_default(body['grader_payload']['location'])
                 course_id = util._value_or_default(body['grader_payload']['course_id'])
