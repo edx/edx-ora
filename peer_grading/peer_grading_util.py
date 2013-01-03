@@ -1,6 +1,5 @@
 from django.db.models import Count
-from controller.models import Submission
-from controller.models import SubmissionState, GraderStatus
+from controller.models import SubmissionState, GraderStatus, Grader, Submission
 import logging
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
@@ -82,3 +81,25 @@ def is_peer_grading_finished_for_submission(submission_id):
         Boolean indicating whether or not there are enough reliable evaluations.
     """
     pass
+
+def peer_grading_submissions_pending_for_location(location):
+    """
+    Get submissions that are graded by instructor
+    """
+    subs_graded = Submission.objects.filter(location=location,
+        state=SubmissionState.waiting_to_be_graded,
+        next_grader_type="PE",
+    )
+
+    return subs_graded
+
+def peer_grading_submissions_graded_for_location(location, student_id):
+    """
+    Get submissions that are graded by instructor
+    """
+    subs_graded = Grader.objects.filter(location=location,
+        status_code=GraderStatus.success,
+        grader_id = student_id,
+    )
+
+    return subs_graded

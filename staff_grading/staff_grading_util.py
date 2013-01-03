@@ -55,6 +55,10 @@ def finished_submissions_graded_by_instructor(location):
 
     return subs_graded
 
+def submission_text_graded_by_instructor(location):
+    finished_subs=finished_submissions_graded_by_instructor(location)
+    sub_text=finished_subs.values('student_response').distinct()
+    return [s['student_response'] for s in sub_text]
 
 def submissions_pending_instructor(location, state_in=[SubmissionState.being_graded, SubmissionState.waiting_to_be_graded]):
     """
@@ -93,6 +97,8 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
 
+    finished_submission_text=submission_text_graded_by_instructor(location)
+
     if not types_to_check_for:
         types_to_check_for="IN"
 
@@ -117,19 +123,24 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         to_be_graded_count=to_be_graded.count()
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
 
-        if(to_be_graded_count > 0):
-            to_be_graded = to_be_graded[0]
-            if to_be_graded is not None:
-                to_be_graded.state = SubmissionState.being_graded
-                to_be_graded.next_grader_type="IN"
-                to_be_graded.save()
-                found = True
-                sub_id = to_be_graded.id
+        for i in xrange(0,to_be_graded_count):
+            #In some cases, this causes a model query error without the try/except block due to the checked out state
+            try:
+                to_be_graded_obj = to_be_graded[i]
+            except:
+                return False, 0
+            if to_be_graded_obj is not None:
+                if to_be_graded_obj.student_response not in finished_submission_text:
+                    to_be_graded_obj.state = SubmissionState.being_graded
+                    to_be_graded_obj.next_grader_type="IN"
+                    to_be_graded_obj.save()
+                    found = True
+                    sub_id = to_be_graded_obj.id
 
-                #Insert timing initialization code
-                initialize_timing(sub_id)
+                    #Insert timing initialization code
+                    initialize_timing(sub_id)
 
-                return found, sub_id
+                    return found, sub_id
 
         #If nothing is found, return false
     return False, 0
