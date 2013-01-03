@@ -140,7 +140,7 @@ def handle_submission(sub):
         sub.next_grader_type = "BC"
         sub.save()
         timing_functions.initialize_timing(sub.id)
-        success, check_dict = basic_check_util.simple_quality_check(sub.student_response)
+        success, check_dict = basic_check_util.simple_quality_check(sub.student_response, sub.initial_display)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
 

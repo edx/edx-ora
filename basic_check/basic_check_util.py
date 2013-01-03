@@ -28,7 +28,7 @@ def perform_spelling_and_grammar_checks(string):
     return feedback, e_set
 
 
-def simple_quality_check(string):
+def simple_quality_check(string, initial_display):
     """
     Performs a simple sanity test on an input string
     Input:
@@ -62,7 +62,8 @@ def simple_quality_check(string):
 
     quality_dict['feedback'] = json.dumps({k: basic_check[k] for k in ['markup_text', 'spelling', 'grammar']})
     if(total_length < LENGTH_MINIMUM or word_length_ratio <= CHARS_PER_WORD_MINIMUM or
-       basic_check['grammar_per_char'] > GRAMMAR_MAXIMUM or basic_check['spelling_per_char'] > SPELLING_MAXIMUM):
+       basic_check['grammar_per_char'] > GRAMMAR_MAXIMUM or basic_check['spelling_per_char'] > SPELLING_MAXIMUM
+        or string==initial_display):
         quality_dict['score'] = 0
 
     return True, quality_dict
