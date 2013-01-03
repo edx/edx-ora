@@ -59,6 +59,8 @@ def submit(request):
                 #Retrieve individual values from xqueue body and header.
                 prompt = util._value_or_default(body['grader_payload']['prompt'], "")
                 rubric = util._value_or_default(body['grader_payload']['rubric'], "")
+                initial_display = util._value_or_default(body['grader_payload']['initial_display'], "")
+                answer = util._value_or_default(body['grader_payload']['answer'], "")
                 student_id = util._value_or_default(body['student_info']['anonymous_student_id'])
                 location = util._value_or_default(body['grader_payload']['location'])
                 course_id = util._value_or_default(body['grader_payload']['course_id'])
@@ -90,6 +92,8 @@ def submit(request):
                     course_id=course_id,
                     max_score=max_score,
                     grader_settings=grader_settings,
+                    initial_display=initial_display,
+                    answer=answer,
                 )
 
             except Exception as err:
@@ -136,7 +140,7 @@ def handle_submission(sub):
         sub.next_grader_type = "BC"
         sub.save()
         timing_functions.initialize_timing(sub.id)
-        success, check_dict = basic_check_util.simple_quality_check(sub.student_response)
+        success, check_dict = basic_check_util.simple_quality_check(sub.student_response, sub.initial_display)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
 

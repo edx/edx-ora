@@ -46,6 +46,8 @@ class Submission(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     prompt = models.TextField(default="")
     rubric = models.TextField(default="")
+    initial_display = models.TextField(default="")
+    answer = models.TextField(default="")
     # TODO: is this good enough?  unique per problem/student?
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
