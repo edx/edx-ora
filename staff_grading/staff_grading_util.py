@@ -118,7 +118,12 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         log.debug("Looking for  location {0} and got count {1}".format(location,to_be_graded_count))
 
         if(to_be_graded_count > 0):
-            to_be_graded = to_be_graded[0]
+
+            #In some cases, this causes a model query error without the try/except block due to the checked out state
+            try:
+                to_be_graded = to_be_graded[0]
+            except:
+                return False, 0
             if to_be_graded is not None:
                 to_be_graded.state = SubmissionState.being_graded
                 to_be_graded.next_grader_type="IN"
