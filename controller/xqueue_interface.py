@@ -59,8 +59,6 @@ def submit(request):
                 #Retrieve individual values from xqueue body and header.
                 prompt = util._value_or_default(body['grader_payload']['prompt'], "")
                 rubric = util._value_or_default(body['grader_payload']['rubric'], "")
-                initial_display = util._value_or_default(body['grader_payload']['initial_display'], "")
-                answer = util._value_or_default(body['grader_payload']['answer'], "")
                 student_id = util._value_or_default(body['student_info']['anonymous_student_id'])
                 location = util._value_or_default(body['grader_payload']['location'])
                 course_id = util._value_or_default(body['grader_payload']['course_id'])
@@ -75,6 +73,13 @@ def submit(request):
 
                 submission_time_string = util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
+
+                initial_display=""
+                if 'initial_display' in body['grader_payload'].keys():
+                    initial_display = util._value_or_default(body['grader_payload']['initial_display'], "")
+                answer=""
+                if 'answer' in body['grader_payload'].keys():
+                    answer = util._value_or_default(body['grader_payload']['answer'], "")
 
                 #Create submission object
                 sub, created = Submission.objects.get_or_create(
@@ -99,7 +104,7 @@ def submit(request):
             except Exception as err:
                 xqueue_submission_id = util._value_or_default(header['submission_id'])
                 xqueue_submission_key = util._value_or_default(header['submission_key'])
-                log.error(
+                log.exception(
                     "Error creating submission and adding to database: sender: {0}, submission_id: {1}, submission_key: {2}".format(
                         util.get_request_ip(request),
                         xqueue_submission_id,
