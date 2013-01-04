@@ -224,7 +224,7 @@ def save_calibration_essay(request):
     if not success:
         return util._error_response("Failed to create and save calibration record.", _INTERFACE_VERSION)
 
-    return util._success_response({'message' : "Successfully saved calibration record."}, _INTERFACE_VERSION)
+    return util._success_response({'message' : "Successfully saved calibration record.", 'actual_score' : data['actual_score']}, _INTERFACE_VERSION)
 
 @csrf_exempt
 @util.error_if_not_logged_in

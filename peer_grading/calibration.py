@@ -55,7 +55,7 @@ def create_and_save_calibration_record(calibration_data):
 
     cal_record.save()
 
-    return True, {'cal_id': cal_record.id}
+    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score}
 
 
 def get_calibration_essay_data(calibration_essay_id):
