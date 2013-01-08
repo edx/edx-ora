@@ -162,12 +162,15 @@ def check_calibration_status(location,student_id):
             normalized_calibration_error=0
         #If error is too high, student not calibrated, otherwise they are.
         if normalized_calibration_error >= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR:
-            return True, calibration_dict.update({'calibrated': False})
+            calibration_dict.update({'calibrated': False})
+            return True, calibration_dict
         else:
-            return True, calibration_dict.update({'calibrated': True})
-    #If student has seen too many calibration essays, just say that they are calibrated.
+            calibration_dict.update({'calibrated': True})
+            return True, calibration_dict     #If student has seen too many calibration essays, just say that they are calibrated.
     elif calibration_record_count >= settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
-        return True, calibration_dict.update({'calibrated': True})
+        calibration_dict.update({'calibrated': True})
+        return True, calibration_dict 
     #If they have not already calibrated the minimum number of essays, they are not calibrated
     else:
-        return True, calibration_dict.update({'calibrated': False})
+        calibration_dict.update({'calibrated': False})
+        return True, calibration_dict 
