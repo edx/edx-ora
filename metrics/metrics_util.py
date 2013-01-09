@@ -50,7 +50,7 @@ def get_data_in_csv_format(locations, name):
         success=[grade['success'] for grade in grader_info]
         submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
         max_score=[sub.max_score for sub in subs]
-        
+
         if z==0:
             writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text"])
         for i in xrange(0,len(grader_info)):
@@ -355,7 +355,7 @@ def dump_form(request, type):
         location=request.POST.get('location')
         if location not in unique_locations and location!="all":
             return HttpResponse("Invalid problem location specified")
-        name=location
+        name="{0}_{1}".format(location, type)
         if location=="all":
             location=unique_locations
 
