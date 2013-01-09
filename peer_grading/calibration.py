@@ -55,7 +55,7 @@ def create_and_save_calibration_record(calibration_data):
 
     cal_record.save()
 
-    return True, {'cal_id': cal_record.id}
+    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score}
 
 
 def get_calibration_essay_data(calibration_essay_id):
@@ -149,6 +149,7 @@ def check_calibration_status(location,student_id):
     calibration_record_count = calibration_history.get_calibration_record_count()
     log.debug("Calibration record count: {0}".format(calibration_record_count))
 
+    calibration_dict={'total_calibrated_on_so_far' : calibration_record_count}
     #If student has calibrated more than the minimum and less than the max, check if error is higher than specified
     #Threshold.  Send another calibration essay if so.
     if (calibration_record_count >= settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
@@ -161,12 +162,15 @@ def check_calibration_status(location,student_id):
             normalized_calibration_error=0
         #If error is too high, student not calibrated, otherwise they are.
         if normalized_calibration_error >= settings.PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR:
-            return True, {'calibrated': False}
+            calibration_dict.update({'calibrated': False})
+            return True, calibration_dict
         else:
-            return True, {'calibrated': True}
-    #If student has seen too many calibration essays, just say that they are calibrated.
+            calibration_dict.update({'calibrated': True})
+            return True, calibration_dict     #If student has seen too many calibration essays, just say that they are calibrated.
     elif calibration_record_count >= settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
-        return True, {'calibrated': True}
+        calibration_dict.update({'calibrated': True})
+        return True, calibration_dict 
     #If they have not already calibrated the minimum number of essays, they are not calibrated
     else:
-        return True, {'calibrated': False}
+        calibration_dict.update({'calibrated': False})
+        return True, calibration_dict 
