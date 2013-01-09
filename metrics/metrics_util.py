@@ -11,6 +11,7 @@ import StringIO
 from matplotlib import numpy as np
 import re
 import csv
+import numpy
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +36,12 @@ def set_up_data_dump(locations,name):
 
     return writer, locations, response
 
+def join_if_list(text):
+    if isinstance(text,list):
+        text=" ".join(text)
+    return text
+
+
 def get_data_in_csv_format(locations, name):
     writer, locations, response = set_up_data_dump(locations, name)
 
@@ -45,8 +52,8 @@ def get_data_in_csv_format(locations, name):
         subs=Submission.objects.filter(location=location,state=SubmissionState.finished)
         grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
         grader_type=[grade['grader_type'] for grade in grader_info]
-        score=[grade['score'] for grade in grader_info]
-        feedback=[sub_commas(encode_ascii(grade['feedback'])) for grade in grader_info]
+        score=[numpy.median(grade['score']) for grade in grader_info]
+        feedback=[sub_commas(encode_ascii(join_if_list(grade['feedback']))) for grade in grader_info]
         success=[grade['success'] for grade in grader_info]
         submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
         max_score=[sub.max_score for sub in subs]
