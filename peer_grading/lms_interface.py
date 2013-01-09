@@ -28,18 +28,23 @@ def get_next_submission(request):
     """
 
     if request.method != "GET":
+        log.debug("Improper request method")
         raise Http404
 
     grader_id = request.GET.get("grader_id")
     location = request.GET.get("location")
 
     if not grader_id or not location:
-        return util._error_response("Failed to find needed keys 'grader_id' and 'location'", _INTERFACE_VERSION)
+        error_message="Failed to find needed keys 'grader_id' and 'location'"
+        log.debug(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
 
     (found, sub_id) = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
-        return  util._error_response("No current grading.", _INTERFACE_VERSION)
+        error_message="No current grading."
+        log.debug(error_message)
+        return  util._error_response(error_message, _INTERFACE_VERSION)
 
     try:
         sub = Submission.objects.get(id=int(sub_id))
@@ -60,6 +65,7 @@ def get_next_submission(request):
         'max_score': sub.max_score,
     }
 
+    log.debug(response)
     return util._success_response(response, _INTERFACE_VERSION)
 
 @csrf_exempt
