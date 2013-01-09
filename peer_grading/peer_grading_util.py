@@ -97,9 +97,10 @@ def peer_grading_submissions_graded_for_location(location, student_id):
     """
     Get submissions that are graded by instructor
     """
-    subs_graded = Grader.objects.filter(location=location,
-        status_code=GraderStatus.success,
-        grader_id = student_id,
+    subs_graded = Submission.objects.filter(
+        location=location,
+        grader__status_code=GraderStatus.success,
+        grader__grader_id = student_id,
     )
 
     return subs_graded

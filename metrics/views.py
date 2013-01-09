@@ -45,29 +45,12 @@ def metrics_form(request):
 @csrf_exempt
 @login_required
 def data_dump_form(request):
-    unique_locations=[x['location'] for x in
-                      list(Submission.objects.all().values('location').distinct())]
-    if request.method == "POST":
-        tags=['location']
-        for tag in tags:
-            if tag not in request.POST:
-                return HttpResponse("Request missing needed tag location.")
+    return metrics_util.dump_form(request,"data_dump")
 
-        location=request.POST.get('location')
-        log.debug(location)
-        if location not in unique_locations:
-            return HttpResponse("Invalid problem location specified")
-
-        success,response = metrics_util.get_data_in_csv_format(location)
-
-        if not success:
-            return response
-
-        return response
-
-    elif request.method == "GET":
-        rendered=metrics_util.render_data_dump_form("metrics/data_dump/",unique_locations)
-        return HttpResponse(rendered)
+@csrf_exempt
+@login_required
+def message_dump_form(request):
+    return metrics_util.dump_form(request,"message_dump")
 
 @csrf_exempt
 @login_required
