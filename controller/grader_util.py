@@ -98,6 +98,8 @@ def create_and_handle_grader_object(grader_dict):
         #If number of successful peer graders equals the needed count, finalize submission.
         if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
             sub.state = SubmissionState.finished
+        else:
+            sub.state = SubmissionState.waiting_to_be_graded
     #If something fails, immediately mark it for regrading
     #TODO: Get better logic for handling failure cases
     elif(grade.status_code == GraderStatus.failure and sub.state == SubmissionState.being_graded):
