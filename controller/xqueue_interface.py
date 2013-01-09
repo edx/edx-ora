@@ -188,6 +188,8 @@ def handle_submission(sub):
             log.exception("Invalid grader type specified in settings file.")
             return False
 
+        sub.preferred_grader_type=grader_settings['grader_type']
+
         sub.save()
         log.debug("Submission object created successfully!")
 
