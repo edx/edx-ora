@@ -23,34 +23,29 @@ def get_single_peer_grading_item(location, grader_id):
         location=location,
         state=SubmissionState.waiting_to_be_graded,
         next_grader_type="PE",
-    ).exclude(student_id=int(grader_id))
+    ).exclude(student_id=grader_id)
 
+    log.debug(to_be_graded)
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
         if to_be_graded_length > 0:
-            #Set the maximum number of records to search through
-            submissions_to_grade = (to_be_graded.filter(grader__isnull=True).values("id")[:50])
-            submissions_to_grade_count = submissions_to_grade.count()
-
-            if submissions_to_grade_count > 0:
-                submission_grader_counts = [0] * submissions_to_grade_count
-            elif submissions_to_grade_count == 0:
-                submissions_to_grade = (to_be_graded
-                                        .filter(grader__status_code=GraderStatus.success, grader__grader_type="PE")
-                                        .exclude(grader__grader_id=grader_id)
-                                        .annotate(num_graders=Count('grader'))
-                                        .values("num_graders", "id")
-                                        .order_by("num_graders")[:50]
-                    )
-                submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
+            submissions_to_grade = (to_be_graded
+                                    .filter(grader__status_code=GraderStatus.success, grader__grader_type__in=["PE","BC"])
+                                    .exclude(grader__grader_id=grader_id)
+                                    .annotate(num_graders=Count('grader'))
+                                    .values("num_graders", "id")
+                                    .order_by("num_graders")[:50]
+                )
+            submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
+            log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
 
             submission_ids = [p['id'] for p in submissions_to_grade]
-
 
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
             for i in xrange(0, len(submission_ids)):
+                log.debug("Looping through graders, on {0}".format(i))
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
                 grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
