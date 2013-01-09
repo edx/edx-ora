@@ -36,6 +36,7 @@ CHARFIELD_LEN_SMALL = 1024
 
 class Submission(models.Model):
     # controller state
+    preferred_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
     next_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
     previous_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
     state = models.CharField(max_length=1, choices=STATE_CODES)
