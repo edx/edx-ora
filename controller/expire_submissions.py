@@ -41,7 +41,8 @@ def reset_ml_subs_to_in():
         subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
         subs_pending_total= Submission.objects.filter(
             location=location,
-            state=SubmissionState.waiting_to_be_graded
+            state=SubmissionState.waiting_to_be_graded,
+            preferred_grader_type="ML"
         ).order_by('-date_created')[:settings.MIN_TO_USE_ML]
         if ((subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending):
             for sub in subs_pending_total:
@@ -57,7 +58,8 @@ def reset_in_subs_to_ml(subs):
     count=0
     in_subs=Submission.objects.filter(
         state=SubmissionState.waiting_to_be_graded,
-        next_grader_type="IN"
+        next_grader_type="IN",
+        preferred_grader_type="ML"
     )
 
     for sub in in_subs:

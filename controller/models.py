@@ -129,11 +129,14 @@ class Submission(models.Model):
         #If grader is peer, send back all peer judgements
         elif self.previous_grader_type == "PE":
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
-            score = [p.score for p in peer_graders]
-            feedback = [p.feedback for p in peer_graders]
-            grader_ids=[p.id for p in peer_graders]
-            return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
-                    'grader_id' : grader_ids, 'submission_id' : self.id}
+            return_list=[]
+            for p in peer_graders:
+                score = p.score
+                feedback = p.feedback
+                grader_ids=p.id
+                return_list.append({'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
+                                    'grader_id' : grader_ids, 'submission_id' : self.id})
+            return return_list
         else:
             return {'score': -1}
 
