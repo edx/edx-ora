@@ -52,9 +52,9 @@ def get_data_in_csv_format(locations, name):
         max_score=[sub.max_score for sub in subs]
 
         if z==0:
-            writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text"])
+            writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text", "Location"])
         for i in xrange(0,len(grader_info)):
-            writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i]])
+            writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i], location])
 
     return True, response
 
@@ -70,9 +70,9 @@ def get_message_in_csv_format(locations, name):
         message_text=[sub_commas(encode_ascii(message.message)) for message in messages]
 
         if z==0:
-            writer.writerow(["Message Text", "Score"])
+            writer.writerow(["Message Text", "Score", "Location"])
         for i in xrange(0,len(message_score)):
-            writer.writerow([message_text[i], message_score[i]])
+            writer.writerow([message_text[i], message_score[i], location])
 
     return True, response
 
