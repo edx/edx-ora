@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 import charting
 from django.db.models import Count
 from metrics.models import Timing
-from controller.models import  Submission, SubmissionState, Grader, GraderStatus
+from controller.models import  Submission, SubmissionState, Grader, GraderStatus, Message
 import logging
 import matplotlib.pyplot as plt
 import StringIO
@@ -23,25 +23,56 @@ def sub_commas(text):
 def encode_ascii(text):
     return text.encode('ascii', 'ignore')
 
+def set_up_data_dump(locations,name):
+    fixed_name=re.sub("[/:]","_",name)
 
-def get_data_in_csv_format(location):
-    fixed_location=re.sub("[/:]","_",location)
+    if isinstance(locations, basestring):
+        locations=[locations]
+
     response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(fixed_location)
+    response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(fixed_name)
     writer = csv.writer(response)
 
-    subs=Submission.objects.filter(location=location,state=SubmissionState.finished)
-    grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
-    grader_type=[grade['grader_type'] for grade in grader_info]
-    score=[grade['score'] for grade in grader_info]
-    feedback=[sub_commas(encode_ascii(grade['feedback'])) for grade in grader_info]
-    success=[grade['success'] for grade in grader_info]
-    submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
-    max_score=[sub.max_score for sub in subs]
+    return writer, locations, response
 
-    writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text"])
-    for i in xrange(0,len(grader_info)):
-        writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i]])
+def get_data_in_csv_format(locations, name):
+    writer, locations, response = set_up_data_dump(locations, name)
+
+    for z in xrange(0,len(locations)):
+        location=locations[z]
+        fixed_location=re.sub("[/:]","_",location)
+
+        subs=Submission.objects.filter(location=location,state=SubmissionState.finished)
+        grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
+        grader_type=[grade['grader_type'] for grade in grader_info]
+        score=[grade['score'] for grade in grader_info]
+        feedback=[sub_commas(encode_ascii(grade['feedback'])) for grade in grader_info]
+        success=[grade['success'] for grade in grader_info]
+        submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
+        max_score=[sub.max_score for sub in subs]
+        
+        if z==0:
+            writer.writerow(["Score", "Max Score","Grader Type", "Success", "Submission Text"])
+        for i in xrange(0,len(grader_info)):
+            writer.writerow([score[i], max_score[i], grader_type[i], success[i], submission_text[i]])
+
+    return True, response
+
+def get_message_in_csv_format(locations, name):
+    writer, locations, response = set_up_data_dump(locations, name)
+
+    for z in xrange(0,len(locations)):
+        location=locations[z]
+        fixed_location=re.sub("[/:]","_",location)
+
+        messages=Message.objects.filter(grader__submission__location=location)
+        message_score=[message.score for message in messages]
+        message_text=[sub_commas(encode_ascii(message.message)) for message in messages]
+
+        if z==0:
+            writer.writerow(["Message Text", "Score"])
+        for i in xrange(0,len(message_score)):
+            writer.writerow([message_text[i], message_score[i]])
 
     return True, response
 
@@ -312,6 +343,34 @@ def get_arguments(request):
 
     return arguments, title
 
+def dump_form(request, type):
+    unique_locations=[x['location'] for x in
+                      list(Submission.objects.all().values('location').distinct())]
+    if request.method == "POST":
+        tags=['location']
+        for tag in tags:
+            if tag not in request.POST:
+                return HttpResponse("Request missing needed tag location.")
+
+        location=request.POST.get('location')
+        if location not in unique_locations and location!="all":
+            return HttpResponse("Invalid problem location specified")
+        name=location
+        if location=="all":
+            location=unique_locations
+
+        success,response = AVAILABLE_DATA_DUMPS[type](location, name)
+
+        if not success:
+            return response
+
+        return response
+
+    elif request.method == "GET":
+        unique_locations.append("all")
+        rendered=render_data_dump_form("metrics/{0}/".format(type),unique_locations)
+        return HttpResponse(rendered)
+
 AVAILABLE_METRICS={
     'timing' : generate_timing_response,
     'student_performance' : generate_student_performance_response,
@@ -321,3 +380,8 @@ AVAILABLE_METRICS={
     'pending_counts' : generate_pending_counts_per_problem,
     'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
     }
+
+AVAILABLE_DATA_DUMPS={
+    'message_dump' : get_message_in_csv_format,
+    'data_dump' : get_data_in_csv_format,
+}
