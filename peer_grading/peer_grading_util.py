@@ -26,6 +26,7 @@ def get_single_peer_grading_item(location, grader_id):
     ).exclude(student_id=grader_id)
 
     log.debug(to_be_graded)
+    log.debug(grader_id)
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
