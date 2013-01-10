@@ -23,6 +23,7 @@ def get_single_peer_grading_item(location, grader_id):
         location=location,
         state=SubmissionState.waiting_to_be_graded,
         next_grader_type="PE",
+        is_duplicate=False,
     ).exclude(student_id=grader_id)
 
     log.debug(to_be_graded)

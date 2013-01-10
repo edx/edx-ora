@@ -46,9 +46,12 @@ class Command(BaseCommand):
                 expire_submissions.reset_subs_in_basic_check(subs)
                 expire_submissions.reset_ml_subs_to_in()
 
+                #See if duplicate peer grading items have been finished grading
+                expire_submissions.check_if_grading_finished_for_duplicates()
+
 
             except Exception as err:
-                    log.error("Could not get submissions to expire! Error: {0}".format(err))
+                    log.exception("Could not get submissions to expire! Error: {0}".format(err))
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:Exception"])
                     transaction.commit_unless_managed()

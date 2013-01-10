@@ -69,6 +69,11 @@ class Submission(models.Model):
     xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     posted_results_back_to_queue = models.BooleanField(default=False)
 
+    #Plagiarism/duplicate checking
+    is_duplicate = models.BooleanField(default=False)
+    is_plagiarized = models.BooleanField(default=False)
+    duplicate_submission_id = models.IntegerField(null=True, blank=True)
+
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
             self.student_id, self.course_id, self.problem_id)
@@ -135,7 +140,8 @@ class Submission(models.Model):
             return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
                     'grader_id' : grader_ids, 'submission_id' : self.id}
         else:
-            return {'score': -1}
+            return {'score': -1, 'feedback' : "There was an error with your submission.",
+                    'grader_type' : self.previous_grader_type, 'success' : False}
 
     def get_last_successful_instructor_grader(self):
         all_graders = self.get_all_graders()
@@ -201,18 +207,19 @@ class Rubric(models.Model):
     """
     Each rubric encapsulates how a student was graded according to a particular rubric
     """
-    submission = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader')
     rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    finished_scoring = models.BooleanField(default=False)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def format_rubric(self):
-        formatted_rubric="<table>"
+        formatted_rubric="<rubric>"
         rubric_items = self.rubricitem_set.all().order_by('item_number')
         for ri in rubric_items:
             formatted_rubric+=ri.format_rubric_item()
-        formatted_rubric+="</table>"
+        formatted_rubric+="</rubric>"
         return formatted_rubric
 
 
@@ -237,11 +244,24 @@ class RubricItem(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     def format_rubric_item(self):
-        formatted_item+="<tr>"
-        formatted_item+="<td>{0}</td>".format(self.text)
-        formatted_item+="<td>{0}</td>".format(self.score)
-        formatted_item+="<td>{0}</td>".format(self.max_score)
-        formatted_item+="</tr>"
+        formatted_item=""
+        formatted_item+="<category>"
+        formatted_item+="<description>{0}</description>".format(text)
+        for option in self.rubricoption_set.all().order_by('item_number'):
+            formatted_item+=option.format_rubric_option()
+        formatted_item+="</category>"
+        return formatted_item
+
+class RubricOption(models.Model):
+
+    rubric_item=models.ForeignKey('RubricItem')
+    points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    short_text = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    text = models.TextField()
+    item_number = models.IntegerField()
+
+    def format_rubric_option(self):
+        formatted_item="<option points='{0}'>{1}</option>".format(self.points, self.text)
         return formatted_item
 
 

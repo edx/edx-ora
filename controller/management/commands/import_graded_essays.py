@@ -19,6 +19,9 @@ from datetime import datetime
 from controller.models import Submission, Grader
 from controller.models import GraderStatus, SubmissionState
 
+from controller import rubric
+import random
+
 log = logging.getLogger(__name__)
 
 class Command(BaseCommand):
@@ -52,6 +55,8 @@ class Command(BaseCommand):
         student_id = parser.get(header_name,'student_id')
         increment_ids = parser.get(header_name,'increment_ids')
 
+        rubric=open(settings.REPO_PATH / "tests/rubric.xml").read()
+
         score, text = [], []
         combined_raw = open(settings.REPO_PATH / essay_file).read()
         raw_lines = combined_raw.splitlines()
@@ -80,6 +85,7 @@ class Command(BaseCommand):
                 posted_results_back_to_queue=True,
                 previous_grader_type="BC",
                 max_score=max_score,
+                rubric=rubric,
             )
 
             sub.save()
@@ -98,6 +104,13 @@ class Command(BaseCommand):
 
                 grade.submission = sub
                 grade.save()
+
+                rubric_targets=rubric.generate_targets_from_rubric(sub.rubric)
+                scores=[]
+                for z in xrange(0,len(rubric_targets)):
+                    scores.append(random.randint(0,rubric_targets[z]))
+
+                rubric.generate_rubric_object(grade, scores, sub.rubric)
 
             if increment_ids:
                 student_id+=1
