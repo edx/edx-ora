@@ -144,7 +144,10 @@ def generate_rubric_object(grader, rubric_xml):
         return False, error_message
 
 def get_submission_rubric_scores(sub):
-    pass
+    rubric=sub.grader_set.all()[0].rubric_set.all()[0]
+    rubric_items=rubric.rubricitem_set
+    scores=[rubric_item.score for rubric_item in rubric_items]
+    return scores
 
 
 
