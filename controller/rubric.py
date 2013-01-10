@@ -130,6 +130,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
         rubric=Rubric(
             grader=grader,
             rubric_version=RUBRIC_VERSION,
+            finished_scoring=True,
         )
         rubric.save()
         success, rubric_items=parse_rubric(rubric_xml)
@@ -178,7 +179,7 @@ def get_submission_rubric_instructor_scores(sub):
         if rubrics.count()>0:
             rubric = rubrics[0]
             rubric_items=rubric.rubricitem_set.all()
-            scores=[rubric_item.score for rubric_item in rubric_items]
+            scores=[int(rubric_item.score) for rubric_item in rubric_items]
             return True, scores
     return False, []
 
