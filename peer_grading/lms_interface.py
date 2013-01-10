@@ -263,7 +263,7 @@ def get_problem_list(request):
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
     location_info=[]
     for location in locations_for_course:
-        student_sub_count=Submission.objects.filter(student_id=student_id, location=location).count()
+        student_sub_count=Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE").count()
         if student_sub_count>0:
             problem_name = Submission.objects.filter(location=location)[0].problem_id
             submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location).count()
