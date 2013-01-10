@@ -169,6 +169,8 @@ def handle_submission(sub):
         #TODO: abstract out logic for assigning which grader to go with.
         grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
         grader_settings = grader_util.get_grader_settings(grader_settings_path)
+
+
         if grader_settings['grader_type'] == "ML":
             success, model = ml_grading_util.get_latest_created_model(sub.location)
             if(((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML) and success):
@@ -189,6 +191,12 @@ def handle_submission(sub):
             return False
 
         sub.preferred_grader_type=grader_settings['grader_type']
+
+        #Do duplicate checks
+        is_duplicate, is_plagiarized, duplicate_id = grader_util.check_is_duplicate_and_plagiarized(sub.student_response, sub.location, sub.student_id, sub.preferred_grader_type)
+        sub.is_duplicate=is_duplicate
+        sub.is_plagiarized = is_plagiarized
+        sub.duplicate_submission_id = duplicate_id
 
         sub.save()
         log.debug("Submission object created successfully!")

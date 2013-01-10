@@ -11,6 +11,7 @@ import json
 import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
+import rubric
 
 log = logging.getLogger(__name__)
 
@@ -78,6 +79,11 @@ def create_and_handle_grader_object(grader_dict):
     grader_dict['feedback'] = json.dumps(grader_dict['feedback'])
 
     grade = create_grader(grader_dict, sub)
+
+    #Check to see if rubric scores were passed to the function, and handle if so.
+    if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
+        if grader_dict['rubric_scores_complete']==True:
+            rubric.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
 
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
 
@@ -173,3 +179,38 @@ def get_eta_for_submission(location):
         pass
 
     return True, eta
+
+def check_is_duplicate(submission_text,location, student_id, preferred_grader_type, check_plagiarized=False):
+    is_duplicate=False
+    duplicate_id=0
+
+    if not check_plagiarized:
+        sub_text_and_ids=Submission.objects.filter(
+            location=location,
+            is_duplicate=False,
+            is_plagiarized=False,
+            preferred_grader_type = preferred_grader_type,
+        ).values('student_response', 'id')
+    else:
+        sub_text_and_ids=Submission.objects.filter(
+            location=location,
+            is_duplicate=False,
+            is_plagiarized=False
+        ).exclude(student_id=student_id).values('student_response', 'id')
+
+    location_text=[sub['student_response'] for sub in sub_text_and_ids]
+    if submission_text in location_text:
+        location_ids = [sub['id'] for sub in sub_text_and_ids]
+        sub_index=location_text.index(submission_text)
+        is_duplicate=True
+        duplicate_id=location_ids[sub_index]
+
+    return is_duplicate,duplicate_id
+
+def check_is_duplicate_and_plagiarized(submission_text,location, student_id, preferred_grader_type):
+    is_duplicate, duplicate_submission_id = check_is_duplicate(submission_text, location, student_id, preferred_grader_type)
+    is_plagiarized, plagiarized_submission_id = check_is_duplicate(submission_text, location, student_id, preferred_grader_type, check_plagiarized=True)
+    if is_plagiarized:
+        duplicate_submission_id=plagiarized_submission_id
+
+    return is_duplicate, is_plagiarized, duplicate_submission_id
