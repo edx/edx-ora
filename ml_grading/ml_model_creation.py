@@ -49,8 +49,9 @@ def handle_single_location(location):
                     success, scores = controller.rubric.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
-            for i in xrange(0,len(location_suffixes)):
-                suffix=location_suffixes[i]
+            for m in xrange(0,len(location_suffixes)):
+                log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
+                suffix=location_suffixes[m]
                 #Get paths to ml model from database
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location + suffix)
                 #Get last created model for given location
@@ -74,7 +75,7 @@ def handle_single_location(location):
                     if i==0:
                         scores = [z.get_last_grader().score for z in list(subs_graded_by_instructor)]
                     else:
-                        scores=[z[i] for z in sub_rubric_scores]
+                        scores=[z[m] for z in sub_rubric_scores]
 
                     #Get the first graded submission, so that we can extract metadata like rubric, etc, from it
                     first_sub=subs_graded_by_instructor[0]
