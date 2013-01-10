@@ -168,7 +168,7 @@ def finalize_expired_submission(sub):
 
 def check_if_grading_finished_for_duplicates():
     duplicate_submissions = Submission.objects.all(
-        next_grader_type = "PE",
+        preferred_grader_type = "PE",
         is_duplicate= True,
     )
     for sub in duplicate_submissions:
