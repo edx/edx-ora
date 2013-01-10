@@ -23,6 +23,7 @@ import ml_grading.ml_grading_util as ml_grading_util
 
 sys.path.append(settings.ML_PATH)
 import create
+import controller.rubric as rubric
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +40,8 @@ def handle_single_location(location):
 
         #check to see if there are enough instructor graded essays for location
         if graded_sub_count >= settings.MIN_TO_USE_ML:
+
+            location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
 
             #Get paths to ml model from database
             relative_model_path, full_model_path= ml_grading_util.get_model_path(location)

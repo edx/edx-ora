@@ -59,50 +59,62 @@ def stringify_children(node):
 
 def parse_rubric_object(rubric_xml):
     parsed_rubric=None
+    success=True
     try:
         parsed_rubric=etree.fromstring(rubric_xml)
     except:
         log.exception("Could not parse rubric properly.")
-        return False, parsed_rubric
+        return False, []
     try:
         parsed_category=parse_task('category', parsed_rubric)
     except:
         error_message="Cannot properly parse the category from rubric {0}".format(parsed_rubric)
         log.exception(error_message)
         parsed_category=""
+        return False, []
 
-    return parsed_category
+    return True, parsed_category
 
 def parse_rubric_item(rubric_item):
     description=""
     options=[""]
+    success = True
     try:
         description=stringify_children(parse('description', rubric_item))
         options=[stringify_children(node) for node in parse_task('option', rubric_item)]
     except:
         error_message="Cannot find the proper tags in rubric item {0}".format(rubric_item)
         log.exception(error_message)
+        success=False
 
-    return {'description' : description, 'options' : options}
+    return {'description' : description, 'options' : options, 'success' : success}
 
 def parse_rubric(rubric_xml):
-    parsed_categories=parse_rubric_object(rubric_xml)
+    success, parsed_categories=parse_rubric_object(rubric_xml)
+    if not success:
+        return False, ""
     parsed_rubric_items=[parse_rubric_item(pc) for pc in parsed_categories]
-
-    return parsed_rubric_items
+    for r in parsed_rubric_items:
+        if not r['success']:
+            success=False
+    return True, parsed_rubric_items
 
 def generate_targets_from_rubric(rubric_xml):
-    parsed_rubric=parse_rubric(rubric_xml)
-    max_scores=[]
-    for category in parsed_rubric:
-        max_score=len(category['options'])-1
-        if max_score<1:
-            max_score=1
-        max_scores.append(max_score)
-    return max_scores
+    success, parsed_rubric=parse_rubric(rubric_xml)
+    if success:
+        max_scores=[]
+        for category in parsed_rubric:
+            max_score=len(category['options'])-1
+            if max_score<1:
+                max_score=1
+            max_scores.append(max_score)
+        return True, max_scores
+    return False, []
 
 def generate_rubric_object(grader, scores, rubric_xml):
-    max_scores=generate_targets_from_rubric(rubric_xml)
+    success, max_scores=generate_targets_from_rubric(rubric_xml)
+    if not success:
+        return False, "Could not parse rubric XML to extract max scores."
     for i in xrange(0,len(scores)):
         score=scores[i]
         try:
@@ -120,7 +132,9 @@ def generate_rubric_object(grader, scores, rubric_xml):
             rubric_version=RUBRIC_VERSION,
         )
         rubric.save()
-        rubric_items=parse_rubric(rubric_xml)
+        success, rubric_items=parse_rubric(rubric_xml)
+        if not success:
+            return False, "Could not parsed rubric items properly: {0}".format(rubric_items)
         if len(scores)!=len(rubric_items):
             return False, "Length of passed in scores: {0} does not match number of rubric items: {1}".format(len(scores), len(rubric_items))
 

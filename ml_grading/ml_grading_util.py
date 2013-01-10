@@ -18,7 +18,7 @@ def create_directory(model_path):
 
     return True
 
-def get_model_path(location):
+def get_model_path(location, suffix=""):
     """
     Generate a path from a location
     """
@@ -28,6 +28,7 @@ def get_model_path(location):
 
     fixed_location=re.sub("[/:]","_",location)
     fixed_location+="_"+timezone.now().strftime("%Y%m%d%H%M%S")
+    fixed_location+=suffix
     full_path=os.path.join(base_path,fixed_location)
     return fixed_location,full_path
 
@@ -160,6 +161,15 @@ def get_pickle_data(prompt_string, feature_ext, classifier, text, score):
 def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model_path):
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     pickle.dump(model_file, file=open(model_path, "w"))
+
+def generate_rubric_location_suffixes(subs):
+    location_suffixes=[""]
+    first_graded_sub=subs.order_by('date_created')[0]
+    success, rubric_targets = rubric.generate_targets_from_rubric(first_graded_sub.rubric)
+    if success:
+        for i in xrange(0,len(rubric_targets)):
+            location_suffixes.append("_rubricitem_{0}".format(i))
+    return location_suffixes
 
 
 
