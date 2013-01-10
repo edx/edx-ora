@@ -143,6 +143,9 @@ def generate_rubric_object(grader, rubric_xml):
         log.exception(error_message)
         return False, error_message
 
+def get_submission_rubric_scores(sub):
+    pass
+
 
 
 

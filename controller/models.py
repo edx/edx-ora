@@ -209,6 +209,7 @@ class Rubric(models.Model):
     """
     grader = models.ForeignKey('Grader')
     rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    finished_scoring = models.BooleanField(default=False)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
