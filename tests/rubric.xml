@@ -1,0 +1,12 @@
+<rubric>
+    <category>
+        <description>Grammar and Spelling</description>
+        <option>Many grammatical and spelling errors</option>
+        <option>This is also a text option</option>
+    </category>
+    <category>
+        <description>Another topic to grade on</description>
+        <option points="0">This is an option</option>
+        <option points="1">This is another option</option>
+    </category>
+</rubric>
