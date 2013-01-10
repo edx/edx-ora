@@ -174,6 +174,36 @@ def get_eta_for_submission(location):
 
     return True, eta
 
-def check_is_duplicate(submission_text,location):
-    location_text=[sub['student_response'] for sub in Submission.objects.filter(location=location).values('student_response')]
-    return submission_text in location_text
+def check_is_duplicate(submission_text,location, student_id,check_plagiarized=False):
+    is_duplicate=False
+    duplicate_id=0
+
+    if not check_plagiarized:
+        sub_text_and_ids=Submission.objects.filter(
+            location=location,
+            is_duplicate=False,
+            is_plagiarized=False
+        ).values('student_response', 'id')
+    else:
+        sub_text_and_ids=Submission.objects.filter(
+            location=location,
+            is_duplicate=False,
+            is_plagiarized=False
+        ).exclude(student_id=student_id),values('student_response', 'id')
+
+    location_text=[sub['student_response'] for sub in sub_text_and_ids]
+    if submission_text in location_text:
+        location_ids = [sub['id'] for sub in sub_text_and_ids]
+        sub_index=location_text.index(submission_text)
+        is_duplicate=True
+        duplicate_id=location_ids[sub_index]
+
+    return is_duplicate,duplicate_id
+
+def check_is_duplicate_and_plagiarized(submission_text,location, student_id):
+    is_duplicate, duplicate_submission_id = check_is_duplicate(submission_text, location, student_id)
+    is_plagiarized, plagiarized_submission_id = check_is_duplicate(submission_text, location, student_id, check_plagiarized=True)
+    if is_plagiarized:
+        duplicate_submission_id=plagiarized_submission_id
+
+    return is_duplicate, is_plagiarized, duplicate_submission_id
