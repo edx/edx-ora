@@ -91,12 +91,23 @@ def parse_rubric(rubric_xml):
 
     return parsed_rubric_items
 
+def generate_targets_from_rubric(rubric_xml):
+    parsed_rubric=parse_rubric(rubric_xml)
+    max_scores=[]
+    for category in parsed_rubric:
+        max_score=len(category['options'])-1
+        if max_score<1:
+            max_score=1
+        max_scores.append(max_score)
+    return max_scores
 
-def generate_rubric_object(rubric_xml):
-    rubric=Rubric(
-        rubric_version=RUBRIC_VERSION,
-    )
+def generate_rubric_object(grader, rubric_xml):
     try:
+        rubric=Rubric(
+            grader=grader,
+            rubric_version=RUBRIC_VERSION,
+        )
+        rubric.save()
         rubric_items=parse_rubric(rubric_xml)
 
         for i in xrange(0,len(rubric_items)):
@@ -104,10 +115,10 @@ def generate_rubric_object(rubric_xml):
             description = rubric_item['description']
             options = rubric_item['options']
 
-            rubric_row=[c.text for c in rubric_items[i]]
-            text=rubric_row[0]
-            score=rubric_row[1]
-            max_score=rubric_row[2]
+            text=description
+            score=0
+            max_score=len(options)
+
             rubric_item=RubricItem(
                 rubric=rubric,
                 text=text,
@@ -126,14 +137,11 @@ def generate_rubric_object(rubric_xml):
                     rubric_item=rubric_item,
                 )
                 rubric_option.save()
+        return True, rubric
     except:
-        log.exception("Could not save and/or parse rubric properly")
-        return False, rubric
-
-def generate_rubric_object(submission):
-
-
-    return True, rubric
+        error_message="Could not save and/or parse rubric properly"
+        log.exception(error_message)
+        return False, error_message
 
 
 
