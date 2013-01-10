@@ -165,3 +165,28 @@ def finalize_expired_submission(sub):
     grade = create_grader(grader_dict,sub)
 
     return True
+
+def check_if_grading_finished_for_duplicates():
+    duplicate_submissions = Submission.objects.all(
+        next_grader_type = "PE",
+        is_duplicate= True,
+    )
+    for sub in duplicate_submissions:
+        original_sub=Submissions.objects.get(id=sub.duplicate_submission_id)
+        if original_sub.state == SubmissionState.finished:
+            finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
+    return True
+
+def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
+    original_grader_set = original_sub.grader_set.all()
+
+    for grade in original_grader_set:
+        grade.pk = None
+        grade.id = None
+        grade.submission = sub
+        grade.save()
+
+    sub.state=SubmissionState.finished
+    sub.save()
+
+    return True

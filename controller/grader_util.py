@@ -189,7 +189,7 @@ def check_is_duplicate(submission_text,location, student_id,check_plagiarized=Fa
             location=location,
             is_duplicate=False,
             is_plagiarized=False
-        ).exclude(student_id=student_id),values('student_response', 'id')
+        ).exclude(student_id=student_id).values('student_response', 'id')
 
     location_text=[sub['student_response'] for sub in sub_text_and_ids]
     if submission_text in location_text:

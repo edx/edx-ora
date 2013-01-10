@@ -171,7 +171,7 @@ def handle_submission(sub):
         grader_settings = grader_util.get_grader_settings(grader_settings_path)
 
         #Do duplicate checks
-        is_duplicate, is_plagiarized, duplicate_id = grader_util.check_is_duplicate(sub.student_response, sub.location, sub.student_id)
+        is_duplicate, is_plagiarized, duplicate_id = grader_util.check_is_duplicate_and_plagiarized(sub.student_response, sub.location, sub.student_id)
         sub.is_duplicate=is_duplicate
         sub.is_plagiarized = is_plagiarized
         sub.duplicate_submission_id = duplicate_id
