@@ -270,7 +270,7 @@ def get_problem_list(request):
             submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
 
             problem_name_from_location=location.split("://")[1]
-            if num_graded>0 or num_pending>0:
+            if submissions_graded>0 or submissions_pending>0:
                 location_dict={
                     'location' : location,
                     'problem_name' : problem_name_from_location,
