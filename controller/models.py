@@ -215,11 +215,11 @@ class Rubric(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     def format_rubric(self):
-        formatted_rubric="<table>"
+        formatted_rubric="<rubric>"
         rubric_items = self.rubricitem_set.all().order_by('item_number')
         for ri in rubric_items:
             formatted_rubric+=ri.format_rubric_item()
-        formatted_rubric+="</table>"
+        formatted_rubric+="</rubric>"
         return formatted_rubric
 
 
@@ -244,11 +244,12 @@ class RubricItem(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     def format_rubric_item(self):
-        formatted_item+="<tr>"
-        formatted_item+="<td>{0}</td>".format(self.text)
-        formatted_item+="<td>{0}</td>".format(self.score)
-        formatted_item+="<td>{0}</td>".format(self.max_score)
-        formatted_item+="</tr>"
+        formatted_item=""
+        formatted_item+="<category>"
+        formatted_item+="<description>{0}</description>".format(text)
+        for option in self.rubricoption_set.all().order_by('item_number'):
+            formatted_item+=option.format_rubric_option()
+        formatted_item+="</category>"
         return formatted_item
 
 class RubricOption(models.Model):
@@ -258,6 +259,10 @@ class RubricOption(models.Model):
     short_text = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     text = models.TextField()
     item_number = models.IntegerField()
+
+    def format_rubric_option(self):
+        formatted_item="<option points='{0}'>{1}</option>".format(self.points, self.text)
+        return formatted_item
 
 
 
