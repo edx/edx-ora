@@ -153,7 +153,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
                 score=score,
                 item_number=i,
                 max_score=max_score,
-                finished_scoring=False,
+                finished_scoring=True,
             )
             rubric_item.save()
             for z in xrange(0,len(options)):

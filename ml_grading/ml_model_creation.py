@@ -45,7 +45,7 @@ def handle_single_location(location):
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
-                    rubric.get_submission_rubric_scores
+                    controller.rubric.get_submission_rubric_scores(sub)
             for i in xrange(0,len(location_suffixes)):
                 suffix=location_suffixes[i]
                 #Get paths to ml model from database
