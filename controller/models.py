@@ -207,7 +207,7 @@ class Rubric(models.Model):
     """
     Each rubric encapsulates how a student was graded according to a particular rubric
     """
-    submission = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader')
     rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     date_created = models.DateTimeField(auto_now_add=True)
