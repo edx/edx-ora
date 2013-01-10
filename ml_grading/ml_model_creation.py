@@ -72,7 +72,7 @@ def handle_single_location(location):
 
                     #TODO: Make queries more efficient
                     #This is for the basic overall score
-                    if i==0:
+                    if m==0:
                         scores = [z.get_last_grader().score for z in list(subs_graded_by_instructor)]
                     else:
                         scores=[z[m-1] for z in sub_rubric_scores]

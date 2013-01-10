@@ -170,6 +170,7 @@ def check_if_grading_finished_for_duplicates():
     duplicate_submissions = Submission.objects.filter(
         preferred_grader_type = "PE",
         is_duplicate= True,
+        posted_results_back_to_queue=False,
     )
     counter=0
     for sub in duplicate_submissions:
