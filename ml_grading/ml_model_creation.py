@@ -43,9 +43,12 @@ def handle_single_location(location):
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
+            sub_rubric_scores=[]
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
-                    controller.rubric.get_submission_rubric_scores(sub)
+                    success, scores = controller.rubric.get_submission_rubric_instructor_scores(sub)
+                    sub_rubric_scores.append(scores)
+
             for i in xrange(0,len(location_suffixes)):
                 suffix=location_suffixes[i]
                 #Get paths to ml model from database
@@ -65,8 +68,13 @@ def handle_single_location(location):
                     combined_data=list(subs_graded_by_instructor.values('student_response', 'id'))
                     text = [str(i['student_response'].encode('ascii', 'ignore')) for i in combined_data]
                     ids=[i['id'] for i in combined_data]
+
                     #TODO: Make queries more efficient
-                    scores = [i.get_last_grader().score for i in list(subs_graded_by_instructor)]
+                    #This is for the basic overall score
+                    if i==0:
+                        scores = [z.get_last_grader().score for z in list(subs_graded_by_instructor)]
+                    else:
+                        scores=[z[i] for z in sub_rubric_scores]
 
                     #Get the first graded submission, so that we can extract metadata like rubric, etc, from it
                     first_sub=subs_graded_by_instructor[0]
@@ -96,7 +104,7 @@ def handle_single_location(location):
                         'max_score' : first_sub.max_score,
                         'prompt' : prompt,
                         'rubric' : rubric,
-                        'location' : location,
+                        'location' : location + suffix,
                         'course_id' : first_sub.course_id,
                         'submission_ids_used' : json.dumps(ids),
                         'problem_id' :  first_sub.problem_id,
