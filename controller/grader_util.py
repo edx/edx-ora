@@ -11,7 +11,7 @@ import json
 import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
-import controller.rubric
+import rubric_functions
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def create_and_handle_grader_object(grader_dict):
     #Check to see if rubric scores were passed to the function, and handle if so.
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
         if grader_dict['rubric_scores_complete']==True:
-            controller.rubric.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
+            rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
 
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
 

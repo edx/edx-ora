@@ -24,7 +24,7 @@ import ml_grading.ml_grading_util as ml_grading_util
 sys.path.append(settings.ML_PATH)
 import create
 
-import controller.rubric
+import controller.rubric_functions
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def handle_single_location(location):
             sub_rubric_scores=[]
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
-                    success, scores = controller.rubric.get_submission_rubric_instructor_scores(sub)
+                    success, scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
             for m in xrange(0,len(location_suffixes)):
@@ -75,7 +75,7 @@ def handle_single_location(location):
                     if i==0:
                         scores = [z.get_last_grader().score for z in list(subs_graded_by_instructor)]
                     else:
-                        scores=[z[m] for z in sub_rubric_scores]
+                        scores=[z[m-1] for z in sub_rubric_scores]
 
                     #Get the first graded submission, so that we can extract metadata like rubric, etc, from it
                     first_sub=subs_graded_by_instructor[0]
