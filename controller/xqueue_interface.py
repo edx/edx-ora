@@ -74,6 +74,16 @@ def submit(request):
                 submission_time_string = util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
 
+                #TODO: find a better way to do this
+                #Need to set rubric to whatever the first submission for this location had
+                #as its rubric.  If the rubric is changed in the course XML, it will break things.
+                try:
+                    first_sub_for_location=Submission.objects.filter(location=location).order_by('date_created')[0]
+                    rubric= first_sub_for_location.rubric
+                except:
+                    error_message="Could not find an existing submission in location.  rubric is original."
+                    log.info(error_message)
+
                 initial_display=""
                 if 'initial_display' in body['grader_payload'].keys():
                     initial_display = util._value_or_default(body['grader_payload']['initial_display'], "")
