@@ -173,3 +173,7 @@ def get_eta_for_submission(location):
         pass
 
     return True, eta
+
+def check_is_duplicate(submission_text,location):
+    location_text=[sub['student_response'] for sub in Submission.objects.filter(location=location).values('student_response')]
+    return submission_text in location_text
