@@ -167,14 +167,15 @@ def finalize_expired_submission(sub):
     return True
 
 def check_if_grading_finished_for_duplicates():
-    duplicate_submissions = Submission.objects.all(
+    duplicate_submissions = Submission.objects.filter(
         preferred_grader_type = "PE",
         is_duplicate= True,
     )
     for sub in duplicate_submissions:
-        original_sub=Submissions.objects.get(id=sub.duplicate_submission_id)
+        original_sub=Submission.objects.get(id=sub.duplicate_submission_id)
         if original_sub.state == SubmissionState.finished:
             finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
+            log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
     return True
 
 def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
@@ -187,6 +188,7 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
         grade.save()
 
     sub.state=SubmissionState.finished
+    sub.previous_grader_type="PE"
     sub.save()
 
     return True

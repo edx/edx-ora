@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
 
             except Exception as err:
-                    log.error("Could not get submissions to expire! Error: {0}".format(err))
+                    log.exception("Could not get submissions to expire! Error: {0}".format(err))
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:Exception"])
                     transaction.commit_unless_managed()

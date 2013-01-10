@@ -140,7 +140,8 @@ class Submission(models.Model):
             return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
                     'grader_id' : grader_ids, 'submission_id' : self.id}
         else:
-            return {'score': -1}
+            return {'score': -1, 'feedback' : "There was an error with your submission.",
+                    'grader_type' : self.previous_grader_type, 'success' : False}
 
     def get_last_successful_instructor_grader(self):
         all_graders = self.get_all_graders()
