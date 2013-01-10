@@ -174,7 +174,7 @@ def get_eta_for_submission(location):
 
     return True, eta
 
-def check_is_duplicate(submission_text,location, student_id,check_plagiarized=False):
+def check_is_duplicate(submission_text,location, student_id, preferred_grader_type, check_plagiarized=False):
     is_duplicate=False
     duplicate_id=0
 
@@ -182,7 +182,8 @@ def check_is_duplicate(submission_text,location, student_id,check_plagiarized=Fa
         sub_text_and_ids=Submission.objects.filter(
             location=location,
             is_duplicate=False,
-            is_plagiarized=False
+            is_plagiarized=False,
+            preferred_grader_type = preferred_grader_type,
         ).values('student_response', 'id')
     else:
         sub_text_and_ids=Submission.objects.filter(
@@ -200,9 +201,9 @@ def check_is_duplicate(submission_text,location, student_id,check_plagiarized=Fa
 
     return is_duplicate,duplicate_id
 
-def check_is_duplicate_and_plagiarized(submission_text,location, student_id):
-    is_duplicate, duplicate_submission_id = check_is_duplicate(submission_text, location, student_id)
-    is_plagiarized, plagiarized_submission_id = check_is_duplicate(submission_text, location, student_id, check_plagiarized=True)
+def check_is_duplicate_and_plagiarized(submission_text,location, student_id, preferred_grader_type):
+    is_duplicate, duplicate_submission_id = check_is_duplicate(submission_text, location, student_id, preferred_grader_type)
+    is_plagiarized, plagiarized_submission_id = check_is_duplicate(submission_text, location, student_id, preferred_grader_type, check_plagiarized=True)
     if is_plagiarized:
         duplicate_submission_id=plagiarized_submission_id
 
