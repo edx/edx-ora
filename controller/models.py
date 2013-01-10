@@ -250,5 +250,11 @@ class RubricItem(models.Model):
         formatted_item+="</tr>"
         return formatted_item
 
+class RubricOption(models.Model):
+    points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    short_text = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    text = models.TextField()
+    item_number = models.IntegerField()
+
 
 
