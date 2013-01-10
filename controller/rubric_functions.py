@@ -69,7 +69,7 @@ def parse_rubric_object(rubric_xml):
         parsed_category=parse_task('category', parsed_rubric)
     except:
         error_message="Cannot properly parse the category from rubric {0}".format(parsed_rubric)
-        log.exception(error_message)
+        log.info(error_message)
         parsed_category=""
         return False, []
 
@@ -84,7 +84,7 @@ def parse_rubric_item(rubric_item):
         options=[stringify_children(node) for node in parse_task('option', rubric_item)]
     except:
         error_message="Cannot find the proper tags in rubric item {0}".format(rubric_item)
-        log.exception(error_message)
+        log.info(error_message)
         success=False
 
     return {'description' : description, 'options' : options, 'success' : success}
@@ -169,7 +169,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
         return True, rubric
     except:
         error_message="Could not save and/or parse rubric properly"
-        log.exception(error_message)
+        log.info(error_message)
         return False, error_message
 
 def get_submission_rubric_instructor_scores(sub):
