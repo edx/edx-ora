@@ -162,7 +162,7 @@ def save_grade(request):
     score = request.POST.get('score')
     feedback = request.POST.get('feedback')
     skipped = request.POST.get('skipped')=="True"
-    complete_rubric_scores = request.GET.get('can_handle_rubric', False)
+    rubric_scores_complete = request.GET.get('rubric_scores_complete', False)
     rubric_scores = request.GET.get('rubric_scores',[])
 
     if (# These have to be truthy
@@ -198,7 +198,10 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0,
          #And they don't make errors
-         'errors' : ""}
+         'errors' : "",
+         'rubric_scores_complete' : rubric_scores_complete,
+         'rubric_scores' : rubric_scores
+         }
 
     success, header = grader_util.create_and_handle_grader_object(d)
 

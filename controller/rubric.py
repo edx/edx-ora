@@ -110,7 +110,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
         except:
             return False, "Scores must be numeric."
         if score<0:
-            return False, "Scores cannot be below zero."
+            return False, "Scores cannot be below zero. : {0}".format(score)
         if score>max_scores[i]:
             return False, "Score: {0} is greater than max score for this item: {1}".format(score, max_scores[i])
 
@@ -130,7 +130,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
             options = rubric_item['options']
 
             text=description
-            score=0
+            score=scores[i]
             max_score=len(options)
 
             rubric_item=RubricItem(
