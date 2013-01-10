@@ -1,5 +1,5 @@
 from lxml import etree
-from models import Rubric, RubricItem
+from models import Rubric, RubricItem, RubricOption
 import logging
 from itertools import chain
 
@@ -78,7 +78,7 @@ def parse_rubric_item(rubric_item):
     options=[""]
     try:
         description=stringify_children(parse('description', rubric_item))
-        options=stringify_children(parse_task('option', rubric_item))
+        options=[stringify_children(node) for node in parse_task('option', rubric_item)]
     except:
         error_message="Cannot find the proper tags in rubric item {0}".format(rubric_item)
         log.exception(error_message)
@@ -97,6 +97,11 @@ def generate_rubric_object(rubric_xml):
         rubric_items=parse_rubric(rubric_xml)
 
         for i in xrange(0,len(rubric_items)):
+            rubric_item=rubric_items[i]
+            description = rubric_item['description']
+            options = rubric_item['options']
+            for option in options:
+
             rubric_row=[c.text for c in rubric_items[i]]
             text=rubric_row[0]
             score=rubric_row[1]
