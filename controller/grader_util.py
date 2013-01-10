@@ -79,6 +79,8 @@ def create_and_handle_grader_object(grader_dict):
 
     grade = create_grader(grader_dict, sub)
 
+    #Check to see if rubric scores were passed to the function, and handle if so.
+
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
 
     sub.previous_grader_type = grade.grader_type

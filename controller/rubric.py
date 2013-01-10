@@ -101,7 +101,19 @@ def generate_targets_from_rubric(rubric_xml):
         max_scores.append(max_score)
     return max_scores
 
-def generate_rubric_object(grader, rubric_xml):
+def generate_rubric_object(grader, scores, rubric_xml):
+    max_scores=generate_targets_from_rubric(rubric_xml)
+    for i in xrange(0,len(scores)):
+        score=scores[i]
+        try:
+            score=int(score)
+        except:
+            return False, "Scores must be numeric."
+        if score<0:
+            return False, "Scores cannot be below zero."
+        if score>max_scores[i]:
+            return False, "Score: {0} is greater than max score for this item: {1}".format(score, max_scores[i])
+
     try:
         rubric=Rubric(
             grader=grader,
@@ -109,6 +121,8 @@ def generate_rubric_object(grader, rubric_xml):
         )
         rubric.save()
         rubric_items=parse_rubric(rubric_xml)
+        if len(scores)!=len(rubric_items):
+            return False, "Length of passed in scores: {0} does not match number of rubric items: {1}".format(len(scores), len(rubric_items))
 
         for i in xrange(0,len(rubric_items)):
             rubric_item=rubric_items[i]
