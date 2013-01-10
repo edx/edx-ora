@@ -24,6 +24,8 @@ import ml_grading.ml_grading_util as ml_grading_util
 sys.path.append(settings.ML_PATH)
 import create
 
+import controller.rubric
+
 log = logging.getLogger(__name__)
 
 def handle_single_location(location):
@@ -41,7 +43,11 @@ def handle_single_location(location):
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
-            for suffix in location_suffixes:
+            if len(location_suffixes)>0:
+                for sub in subs_graded_by_instructor:
+                    rubric.get_submission_rubric_scores
+            for i in xrange(0,len(location_suffixes)):
+                suffix=location_suffixes[i]
                 #Get paths to ml model from database
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location + suffix)
                 #Get last created model for given location
@@ -55,6 +61,7 @@ def handle_single_location(location):
 
                 #Retrain if no model exists, or every 10 graded essays.
                 if not success or graded_sub_count % 10 == 0 or sub_count_diff>=10:
+
                     combined_data=list(subs_graded_by_instructor.values('student_response', 'id'))
                     text = [str(i['student_response'].encode('ascii', 'ignore')) for i in combined_data]
                     ids=[i['id'] for i in combined_data]

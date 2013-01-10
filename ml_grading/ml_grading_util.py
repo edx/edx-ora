@@ -11,7 +11,7 @@ from models import CreatedModel
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-import controller.rubric as rubric
+import controller.rubric
 
 def create_directory(model_path):
     directory=path(model_path).dirname()
@@ -167,7 +167,7 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model
 def generate_rubric_location_suffixes(subs):
     location_suffixes=[""]
     first_graded_sub=subs.order_by('date_created')[0]
-    success, rubric_targets = rubric.generate_targets_from_rubric(first_graded_sub.rubric)
+    success, rubric_targets = controller.rubric.generate_targets_from_rubric(first_graded_sub.rubric)
     if success:
         for i in xrange(0,len(rubric_targets)):
             location_suffixes.append("_rubricitem_{0}".format(i))
