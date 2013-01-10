@@ -234,7 +234,6 @@ def create_xqueue_header_and_body(submission):
     }
 
     score_and_feedback = submission.get_all_successful_scores_and_feedback()
-    log.debug(score_and_feedback)
     score = score_and_feedback['score']
     feedback = score_and_feedback['feedback']
     grader_type=score_and_feedback['grader_type']

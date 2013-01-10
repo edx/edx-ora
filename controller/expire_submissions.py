@@ -171,11 +171,14 @@ def check_if_grading_finished_for_duplicates():
         preferred_grader_type = "PE",
         is_duplicate= True,
     )
+    counter=0
     for sub in duplicate_submissions:
         original_sub=Submission.objects.get(id=sub.duplicate_submission_id)
         if original_sub.state == SubmissionState.finished:
             finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
+            counter+=1
             log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
+    log.info("Finalized {0} duplicate submissions".format(counter))
     return True
 
 def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
