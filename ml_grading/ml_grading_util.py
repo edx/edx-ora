@@ -11,6 +11,8 @@ from models import CreatedModel
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
+import controller.rubric as rubric
+
 def create_directory(model_path):
     directory=path(model_path).dirname()
     if not os.path.exists(directory):

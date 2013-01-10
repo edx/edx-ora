@@ -19,7 +19,7 @@ from datetime import datetime
 from controller.models import Submission, Grader
 from controller.models import GraderStatus, SubmissionState
 
-from controller import rubric
+import controller.rubric
 import random
 
 log = logging.getLogger(__name__)
@@ -105,12 +105,12 @@ class Command(BaseCommand):
                 grade.submission = sub
                 grade.save()
 
-                rubric_targets=rubric.generate_targets_from_rubric(sub.rubric)
+                success, rubric_targets=controller.rubric.generate_targets_from_rubric(sub.rubric)
                 scores=[]
                 for z in xrange(0,len(rubric_targets)):
                     scores.append(random.randint(0,rubric_targets[z]))
 
-                rubric.generate_rubric_object(grade, scores, sub.rubric)
+                controller.rubric.generate_rubric_object(grade, scores, sub.rubric)
 
             if increment_ids:
                 student_id+=1
