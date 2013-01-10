@@ -182,7 +182,7 @@ def handle_submission(sub):
 
 
         if grader_settings['grader_type'] == "ML":
-            success, model = ml_grading_util.get_latest_created_model(sub.location)
+            success= ml_grading_util.check_for_all_model_and_rubric_success(sub.location)
             if(((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML) and success):
                 sub.next_grader_type = "ML"
             else:

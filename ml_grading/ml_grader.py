@@ -122,7 +122,6 @@ def handle_single_item(controller_session):
         if len(rubric_scores)==0:
             rubric_scores_complete=False
 
-        log.debug(results)
         grader_dict = {
             'score': final_results['score'],
             'feedback': json.dumps(results['feedback']),
@@ -133,10 +132,8 @@ def handle_single_item(controller_session):
             'submission_id': sub.id,
             'errors' : ' ' .join(results['errors']),
             'rubric_scores_complete' : rubric_scores_complete,
-            'rubric_scores' : rubric_scores,
+            'rubric_scores' : json.dumps(rubric_scores),
             }
-
-
         #Create grader object in controller by posting back results
         created, msg = util._http_post(
             controller_session,

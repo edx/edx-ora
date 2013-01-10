@@ -52,6 +52,17 @@ def get_latest_created_model(location):
 
     return True, created_models[0]
 
+def check_for_all_model_and_rubric_success(location):
+    subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
+    location_suffixes=generate_rubric_location_suffixes(subs_graded_by_instructor)
+    overall_success=True
+    for m in xrange(0,len(location_suffixes)):
+        suffix = location_suffixes[m]
+        success, created_model=ml_grading_util.get_latest_created_model(sub.location + suffix)
+        if not success:
+            overall_success=False
+    return overall_success
+
 def save_created_model(model_data):
     """
     Creates and saves a createdmodel object from an input dictionary.
