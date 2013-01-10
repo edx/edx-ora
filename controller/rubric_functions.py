@@ -186,4 +186,3 @@ def get_submission_rubric_instructor_scores(sub):
 
 
 
-

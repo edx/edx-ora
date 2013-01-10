@@ -47,6 +47,7 @@ def handle_single_item(controller_session):
         first_sub = subs_graded_by_instructor.order_by('date_created')[0]
         parsed_rubric=rubric_functions.parse_rubric(first_sub.rubric)
 
+
         #strip out unicode and other characters in student response
         #Needed, or grader may potentially fail
         #TODO: Handle unicode in student responses properly
@@ -56,6 +57,10 @@ def handle_single_item(controller_session):
         transaction.commit_unless_managed()
 
         location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
+
+        if len(location_suffixes)>0:
+            rubric_scores_complete=True
+            rubric_scores=[]
 
         for m in xrange(0,len(location_suffixes)):
             suffix = location_suffixes[m]
@@ -110,13 +115,16 @@ def handle_single_item(controller_session):
 
             if m==0:
                 final_results=results
+            elif results['success']==False:
+                rubric_scores_complete = False
             else:
-                pass
-
+                rubric_scores.append(results['score'])
+        if len(rubric_scores)==0:
+            rubric_scores_complete=False
 
         log.debug(results)
         grader_dict = {
-            'score': results['score'],
+            'score': final_results['score'],
             'feedback': json.dumps(results['feedback']),
             'status': status,
             'grader_id': 1,
@@ -124,6 +132,8 @@ def handle_single_item(controller_session):
             'confidence': results['confidence'],
             'submission_id': sub.id,
             'errors' : ' ' .join(results['errors']),
+            'rubric_scores_complete' : rubric_scores_complete,
+            'rubric_scores' : rubric_scores,
             }
 
 
