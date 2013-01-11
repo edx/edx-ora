@@ -64,7 +64,7 @@ def handle_single_location(location):
                     sub_count_diff = graded_sub_count
 
                 #Retrain if no model exists, or every 10 graded essays.
-                if not success or graded_sub_count % 10 == 0 or sub_count_diff>=10:
+                if not success or sub_count_diff>=5:
 
                     combined_data=list(subs_graded_by_instructor.values('student_response', 'id'))
                     text = [str(i['student_response'].encode('ascii', 'ignore')) for i in combined_data]
