@@ -187,9 +187,24 @@ def generate_rubric_location_suffixes(subs):
         first_graded_sub=first_graded_sub[0]
         success, rubric_targets = controller.rubric_functions.generate_targets_from_rubric(first_graded_sub.rubric)
         if success:
+            for m in xrange(0,len(subs)):
+                sub=subs[m]
+                scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
+                if not scores_match_target:
+                    return location_suffixes
+
             for i in xrange(0,len(rubric_targets)):
                 location_suffixes.append("_rubricitem_{0}".format(i))
     return location_suffixes
+
+def check_if_sub_scores_match_targets(sub, targets):
+    success, sub_scores = controller.rubric.get_submission_rubric_instructor_scores(sub)
+    if success:
+        if len(sub_scores)==len(targets):
+            success=True
+        else:
+            success=False
+    return success
 
 
 
