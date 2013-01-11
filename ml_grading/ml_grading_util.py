@@ -198,7 +198,7 @@ def generate_rubric_location_suffixes(subs):
     return location_suffixes
 
 def check_if_sub_scores_match_targets(sub, targets):
-    success, sub_scores = controller.rubric.get_submission_rubric_instructor_scores(sub)
+    success, sub_scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
     if success:
         if len(sub_scores)==len(targets):
             success=True

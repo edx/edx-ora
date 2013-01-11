@@ -63,7 +63,7 @@ def parse_rubric_object(rubric_xml):
     try:
         parsed_rubric=etree.fromstring(rubric_xml)
     except:
-        log.exception("Could not parse rubric properly.")
+        log.info("Could not parse rubric properly.")
         return False, []
     try:
         parsed_category=parse_task('category', parsed_rubric)
