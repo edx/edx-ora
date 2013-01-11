@@ -228,6 +228,21 @@ def save_grade(request):
                 targets, rubric_scores)}
         )
 
+    for i in xrange(0,rubric_scores):
+        try:
+            rubric_scores[i]=int(rubric_scores[i])
+        except:
+            return util_error_response(
+                "grade_save_error",
+                _INTERFACE_VERSION,
+                data={"msg": "Cannot parse score into int".format(rubric_scores[i])}
+            )
+        if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:
+            return util_error_response(
+                "grade_save_error",
+                _INTERFACE_VERSION,
+                data={"msg": "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])}
+            )
 
     d = {'submission_id': submission_id,
          'score': score,
