@@ -163,8 +163,8 @@ def save_grade(request):
     score = request.POST.get('score')
     feedback = request.POST.get('feedback')
     skipped = request.POST.get('skipped')=="True"
-    rubric_scores_complete = request.GET.get('rubric_scores_complete', False)
-    rubric_scores = request.GET.get('rubric_scores',[])
+    rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
+    rubric_scores = request.POST.getlist('rubric_scores')
 
     if (# These have to be truthy
         not (course_id and grader_id and submission_id) or
@@ -198,8 +198,8 @@ def save_grade(request):
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}
         )
 
-    if rubric_scores_complete!=True:
-        return util_error_response(
+    if rubric_scores_complete!="True":
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Rubric scores complete is not true: {0}".format(rubric_scores_complete)}
@@ -207,38 +207,38 @@ def save_grade(request):
 
     success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
     if not success:
-        return util_error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Cannot generate targets from rubric xml: {0}".format(sub.rubric)}
         )
 
     if not isinstance(rubric_scores,list):
-        return util_error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Rubric Scores is not a list: {0}".format(rubric_scores)}
         )
 
     if len(rubric_scores)!=len(targets):
-        return util_error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Number of scores saved does not equal number of targets.  Targets: {0} Rubric Scores: {1}".format(
                 targets, rubric_scores)}
         )
 
-    for i in xrange(0,rubric_scores):
+    for i in xrange(0,len(rubric_scores)):
         try:
             rubric_scores[i]=int(rubric_scores[i])
         except:
-            return util_error_response(
+            return util._error_response(
                 "grade_save_error",
                 _INTERFACE_VERSION,
                 data={"msg": "Cannot parse score into int".format(rubric_scores[i])}
             )
         if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:
-            return util_error_response(
+            return util._error_response(
                 "grade_save_error",
                 _INTERFACE_VERSION,
                 data={"msg": "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])}
