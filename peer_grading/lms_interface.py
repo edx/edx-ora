@@ -1,11 +1,12 @@
 import logging
 
+from django.conf import settings
 from django.http import  Http404
 from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission
+from controller.models import Submission, Grader
 from controller.models import SubmissionState, GraderStatus
 from controller import util
 
@@ -282,4 +283,36 @@ def get_problem_list(request):
     log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
         _INTERFACE_VERSION)
+
+@csrf_exempt
+@util.error_if_not_logged_in
+def get_notifications(request):
+    if request.method!="GET":
+        error_message="Request needs to be GET."
+    log.error(error_message)
+    return util._error_response(error_message, _INTERFACE_VERSION)
+
+    course_id=request.GET.get("course_id")
+    student_id = request.GET.get("student_id")
+
+    if not course_id or not student_id:
+        error_message="Missing needed tag course_id or student_id"
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    student_needs_to_peer_grade = False
+
+    student_responses_for_course = Submissions.objects.filter(student_id = student_id, course_id=course_id)
+    unique_student_locations = [x['location'] for x in
+                                student_responses_for_course.values('location').distinct()]
+    for location in unique_student_locations:
+        location_response_count = student_responses_for_course.filter(location=location).count()
+        required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
+        completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission_location = location).count()
+
+        if completed_peer_grading_for_location<required_peer_grading_for_location:
+            student_needs_to_peer_grade = True
+            return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
+
+    return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
 

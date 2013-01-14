@@ -39,9 +39,10 @@ ML_ESTIMATED_GRADING_TIME= 5 * 60 #Estimated grading time for machine learning i
 
 #Peer
 MIN_TO_USE_PEER=20 #Minimum instructor graded (calibration) essays before peer grading can be used
-PEER_GRADER_COUNT = 2 #Number of peer graders for each submission
+PEER_GRADER_COUNT = 3 #Number of peer graders for each submission
 PEER_GRADER_MINIMUM_TO_CALIBRATE = 3 #Minimum number of calibration essays each peer grader will see
 PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6 #Maximum number of calibration essays each peer grader will see
+REQUIRED_PEER_GRADING_PER_STUDENT = 3 #Student must peer grade at least 3 submissions for each question they answer.
 
 #Error units are defined as the absolute value of student calibration score minus actual score divided by maximum score
 #abs(student_score-actual_score)/max_score
