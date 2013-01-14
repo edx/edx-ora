@@ -85,7 +85,6 @@ def create_and_handle_grader_object(grader_dict):
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
         if grader_dict['rubric_scores_complete']=='True':
             try:
-                grader_dict['rubric_scores']=json.loads(grader_dict['rubric_scores'])
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
             except:
                 log.exception("Problem with getting rubric scores from dict : {0}".format(grader_dict))
