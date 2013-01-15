@@ -49,6 +49,9 @@ class CalibrationRecord(models.Model):
     #This is currently not used, but in case student offers feedback.  This may be useful in some way.
     feedback = models.TextField()
 
+    rubric_scores = models.TextField(default="")
+    rubric_scores_complete = models.BooleanField(default=False)
+
     #The plan is to display calibration records to students at two points:
     #1. Before they start grading (pre-calibration)
     #2. Randomly mixed in with essays while they are graded

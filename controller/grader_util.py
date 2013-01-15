@@ -218,3 +218,29 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
         duplicate_submission_id=plagiarized_submission_id
 
     return is_duplicate, is_plagiarized, duplicate_submission_id
+
+def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
+    success=False
+    if rubric_scores_complete!="True":
+        return success, "Rubric scores complete is not true: {0}".format(rubric_scores_complete)
+
+    success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
+    if not success:
+        return success, "Cannot generate targets from rubric xml: {0}".format(sub.rubric)
+
+    if not isinstance(rubric_scores,list):
+        return success, "Rubric Scores is not a list: {0}".format(rubric_scores)
+
+    if len(rubric_scores)!=len(targets):
+        return success, "Number of scores saved does not equal number of targets.  Targets: {0} Rubric Scores: {1}".format(targets, rubric_scores)
+
+    for i in xrange(0,len(rubric_scores)):
+        try:
+            rubric_scores[i]=int(rubric_scores[i])
+        except:
+            return success, "Cannot parse score into int".format(rubric_scores[i])
+
+        if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:
+            return success, "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])
+    success = True
+    return success , ""
