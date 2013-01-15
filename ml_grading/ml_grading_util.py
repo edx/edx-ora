@@ -12,7 +12,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
 import controller.rubric_functions
-from controller.models import Submission, SubmissionState
+from controller.models import Submission, SubmissionState, Grader
 
 def create_directory(model_path):
     directory=path(model_path).dirname()
@@ -205,6 +205,30 @@ def check_if_sub_scores_match_targets(sub, targets):
         else:
             success=False
     return success
+
+def regrade_ml(location):
+    """
+    Regrades all of the ML problems in a given location.  Returns boolean success.
+    """
+    success = check_for_all_model_and_rubric_success(location)
+    if not success:
+        log.debug("No models trained yet for location {0}, so cannot regrade.".format(location))
+        return False
+
+    subs = Submission.objects.filter(location=location, previous_grader_type="ML")
+    for sub in subs:
+        for grade in sub.grader_set.all():
+            grade.status_code = GraderStatus.failure
+            grade.save()
+        sub.state= SubmissionState.waiting_to_be_graded
+        sub.posted_results_back_to_queue = False
+        sub.next_grader_type = "ML"
+        sub.save()
+
+    return True
+
+
+
 
 
 
