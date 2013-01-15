@@ -270,6 +270,12 @@ def get_problem_list(request):
         problem_name = Submission.objects.filter(location=location)[0].problem_id
         submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
         finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        min_scored_for_location=settings.MIN_TO_USE_PEER
+        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
+            min_scored_for_location=settings.MIN_TO_USE_ML
+
+        submissions_required = max([0,min_scored_for_location-finished_instructor_graded])
 
         problem_name_from_location=location.split("://")[1]
         location_dict={
@@ -277,6 +283,7 @@ def get_problem_list(request):
             'problem_name' : problem_name_from_location,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
+            'num_required' : submissions_required,
             'min_for_ml' : settings.MIN_TO_USE_ML,
             }
         location_info.append(location_dict)
@@ -305,19 +312,16 @@ def get_notifications(request):
     unique_course_locations = [x['location'] for x in
                                 Submission.objects.filter(course_id = course_id).values('location').distinct()]
     for location in unique_course_locations:
-        is_location_ml=False
-        location_ml_count = Submission.objects.filter(course_id = course_id, location=location, preferred_grader_type="ML").count()
-        if location_ml_count>0:
-            is_location_ml=True
         min_scored_for_location=settings.MIN_TO_USE_PEER
-        if is_location_ml:
+        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
             min_scored_for_location=settings.MIN_TO_USE_ML
 
-        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor.count()
+        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
         submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
 
         if location_scored_count<min_scored_for_location and submissions_pending>0:
             staff_needs_to_grade = True
-            return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}), _INTERFACE_VERSION)
+            return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
 
     return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
