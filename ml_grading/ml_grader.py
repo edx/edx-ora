@@ -20,9 +20,8 @@ import pickle
 log=logging.getLogger(__name__)
 
 import controller.util as util
-from controller.models import SubmissionState, GraderStatus
-
-from controller.models import Submission, Grader
+from controller.models import SubmissionState, GraderStatus, Submission, Grader
+from controller import rubric_functions
 
 from ml_grading.models import CreatedModel
 
@@ -30,6 +29,8 @@ import ml_grading.ml_grading_util as ml_grading_util
 
 sys.path.append(settings.ML_PATH)
 import grade
+
+from staff_grading import staff_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +43,10 @@ def handle_single_item(controller_session):
     if sub_get_success:
         transaction.commit_unless_managed()
         sub = Submission.objects.get(id=int(content['submission_id']))
+        subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(sub.location)
+        first_sub = subs_graded_by_instructor.order_by('date_created')[0]
+        parsed_rubric=rubric_functions.parse_rubric(first_sub.rubric)
+
 
         #strip out unicode and other characters in student response
         #Needed, or grader may potentially fail
@@ -50,57 +55,75 @@ def handle_single_item(controller_session):
 
         #Get the latest created model for the given location
         transaction.commit_unless_managed()
-        success, created_model=ml_grading_util.get_latest_created_model(sub.location)
 
-        if not success:
-            log.debug("Could not identify a valid created model!")
-            results= RESULT_FAILURE_DICT
-            formatted_feedback="error"
-            status=GraderStatus.failure
-            statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
-                tags=["success:False"])
+        location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
 
-        else:
+        if len(location_suffixes)>0:
+            rubric_scores_complete=True
+            rubric_scores=[]
 
-            #Create grader path from location in submission
-            grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
-            model_stored_in_s3=created_model.model_stored_in_s3
+        for m in xrange(0,len(location_suffixes)):
+            suffix = location_suffixes[m]
+            success, created_model=ml_grading_util.get_latest_created_model(sub.location + suffix)
 
-            success, grader_data=load_model_file(created_model,use_full_path=False)
-            if success:
-                results = grade.grade(grader_data, None,
-                    student_response) #grader config is none for now, could be different later
+            if not success:
+                log.debug("Could not identify a valid created model!")
+                if m==0:
+                    results= RESULT_FAILURE_DICT
+                    formatted_feedback="error"
+                    status=GraderStatus.failure
+                    statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                        tags=["success:False"])
+
             else:
-                results=RESULT_FAILURE_DICT
 
-            #If the above fails, try using the full path in the created_model object
-            if not results['success'] and not created_model.model_stored_in_s3:
-                grader_path=created_model.model_full_path
-                try:
-                    success, grader_data=load_model_file(created_model,use_full_path=True)
-                    if success:
-                        results = grade.grade(grader_data, None,
-                            student_response) #grader config is none for now, could be different later
-                    else:
-                        results=RESULT_FAILURE_DICT
-                except:
-                    error_message="Could not find a valid model file."
-                    log.exception(error_message)
+                #Create grader path from location in submission
+                grader_path = os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path)
+                model_stored_in_s3=created_model.model_stored_in_s3
+
+                success, grader_data=load_model_file(created_model,use_full_path=False)
+                if success:
+                    results = grade.grade(grader_data, None,
+                        student_response) #grader config is none for now, could be different later
+                else:
                     results=RESULT_FAILURE_DICT
 
-            log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
-            statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
-                tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
+                #If the above fails, try using the full path in the created_model object
+                if not results['success'] and not created_model.model_stored_in_s3:
+                    grader_path=created_model.model_full_path
+                    try:
+                        success, grader_data=load_model_file(created_model,use_full_path=True)
+                        if success:
+                            results = grade.grade(grader_data, None,
+                                student_response) #grader config is none for now, could be different later
+                        else:
+                            results=RESULT_FAILURE_DICT
+                    except:
+                        error_message="Could not find a valid model file."
+                        log.exception(error_message)
+                        results=RESULT_FAILURE_DICT
 
-            #Set grader status according to success/fail
-            if results['success']:
-                status = GraderStatus.success
+                log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+                statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
+                    tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
+
+                #Set grader status according to success/fail
+                if results['success']:
+                    status = GraderStatus.success
+                else:
+                    status = GraderStatus.failure
+
+            if m==0:
+                final_results=results
+            elif results['success']==False:
+                rubric_scores_complete = False
             else:
-                status = GraderStatus.failure
+                rubric_scores.append(results['score'])
+        if len(rubric_scores)==0:
+            rubric_scores_complete=False
 
-        log.debug(results)
         grader_dict = {
-            'score': results['score'],
+            'score': final_results['score'],
             'feedback': json.dumps(results['feedback']),
             'status': status,
             'grader_id': 1,
@@ -108,9 +131,9 @@ def handle_single_item(controller_session):
             'confidence': results['confidence'],
             'submission_id': sub.id,
             'errors' : ' ' .join(results['errors']),
+            'rubric_scores_complete' : rubric_scores_complete,
+            'rubric_scores' : json.dumps(rubric_scores),
             }
-
-
         #Create grader object in controller by posting back results
         created, msg = util._http_post(
             controller_session,
@@ -140,6 +163,7 @@ def get_pending_length_from_controller(controller_session):
     Get the number of pending submissions from the controller
     """
     success,content=query_controller(controller_session,project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
+    log.debug(content)
     return success, content['to_be_graded_count']
 
 def query_controller(controller_session,end_path,data={}):

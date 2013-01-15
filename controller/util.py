@@ -240,6 +240,8 @@ def create_xqueue_header_and_body(submission):
     success=score_and_feedback['success']
     grader_id = score_and_feedback['grader_id']
     submission_id = score_and_feedback['submission_id']
+    rubric_scores_complete = score_and_feedback['rubric_scores_complete']
+    rubric_xml = score_and_feedback['rubric_xml']
     xqueue_body = {
         'feedback': feedback,
         'score': score,
@@ -247,6 +249,8 @@ def create_xqueue_header_and_body(submission):
         'success' : success,
         'grader_id' : grader_id,
         'submission_id' : submission_id,
+        'rubric_scores_complete' : rubric_scores_complete,
+        'rubric_xml' : rubric_xml,
     }
 
     return xqueue_header, xqueue_body

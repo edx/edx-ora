@@ -11,7 +11,7 @@ import json
 import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
-import rubric
+import rubric_functions
 
 log = logging.getLogger(__name__)
 
@@ -81,9 +81,13 @@ def create_and_handle_grader_object(grader_dict):
     grade = create_grader(grader_dict, sub)
 
     #Check to see if rubric scores were passed to the function, and handle if so.
+    log.debug(grader_dict)
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
-        if grader_dict['rubric_scores_complete']==True:
-            rubric.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
+        if grader_dict['rubric_scores_complete']=='True':
+            try:
+                rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
+            except:
+                log.exception("Problem with getting rubric scores from dict : {0}".format(grader_dict))
 
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
 
@@ -171,7 +175,7 @@ def get_eta_for_submission(location):
     grader_settings = get_grader_settings(grader_settings_path)
 
     if grader_settings['grader_type'] in ["ML", "IN"]:
-        success, model = ml_grading_util.get_latest_created_model(location)
+        success= ml_grading_util.check_for_all_model_and_rubric_success(location)
         if success:
             eta = settings.ML_ESTIMATED_GRADING_TIME
     elif grader_settings['grader_type'] in "PE":
