@@ -125,9 +125,13 @@ def save_grade(request):
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}
         )
 
-    response = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
-    if not response['success']:
-        return response
+    success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+    if not success:
+        return util.error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": error_message}
+        )
 
     d = {'submission_id': submission_id,
          'score': score,

@@ -203,9 +203,13 @@ def save_grade(request):
     rubric_success, parsed_rubric =  rubric_functions.parse_rubric(rubric)
 
     if rubric_success:
-        response = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
-        if not response['success']:
-            return response
+        success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+        if not success:
+            return util.error_response(
+                "grade_save_error",
+                _INTERFACE_VERSION,
+                data={"msg": error_message}
+            )
 
     d = {'submission_id': submission_id,
          'score': score,
