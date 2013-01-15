@@ -137,7 +137,7 @@ def put_result(request):
         post_data = request.POST.dict().copy()
         log.debug(post_data)
 
-        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'errors']:
+        for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'errors', 'rubric_scores_complete', 'rubric_scores']:
             if not post_data.has_key(tag):
                 return util._error_response("Failed to find needed key {0}.".format(tag), _INTERFACE_VERSION)
 
@@ -154,6 +154,25 @@ def put_result(request):
         except:
             return util._error_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
 
+        try:
+            sub=Submission.objects.get(id=int(post_data['submission_id']))
+        except:
+            return util.error_response(
+                "Submission id {0} is not valid.".format(submission_id),
+                _INTERFACE_VERSION,
+            )
+
+        rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
+        rubric_scores = request.POST.getlist('rubric_scores', [])
+        success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+        if not success:
+            return util.error_response(
+                error_message,
+                _INTERFACE_VERSION,
+            )
+
+        post_data['rubric_scores']=rubric_scores
+        post_data['rubric_scores_complete'] = rubric_scores_complete
         success, header = grader_util.create_and_handle_grader_object(post_data)
         if not success:
             return util._error_response("Could not save grader.", _INTERFACE_VERSION)
