@@ -108,6 +108,9 @@ def save_grade(request):
     #This is done to ensure that response is properly formatted on the lms side.
     feedback_dict = post_data['feedback']
 
+    rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
+    rubric_scores = request.POST.getlist('rubric_scores')
+
     try:
         score = int(score)
     except ValueError:
@@ -230,16 +233,30 @@ def save_calibration_essay(request):
     #Submission key currently unused, but plan to use it for validation in the future.
     submission_key = post_data['submission_key']
 
+    rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
+    rubric_scores = request.POST.getlist('rubric_scores')
+
     try:
         score = int(score)
     except ValueError:
         return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
+
+    try:
+        sub=Submission.objects.get(id=submission_id)
+    except:
+        return util.error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": "Submission id {0} is not valid.".format(submission_id)}
+        )
 
     d = {'submission_id': submission_id,
          'score': score,
          'feedback': feedback,
          'student_id': student_id,
          'location': location,
+         'rubric_scores_complete' : rubric_scores_complete,
+         'rubric_scores' : rubric_scores,
     }
 
     (success, data) = calibration.create_and_save_calibration_record(d)
