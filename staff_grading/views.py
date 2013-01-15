@@ -164,7 +164,7 @@ def save_grade(request):
     feedback = request.POST.get('feedback')
     skipped = request.POST.get('skipped')=="True"
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
-    rubric_scores = request.POST.getlist('rubric_scores')
+    rubric_scores = request.POST.getlist('rubric_scores', [])
 
     if (# These have to be truthy
         not (course_id and grader_id and submission_id) or

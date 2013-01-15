@@ -109,7 +109,7 @@ def save_grade(request):
     feedback_dict = post_data['feedback']
 
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
-    rubric_scores = request.POST.getlist('rubric_scores')
+    rubric_scores = request.POST.getlist('rubric_scores', [])
 
     try:
         score = int(score)
@@ -234,7 +234,7 @@ def save_calibration_essay(request):
     submission_key = post_data['submission_key']
 
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
-    rubric_scores = request.POST.getlist('rubric_scores')
+    rubric_scores = request.POST.getlist('rubric_scores', [])
 
     try:
         score = int(score)
