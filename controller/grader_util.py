@@ -53,7 +53,7 @@ def create_and_handle_grader_object(grader_dict):
         Feedback should be a dictionary with as many keys as needed.
         Errors is a string containing errors.
     """
-
+    log.debug(grader_dict)
     for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
         if tag not in grader_dict:
             return False, "{0} tag not in input dictionary.".format(tag)
@@ -83,6 +83,11 @@ def create_and_handle_grader_object(grader_dict):
     #Check to see if rubric scores were passed to the function, and handle if so.
     log.debug(grader_dict)
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
+        try:
+            grader_dict['rubric_scores']=json.loads(grader_dict['rubric_scores'])
+        except:
+            pass
+
         if grader_dict['rubric_scores_complete']=='True':
             try:
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)

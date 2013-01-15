@@ -163,7 +163,13 @@ def put_result(request):
             )
 
         rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
-        rubric_scores = request.POST.getlist('rubric_scores', [])
+        rubric_scores = request.POST.get('rubric_scores', [])
+
+        try:
+            rubric_scores=json.loads(rubric_scores)
+        except:
+            pass
+
         success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
         if not success:
             return util.error_response(
