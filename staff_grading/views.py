@@ -203,51 +203,9 @@ def save_grade(request):
     rubric_success, parsed_rubric =  rubric_functions.parse_rubric(rubric)
 
     if rubric_success:
-        if rubric_scores_complete!="True":
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": "Rubric scores complete is not true: {0}".format(rubric_scores_complete)}
-            )
-
-        success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
-        if not success:
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": "Cannot generate targets from rubric xml: {0}".format(sub.rubric)}
-            )
-
-        if not isinstance(rubric_scores,list):
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": "Rubric Scores is not a list: {0}".format(rubric_scores)}
-            )
-
-        if len(rubric_scores)!=len(targets):
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": "Number of scores saved does not equal number of targets.  Targets: {0} Rubric Scores: {1}".format(
-                    targets, rubric_scores)}
-            )
-
-        for i in xrange(0,len(rubric_scores)):
-            try:
-                rubric_scores[i]=int(rubric_scores[i])
-            except:
-                return util._error_response(
-                    "grade_save_error",
-                    _INTERFACE_VERSION,
-                    data={"msg": "Cannot parse score into int".format(rubric_scores[i])}
-                )
-            if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:
-                return util._error_response(
-                    "grade_save_error",
-                    _INTERFACE_VERSION,
-                    data={"msg": "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])}
-                )
+        response = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+        if not response['success']:
+            return response
 
     d = {'submission_id': submission_id,
          'score': score,

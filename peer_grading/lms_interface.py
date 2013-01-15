@@ -113,6 +113,19 @@ def save_grade(request):
     except ValueError:
         return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
 
+    try:
+        sub=Submission.objects.get(id=submission_id)
+    except:
+        return util.error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": "Submission id {0} is not valid.".format(submission_id)}
+        )
+
+    response = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+    if not response['success']:
+        return response
+
     d = {'submission_id': submission_id,
          'score': score,
          'feedback': feedback_dict,
@@ -123,7 +136,10 @@ def save_grade(request):
          # ...and they're always confident too.
          'confidence': 1.0,
          #And they don't make any errors
-         'errors' : ""}
+         'errors' : "",
+         'rubric_scores_complete' : rubric_scores_complete,
+         'rubric_scores' : rubric_scores
+    }
 
     #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.
     (success, header) = grader_util.create_and_handle_grader_object(d)
