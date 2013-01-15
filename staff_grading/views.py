@@ -164,7 +164,7 @@ def save_grade(request):
     feedback = request.POST.get('feedback')
     skipped = request.POST.get('skipped')=="True"
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
-    rubric_scores = request.POST.getlist('rubric_scores')
+    rubric_scores = request.POST.getlist('rubric_scores', [])
 
     if (# These have to be truthy
         not (course_id and grader_id and submission_id) or
@@ -198,50 +198,17 @@ def save_grade(request):
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}
         )
 
-    if rubric_scores_complete!="True":
-        return util._error_response(
-            "grade_save_error",
-            _INTERFACE_VERSION,
-            data={"msg": "Rubric scores complete is not true: {0}".format(rubric_scores_complete)}
-        )
+    first_sub_for_location=Submission.objects.filter(location=sub.location).order_by('date_created')[0]
+    rubric= first_sub_for_location.rubric
+    rubric_success, parsed_rubric =  rubric_functions.parse_rubric(rubric)
 
-    success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
-    if not success:
-        return util._error_response(
-            "grade_save_error",
-            _INTERFACE_VERSION,
-            data={"msg": "Cannot generate targets from rubric xml: {0}".format(sub.rubric)}
-        )
-
-    if not isinstance(rubric_scores,list):
-        return util._error_response(
-            "grade_save_error",
-            _INTERFACE_VERSION,
-            data={"msg": "Rubric Scores is not a list: {0}".format(rubric_scores)}
-        )
-
-    if len(rubric_scores)!=len(targets):
-        return util._error_response(
-            "grade_save_error",
-            _INTERFACE_VERSION,
-            data={"msg": "Number of scores saved does not equal number of targets.  Targets: {0} Rubric Scores: {1}".format(
-                targets, rubric_scores)}
-        )
-
-    for i in xrange(0,len(rubric_scores)):
-        try:
-            rubric_scores[i]=int(rubric_scores[i])
-        except:
-            return util._error_response(
+    if rubric_success:
+        success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+        if not success:
+            return util.error_response(
                 "grade_save_error",
                 _INTERFACE_VERSION,
-                data={"msg": "Cannot parse score into int".format(rubric_scores[i])}
-            )
-        if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])}
+                data={"msg": error_message}
             )
 
     d = {'submission_id': submission_id,
@@ -307,6 +274,12 @@ def get_problem_list(request):
         problem_name = Submission.objects.filter(location=location)[0].problem_id
         submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
         finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        min_scored_for_location=settings.MIN_TO_USE_PEER
+        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
+            min_scored_for_location=settings.MIN_TO_USE_ML
+
+        submissions_required = max([0,min_scored_for_location-finished_instructor_graded])
 
         problem_name_from_location=location.split("://")[1]
         location_dict={
@@ -314,6 +287,7 @@ def get_problem_list(request):
             'problem_name' : problem_name_from_location,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
+            'num_required' : submissions_required,
             'min_for_ml' : settings.MIN_TO_USE_ML,
             }
         location_info.append(location_dict)
@@ -321,3 +295,37 @@ def get_problem_list(request):
     log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
                                   _INTERFACE_VERSION)
+
+@csrf_exempt
+@util.error_if_not_logged_in
+def get_notifications(request):
+    if request.method!="GET":
+        error_message="Request needs to be GET."
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    course_id=request.GET.get("course_id")
+
+    if not course_id:
+        error_message="Missing needed tag course_id"
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    staff_needs_to_grade = False
+
+    unique_course_locations = [x['location'] for x in
+                                Submission.objects.filter(course_id = course_id).values('location').distinct()]
+    for location in unique_course_locations:
+        min_scored_for_location=settings.MIN_TO_USE_PEER
+        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
+            min_scored_for_location=settings.MIN_TO_USE_ML
+
+        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+
+        if location_scored_count<min_scored_for_location and submissions_pending>0:
+            staff_needs_to_grade = True
+            return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
+
+    return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)

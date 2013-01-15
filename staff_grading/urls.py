@@ -5,6 +5,7 @@ urlpatterns = patterns('staff_grading.views',
     url(r'^get_next_submission/$', 'get_next_submission'),
     url(r'^save_grade/$', 'save_grade'),
     url(r'^get_problem_list/$', 'get_problem_list'),
+    url(r'^get_notifications/$', 'get_notifications'),
 )
 
 

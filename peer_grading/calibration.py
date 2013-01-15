@@ -3,6 +3,7 @@ from django.conf import settings
 from controller.models import Submission
 import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
+import json
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ def create_and_save_calibration_record(calibration_data):
         Or boolean indicating failure and error message
     """
 
-    for tag in ['submission_id', 'score', 'feedback', 'student_id', 'location']:
+    for tag in ['submission_id', 'score', 'feedback', 'student_id', 'location', 'rubric_scores_complete', 'rubric_scores']:
         if not tag in calibration_data:
             return False, ("Cannot find needed key {0} in request.".format(tag))
 
@@ -51,6 +52,8 @@ def create_and_save_calibration_record(calibration_data):
         score=calibration_data['score'],
         actual_score=actual_score,
         feedback=calibration_data['feedback'],
+        rubric_scores_complete = calibration_data['rubric_scores_complete'],
+        rubric_scores = json.dumps(calibration_data['rubric_scores']),
     )
 
     cal_record.save()
