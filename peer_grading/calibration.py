@@ -3,6 +3,7 @@ from django.conf import settings
 from controller.models import Submission
 import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
+import json
 
 log = logging.getLogger(__name__)
 
