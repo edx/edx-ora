@@ -107,7 +107,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
 
     subs_graded = finished_submissions_graded_by_instructor(location).count()
     subs_pending = submissions_pending_instructor(location, state_in=[SubmissionState.being_graded]).count()
-    success, model = ml_grading_util.get_latest_created_model(location)
+    success= ml_grading_util.check_for_all_model_and_rubric_success(location)
 
     if ((subs_graded + subs_pending) < settings.MIN_TO_USE_ML or not success) or not check_for_ml:
         to_be_graded = Submission.objects.filter(

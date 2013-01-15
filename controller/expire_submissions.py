@@ -65,7 +65,7 @@ def reset_in_subs_to_ml(subs):
     for sub in in_subs:
         #If an instructor checks out a submission after ML grading has started,
         # this resets it to ML if the instructor times out
-        success, model = ml_grading_util.get_latest_created_model(sub.location)
+        success= ml_grading_util.check_for_all_model_and_rubric_success(sub.location)
         if (sub.next_grader_type=="IN" and success):
             sub.next_grader_type="ML"
             sub.save()
@@ -170,6 +170,7 @@ def check_if_grading_finished_for_duplicates():
     duplicate_submissions = Submission.objects.filter(
         preferred_grader_type = "PE",
         is_duplicate= True,
+        posted_results_back_to_queue=False,
     )
     counter=0
     for sub in duplicate_submissions:

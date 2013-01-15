@@ -11,6 +11,9 @@ from models import CreatedModel
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
+import controller.rubric_functions
+from controller.models import Submission, SubmissionState, Grader
+
 def create_directory(model_path):
     directory=path(model_path).dirname()
     if not os.path.exists(directory):
@@ -18,7 +21,7 @@ def create_directory(model_path):
 
     return True
 
-def get_model_path(location):
+def get_model_path(location, suffix=""):
     """
     Generate a path from a location
     """
@@ -28,6 +31,7 @@ def get_model_path(location):
 
     fixed_location=re.sub("[/:]","_",location)
     fixed_location+="_"+timezone.now().strftime("%Y%m%d%H%M%S")
+    fixed_location+=suffix
     full_path=os.path.join(base_path,fixed_location)
     return fixed_location,full_path
 
@@ -48,6 +52,21 @@ def get_latest_created_model(location):
         return False, "No valid models for location."
 
     return True, created_models[0]
+
+def check_for_all_model_and_rubric_success(location):
+    subs_graded_by_instructor = Submission.objects.filter(location=location,
+        previous_grader_type="IN",
+        state=SubmissionState.finished,
+    )
+
+    location_suffixes=generate_rubric_location_suffixes(subs_graded_by_instructor)
+    overall_success=True
+    for m in xrange(0,len(location_suffixes)):
+        suffix = location_suffixes[m]
+        success, created_model=get_latest_created_model(location + suffix)
+        if not success:
+            overall_success=False
+    return overall_success
 
 def save_created_model(model_data):
     """
@@ -160,6 +179,56 @@ def get_pickle_data(prompt_string, feature_ext, classifier, text, score):
 def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model_path):
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     pickle.dump(model_file, file=open(model_path, "w"))
+
+def generate_rubric_location_suffixes(subs):
+    location_suffixes=[""]
+    first_graded_sub=subs.order_by('date_created')
+    if len(first_graded_sub)>0:
+        first_graded_sub=first_graded_sub[0]
+        success, rubric_targets = controller.rubric_functions.generate_targets_from_rubric(first_graded_sub.rubric)
+        if success:
+            for m in xrange(0,len(subs)):
+                sub=subs[m]
+                scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
+                if not scores_match_target:
+                    return location_suffixes
+
+            for i in xrange(0,len(rubric_targets)):
+                location_suffixes.append("_rubricitem_{0}".format(i))
+    return location_suffixes
+
+def check_if_sub_scores_match_targets(sub, targets):
+    success, sub_scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
+    if success:
+        if len(sub_scores)==len(targets):
+            success=True
+        else:
+            success=False
+    return success
+
+def regrade_ml(location):
+    """
+    Regrades all of the ML problems in a given location.  Returns boolean success.
+    """
+    success = check_for_all_model_and_rubric_success(location)
+    if not success:
+        log.debug("No models trained yet for location {0}, so cannot regrade.".format(location))
+        return False
+
+    subs = Submission.objects.filter(location=location, previous_grader_type="ML")
+    for sub in subs:
+        for grade in sub.grader_set.all():
+            grade.status_code = GraderStatus.failure
+            grade.save()
+        sub.state= SubmissionState.waiting_to_be_graded
+        sub.posted_results_back_to_queue = False
+        sub.next_grader_type = "ML"
+        sub.save()
+
+    return True
+
+
+
 
 
 
