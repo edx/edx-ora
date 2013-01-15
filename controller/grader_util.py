@@ -12,6 +12,7 @@ import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
 import rubric_functions
+import util
 
 log = logging.getLogger(__name__)
 

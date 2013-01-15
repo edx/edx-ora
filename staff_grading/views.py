@@ -284,3 +284,40 @@ def get_problem_list(request):
     log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
                                   _INTERFACE_VERSION)
+
+@csrf_exempt
+@util.error_if_not_logged_in
+def get_notifications(request):
+    if request.method!="GET":
+        error_message="Request needs to be GET."
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    course_id=request.GET.get("course_id")
+
+    if not course_id:
+        error_message="Missing needed tag course_id"
+        log.error(error_message)
+        return util._error_response(error_message, _INTERFACE_VERSION)
+
+    staff_needs_to_grade = False
+
+    unique_course_locations = [x['location'] for x in
+                                Submission.objects.filter(course_id = course_id).values('location').distinct()]
+    for location in unique_course_locations:
+        is_location_ml=False
+        location_ml_count = Submission.objects.filter(course_id = course_id, location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
+            is_location_ml=True
+        min_scored_for_location=settings.MIN_TO_USE_PEER
+        if is_location_ml:
+            min_scored_for_location=settings.MIN_TO_USE_ML
+
+        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor.count()
+        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+
+        if location_scored_count<min_scored_for_location and submissions_pending>0:
+            staff_needs_to_grade = True
+            return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}), _INTERFACE_VERSION)
+
+    return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
