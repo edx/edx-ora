@@ -295,6 +295,7 @@ def get_problem_list(request):
 
     locations_for_course = [x['location'] for x in
                             list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+
     location_info=[]
     for location in locations_for_course:
         student_sub_count=Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE").count()
@@ -344,8 +345,9 @@ def get_notifications(request):
         location_response_count = student_responses_for_course.filter(location=location).count()
         required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
         completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
+        submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location).count()
 
-        if completed_peer_grading_for_location<required_peer_grading_for_location:
+        if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
             student_needs_to_peer_grade = True
             return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
 
