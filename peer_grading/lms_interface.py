@@ -337,7 +337,7 @@ def get_notifications(request):
 
     student_needs_to_peer_grade = False
 
-    student_responses_for_course = Submission.objects.filter(student_id = student_id, course_id=course_id)
+    student_responses_for_course = Submission.objects.filter(student_id = student_id, course_id=course_id, preferred_grader_type="PE")
     unique_student_locations = [x['location'] for x in
                                 student_responses_for_course.values('location').distinct()]
     for location in unique_student_locations:
