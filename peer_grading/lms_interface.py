@@ -269,6 +269,7 @@ def get_problem_list(request):
             problem_name = Submission.objects.filter(location=location)[0].problem_id
             submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location).count()
             submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
+            submissions_required = max([0,(settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count)-submissions_graded])
 
             problem_name_from_location=location.split("://")[1]
             if submissions_graded>0 or submissions_pending>0:
@@ -276,6 +277,7 @@ def get_problem_list(request):
                     'location' : location,
                     'problem_name' : problem_name_from_location,
                     'num_graded' : submissions_graded,
+                    'num_required' : submissions_required,
                     'num_pending' : submissions_pending,
                     }
                 location_info.append(location_dict)
