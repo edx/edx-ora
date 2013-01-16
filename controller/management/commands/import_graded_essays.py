@@ -126,12 +126,12 @@ class Command(BaseCommand):
                 for z in xrange(0,len(rubric_targets)):
                     scores.append(random.randint(0,rubric_targets[z]))
                 if import_rubric_scores:
-                    score_item = rubric_scores[z]
-                    success = grader_util.validate_rubric_scores(score_item, True, sub)
-                else:
-                    final_scores = scores
+                    score_item = rubric_scores[i]
+                    if len(score_item) == len(scores):
+                        scores = score_item
+                        log.debug("Score: {0} Rubric Score: {1}".format(score[i], scores))
 
-                controller.rubric_functions.generate_rubric_object(grade, final_scores, sub.rubric)
+                controller.rubric_functions.generate_rubric_object(grade, scores, sub.rubric)
 
             if increment_ids:
                 student_id+=1
