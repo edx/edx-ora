@@ -118,12 +118,12 @@ def handle_single_item(controller_session):
             elif results['success']==False:
                 rubric_scores_complete = False
             else:
-                rubric_scores.append(results['score'])
+                rubric_scores.append(int(results['score']))
         if len(rubric_scores)==0:
             rubric_scores_complete=False
 
         grader_dict = {
-            'score': final_results['score'],
+            'score': int(final_results['score']),
             'feedback': json.dumps(results['feedback']),
             'status': status,
             'grader_id': 1,
