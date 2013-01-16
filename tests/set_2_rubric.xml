@@ -1,0 +1,14 @@
+<rubric>
+	<category>
+		<description>Writing Applications</description>
+		<option> The essay does not address itself to the prompt, or exhibits significant difficulty in conveying and organizing its theme.</option>
+		<option> The essay loses focus, has little information or supporting details, and the organization makes it difficult to follow.</option>
+		<option> The essay presents a mostly unified theme, includes sufficient information to convey the theme, and is generally organized well.</option>
+	</category>
+	<category>
+		<description> Language Conventions </description>
+		<option> The essay demonstrates a minimal command of proper spelling and grammar.</option>
+		<option> The essay demonstrates a good command of proper spelling and grammar. </option>
+		<option> The essay demonstrates superior command of proper spelling and grammar.</option>
+	</category>
+</rubric>
