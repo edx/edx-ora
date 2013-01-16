@@ -89,6 +89,7 @@ def create_and_handle_grader_object(grader_dict):
             pass
 
         if grader_dict['rubric_scores_complete']=='True':
+            grader_dict['rubric_scores']=[int(r) for r in grader_dict['rubric_scores']]
             try:
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
             except:
