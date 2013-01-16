@@ -21,6 +21,7 @@ from controller.models import GraderStatus, SubmissionState
 
 import controller.rubric_functions
 import random
+from controller import grader_util
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class Command(BaseCommand):
         location = parser.get(header_name, 'location')
         course_id = parser.get(header_name, 'course_id')
         problem_id = parser.get(header_name, 'problem_id')
-        prompt = parser.get(header_name, 'prompt')
+        prompt_file = parser.get(header_name, 'prompt_file')
         essay_file = parser.get(header_name, 'essay_file')
         essay_limit = int(parser.get(header_name, 'essay_limit'))
         state = parser.get(header_name, "state")
@@ -54,8 +55,12 @@ class Command(BaseCommand):
         max_score= parser.get(header_name,"max_score")
         student_id = parser.get(header_name,'student_id')
         increment_ids = parser.get(header_name,'increment_ids')
+        rubric_file = parser.get(header_name, 'rubric_file')
+        import_rubric_scores = parser.get(header_name, 'import_rubric_scores') == "True"
+        rubric_scores_file = parser.get(header_name, 'rubric_scores_file')
 
-        rubric=open(settings.REPO_PATH / "tests/rubric.xml").read()
+        rubric=open(settings.REPO_PATH / rubric_file).read()
+        prompt=open(settings.REPO_PATH / prompt_file).read()
 
         score, text = [], []
         combined_raw = open(settings.REPO_PATH / essay_file).read()
@@ -67,6 +72,16 @@ class Command(BaseCommand):
 
         if increment_ids:
             student_id = int(student_id)
+
+        if import_rubric_scores:
+            rubric_scores=[]
+            combined_raw = open(settings.REPO_PATH / rubric_scores_file).read()
+            raw_lines = combined_raw.splitlines()
+            for row in xrange(1, len(raw_lines)):
+                rubric_score_row=[]
+                for score_item in raw_lines[row].strip().split("\t"):
+                    rubric_score_row.append(int(score_item))
+                rubric_scores.append(rubric_score_row)
 
         for i in range(0, min(essay_limit, len(text))):
             sub = Submission(
@@ -105,10 +120,16 @@ class Command(BaseCommand):
                 grade.submission = sub
                 grade.save()
 
+
                 success, rubric_targets=controller.rubric_functions.generate_targets_from_rubric(sub.rubric)
                 scores=[]
                 for z in xrange(0,len(rubric_targets)):
                     scores.append(random.randint(0,rubric_targets[z]))
+                if import_rubric_scores:
+                    score_item = rubric_scores[i]
+                    if len(score_item) == len(scores):
+                        scores = score_item
+                        log.debug("Score: {0} Rubric Score: {1}".format(score[i], scores))
 
                 controller.rubric_functions.generate_rubric_object(grade, scores, sub.rubric)
 

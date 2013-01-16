@@ -1,12 +1,9 @@
 <rubric>
     <category>
-        <description>Grammar and Spelling</description>
-        <option>Many grammatical and spelling errors</option>
-        <option>This is also a text option</option>
-    </category>
-    <category>
-        <description>Another topic to grade on</description>
-        <option points="0">This is an option</option>
-        <option points="1">This is another option</option>
+	<description>Response Quality</description>
+	<option>The response is not a satisfactory answer to the question.  It either fails to address the question or does so in a limited way, with no evidence of higher-order thinking.</option>
+	<option>The response is a marginal answer to the question.  It may contain some elements of a proficient response, but it is inaccurate or incomplete.</option>
+	<option>The response is a proficient answer to the question.  It is generally correct, although it may contain minor inaccuracies.  There is limited evidence of higher-order thinking.</option>
+	<option>The response is correct, complete, and contains evidence of higher-order thinking.</option>
     </category>
 </rubric>
