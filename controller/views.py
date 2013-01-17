@@ -126,15 +126,13 @@ def check_for_notifications(request):
     if request.method != 'GET':
         return util._error_response("Request type must be GET", _INTERFACE_VERSION)
 
-    for tag in ['location', 'course_id']:
+    for tag in ['location', 'course_id', 'user_is_staff', 'last_viewed_time']:
         if tag not in request.GET:
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
 
-    location=request.GET.get("location")
-    course_id = request.GET.get('course_id')
-    user_is_staff = request.GET.get('user_is_staff')
+    request_dict = request.GET.copy()
 
-    success, combined_notifications = grader_util.check_for_combined_notifications(location, course_id, user_is_staff)
+    success, combined_notifications = grader_util.check_for_combined_notifications(request_dict)
 
     if not success:
         return util._error_response(combined_notifications,_INTERFACE_VERSION)

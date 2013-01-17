@@ -270,7 +270,25 @@ def check_name_uniqueness(problem_id, location, course_id):
 
     return success, name_unique
 
-def check_for_combined_notifications(student_id, course_id, user_is_staff):
+def check_for_student_grading_notifications(student_id, course_id, last_time_viewed):
+    success = True
+    new_student_grading = False
+    subs = Submission.objects.filter(state=SubmissionState.finished, date_modified__gte=last_time_viewed, course_id = course_id)
+    if subs.count()>0:
+        new_student_grading=True
+    return success, new_student_grading
+
+def check_for_combined_notifications(notification_dict):
+    overall_success = True
+    for tag in ['location', 'course_id', 'user_is_staff', 'last_viewed_time']:
+        if tag not in notification_dict:
+            return False, "Missing required key {0}".format(tag)
+
+    location = notification_dict['location']
+    course_id = notification_dict['course_id']
+    user_is_staff = notification_dict['user_is_staff']
+    last_time_viewed = notification_dict['last_time_viewed']
+
     combined_notifications = {}
     success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
     if success:
@@ -281,5 +299,10 @@ def check_for_combined_notifications(student_id, course_id, user_is_staff):
         if success:
             combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
 
-    
+    success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
+    if success:
+        combined_notifications.update({'new_student_grading_to_view' : new_student_grading})
+
+    return overall_success, combined_notifications
+
 
