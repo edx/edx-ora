@@ -4,7 +4,7 @@ from create_grader import create_grader
 from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
-from models import GraderStatus, SubmissionState
+from models import GraderStatus, SubmissionState, STATE_CODES
 import expire_submissions
 from statsd import statsd
 import json
@@ -278,6 +278,27 @@ def check_for_student_grading_notifications(student_id, course_id, last_time_vie
         new_student_grading=True
     return success, new_student_grading
 
+def get_problems_student_has_tried(student_id, course_id):
+    success = True
+    subs = Submission.objects.filter(student_id=student_id, course_id = course_id)
+    sub_list = []
+    if subs.count()>0:
+        sub_locations = [s['location'] for s in subs.values('location').distinct()]
+        for location in sub_locations:
+            last_sub = subs.filter(location=location).order_by('-date_modified')[0]
+            problem_name = last_sub.problem_id
+            sub_state = last_sub.state
+            sub_codes = [s[0] for s in STATE_CODES]
+            state_index = sub_codes.index(sub_state)
+            sub_human_state = STATE_CODES[state_index][1]
+            sub_dict={
+                'state' : sub_human_state,
+                'location' : location,
+                'grader_type' : last_sub.previous_grader_type,
+            }
+            sub_list.update(sub_dict)
+    return success, sub_list
+
 def check_for_combined_notifications(notification_dict):
     overall_success = True
     for tag in ['location', 'course_id', 'user_is_staff', 'last_viewed_time']:
@@ -301,7 +322,9 @@ def check_for_combined_notifications(notification_dict):
 
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
     if success:
-        combined_notifications.update({'new_student_grading_to_view' : new_student_grading})
+        combined_notifications.update({
+            'new_student_grading_to_view' : new_student_grading
+        })
 
     return overall_success, combined_notifications
 

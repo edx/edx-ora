@@ -139,6 +139,34 @@ def check_for_notifications(request):
 
     return util._success_response(combined_notifications, _INTERFACE_VERSION)
 
+@csrf_exempt
+@login_required
+def get_grading_status_list(request):
+    """
+    Get a list of locations where student has submitted open ended questions and the status of each.
+    Input:
+        Course id, student id
+    Output:
+        Dictionary containing success, and a list of problems in the course with student submission status.
+        See grader_util for format details.
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['course_id', 'student_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    course_id = request.GET.get('course_id')
+    student_id = request.GET.get('student_id')
+
+    success, sub_list = grader_util.get_problems_student_has_tried(student_id, course_id)
+
+    if not success:
+        return util._error_response(combined_notifications,_INTERFACE_VERSION)
+
+    return util._success_response(combined_notifications, _INTERFACE_VERSION)
+
 
 
 
