@@ -111,8 +111,7 @@ def submit(request):
                     answer=answer,
                 )
 
-                log.debug(created)
-                if created==True:
+                if created==False:
                     log.error("Exact submission already exists.")
                     return util._error_response('Submission already exists.', _INTERFACE_VERSION)
 
