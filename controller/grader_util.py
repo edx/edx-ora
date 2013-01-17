@@ -11,6 +11,7 @@ import json
 import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
+from peer_grading import peer_grading_util
 import rubric_functions
 
 log = logging.getLogger(__name__)
@@ -269,4 +270,16 @@ def check_name_uniqueness(problem_id, location, course_id):
 
     return success, name_unique
 
+def check_for_combined_notifications(student_id, course_id, user_is_staff):
+    combined_notifications = {}
+    success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
+    if success:
+        combined_notifications.update({'student_needs_to_peer_grade' : student_needs_to_peer_grade})
+
+    if user_is_staff==True:
+        success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
+        if success:
+            combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
+
+    
 

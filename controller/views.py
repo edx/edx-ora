@@ -132,8 +132,9 @@ def check_for_notifications(request):
 
     location=request.GET.get("location")
     course_id = request.GET.get('course_id')
+    user_is_staff = request.GET.get('user_is_staff')
 
-    success, combined_notifications = grader_util.check_for_combined_notifications(location, course_id)
+    success, combined_notifications = grader_util.check_for_combined_notifications(location, course_id, user_is_staff)
 
     if not success:
         return util._error_response(combined_notifications,_INTERFACE_VERSION)
