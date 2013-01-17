@@ -248,8 +248,9 @@ def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
     success = True
     return success , ""
 
-def check_name_uniqueness(problem_id, location):
-    problem_name_pairs = Submission.objects.all().values('problem_id', 'location').distinct()
+def check_name_uniqueness(problem_id, location, course_id):
+
+    problem_name_pairs = Submission.objects.filter(course_id=course_id).values('problem_id', 'location').distinct()
     locations = [p['location'] for p in problem_name_pairs]
     problem_names = [p['problem_id'] for p in problem_name_pairs]
 

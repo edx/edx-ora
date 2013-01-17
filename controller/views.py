@@ -96,12 +96,15 @@ def verify_name_uniqueness(request):
     if request.method != 'GET':
         return util._error_response("Request type must be GET", _INTERFACE_VERSION)
 
+    for tag in ['location', 'problem_name', 'course_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
     location=request.GET.get("location")
     problem_name = request.GET.get("problem_name")
-    if not location or not problem_name:
-        return util._error_response("Missing required key location or problem_name", _INTERFACE_VERSION)
+    course_id = request.GET.get('course_id')
 
-    success, unique = grader_util.check_name_uniqueness(problem_name,location)
+    success, unique = grader_util.check_name_uniqueness(problem_name,location, course_id)
 
     if not success:
         return util._error_response(eta,_INTERFACE_VERSION)
