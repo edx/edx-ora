@@ -135,7 +135,6 @@ def put_result(request):
         return util._error_response("'put_result' must use HTTP POST", _INTERFACE_VERSION)
     else:
         post_data = request.POST.dict().copy()
-        log.debug(post_data)
 
         for tag in ['feedback', 'submission_id', 'grader_type', 'status', 'confidence', 'grader_id', 'score', 'errors', 'rubric_scores_complete', 'rubric_scores']:
             if not post_data.has_key(tag):

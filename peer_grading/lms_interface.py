@@ -66,7 +66,7 @@ def get_next_submission(request):
         'max_score': sub.max_score,
     }
 
-    log.debug(response)
+    #log.debug(response)
     return util._success_response(response, _INTERFACE_VERSION)
 
 @csrf_exempt
@@ -320,7 +320,6 @@ def get_problem_list(request):
                     }
                 location_info.append(location_dict)
 
-    log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
         _INTERFACE_VERSION)
 

@@ -157,7 +157,7 @@ def check_calibration_status(location,student_id):
     calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
     max_score = matching_submissions[0].max_score
     calibration_record_count = calibration_history.get_calibration_record_count()
-    log.debug("Calibration record count: {0}".format(calibration_record_count))
+    #log.debug("Calibration record count: {0}".format(calibration_record_count))
 
     calibration_dict={'total_calibrated_on_so_far' : calibration_record_count}
     #If student has calibrated more than the minimum and less than the max, check if error is higher than specified

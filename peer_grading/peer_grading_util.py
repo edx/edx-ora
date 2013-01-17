@@ -26,8 +26,7 @@ def get_single_peer_grading_item(location, grader_id):
         is_duplicate=False,
     ).exclude(student_id=grader_id)
 
-    log.debug(to_be_graded)
-    log.debug(grader_id)
+    log.debug("Looking for grading for student {0}, found {1}".format(grader_id, to_be_graded))
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
@@ -40,14 +39,14 @@ def get_single_peer_grading_item(location, grader_id):
                                     .order_by("num_graders")[:50]
                 )
             submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
-            log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
+            #log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
 
             submission_ids = [p['id'] for p in submissions_to_grade]
 
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
             for i in xrange(0, len(submission_ids)):
-                log.debug("Looping through graders, on {0}".format(i))
+                #log.debug("Looping through graders, on {0}".format(i))
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
                 grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
