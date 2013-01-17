@@ -44,6 +44,7 @@ class Command(BaseCommand):
 
                 expire_submissions.reset_in_subs_to_ml(subs)
                 expire_submissions.reset_subs_in_basic_check(subs)
+                expire_submissions.reset_failed_subs_in_basic_check(subs)
                 expire_submissions.reset_ml_subs_to_in()
 
                 #See if duplicate peer grading items have been finished grading
