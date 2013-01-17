@@ -247,3 +247,25 @@ def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
             return success, "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])
     success = True
     return success , ""
+
+def check_name_uniqueness(problem_id, location):
+    problem_name_pairs = Submission.objects.all().values('problem_id', 'location').distinct()
+    locations = [p['location'] for p in problem_name_pairs]
+    problem_names = [p['problem_id'] for p in problem_name_pairs]
+
+    equal_locations=[p for p in locations if p==location]
+    equal_problem_id = [p for p in problem_names if p==problem_id]
+    name_unique=True
+    success=True
+
+    if len(equal_problem_id)>1:
+        name_unique=False
+    elif len(equal_problem_id)==1:
+        equal_id_index=problem_names.index(problem_id)
+        matching_location=locations[equal_id_index]
+        if matching_location!=location:
+            name_unique=False
+
+    return success, name_unique
+
+

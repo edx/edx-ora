@@ -313,7 +313,7 @@ def get_problem_list(request):
             if submissions_graded>0 or submissions_pending>0:
                 location_dict={
                     'location' : location,
-                    'problem_name' : problem_name_from_location,
+                    'problem_name' : problem_name,
                     'num_graded' : submissions_graded,
                     'num_required' : submissions_required,
                     'num_pending' : submissions_pending,
