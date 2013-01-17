@@ -15,6 +15,7 @@ urlpatterns = patterns('controller.views',
     url(r'^get_submission_eta/$', 'request_eta_for_submission'),
     url(r'^is_name_unique/$', 'verify_name_uniqueness'),
     url(r'^combined_notifications/$', 'check_for_notifications'),
+    url(r'^get_grading_status_list/$', 'get_grading_status_list'),
 )
 
 # Xqueue submission interface (xqueue pull script uses this)

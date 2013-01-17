@@ -163,9 +163,9 @@ def get_grading_status_list(request):
     success, sub_list = grader_util.get_problems_student_has_tried(student_id, course_id)
 
     if not success:
-        return util._error_response(combined_notifications,_INTERFACE_VERSION)
+        return util._error_response(sub_list,_INTERFACE_VERSION)
 
-    return util._success_response(combined_notifications, _INTERFACE_VERSION)
+    return util._success_response(sub_list, _INTERFACE_VERSION)
 
 
 
