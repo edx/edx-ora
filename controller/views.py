@@ -57,6 +57,8 @@ def status(request):
     """
     return util._success_response({'content' : 'OK'}, _INTERFACE_VERSION)
 
+@csrf_exempt
+@util.error_if_not_logged_in
 def request_eta_for_submission(request):
     """
     Gets the ETA (in seconds) for a student submission to be graded for a given location
@@ -80,6 +82,33 @@ def request_eta_for_submission(request):
     return util._success_response({
         'eta' : eta,
     }, _INTERFACE_VERSION)
+
+@csrf_exempt
+@login_required
+def verify_name_uniqueness(request):
+    """
+    Check if a given problem name, location tuple is unique
+    Input:
+        A problem location and the problem name
+    Output:
+        Dictionary containing success, and and indicator of whether or not the name is unique
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    location=request.GET.get("location")
+    problem_name = request.GET.get("problem_name")
+    if not location or not problem_name:
+        return util._error_response("Missing required key location or problem_name", _INTERFACE_VERSION)
+
+    success, unique = grader_util.check_name_uniqueness(problem_name,location)
+
+    if not success:
+        return util._error_response(eta,_INTERFACE_VERSION)
+
+    return util._success_response({
+        'name_is_unique' : unique,
+        }, _INTERFACE_VERSION)
 
 
 
