@@ -113,6 +113,33 @@ def verify_name_uniqueness(request):
         'name_is_unique' : unique,
         }, _INTERFACE_VERSION)
 
+@csrf_exempt
+@login_required
+def check_for_notifications(request):
+    """
+    Check if a given problem name, location tuple is unique
+    Input:
+        A problem location and the problem name
+    Output:
+        Dictionary containing success, and and indicator of whether or not the name is unique
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['location', 'course_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    location=request.GET.get("location")
+    course_id = request.GET.get('course_id')
+
+    success, combined_notifications = grader_util.check_for_combined_notifications(location, course_id)
+
+    if not success:
+        return util._error_response(combined_notifications,_INTERFACE_VERSION)
+
+    return util._success_response(combined_notifications, _INTERFACE_VERSION)
+
 
 
 

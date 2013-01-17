@@ -260,3 +260,24 @@ def set_ml_grading_item_back_to_instructor(submission_id):
     sub.save()
 
     return True, sub
+
+def get_staff_grading_notifications(course_id):
+    staff_needs_to_grade = False
+    success = True
+
+    unique_course_locations = [x['location'] for x in
+                               Submission.objects.filter(course_id = course_id).values('location').distinct()]
+    for location in unique_course_locations:
+        min_scored_for_location=settings.MIN_TO_USE_PEER
+        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+        if location_ml_count>0:
+            min_scored_for_location=settings.MIN_TO_USE_ML
+
+        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+
+        if location_scored_count<min_scored_for_location and submissions_pending>0:
+            staff_needs_to_grade= True
+            return success, staff_needs_to_grade
+
+    return success, staff_needs_to_grade

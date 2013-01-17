@@ -339,20 +339,9 @@ def get_notifications(request):
         log.error(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-    student_needs_to_peer_grade = False
-
-    student_responses_for_course = Submission.objects.filter(student_id = student_id, course_id=course_id, preferred_grader_type="PE")
-    unique_student_locations = [x['location'] for x in
-                                student_responses_for_course.values('location').distinct()]
-    for location in unique_student_locations:
-        location_response_count = student_responses_for_course.filter(location=location).count()
-        required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
-        completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
-        submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location).count()
-
-        if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
-            student_needs_to_peer_grade = True
-            return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
+    success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
+    if not success:
+        return util._error_response(student_needs_to_peer_grade, _INTERFACE_VERSION)
 
     return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
 

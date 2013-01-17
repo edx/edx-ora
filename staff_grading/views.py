@@ -311,21 +311,8 @@ def get_notifications(request):
         log.error(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-    staff_needs_to_grade = False
-
-    unique_course_locations = [x['location'] for x in
-                                Submission.objects.filter(course_id = course_id).values('location').distinct()]
-    for location in unique_course_locations:
-        min_scored_for_location=settings.MIN_TO_USE_PEER
-        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
-        if location_ml_count>0:
-            min_scored_for_location=settings.MIN_TO_USE_ML
-
-        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
-        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
-
-        if location_scored_count<min_scored_for_location and submissions_pending>0:
-            staff_needs_to_grade = True
-            return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
+    success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
+    if not success:
+        return util._error_response(staff_needs_to_grade, _INTERFACE_VERSION)
 
     return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
