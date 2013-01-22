@@ -272,7 +272,7 @@ class RubricItem(models.Model):
         formatted_item=""
         formatted_item+="<category>"
         formatted_item+="<description>{0}</description>".format(self.text)
-        formatted_item+="<score>{0}</score>".format(self.score)
+        formatted_item+="<score>{0}</score>".format(int(self.score))
         for option in self.rubricoption_set.all().order_by('item_number'):
             formatted_item+=option.format_rubric_option()
         formatted_item+="</category>"
@@ -287,7 +287,7 @@ class RubricOption(models.Model):
     item_number = models.IntegerField()
 
     def format_rubric_option(self):
-        formatted_item="<option points='{0}'>{1}</option>".format(self.points, self.text)
+        formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
         return formatted_item
 
 

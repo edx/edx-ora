@@ -118,12 +118,12 @@ def handle_single_item(controller_session):
             elif results['success']==False:
                 rubric_scores_complete = False
             else:
-                rubric_scores.append(results['score'])
+                rubric_scores.append(int(results['score']))
         if len(rubric_scores)==0:
             rubric_scores_complete=False
 
         grader_dict = {
-            'score': final_results['score'],
+            'score': int(final_results['score']),
             'feedback': json.dumps(results['feedback']),
             'status': status,
             'grader_id': 1,
@@ -163,7 +163,7 @@ def get_pending_length_from_controller(controller_session):
     Get the number of pending submissions from the controller
     """
     success,content=query_controller(controller_session,project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
-    log.debug(content)
+    #log.debug(content)
     return success, content['to_be_graded_count']
 
 def query_controller(controller_session,end_path,data={}):

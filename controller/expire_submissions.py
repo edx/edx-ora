@@ -92,6 +92,23 @@ def reset_subs_in_basic_check(subs):
         log.debug("Reset {0} basic check subs properly.".format(count))
     return True
 
+def reset_failed_subs_in_basic_check(subs):
+    #Reset submissions that are stuck in basic check state
+    subs_failed_basic_check=subs.filter(
+        grader__grader_type="BC",
+        grader__status_code= GraderStatus.failure,
+        state=SubmissionState.waiting_to_be_graded,
+    ).exclude(grader__status_code=GraderStatus.success)
+
+    count=0
+    for sub in subs_failed_basic_check:
+        handle_submission(sub)
+        count+=1
+
+    if count>0:
+        log.debug("Reset {0} basic check failed subs properly.".format(count))
+    return True
+
 def reset_timed_out_submissions(subs):
     """
     Check if submissions have timed out, and reset them to waiting to grade state if they have

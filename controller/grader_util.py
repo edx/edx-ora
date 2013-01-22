@@ -4,13 +4,14 @@ from create_grader import create_grader
 from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
-from models import GraderStatus, SubmissionState
+from models import GraderStatus, SubmissionState, STATE_CODES
 import expire_submissions
 from statsd import statsd
 import json
 import os
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
+from peer_grading import peer_grading_util
 import rubric_functions
 
 log = logging.getLogger(__name__)
@@ -53,7 +54,6 @@ def create_and_handle_grader_object(grader_dict):
         Feedback should be a dictionary with as many keys as needed.
         Errors is a string containing errors.
     """
-    log.debug(grader_dict)
     for tag in ["feedback", "status", "grader_id", "grader_type", "confidence", "score", "submission_id", "errors"]:
         if tag not in grader_dict:
             return False, "{0} tag not in input dictionary.".format(tag)
@@ -63,7 +63,6 @@ def create_and_handle_grader_object(grader_dict):
     except:
         return False, "Error getting submission."
 
-    log.debug(grader_dict['feedback'])
 
     try:
         grader_dict['feedback'] = json.loads(grader_dict['feedback'])
@@ -81,7 +80,6 @@ def create_and_handle_grader_object(grader_dict):
     grade = create_grader(grader_dict, sub)
 
     #Check to see if rubric scores were passed to the function, and handle if so.
-    log.debug(grader_dict)
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
         try:
             grader_dict['rubric_scores']=json.loads(grader_dict['rubric_scores'])
@@ -89,6 +87,7 @@ def create_and_handle_grader_object(grader_dict):
             pass
 
         if grader_dict['rubric_scores_complete']=='True':
+            grader_dict['rubric_scores']=[int(r) for r in grader_dict['rubric_scores']]
             try:
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
             except:
@@ -249,3 +248,92 @@ def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
             return success, "Score {0} under 0 or over max score {1}".format(rubric_scores[i], targets[i])
     success = True
     return success , ""
+
+def check_name_uniqueness(problem_id, location, course_id):
+
+    problem_name_pairs = Submission.objects.filter(course_id=course_id).values('problem_id', 'location').distinct()
+    locations = [p['location'] for p in problem_name_pairs]
+    problem_names = [p['problem_id'] for p in problem_name_pairs]
+
+    equal_locations=[p for p in locations if p==location]
+    equal_problem_id = [p for p in problem_names if p==problem_id]
+    name_unique=True
+    success=True
+
+    if len(equal_problem_id)>1:
+        name_unique=False
+    elif len(equal_problem_id)==1:
+        equal_id_index=problem_names.index(problem_id)
+        matching_location=locations[equal_id_index]
+        if matching_location!=location:
+            name_unique=False
+
+    return success, name_unique
+
+def check_for_student_grading_notifications(student_id, course_id, last_time_viewed):
+    success = True
+    new_student_grading = False
+    subs = Submission.objects.filter(state=SubmissionState.finished, date_modified__gte=last_time_viewed, course_id = course_id)
+    if subs.count()>0:
+        new_student_grading=True
+    return success, new_student_grading
+
+def get_problems_student_has_tried(student_id, course_id):
+    success = True
+    subs = Submission.objects.filter(student_id=student_id, course_id = course_id)
+    sub_list = []
+    if subs.count()>0:
+        sub_locations = [s['location'] for s in subs.values('location').distinct()]
+        for location in sub_locations:
+            last_sub = subs.filter(location=location).order_by('-date_modified')[0]
+            problem_name = last_sub.problem_id
+            sub_state = last_sub.state
+            sub_codes = [s[0] for s in STATE_CODES]
+            state_index = sub_codes.index(sub_state)
+            sub_human_state = STATE_CODES[state_index][1]
+            sub_dict={
+                'state' : sub_human_state,
+                'location' : location,
+                'grader_type' : last_sub.previous_grader_type,
+                'problem_name' : last_sub.problem_id,
+            }
+            sub_list.append(sub_dict)
+    return success, sub_list
+
+def check_for_combined_notifications(notification_dict):
+    overall_success = True
+    for tag in ['course_id', 'user_is_staff', 'last_time_viewed', 'student_id']:
+        if tag not in notification_dict:
+            return False, "Missing required key {0}".format(tag)
+
+    course_id = notification_dict['course_id']
+    user_is_staff = notification_dict['user_is_staff']
+    if isinstance(user_is_staff, basestring):
+        user_is_staff = (user_is_staff == "True")
+    last_time_viewed = notification_dict['last_time_viewed']
+    student_id = notification_dict['student_id']
+    overall_need_to_check=False
+
+    combined_notifications = {}
+    success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
+    if success:
+        combined_notifications.update({'student_needs_to_peer_grade' : student_needs_to_peer_grade})
+        overall_need_to_check=True
+
+    if user_is_staff==True:
+        success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
+        if success:
+            combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
+            overall_need_to_check=True
+
+    success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
+    if success:
+        combined_notifications.update({
+            'new_student_grading_to_view' : new_student_grading
+        })
+        overall_need_to_check=True
+
+    combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
+    return overall_success, combined_notifications
+
+

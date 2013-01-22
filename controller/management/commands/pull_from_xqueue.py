@@ -81,7 +81,6 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,
         while success and queue_length>0:
             success, queue_item = get_from_queue(queue_name, xqueue_session)
             success, content = util.parse_xobject(queue_item, queue_name)
-            log.debug(content)
 
             #Post to grading controller here!
             if  success:

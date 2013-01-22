@@ -85,6 +85,7 @@ def handle_single_location(location):
 
                     results = create.create(text, scores, prompt, full_model_path)
 
+                    scores = [int(score_item) for score_item in scores]
                     #Add in needed stuff that ml creator does not pass back
                     results.update({'text' : text, 'score' : scores, 'model_path' : full_model_path,
                                     'relative_model_path' : relative_model_path, 'prompt' : prompt})
