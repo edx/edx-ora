@@ -126,7 +126,7 @@ def check_for_notifications(request):
     if request.method != 'GET':
         return util._error_response("Request type must be GET", _INTERFACE_VERSION)
 
-    for tag in ['location', 'course_id', 'user_is_staff', 'last_viewed_time']:
+    for tag in ['course_id', 'user_is_staff', 'last_time_viewed']:
         if tag not in request.GET:
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
 

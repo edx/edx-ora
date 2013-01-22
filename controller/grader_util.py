@@ -302,11 +302,10 @@ def get_problems_student_has_tried(student_id, course_id):
 
 def check_for_combined_notifications(notification_dict):
     overall_success = True
-    for tag in ['location', 'course_id', 'user_is_staff', 'last_viewed_time']:
+    for tag in ['course_id', 'user_is_staff', 'last_time_viewed']:
         if tag not in notification_dict:
             return False, "Missing required key {0}".format(tag)
 
-    location = notification_dict['location']
     course_id = notification_dict['course_id']
     user_is_staff = notification_dict['user_is_staff']
     last_time_viewed = notification_dict['last_time_viewed']
