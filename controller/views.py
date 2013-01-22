@@ -114,7 +114,7 @@ def verify_name_uniqueness(request):
         }, _INTERFACE_VERSION)
 
 @csrf_exempt
-@login_required
+@util.error_if_not_logged_in
 def check_for_notifications(request):
     """
     Check if a given problem name, location tuple is unique
