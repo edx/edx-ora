@@ -309,23 +309,28 @@ def check_for_combined_notifications(notification_dict):
     course_id = notification_dict['course_id']
     user_is_staff = notification_dict['user_is_staff']
     last_time_viewed = notification_dict['last_time_viewed']
+    overall_need_to_check=False
 
     combined_notifications = {}
     success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
     if success:
         combined_notifications.update({'student_needs_to_peer_grade' : student_needs_to_peer_grade})
+        overall_need_to_check=True
 
     if user_is_staff==True:
         success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
         if success:
             combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
+            overall_need_to_check=True
 
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
     if success:
         combined_notifications.update({
             'new_student_grading_to_view' : new_student_grading
         })
+        overall_need_to_check=True
 
+    combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
     return overall_success, combined_notifications
 
 
