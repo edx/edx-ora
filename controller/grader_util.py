@@ -295,8 +295,9 @@ def get_problems_student_has_tried(student_id, course_id):
                 'state' : sub_human_state,
                 'location' : location,
                 'grader_type' : last_sub.previous_grader_type,
+                'problem_name' : last_sub.problem_id,
             }
-            sub_list.update(sub_dict)
+            sub_list.append(sub_dict)
     return success, sub_list
 
 def check_for_combined_notifications(notification_dict):
