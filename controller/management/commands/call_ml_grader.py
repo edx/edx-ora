@@ -36,7 +36,7 @@ class Command(NoArgsCommand):
             try:
                 #See if there are any submissions waiting
                 success, pending_count=ml_grader.get_pending_length_from_controller(self.controller_session)
-                log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
+                #log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
                 while success and pending_count>0:
                     sub_get_success = ml_grader.handle_single_item(self.controller_session)
                     if not sub_get_success:

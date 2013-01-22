@@ -57,6 +57,8 @@ def status(request):
     """
     return util._success_response({'content' : 'OK'}, _INTERFACE_VERSION)
 
+@csrf_exempt
+@util.error_if_not_logged_in
 def request_eta_for_submission(request):
     """
     Gets the ETA (in seconds) for a student submission to be graded for a given location
@@ -80,6 +82,93 @@ def request_eta_for_submission(request):
     return util._success_response({
         'eta' : eta,
     }, _INTERFACE_VERSION)
+
+@csrf_exempt
+@login_required
+def verify_name_uniqueness(request):
+    """
+    Check if a given problem name, location tuple is unique
+    Input:
+        A problem location and the problem name
+    Output:
+        Dictionary containing success, and and indicator of whether or not the name is unique
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['location', 'problem_name', 'course_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    location=request.GET.get("location")
+    problem_name = request.GET.get("problem_name")
+    course_id = request.GET.get('course_id')
+
+    success, unique = grader_util.check_name_uniqueness(problem_name,location, course_id)
+
+    if not success:
+        return util._error_response(eta,_INTERFACE_VERSION)
+
+    return util._success_response({
+        'name_is_unique' : unique,
+        }, _INTERFACE_VERSION)
+
+@csrf_exempt
+@util.error_if_not_logged_in
+def check_for_notifications(request):
+    """
+    Check if a given problem name, location tuple is unique
+    Input:
+        A problem location and the problem name
+    Output:
+        Dictionary containing success, and and indicator of whether or not the name is unique
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['course_id', 'user_is_staff', 'last_time_viewed', 'student_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    request_dict = request.GET.copy()
+    success, combined_notifications = grader_util.check_for_combined_notifications(request_dict)
+
+    if not success:
+        return util._error_response(combined_notifications,_INTERFACE_VERSION)
+
+    return util._success_response(combined_notifications, _INTERFACE_VERSION)
+
+@csrf_exempt
+@util.error_if_not_logged_in
+def get_grading_status_list(request):
+    """
+    Get a list of locations where student has submitted open ended questions and the status of each.
+    Input:
+        Course id, student id
+    Output:
+        Dictionary containing success, and a list of problems in the course with student submission status.
+        See grader_util for format details.
+    """
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['course_id', 'student_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    course_id = request.GET.get('course_id')
+    student_id = request.GET.get('student_id')
+
+    success, sub_list = grader_util.get_problems_student_has_tried(student_id, course_id)
+
+    if not success:
+        return util._error_response("Could not generate a submission list. {0}".format(sub_list),_INTERFACE_VERSION)
+
+    problem_list_dict={
+        'success' : success,
+        'problem_list' : sub_list,
+        }
+    return util._success_response(problem_list_dict, _INTERFACE_VERSION)
 
 
 

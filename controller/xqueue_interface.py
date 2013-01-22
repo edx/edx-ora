@@ -111,6 +111,10 @@ def submit(request):
                     answer=answer,
                 )
 
+                if created==False:
+                    log.error("Exact submission already exists.")
+                    return util._error_response('Submission already exists.', _INTERFACE_VERSION)
+
             except Exception as err:
                 xqueue_submission_id = util._value_or_default(header['submission_id'])
                 xqueue_submission_key = util._value_or_default(header['submission_key'])

@@ -3,6 +3,7 @@ from controller.models import SubmissionState, GraderStatus, Grader, Submission
 import logging
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
+from django.conf import settings
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +27,7 @@ def get_single_peer_grading_item(location, grader_id):
         is_duplicate=False,
     ).exclude(student_id=grader_id)
 
-    log.debug(to_be_graded)
-    log.debug(grader_id)
+    log.debug("Looking for grading for student {0}, found {1}".format(grader_id, to_be_graded))
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
@@ -40,14 +40,14 @@ def get_single_peer_grading_item(location, grader_id):
                                     .order_by("num_graders")[:50]
                 )
             submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
-            log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
+            #log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
 
             submission_ids = [p['id'] for p in submissions_to_grade]
 
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
             for i in xrange(0, len(submission_ids)):
-                log.debug("Looping through graders, on {0}".format(i))
+                #log.debug("Looping through graders, on {0}".format(i))
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
                 grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
@@ -101,3 +101,22 @@ def peer_grading_submissions_graded_for_location(location, student_id):
     )
 
     return subs_graded
+
+def get_peer_grading_notifications(course_id, student_id):
+    student_needs_to_peer_grade = False
+    success = True
+
+    student_responses_for_course = Submission.objects.filter(student_id = student_id, course_id=course_id, preferred_grader_type="PE")
+    unique_student_locations = [x['location'] for x in
+                                student_responses_for_course.values('location').distinct()]
+    for location in unique_student_locations:
+        location_response_count = student_responses_for_course.filter(location=location).count()
+        required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
+        completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
+        submissions_pending = peer_grading_submissions_pending_for_location(location).count()
+
+        if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
+            student_needs_to_peer_grade = True
+            return success, student_needs_to_peer_grade
+
+    return success, student_needs_to_peer_grade
