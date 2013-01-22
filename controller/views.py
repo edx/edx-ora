@@ -140,7 +140,7 @@ def check_for_notifications(request):
     return util._success_response(combined_notifications, _INTERFACE_VERSION)
 
 @csrf_exempt
-@login_required
+@util.error_if_not_logged_in
 def get_grading_status_list(request):
     """
     Get a list of locations where student has submitted open ended questions and the status of each.
@@ -163,9 +163,13 @@ def get_grading_status_list(request):
     success, sub_list = grader_util.get_problems_student_has_tried(student_id, course_id)
 
     if not success:
-        return util._error_response(sub_list,_INTERFACE_VERSION)
+        return util._error_response("Could not generate a submission list. {0}".format(sub_list),_INTERFACE_VERSION)
 
-    return util._success_response(sub_list, _INTERFACE_VERSION)
+    problem_list_dict={
+        'success' : success,
+        'problem_list' : sub_list,
+        }
+    return util._success_response(problem_list_dict, _INTERFACE_VERSION)
 
 
 
