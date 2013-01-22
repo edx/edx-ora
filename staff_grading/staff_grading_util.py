@@ -273,8 +273,8 @@ def get_staff_grading_notifications(course_id):
         if location_ml_count>0:
             min_scored_for_location=settings.MIN_TO_USE_ML
 
-        location_scored_count = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
-        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+        location_scored_count = finished_submissions_graded_by_instructor(location).count()
+        submissions_pending = submissions_pending_for_location(location).count()
 
         if location_scored_count<min_scored_for_location and submissions_pending>0:
             staff_needs_to_grade= True
