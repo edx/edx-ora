@@ -131,7 +131,6 @@ def check_for_notifications(request):
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
 
     request_dict = request.GET.copy()
-
     success, combined_notifications = grader_util.check_for_combined_notifications(request_dict)
 
     if not success:

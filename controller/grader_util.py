@@ -308,6 +308,8 @@ def check_for_combined_notifications(notification_dict):
 
     course_id = notification_dict['course_id']
     user_is_staff = notification_dict['user_is_staff']
+    if isinstance(user_is_staff, basestring):
+        user_is_staff = (user_is_staff == "True")
     last_time_viewed = notification_dict['last_time_viewed']
     student_id = notification_dict['student_id']
     overall_need_to_check=False
