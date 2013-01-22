@@ -273,7 +273,7 @@ def check_name_uniqueness(problem_id, location, course_id):
 def check_for_student_grading_notifications(student_id, course_id, last_time_viewed):
     success = True
     new_student_grading = False
-    subs = Submission.objects.filter(state=SubmissionState.finished, date_modified__gte=last_time_viewed, course_id = course_id)
+    subs = Submission.objects.filter(state=SubmissionState.finished, date_modified__gte=last_time_viewed, course_id = course_id, student_id = student_id)
     if subs.count()>0:
         new_student_grading=True
     return success, new_student_grading
