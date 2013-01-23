@@ -2,7 +2,8 @@ from django.db import models
 from django.utils import timezone
 import json
 
-CHARFIELD_LEN_SMALL=512
+CHARFIELD_LEN_SMALL=128
+CHARFIELD_LEN_LONG = 1024
 
 class CreatedModel(models.Model):
     #When it was created/modified
@@ -21,11 +22,11 @@ class CreatedModel(models.Model):
     submission_ids_used=models.TextField()
 
     #Currently unused, but may be in the future.  See comment in controller/models.py above problem_id for details
-    problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    problem_id=models.CharField(max_length=CHARFIELD_LEN_LONG)
 
     #Properties of the model file
-    model_relative_path=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    model_full_path=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    model_relative_path=models.CharField(max_length=CHARFIELD_LEN_LONG)
+    model_full_path=models.CharField(max_length=CHARFIELD_LEN_LONG)
 
     #Properties of the model itself
     number_of_essays=models.IntegerField()
