@@ -8,15 +8,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding index on 'CreatedModel', fields ['creation_succeeded']
-        db.create_index('ml_grading_createdmodel', ['creation_succeeded'])
-
-        # Adding index on 'CreatedModel', fields ['model_stored_in_s3']
-        db.create_index('ml_grading_createdmodel', ['model_stored_in_s3'])
-
-        # Adding index on 'CreatedModel', fields ['course_id']
-        db.create_index('ml_grading_createdmodel', ['course_id'])
-
         # Adding index on 'CreatedModel', fields ['location']
         db.create_index('ml_grading_createdmodel', ['location'])
 
@@ -25,21 +16,12 @@ class Migration(SchemaMigration):
         # Removing index on 'CreatedModel', fields ['location']
         db.delete_index('ml_grading_createdmodel', ['location'])
 
-        # Removing index on 'CreatedModel', fields ['course_id']
-        db.delete_index('ml_grading_createdmodel', ['course_id'])
-
-        # Removing index on 'CreatedModel', fields ['model_stored_in_s3']
-        db.delete_index('ml_grading_createdmodel', ['model_stored_in_s3'])
-
-        # Removing index on 'CreatedModel', fields ['creation_succeeded']
-        db.delete_index('ml_grading_createdmodel', ['creation_succeeded'])
-
 
     models = {
         'ml_grading.createdmodel': {
             'Meta': {'object_name': 'CreatedModel'},
-            'course_id': ('django.db.models.fields.CharField', [], {'max_length': '1024', 'db_index': 'True'}),
-            'creation_succeeded': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
+            'course_id': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
+            'creation_succeeded': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'cv_kappa': ('django.db.models.fields.DecimalField', [], {'max_digits': '10', 'decimal_places': '9'}),
             'cv_mean_absolute_error': ('django.db.models.fields.DecimalField', [], {'max_digits': '15', 'decimal_places': '10'}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -49,7 +31,7 @@ class Migration(SchemaMigration):
             'max_score': ('django.db.models.fields.IntegerField', [], {}),
             'model_full_path': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'model_relative_path': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
-            'model_stored_in_s3': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
+            'model_stored_in_s3': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'number_of_essays': ('django.db.models.fields.IntegerField', [], {}),
             'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'prompt': ('django.db.models.fields.TextField', [], {}),
