@@ -2,7 +2,7 @@ from django.db import models
 from controller.models import GRADER_TYPE, STATUS_CODES, STATE_CODES
 from django.utils import timezone
 
-CHARFIELD_LEN_SMALL=1024
+CHARFIELD_LEN_SMALL=512
 
 class Timing(models.Model):
 
