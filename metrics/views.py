@@ -12,11 +12,15 @@ from controller.models import Submission
 from models import Timing
 import logging
 
+from statsd import statsd
+
 log=logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.metrics.views.time',
+    tags=['function:metrics_form'])
 @login_required
 def metrics_form(request):
 
@@ -43,11 +47,15 @@ def metrics_form(request):
         return HttpResponse(rendered)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.metrics.views.time',
+    tags=['function:data_dump_form'])
 @login_required
 def data_dump_form(request):
     return metrics_util.dump_form(request,"data_dump")
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.metrics.views.time',
+    tags=['function:message_dump_form'])
 @login_required
 def message_dump_form(request):
     return metrics_util.dump_form(request,"message_dump")

@@ -1,6 +1,8 @@
 from models import Message, Grader, Submission
 import logging
 
+from statsd import statsd
+
 log=logging.getLogger(__name__)
 
 def create_message(message_dict):
@@ -36,5 +38,14 @@ def create_message(message_dict):
         log.exception(error)
         return False, error
 
+    statsd.increment("open_ended_assessment.grading_controller.create_message",
+        tags=["course:{0}".format(submission.course_id),
+              "location:{0}".format(submission.location),
+              "grader_type:{0}".format(submission.previous_grader_type),
+              "grade:{0}".format(grade.score),
+              "message_type:{0}".format(message_dict['message_type']),
+              "message_score:{0}".format(message_dict['score'])
+              ]
+    )
     return True, msg.id
 

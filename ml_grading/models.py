@@ -13,7 +13,7 @@ class CreatedModel(models.Model):
     max_score=models.IntegerField()
     prompt=models.TextField()
     rubric=models.TextField()
-    location=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    location=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     #Stores a json serialized list of all the submission ids of essays used in this model.

@@ -13,11 +13,17 @@ from controller import util
 import calibration
 import peer_grading_util
 
+from statsd import statsd
+
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:get_next_submission'])
 @util.error_if_not_logged_in
 def get_next_submission(request):
     """
@@ -70,6 +76,8 @@ def get_next_submission(request):
     return util._success_response(response, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:save_grade'])
 @util.error_if_not_logged_in
 def save_grade(request):
     """
@@ -156,9 +164,12 @@ def save_grade(request):
     #xqueue_session=util.xqueue_login()
     #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
+    util.log_connection_data()
     return util._success_response({'msg': "Posted to queue."}, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:is_student_calibrated'])
 @util.error_if_not_logged_in
 def is_student_calibrated(request):
     """
@@ -182,9 +193,12 @@ def is_student_calibrated(request):
     if not success:
         return util._error_response(data, _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response(data, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:show_calibration_essay'])
 @util.error_if_not_logged_in
 def show_calibration_essay(request):
     """
@@ -206,9 +220,12 @@ def show_calibration_essay(request):
     if not success:
         return util._error_response(data, _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response(data, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:save_calibration_essay'])
 @util.error_if_not_logged_in
 def save_calibration_essay(request):
     """
@@ -268,9 +285,12 @@ def save_calibration_essay(request):
     if not success:
         return util._error_response("Failed to create and save calibration record.", _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response({'message' : "Successfully saved calibration record.", 'actual_score' : data['actual_score']}, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
+    tags=['function:get_problem_list'])
 @util.error_if_not_logged_in
 def get_problem_list(request):
     """
@@ -320,6 +340,7 @@ def get_problem_list(request):
                     }
                 location_info.append(location_dict)
 
+    util.log_connection_data()
     return util._success_response({'problem_list' : location_info},
         _INTERFACE_VERSION)
 
@@ -343,5 +364,6 @@ def get_notifications(request):
     if not success:
         return util._error_response(student_needs_to_peer_grade, _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
 

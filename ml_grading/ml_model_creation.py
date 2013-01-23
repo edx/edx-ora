@@ -15,6 +15,8 @@ import sys
 from statsd import statsd
 import pickle
 
+from controller import util
+
 from controller.models import Submission
 from staff_grading import staff_grading_util
 
@@ -42,7 +44,7 @@ def handle_single_location(location):
         #check to see if there are enough instructor graded essays for location
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
-            location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
+            location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
             sub_rubric_scores=[]
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
@@ -136,6 +138,7 @@ def handle_single_location(location):
                     ))
                     statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                         tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
+        util.log_connection_data()
     except:
         log.exception("Problem creating model for location {0}".format(location))
         statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",

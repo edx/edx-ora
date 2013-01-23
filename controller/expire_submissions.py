@@ -11,6 +11,8 @@ from staff_grading import staff_grading_util
 from xqueue_interface import handle_submission
 from ml_grading import ml_grading_util
 
+from statsd import statsd
+
 log = logging.getLogger(__name__)
 
 error_template = u"""
@@ -52,6 +54,8 @@ def reset_ml_subs_to_in():
                 if (counter+subs_graded + subs_pending)> settings.MIN_TO_USE_ML:
                     break
     if counter>0:
+        statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_ml_subs_to_in",
+            tags=["counter:{0}".format(counter)])
         log.debug("Reset {0} submission from ML to IN".format(counter))
 
 def reset_in_subs_to_ml(subs):
@@ -72,6 +76,8 @@ def reset_in_subs_to_ml(subs):
             count+=1
 
     if count>0:
+        statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_in_subs_to_ml",
+            tags=["counter:{0}".format(count)])
         log.debug("Reset {0} instructor subs to ML".format(count))
 
     return True
@@ -89,6 +95,8 @@ def reset_subs_in_basic_check(subs):
         count+=1
 
     if count>0:
+        statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_subs_in_basic_check",
+            tags=["counter:{0}".format(count)])
         log.debug("Reset {0} basic check subs properly.".format(count))
     return True
 
@@ -106,6 +114,8 @@ def reset_failed_subs_in_basic_check(subs):
         count+=1
 
     if count>0:
+        statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_subs_failed_basic_check",
+            tags=["counter:{0}".format(count)])
         log.debug("Reset {0} basic check failed subs properly.".format(count))
     return True
 
@@ -131,6 +141,8 @@ def reset_timed_out_submissions(subs):
             count += 1
 
     if count>0:
+        statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_timed_out_submissions",
+            tags=["counter:{0}".format(count)])
         log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
 
     return True
@@ -181,6 +193,13 @@ def finalize_expired_submission(sub):
 
     grade = create_grader(grader_dict,sub)
 
+    statsd.increment("open_ended_assessment.grading_controller.expire_submissions.finalize_expired_submission",
+        tags=[
+            "course:{0}".format(sub.course_id),
+            "location:{0}".format(sub.location),
+            'grader_type:{0}'.format(sub.next_grader_type)
+              ])
+
     return True
 
 def check_if_grading_finished_for_duplicates():
@@ -196,6 +215,11 @@ def check_if_grading_finished_for_duplicates():
             finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
             counter+=1
             log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
+
+    statsd.increment("open_ended_assessment.grading_controller.expire_submissions.check_if_duplicate_grading_finished",
+        tags=[
+            "counter:{0}".format(counter),
+        ])
     log.info("Finalized {0} duplicate submissions".format(counter))
     return True
 

@@ -50,14 +50,14 @@ class Submission(models.Model):
     initial_display = models.TextField(default="")
     answer = models.TextField(default="")
     # TODO: is this good enough?  unique per problem/student?
-    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
 
     # specified in the input type--can be reused between many different
     # problems.  (Should perhaps be named something like problem_type)
     problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     # passed by the LMS
-    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
     max_score = models.IntegerField(default=1)
     course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     student_response = models.TextField(default="")
@@ -177,7 +177,7 @@ class Submission(models.Model):
 
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
-    submission = models.ForeignKey('Submission')
+    submission = models.ForeignKey('Submission', db_index = True)
     score = models.IntegerField()
     feedback = models.TextField()
     status_code = models.CharField(max_length=1, choices=STATUS_CODES)
@@ -218,7 +218,7 @@ class Grader(models.Model):
         return latest_rubric
 
 class Message(models.Model):
-    grader = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader', db_index = True)
     message = models.TextField()
     originator = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     recipient= models.CharField(max_length=CHARFIELD_LEN_SMALL)
@@ -232,7 +232,7 @@ class Rubric(models.Model):
     """
     Each rubric encapsulates how a student was graded according to a particular rubric
     """
-    grader = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader', db_index = True)
     rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     finished_scoring = models.BooleanField(default=False)
 
@@ -253,7 +253,7 @@ class RubricItem(models.Model):
     Each one encapsulates one item in a rubric, along with comments and the score on the item
     """
 
-    rubric=models.ForeignKey('Rubric')
+    rubric=models.ForeignKey('Rubric', db_index = True)
     text=models.TextField()
     short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     comment = models.TextField(default="")
@@ -280,7 +280,7 @@ class RubricItem(models.Model):
 
 class RubricOption(models.Model):
 
-    rubric_item=models.ForeignKey('RubricItem')
+    rubric_item=models.ForeignKey('RubricItem', db_index = True)
     points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     short_text = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     text = models.TextField()

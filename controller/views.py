@@ -17,6 +17,10 @@ from staff_grading import staff_grading_util
 
 from models import Submission
 
+from statsd import statsd
+
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
@@ -114,6 +118,8 @@ def verify_name_uniqueness(request):
         }, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
+    tags=['function:check_for_notifications'])
 @util.error_if_not_logged_in
 def check_for_notifications(request):
     """
@@ -136,9 +142,12 @@ def check_for_notifications(request):
     if not success:
         return util._error_response(combined_notifications,_INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response(combined_notifications, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
+    tags=['function:get_grading_status_list'])
 @util.error_if_not_logged_in
 def get_grading_status_list(request):
     """
@@ -168,6 +177,8 @@ def get_grading_status_list(request):
         'success' : success,
         'problem_list' : sub_list,
         }
+
+    util.log_connection_data()
     return util._success_response(problem_list_dict, _INTERFACE_VERSION)
 
 

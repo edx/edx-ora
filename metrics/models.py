@@ -18,7 +18,7 @@ class Timing(models.Model):
 
     #Essay metadata
     student_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    location=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    location=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     max_score=models.IntegerField(default=1)
