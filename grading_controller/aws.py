@@ -25,6 +25,9 @@ if isinstance(DEBUG,basestring):
 TEMPLATE_DEBUG = ENV_TOKENS.get('TEMPLATE_DEBUG', False)
 if isinstance(TEMPLATE_DEBUG,basestring):
     TEMPLATE_DEBUG= TEMPLATE_DEBUG.lower()=="true"
+PRINT_QUERIES = ENV_TOKENS.get('PRINT_QUERIES', False)
+if isinstance(PRINT_QUERIES,basestring):
+    PRINT_QUERIES= PRINT_QUERIES.lower()=="true"
 
 #General
 REQUESTS_TIMEOUT = int(ENV_TOKENS.get('REQUESTS_TIMEOUT', 5))

@@ -20,6 +20,8 @@ from peer_grading import peer_grading_util
 from metrics import metrics_util
 from ml_grading import ml_grading_util
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
@@ -53,6 +55,7 @@ def get_submission_ml(request):
 
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 @login_required
@@ -77,6 +80,7 @@ def get_pending_count(request):
         next_grader_type=grader_type,
     ).count()
 
+    util.log_connection_data()
     return util._success_response({'to_be_graded_count' : to_be_graded_count}, _INTERFACE_VERSION)
 
 @login_required
@@ -98,6 +102,7 @@ def get_submission_instructor(request):
     #Insert timing initialization code
     initialize_timing(sub_id)
 
+    util.log_connection_data()
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
 
@@ -121,6 +126,7 @@ def get_submission_peer(request):
     #Insert timing initialization code
     initialize_timing(sub_id)
 
+    util.log_connection_data()
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
 
@@ -182,6 +188,7 @@ def put_result(request):
         if not success:
             return util._error_response("Could not save grader.", _INTERFACE_VERSION)
 
+        util.log_connection_data()
         return util._success_response({'message' : "Saved successfully."}, _INTERFACE_VERSION)
 
 

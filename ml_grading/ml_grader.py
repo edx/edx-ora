@@ -56,7 +56,7 @@ def handle_single_item(controller_session):
         #Get the latest created model for the given location
         transaction.commit_unless_managed()
 
-        location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor)
+        location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading = True)
 
         if len(location_suffixes)>0:
             rubric_scores_complete=True
@@ -148,6 +148,7 @@ def handle_single_item(controller_session):
         statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
             tags=["success:False"])
 
+    util.log_connection_data()
     return sub_get_success
 
 def get_item_from_controller(controller_session):

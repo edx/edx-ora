@@ -19,6 +19,8 @@ from metrics import timing_functions
 import message_util
 from ml_grading import ml_grading_util
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
@@ -142,6 +144,7 @@ def submit(request):
             if not success:
                 return util._error_response("Failed to handle submission.", _INTERFACE_VERSION)
 
+            util.log_connection_data()
             return util._success_response({'message': "Saved successfully."}, _INTERFACE_VERSION)
 
 
@@ -211,6 +214,11 @@ def handle_submission(sub):
         sub.is_duplicate=is_duplicate
         sub.is_plagiarized = is_plagiarized
         sub.duplicate_submission_id = duplicate_id
+        statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.handle_submission.duplicates",
+            tags=[
+                "duplicate:{0}".format(is_duplicate),
+                "is_plagiarized:{0}".format(is_plagiarized)
+                ])
 
         sub.save()
         log.debug("Submission object created successfully!")

@@ -3,13 +3,13 @@ from django.db import models
 CHARFIELD_LEN_SMALL = 128
 
 class CalibrationHistory(models.Model):
-    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
 
     #Have problem_id and location in order to allow for one to be user_defined, and one system defined
     #This allows for the same problem to be used across classes without re-calibration if needed.
     #Currently use location instead of problem_id
     problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
-    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
 
     def __unicode__(self):
         history_row = ("Calibration history for student {0} on problem {1} at location {2}").format(
@@ -41,8 +41,8 @@ class CalibrationHistory(models.Model):
 
 
 class CalibrationRecord(models.Model):
-    calibration_history = models.ForeignKey("CalibrationHistory")
-    submission = models.ForeignKey("controller.Submission")
+    calibration_history = models.ForeignKey("CalibrationHistory", db_index = True)
+    submission = models.ForeignKey("controller.Submission", db_index = True)
     score = models.IntegerField()
     actual_score = models.IntegerField()
 
