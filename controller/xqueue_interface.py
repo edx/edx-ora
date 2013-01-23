@@ -211,6 +211,11 @@ def handle_submission(sub):
         sub.is_duplicate=is_duplicate
         sub.is_plagiarized = is_plagiarized
         sub.duplicate_submission_id = duplicate_id
+        statsd.increment("open_ended_assessment.grading_controller.controller.xqueue_interface.handle_submission.duplicates",
+            tags=[
+                "duplicate:{0}".format(is_duplicate),
+                "is_plagiarized:{0}".format(is_plagiarized)
+                ])
 
         sub.save()
         log.debug("Submission object created successfully!")
