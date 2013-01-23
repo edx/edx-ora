@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 import json
 
-CHARFIELD_LEN_SMALL=1024
+CHARFIELD_LEN_SMALL=512
 
 class CreatedModel(models.Model):
     #When it was created/modified

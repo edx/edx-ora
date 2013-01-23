@@ -30,7 +30,7 @@ STATE_CODES = (
     (SubmissionState.finished, "Finished" )
     )
 
-CHARFIELD_LEN_SMALL = 1024
+CHARFIELD_LEN_SMALL = 512
 
 # TODO: DB settings -- utf-8, innodb, store everything in UTC
 
