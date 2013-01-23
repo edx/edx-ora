@@ -8,20 +8,92 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding index on 'Submission', fields ['student_id']
-        db.create_index('controller_submission', ['student_id'])
 
-        # Adding index on 'Submission', fields ['location']
-        db.create_index('controller_submission', ['location'])
+        # Changing field 'Rubric.rubric_version'
+        db.alter_column('controller_rubric', 'rubric_version', self.gf('django.db.models.fields.CharField')(max_length=512))
 
+        # Changing field 'Message.originator'
+        db.alter_column('controller_message', 'originator', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Message.message_type'
+        db.alter_column('controller_message', 'message_type', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Message.recipient'
+        db.alter_column('controller_message', 'recipient', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Grader.grader_id'
+        db.alter_column('controller_grader', 'grader_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'RubricItem.short_text'
+        db.alter_column('controller_rubricitem', 'short_text', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'RubricOption.short_text'
+        db.alter_column('controller_rubricoption', 'short_text', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.xqueue_queue_name'
+        db.alter_column('controller_submission', 'xqueue_queue_name', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.course_id'
+        db.alter_column('controller_submission', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.student_id'
+        db.alter_column('controller_submission', 'student_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.location'
+        db.alter_column('controller_submission', 'location', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.xqueue_submission_key'
+        db.alter_column('controller_submission', 'xqueue_submission_key', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.problem_id'
+        db.alter_column('controller_submission', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Submission.xqueue_submission_id'
+        db.alter_column('controller_submission', 'xqueue_submission_id', self.gf('django.db.models.fields.CharField')(max_length=512))
 
     def backwards(self, orm):
-        # Removing index on 'Submission', fields ['location']
-        db.delete_index('controller_submission', ['location'])
 
-        # Removing index on 'Submission', fields ['student_id']
-        db.delete_index('controller_submission', ['student_id'])
+        # Changing field 'Rubric.rubric_version'
+        db.alter_column('controller_rubric', 'rubric_version', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
+        # Changing field 'Message.originator'
+        db.alter_column('controller_message', 'originator', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Message.message_type'
+        db.alter_column('controller_message', 'message_type', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Message.recipient'
+        db.alter_column('controller_message', 'recipient', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Grader.grader_id'
+        db.alter_column('controller_grader', 'grader_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'RubricItem.short_text'
+        db.alter_column('controller_rubricitem', 'short_text', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'RubricOption.short_text'
+        db.alter_column('controller_rubricoption', 'short_text', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.xqueue_queue_name'
+        db.alter_column('controller_submission', 'xqueue_queue_name', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.course_id'
+        db.alter_column('controller_submission', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.student_id'
+        db.alter_column('controller_submission', 'student_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.location'
+        db.alter_column('controller_submission', 'location', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.xqueue_submission_key'
+        db.alter_column('controller_submission', 'xqueue_submission_key', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.problem_id'
+        db.alter_column('controller_submission', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Submission.xqueue_submission_id'
+        db.alter_column('controller_submission', 'xqueue_submission_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
     models = {
         'controller.grader': {
@@ -94,7 +166,7 @@ class Migration(SchemaMigration):
             'initial_display': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'is_duplicate': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_plagiarized': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'location': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '512', 'db_index': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '512'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'next_grader_type': ('django.db.models.fields.CharField', [], {'default': "'NA'", 'max_length': '2'}),
             'posted_results_back_to_queue': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -104,7 +176,7 @@ class Migration(SchemaMigration):
             'prompt': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'rubric': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'state': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'student_id': ('django.db.models.fields.CharField', [], {'max_length': '512', 'db_index': 'True'}),
+            'student_id': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'student_response': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '512'}),

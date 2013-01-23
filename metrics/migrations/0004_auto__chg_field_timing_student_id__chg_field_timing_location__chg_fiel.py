@@ -8,14 +8,38 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding index on 'Timing', fields ['location']
-        db.create_index('metrics_timing', ['location'])
 
+        # Changing field 'Timing.student_id'
+        db.alter_column('metrics_timing', 'student_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Timing.location'
+        db.alter_column('metrics_timing', 'location', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Timing.course_id'
+        db.alter_column('metrics_timing', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'Timing.grader_version'
+        db.alter_column('metrics_timing', 'grader_version', self.gf('django.db.models.fields.CharField')(max_length=512, null=True))
+
+        # Changing field 'Timing.problem_id'
+        db.alter_column('metrics_timing', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=512))
 
     def backwards(self, orm):
-        # Removing index on 'Timing', fields ['location']
-        db.delete_index('metrics_timing', ['location'])
 
+        # Changing field 'Timing.student_id'
+        db.alter_column('metrics_timing', 'student_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Timing.location'
+        db.alter_column('metrics_timing', 'location', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Timing.course_id'
+        db.alter_column('metrics_timing', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'Timing.grader_version'
+        db.alter_column('metrics_timing', 'grader_version', self.gf('django.db.models.fields.CharField')(max_length=1024, null=True))
+
+        # Changing field 'Timing.problem_id'
+        db.alter_column('metrics_timing', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
     models = {
         'metrics.timing': {
@@ -29,7 +53,7 @@ class Migration(SchemaMigration):
             'grader_version': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_calibration': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'location': ('django.db.models.fields.CharField', [], {'max_length': '512', 'db_index': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'score': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),

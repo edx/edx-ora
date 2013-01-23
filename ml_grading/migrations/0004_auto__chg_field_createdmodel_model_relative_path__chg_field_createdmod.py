@@ -8,14 +8,38 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding index on 'CreatedModel', fields ['location']
-        db.create_index('ml_grading_createdmodel', ['location'])
 
+        # Changing field 'CreatedModel.model_relative_path'
+        db.alter_column('ml_grading_createdmodel', 'model_relative_path', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'CreatedModel.course_id'
+        db.alter_column('ml_grading_createdmodel', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'CreatedModel.model_full_path'
+        db.alter_column('ml_grading_createdmodel', 'model_full_path', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'CreatedModel.problem_id'
+        db.alter_column('ml_grading_createdmodel', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+
+        # Changing field 'CreatedModel.location'
+        db.alter_column('ml_grading_createdmodel', 'location', self.gf('django.db.models.fields.CharField')(max_length=512))
 
     def backwards(self, orm):
-        # Removing index on 'CreatedModel', fields ['location']
-        db.delete_index('ml_grading_createdmodel', ['location'])
 
+        # Changing field 'CreatedModel.model_relative_path'
+        db.alter_column('ml_grading_createdmodel', 'model_relative_path', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'CreatedModel.course_id'
+        db.alter_column('ml_grading_createdmodel', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'CreatedModel.model_full_path'
+        db.alter_column('ml_grading_createdmodel', 'model_full_path', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'CreatedModel.problem_id'
+        db.alter_column('ml_grading_createdmodel', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
+
+        # Changing field 'CreatedModel.location'
+        db.alter_column('ml_grading_createdmodel', 'location', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
     models = {
         'ml_grading.createdmodel': {
@@ -27,7 +51,7 @@ class Migration(SchemaMigration):
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'location': ('django.db.models.fields.CharField', [], {'max_length': '512', 'db_index': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {}),
             'model_full_path': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'model_relative_path': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
