@@ -36,10 +36,10 @@ CHARFIELD_LEN_SMALL = 1024
 
 class Submission(models.Model):
     # controller state
-    preferred_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
-    next_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
-    previous_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA")
-    state = models.CharField(max_length=1, choices=STATE_CODES)
+    preferred_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA", db_index=True)
+    next_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA", db_index = True)
+    previous_grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, default="NA", db_index = True)
+    state = models.CharField(max_length=1, choices=STATE_CODES, db_index = True)
     grader_settings = models.TextField(default="")
 
     # data about the submission
@@ -57,9 +57,9 @@ class Submission(models.Model):
     problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     # passed by the LMS
-    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
     max_score = models.IntegerField(default=1)
-    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     student_response = models.TextField(default="")
     student_submission_time = models.DateTimeField(default=timezone.now)
 
@@ -177,10 +177,10 @@ class Submission(models.Model):
 
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
-    submission = models.ForeignKey('Submission')
+    submission = models.ForeignKey('Submission', db_index = True)
     score = models.IntegerField()
     feedback = models.TextField()
-    status_code = models.CharField(max_length=1, choices=STATUS_CODES)
+    status_code = models.CharField(max_length=1, choices=STATUS_CODES, db_index = True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
@@ -188,7 +188,7 @@ class Grader(models.Model):
     # For machine grading, it's the name and version of the algorithm that was
     # used.
     grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="1")
-    grader_type = models.CharField(max_length=2, choices=GRADER_TYPE)
+    grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, db_index = True)
 
     # should be between 0 and 1, with 1 being most confident.
     confidence = models.DecimalField(max_digits=10, decimal_places=9, default=0)
@@ -218,7 +218,7 @@ class Grader(models.Model):
         return latest_rubric
 
 class Message(models.Model):
-    grader = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader', db_index = True)
     message = models.TextField()
     originator = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     recipient= models.CharField(max_length=CHARFIELD_LEN_SMALL)
@@ -232,9 +232,9 @@ class Rubric(models.Model):
     """
     Each rubric encapsulates how a student was graded according to a particular rubric
     """
-    grader = models.ForeignKey('Grader')
+    grader = models.ForeignKey('Grader', db_index = True)
     rubric_version = models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    finished_scoring = models.BooleanField(default=False)
+    finished_scoring = models.BooleanField(default=False, db_index = True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -253,13 +253,13 @@ class RubricItem(models.Model):
     Each one encapsulates one item in a rubric, along with comments and the score on the item
     """
 
-    rubric=models.ForeignKey('Rubric')
+    rubric=models.ForeignKey('Rubric', db_index = True)
     text=models.TextField()
     short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     comment = models.TextField(default="")
     score=models.DecimalField(max_digits=10, decimal_places=2, default=0)
     max_score= models.IntegerField(default=1)
-    finished_scoring = models.BooleanField(default=False)
+    finished_scoring = models.BooleanField(default=False, db_index = True)
 
     #Ensures that rubric items are ordered properly
     item_number = models.IntegerField()
@@ -280,7 +280,7 @@ class RubricItem(models.Model):
 
 class RubricOption(models.Model):
 
-    rubric_item=models.ForeignKey('RubricItem')
+    rubric_item=models.ForeignKey('RubricItem', db_index = True)
     points = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     short_text = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     text = models.TextField()

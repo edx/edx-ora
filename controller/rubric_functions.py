@@ -173,7 +173,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
         return False, error_message
 
 def get_submission_rubric_instructor_scores(sub):
-    grader_set=sub.grader_set.select_related().filter(status_code=GraderStatus.success, grader_type="IN")
+    grader_set=sub.grader_set.filter(status_code=GraderStatus.success, grader_type="IN")
     if grader_set.count()>0:
         rubrics=grader_set[0].rubric_set.filter(finished_scoring=True)
         if rubrics.count()>0:
