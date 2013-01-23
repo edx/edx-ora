@@ -18,17 +18,17 @@ class Timing(models.Model):
 
     #Essay metadata
     student_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    location=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    location=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     max_score=models.IntegerField(default=1)
 
     #This is so that we can query on it if we need to get more data
     submission_id=models.IntegerField(blank=True,null=True)
 
     #Grader Metadata
-    grader_type=models.CharField(max_length=2,choices=GRADER_TYPE,null=True, blank=True)
-    status_code = models.CharField(max_length=1, choices=STATUS_CODES,null=True, blank=True)
+    grader_type=models.CharField(max_length=2,choices=GRADER_TYPE,null=True, blank=True, db_index = True)
+    status_code = models.CharField(max_length=1, choices=STATUS_CODES,null=True, blank=True, db_index = True)
     confidence = models.DecimalField(max_digits=10, decimal_places=9,null=True, blank=True)
     is_calibration = models.BooleanField(default=False)
     score=models.IntegerField(null=True, blank=True)
