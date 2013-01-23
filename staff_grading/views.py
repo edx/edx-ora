@@ -235,6 +235,8 @@ def save_grade(request):
     return util._success_response({}, _INTERFACE_VERSION)
 
 @csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.staff_grading.views.time',
+    tags=['function:get_problem_list'])
 @util.error_if_not_logged_in
 def get_problem_list(request):
     """

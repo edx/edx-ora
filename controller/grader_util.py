@@ -296,6 +296,7 @@ def get_problems_student_has_tried(student_id, course_id):
                 'location' : location,
                 'grader_type' : last_sub.previous_grader_type,
                 'problem_name' : last_sub.problem_id,
+                'date_modified' : last_sub.date_modified,
             }
             sub_list.append(sub_dict)
     return success, sub_list
