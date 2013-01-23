@@ -1,6 +1,7 @@
 from django.db import models
 
 CHARFIELD_LEN_SMALL = 128
+CHARFIELD_LEN_LONG = 1024
 
 class CalibrationHistory(models.Model):
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
@@ -8,7 +9,7 @@ class CalibrationHistory(models.Model):
     #Have problem_id and location in order to allow for one to be user_defined, and one system defined
     #This allows for the same problem to be used across classes without re-calibration if needed.
     #Currently use location instead of problem_id
-    problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    problem_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
 
     def __unicode__(self):

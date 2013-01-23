@@ -2,7 +2,8 @@ from django.db import models
 from controller.models import GRADER_TYPE, STATUS_CODES, STATE_CODES
 from django.utils import timezone
 
-CHARFIELD_LEN_SMALL=512
+CHARFIELD_LEN_SMALL=128
+CHARFIELD_LEN_LONG = 1024
 
 class Timing(models.Model):
 
@@ -19,7 +20,7 @@ class Timing(models.Model):
     #Essay metadata
     student_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
-    problem_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    problem_id=models.CharField(max_length=CHARFIELD_LEN_LONG)
     course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
     max_score=models.IntegerField(default=1)
 
@@ -35,7 +36,7 @@ class Timing(models.Model):
 
     #Badly named, but it can't be grader_id for obvious reasons!
     #This contains the version # of the grader.  For humans, version number is the lms id for the person.
-    grader_version=models.CharField(max_length=CHARFIELD_LEN_SMALL,null=True, blank=True)
+    grader_version=models.CharField(max_length=CHARFIELD_LEN_LONG,null=True, blank=True)
 
     #This is so that we can query on it if we need to get more data
     grader_id=models.IntegerField(blank=True,null=True)
