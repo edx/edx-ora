@@ -19,6 +19,8 @@ from models import Submission
 
 from statsd import statsd
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
@@ -140,6 +142,7 @@ def check_for_notifications(request):
     if not success:
         return util._error_response(combined_notifications,_INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response(combined_notifications, _INTERFACE_VERSION)
 
 @csrf_exempt
@@ -174,6 +177,8 @@ def get_grading_status_list(request):
         'success' : success,
         'problem_list' : sub_list,
         }
+
+    util.log_connection_data()
     return util._success_response(problem_list_dict, _INTERFACE_VERSION)
 
 

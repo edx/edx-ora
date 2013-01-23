@@ -9,6 +9,8 @@ import project_urls
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
@@ -305,3 +307,11 @@ def update_users_from_file():
                 user.set_password(pwd)
                 user.save()
         log.info(' [*] All done!')
+
+def log_connection_data():
+    query_data = connection.queries
+    query_time = [float(q['time']) for q in query_data]
+    query_sql = [q['sql'] for q in query_data]
+
+    for i in xrange(0,len(query_time)):
+        log.debug("Time: {0} SQL: {1}".format(query_time[i], query_sql[i]))

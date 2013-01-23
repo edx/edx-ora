@@ -182,13 +182,13 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model
 
 def generate_rubric_location_suffixes(subs):
     location_suffixes=[""]
-    first_graded_sub=subs.order_by('date_created')
-    if len(first_graded_sub)>0:
-        first_graded_sub=first_graded_sub[0]
+    first_graded_subs=list(subs.order_by('date_created'))
+    if len(first_graded_subs)>0:
+        first_graded_sub=first_graded_subs[0]
         success, rubric_targets = controller.rubric_functions.generate_targets_from_rubric(first_graded_sub.rubric)
         if success:
-            for m in xrange(0,len(subs)):
-                sub=subs[m]
+            for m in xrange(0,len(first_graded_subs)):
+                sub=first_graded_subs[m]
                 scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
                 if not scores_match_target:
                     return location_suffixes

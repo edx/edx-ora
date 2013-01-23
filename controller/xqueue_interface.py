@@ -19,6 +19,8 @@ from metrics import timing_functions
 import message_util
 from ml_grading import ml_grading_util
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
@@ -142,6 +144,7 @@ def submit(request):
             if not success:
                 return util._error_response("Failed to handle submission.", _INTERFACE_VERSION)
 
+            util.log_connection_data()
             return util._success_response({'message': "Saved successfully."}, _INTERFACE_VERSION)
 
 

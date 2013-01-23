@@ -24,6 +24,8 @@ from controller import rubric_functions
 import staff_grading_util
 from ml_grading import ml_grading_util
 
+from django.db import connection
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
@@ -128,6 +130,7 @@ def get_next_submission(request):
                 'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
+    util.log_connection_data()
     log.debug("Sending success response back to instructor grading!")
     log.debug("Sub id from get next: {0}".format(submission.id))
     return util._success_response(response, _INTERFACE_VERSION)
@@ -232,6 +235,7 @@ def save_grade(request):
         return util._error_response("grade_save_error", _INTERFACE_VERSION,
                                     data={'msg': 'Internal error'})
 
+    util.log_connection_data()
     return util._success_response({}, _INTERFACE_VERSION)
 
 @csrf_exempt
@@ -294,6 +298,7 @@ def get_problem_list(request):
             }
         location_info.append(location_dict)
 
+    util.log_connection_data()
     log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
                                   _INTERFACE_VERSION)
@@ -317,4 +322,5 @@ def get_notifications(request):
     if not success:
         return util._error_response(staff_needs_to_grade, _INTERFACE_VERSION)
 
+    util.log_connection_data()
     return util._success_response({'staff_needs_to_grade' : staff_needs_to_grade}, _INTERFACE_VERSION)
