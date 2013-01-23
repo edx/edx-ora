@@ -14,7 +14,7 @@ class CreatedModel(models.Model):
     prompt=models.TextField()
     rubric=models.TextField()
     location=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
-    course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    course_id=models.CharField(max_length=CHARFIELD_LEN_SMALL)
 
     #Stores a json serialized list of all the submission ids of essays used in this model.
     #Not currently used, but good to store in case it is used down the road.
@@ -42,10 +42,10 @@ class CreatedModel(models.Model):
     #A mean absolute error of .5 means that, on average, the predicted score is +/- .5 points from the actual score
     cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10)
 
-    creation_succeeded=models.BooleanField(default=False, db_index = True)
+    creation_succeeded=models.BooleanField(default=False)
 
     #Amazon S3 stuff if we do use it
-    model_stored_in_s3=models.BooleanField(default=False, db_index = True)
+    model_stored_in_s3=models.BooleanField(default=False)
     s3_public_url=models.TextField(default="")
     s3_bucketname=models.TextField(default="")
 
