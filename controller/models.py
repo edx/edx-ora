@@ -30,7 +30,8 @@ STATE_CODES = (
     (SubmissionState.finished, "Finished" )
     )
 
-CHARFIELD_LEN_SMALL = 512
+CHARFIELD_LEN_SMALL = 128
+CHARFIELD_LEN_LONG = 1024
 
 # TODO: DB settings -- utf-8, innodb, store everything in UTC
 
@@ -54,7 +55,7 @@ class Submission(models.Model):
 
     # specified in the input type--can be reused between many different
     # problems.  (Should perhaps be named something like problem_type)
-    problem_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    problem_id = models.CharField(max_length=CHARFIELD_LEN_LONG)
 
     # passed by the LMS
     location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
@@ -64,8 +65,8 @@ class Submission(models.Model):
     student_submission_time = models.DateTimeField(default=timezone.now)
 
     # xqueue details
-    xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
-    xqueue_submission_key = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
+    xqueue_submission_key = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     posted_results_back_to_queue = models.BooleanField(default=False)
 
@@ -187,7 +188,7 @@ class Grader(models.Model):
     # For human grading, this is the id of the user that graded the submission.
     # For machine grading, it's the name and version of the algorithm that was
     # used.
-    grader_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="1")
+    grader_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="1")
     grader_type = models.CharField(max_length=2, choices=GRADER_TYPE)
 
     # should be between 0 and 1, with 1 being most confident.
@@ -255,7 +256,7 @@ class RubricItem(models.Model):
 
     rubric=models.ForeignKey('Rubric', db_index = True)
     text=models.TextField()
-    short_text=models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
+    short_text=models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     comment = models.TextField(default="")
     score=models.DecimalField(max_digits=10, decimal_places=2, default=0)
     max_score= models.IntegerField(default=1)

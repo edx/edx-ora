@@ -9,34 +9,16 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Changing field 'CreatedModel.model_relative_path'
-        db.alter_column('ml_grading_createdmodel', 'model_relative_path', self.gf('django.db.models.fields.CharField')(max_length=512))
-
         # Changing field 'CreatedModel.course_id'
-        db.alter_column('ml_grading_createdmodel', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=512))
-
-        # Changing field 'CreatedModel.model_full_path'
-        db.alter_column('ml_grading_createdmodel', 'model_full_path', self.gf('django.db.models.fields.CharField')(max_length=512))
-
-        # Changing field 'CreatedModel.problem_id'
-        db.alter_column('ml_grading_createdmodel', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=512))
+        db.alter_column('ml_grading_createdmodel', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=128))
 
         # Changing field 'CreatedModel.location'
-        db.alter_column('ml_grading_createdmodel', 'location', self.gf('django.db.models.fields.CharField')(max_length=512))
+        db.alter_column('ml_grading_createdmodel', 'location', self.gf('django.db.models.fields.CharField')(max_length=128))
 
     def backwards(self, orm):
 
-        # Changing field 'CreatedModel.model_relative_path'
-        db.alter_column('ml_grading_createdmodel', 'model_relative_path', self.gf('django.db.models.fields.CharField')(max_length=1024))
-
         # Changing field 'CreatedModel.course_id'
         db.alter_column('ml_grading_createdmodel', 'course_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
-
-        # Changing field 'CreatedModel.model_full_path'
-        db.alter_column('ml_grading_createdmodel', 'model_full_path', self.gf('django.db.models.fields.CharField')(max_length=1024))
-
-        # Changing field 'CreatedModel.problem_id'
-        db.alter_column('ml_grading_createdmodel', 'problem_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
         # Changing field 'CreatedModel.location'
         db.alter_column('ml_grading_createdmodel', 'location', self.gf('django.db.models.fields.CharField')(max_length=1024))
@@ -44,20 +26,20 @@ class Migration(SchemaMigration):
     models = {
         'ml_grading.createdmodel': {
             'Meta': {'object_name': 'CreatedModel'},
-            'course_id': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'course_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'creation_succeeded': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'cv_kappa': ('django.db.models.fields.DecimalField', [], {'max_digits': '10', 'decimal_places': '9'}),
             'cv_mean_absolute_error': ('django.db.models.fields.DecimalField', [], {'max_digits': '15', 'decimal_places': '10'}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'location': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'max_score': ('django.db.models.fields.IntegerField', [], {}),
-            'model_full_path': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'model_relative_path': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'model_full_path': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
+            'model_relative_path': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'model_stored_in_s3': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'number_of_essays': ('django.db.models.fields.IntegerField', [], {}),
-            'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'problem_id': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'prompt': ('django.db.models.fields.TextField', [], {}),
             'rubric': ('django.db.models.fields.TextField', [], {}),
             's3_bucketname': ('django.db.models.fields.TextField', [], {'default': "''"}),
