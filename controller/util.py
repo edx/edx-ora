@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 
 from django.db import connection
 
+import traceback
+
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
@@ -309,9 +311,20 @@ def update_users_from_file():
         log.info(' [*] All done!')
 
 def log_connection_data():
-    query_data = connection.queries
-    query_time = [float(q['time']) for q in query_data]
-    query_sql = [q['sql'] for q in query_data]
+    if settings.PRINT_QUERIES == True:
+        query_data = connection.queries
+        query_time = [float(q['time']) for q in query_data]
+        query_sql = [q['sql'] for q in query_data]
 
-    for i in xrange(0,len(query_time)):
-        log.debug("Time: {0} SQL: {1}".format(query_time[i], query_sql[i]))
+        for i in xrange(0,len(query_time)):
+            try:
+                if query_time[i]>.02:
+                    log.debug("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
+            except:
+                pass
+
+        log.debug("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
+        if len(query_time)>30:
+            for i in xrange(0,30):
+                log.debug(query_sql[i])
+            traceback.print_stack()

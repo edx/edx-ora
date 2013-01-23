@@ -59,7 +59,7 @@ def check_for_all_model_and_rubric_success(location):
         state=SubmissionState.finished,
     )
 
-    location_suffixes=generate_rubric_location_suffixes(subs_graded_by_instructor)
+    location_suffixes=generate_rubric_location_suffixes(subs_graded_by_instructor, grading = True)
     overall_success=True
     for m in xrange(0,len(location_suffixes)):
         suffix = location_suffixes[m]
@@ -180,14 +180,18 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score,model
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     pickle.dump(model_file, file=open(model_path, "w"))
 
-def generate_rubric_location_suffixes(subs):
+def generate_rubric_location_suffixes(subs, grading=False):
     location_suffixes=[""]
     first_graded_subs=list(subs.order_by('date_created'))
     if len(first_graded_subs)>0:
         first_graded_sub=first_graded_subs[0]
         success, rubric_targets = controller.rubric_functions.generate_targets_from_rubric(first_graded_sub.rubric)
         if success:
-            for m in xrange(0,len(first_graded_subs)):
+            min_to_check = len(first_graded_subs)
+            if grading:
+                min_to_check = min(2,len(first_graded_subs))
+
+            for m in xrange(0,min_to_check):
                 sub=first_graded_subs[m]
                 scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
                 if not scores_match_target:
