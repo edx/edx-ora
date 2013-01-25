@@ -4,6 +4,7 @@ import logging
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
 from django.conf import settings
+from metrics import utilize_student_metrics
 
 log = logging.getLogger(__name__)
 
@@ -44,8 +45,10 @@ def get_single_peer_grading_item(location, grader_id):
 
             submission_ids = [p['id'] for p in submissions_to_grade]
 
+            student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(grader_id, submissions_to_grade[0].course_id)
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
+            fallback_sub_id = None
             for i in xrange(0, len(submission_ids)):
                 #log.debug("Looping through graders, on {0}".format(i))
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
@@ -58,13 +61,23 @@ def get_single_peer_grading_item(location, grader_id):
                     sub_id = grade_item.id
 
                     #Insert timing initialization code
-                    initialize_timing(sub_id)
+                    if fallback_sub_id is None:
+                        fallback_sub_id = grade_item.id
 
-                    return found, sub_id
+                    if not student_profile_success:
+                        initialize_timing(sub_id)
+                        return found, sub_id
+                    else:
+                        success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id)
+                        if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
+                            initialize_timing(sub_id)
+                            return found, sub_id
                 else:
                     if len(submission_ids) > 1:
                         submission_ids.pop(minimum_index)
                         submission_grader_counts.pop(minimum_index)
+            if found:
+                return found, fallback_sub_id
 
     return found, sub_id
 
