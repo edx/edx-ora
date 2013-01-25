@@ -12,11 +12,13 @@ import time
 import json
 import logging
 from statsd import statsd
+import random
 
 import controller.util as util
 from controller.models import Submission, SubmissionState
 import controller.expire_submissions as expire_submissions
 from staff_grading import staff_grading_util
+from metrics import generate_student_metrics
 
 log = logging.getLogger(__name__)
 
@@ -43,12 +45,21 @@ class Command(BaseCommand):
                 """
 
                 expire_submissions.reset_in_subs_to_ml(subs)
+                transaction.commit_unless_managed()
+
                 expire_submissions.reset_subs_in_basic_check(subs)
+                transaction.commit_unless_managed()
+
                 expire_submissions.reset_failed_subs_in_basic_check(subs)
+                transaction.commit_unless_managed()
+
                 expire_submissions.reset_ml_subs_to_in()
+                transaction.commit_unless_managed()
 
                 #See if duplicate peer grading items have been finished grading
                 expire_submissions.check_if_grading_finished_for_duplicates()
+
+                generate_student_metrics.regenerate_student_data()
 
 
             except Exception as err:
@@ -57,4 +68,4 @@ class Command(BaseCommand):
                         tags=["success:Exception"])
                     transaction.commit_unless_managed()
 
-            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
+            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS + random.randint(settings.MIN_RANDOMIZED_PROCESS_SLEEP_TIME, settings.MAX_RANDOMIZED_PROCESS_SLEEP_TIME))

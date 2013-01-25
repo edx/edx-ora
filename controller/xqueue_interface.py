@@ -67,6 +67,7 @@ def submit(request):
                 problem_id = util._value_or_default(body['grader_payload']['problem_id'], location)
                 grader_settings = util._value_or_default(body['grader_payload']['grader_settings'], "")
                 student_response = util._value_or_default(body['student_response'])
+                student_response = util.sanitize_html(student_response)
                 xqueue_submission_id = util._value_or_default(header['submission_id'])
                 xqueue_submission_key = util._value_or_default(header['submission_key'])
                 state_code = SubmissionState.waiting_to_be_graded
@@ -325,6 +326,7 @@ def submit_message(request):
         return util._error_response('Incorrect format', _INTERFACE_VERSION)
 
     message = body['feedback']
+    message = util.sanitize_html(message)
     grader_id = body['grader_id']
     submission_id = body['submission_id']
     originator = body['student_info']['anonymous_student_id']

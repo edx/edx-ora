@@ -9,6 +9,7 @@ from django.db import transaction
 import time
 import logging
 import statsd
+import random
 
 from controller.models import Submission
 from ml_grading import ml_model_creation
@@ -35,7 +36,7 @@ class Command(NoArgsCommand):
 
             log.debug("Finished looping through.")
 
-            time.sleep(settings.TIME_BETWEEN_ML_CREATOR_CHECKS)
+            time.sleep(settings.TIME_BETWEEN_ML_CREATOR_CHECKS + random.randint(settings.MIN_RANDOMIZED_PROCESS_SLEEP_TIME, settings.MAX_RANDOMIZED_PROCESS_SLEEP_TIME))
 
 
 

@@ -5,6 +5,7 @@ import logging
 import requests
 import urlparse
 import project_urls
+import re
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -12,6 +13,7 @@ from django.contrib.auth.models import User
 from django.db import connection
 
 import traceback
+from lxml.html.clean import Cleaner
 
 log = logging.getLogger(__name__)
 
@@ -328,3 +330,12 @@ def log_connection_data():
             for i in xrange(0,30):
                 log.debug(query_sql[i])
             traceback.print_stack()
+
+def sanitize_html(text):
+    try:
+        cleaner = Cleaner(style=True, links=True, add_nofollow=True, page_structure=True, safe_attrs_only=True)
+        clean_html = cleaner.clean_html(text)
+        clean_html = re.sub(r'</p>$', '', re.sub(r'^<p>', '', clean_html))
+    except:
+        clean_html = text
+    return clean_html
