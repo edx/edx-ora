@@ -1,20 +1,24 @@
+from __future__ import division
 from controller.models import Grader, Message, Submission, GraderStatus, SubmissionState
 import numpy
 from django.conf import settings
-from __future__ import division
 from models import StudentCourseProfile, StudentProfile
 from django.db import transaction
+
+import logging
+
+log=logging.getLogger(__name__)
 
 MIN_NEW_ATTEMPTS_TO_REGENERATE = 5
 
 def regenerate_student_data():
     transaction.commit_unless_managed()
-    unique_courses = Submission.objects.all().values('course_id').distinct()
+    unique_courses = [s['course_id'] for s in Submission.objects.all().values('course_id').distinct()]
 
     for course in unique_courses:
         transaction.commit_unless_managed()
-        unique_students = Submission.objects.filter(course_id = course).values('student_id').distinct()
-        log.debug("Regenerating data for course {0} with {1} students.".format(course, unique_students.count()))
+        unique_students = [s['student_id'] for s in Submission.objects.filter(course_id = course).values('student_id').distinct()]
+        log.debug("Regenerating data for course {0} with {1} students.".format(course, len(unique_students)))
         success_count = 0
         change_count = 0
         for student in unique_students:
@@ -26,6 +30,7 @@ def regenerate_student_data():
                     change_count+=1
             except:
                 error_message = "Could not generate student course profile for student "
+                log.exception(error_message)
         log.debug("{0} students successfully scanned, {1} updated.".format(success_count, change_count))
 
 def read_one_student_data(student_id, course_id):
@@ -36,6 +41,7 @@ def read_one_student_data(student_id, course_id):
         student_profile = StudentProfile.objects.get_or_create(student_id = student_id)
         student_course_profile = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id)
     except:
+        log.exception("Could not find student_profile or student_course_profile.")
         return success, changed
 
     sub_count = Submission.objects.filter(student_id=student_id, course_id=course_id, state = SubmissionState.finished).count()
