@@ -2,7 +2,7 @@ from __future__ import division
 from controller.models import Grader, Message, Submission, GraderStatus, SubmissionState
 import numpy
 from django.conf import settings
-from models import StudentCourseProfile, StudentProfile, DECIMAL_PLACES
+from models import StudentCourseProfile, StudentProfile, DECIMAL_PLACES, FIELDS_TO_EVALUATE
 from django.db import transaction
 
 import logging
@@ -106,32 +106,34 @@ def read_one_student_data(student_id, course_id):
     average_percent_score_peer = numpy.mean(average_percent_score_list_peer)
     average_percent_score_ml = numpy.mean(average_percent_score_list_ml)
 
-    StudentCourseProfile.objects.filter(id = student_course_profile.id).update(
-        id=student_course_profile.id,
-        student_profile = student_profile,
-        course_id = course_id,
-        student_id = student_id,
-        problems_attempted = round(problems_attempted, DECIMAL_PLACES),
-        attempts_per_problem = round(attempts_per_problem,DECIMAL_PLACES),
-        graders_per_attempt = round(graders_per_attempt,DECIMAL_PLACES),
-        stdev_percent_score = round(stdev_percent_score,DECIMAL_PLACES),
-        average_percent_score = round(average_percent_score,DECIMAL_PLACES),
-        average_percent_score_last20 = round(average_percent_score_last20,DECIMAL_PLACES),
-        average_percent_score_last10 = round(average_percent_score_last10,DECIMAL_PLACES),
-        problems_attempted_peer = round(problems_attempted_peer, DECIMAL_PLACES),
-        completed_peer_grading = round(completed_peer_grading, DECIMAL_PLACES),
-        average_length_of_peer_feedback_given = round(average_length_of_peer_feedback_given,DECIMAL_PLACES),
-        stdev_length_of_peer_feedback_given = round(stdev_length_of_peer_feedback_given,DECIMAL_PLACES),
-        average_peer_grading_score_given = round(average_peer_grading_score_given,DECIMAL_PLACES),
-        attempts_per_problem_peer = round(attempts_per_problem_peer,DECIMAL_PLACES),
-        average_percent_score_peer = round(average_percent_score_peer,DECIMAL_PLACES),
-        problems_attempted_ml = round(problems_attempted_ml, DECIMAL_PLACES),
-        attempts_per_problem_ml = round(attempts_per_problem_ml,DECIMAL_PLACES),
-        average_ml_confidence = round(average_ml_confidence,DECIMAL_PLACES),
-        average_percent_score_ml = round(average_percent_score_ml,DECIMAL_PLACES),
-        average_submission_length = round(average_submission_length,DECIMAL_PLACES),
-        stdev_submission_length = round(stdev_submission_length,DECIMAL_PLACES),
-    )
+    value_dict = {
+        "problems_attempted" : problems_attempted,
+        "attempts_per_problem" : attempts_per_problem,
+        "graders_per_attempt" : graders_per_attempt,
+        "stdev_percent_score" : stdev_percent_score,
+        "average_percent_score" : average_percent_score,
+        "average_percent_score_last20" : average_percent_score_last20,
+        "average_percent_score_last10" : average_percent_score_last10,
+        "problems_attempted_peer" : problems_attempted_peer,
+        "completed_peer_grading" : completed_peer_grading,
+        "average_length_of_peer_feedback_given" : average_length_of_peer_feedback_given,
+        "stdev_length_of_peer_feedback_given" : stdev_length_of_peer_feedback_given,
+        "average_peer_grading_score_given" : average_peer_grading_score_given,
+        "attempts_per_problem_peer" : attempts_per_problem_peer,
+        "average_percent_score_peer" : average_percent_score_peer,
+        "problems_attempted_ml" : problems_attempted_ml,
+        "attempts_per_problem_ml" : attempts_per_problem_ml,
+        "average_ml_confidence" : average_ml_confidence,
+        "average_percent_score_ml" : average_percent_score_ml,
+        "stdev_submission_length" : stdev_submission_length,
+    }
+
+    for k in value_dict:
+        value_dict[k] = round(value_dict[k], DECIMAL_PLACES)
+        if numpy.isnan(value_dict[k]):
+            value_dict[k]=0
+
+    StudentCourseProfile.objects.filter(id = student_course_profile.id).update(**value_dict)
 
     success = True
     changed = True

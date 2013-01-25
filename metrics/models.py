@@ -8,6 +8,29 @@ MAX_DECIMAL_DIGITS = 10
 DECIMAL_PLACES = 5
 DEFAULT_VALUE=0
 
+FIELDS_TO_EVALUATE = [
+    "problems_attempted",
+    "attempts_per_problem",
+    "graders_per_attempt",
+    "stdev_percent_score",
+    "average_percent_score",
+    "average_percent_score_last20",
+    "average_percent_score_last10",
+    "problems_attempted_peer",
+    "completed_peer_grading",
+    "average_length_of_peer_feedback_given",
+    "stdev_length_of_peer_feedback_given",
+    "average_peer_grading_score_given",
+    "attempts_per_problem_peer",
+    "average_percent_score_peer",
+    "problems_attempted_ml",
+    "attempts_per_problem_ml",
+    "average_ml_confidence",
+    "average_percent_score_ml",
+    "average_submission_length",
+    "stdev_submission_length",
+    ]
+
 class Timing(models.Model):
 
     #The need to store all of this could be solved by putting a foreign key on a submission object.
