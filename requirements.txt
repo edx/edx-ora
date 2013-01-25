@@ -10,4 +10,5 @@ pytz
 matplotlib
 MySQL-python
 boto
+lxml
 

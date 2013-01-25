@@ -5,6 +5,12 @@ from __future__ import division
 from models import StudentCourseProfile
 
 def read_one_student_data(student_id, course_id):
+    success = False
+    try:
+        student_course_profile = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id)
+    except:
+        return success
+
     subs = list(Submission.objects.filter(student_id=student_id, course_id=course_id, state = SubmissionState.finished).order_by("-date_modified"))
     sub_ids = [sub.id for sub in subs]
     graders = list(Grader.objects.filter(submission_id__in=sub_ids))

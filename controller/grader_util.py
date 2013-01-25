@@ -9,6 +9,7 @@ import expire_submissions
 from statsd import statsd
 import json
 import os
+import util
 from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
 from peer_grading import peer_grading_util
@@ -71,6 +72,9 @@ def create_and_handle_grader_object(grader_dict):
 
     if not isinstance(grader_dict['feedback'], dict):
         grader_dict['feedback'] = {'feedback': grader_dict['feedback']}
+
+    for k,v in grader_dict['feedback']:
+        grader_dict['feedback'][k] = util.sanitize_html(v)
 
     if grader_dict['status'] == GraderStatus.failure:
         grader_dict['feedback'] = ' '.join(grader_dict['errors'])
