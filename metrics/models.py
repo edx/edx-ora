@@ -52,6 +52,9 @@ class StudentProfile(models.Model):
 class StudentCourseProfile(models.Model):
     student_profile = models.ForeignKey('StudentProfile')
 
+    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="", db_index = True)
+
     #Attempt data
     problems_attempted = models.IntegerField(default=0)
     attempts_per_problem = models.DecimalField(max_digits=10, decimal_places=9, default=0)

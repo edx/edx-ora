@@ -2,6 +2,7 @@ from controller.models import Grader, Message, Submission, GraderStatus, Submiss
 import numpy
 from django.conf import settings
 from __future__ import division
+from models import StudentCourseProfile
 
 def read_one_student_data(student_id, course_id):
     subs = list(Submission.objects.filter(student_id=student_id, course_id=course_id, state = SubmissionState.finished).order_by("-date_modified"))
@@ -58,3 +59,32 @@ def read_one_student_data(student_id, course_id):
     average_percent_score = numpy.mean(average_percent_score_list)
     average_percent_score_last20 = numpy.mean(average_percent_score_list[:20])
     average_percent_score_last10 = numpy.mean(average_percent_score_list[:10])
+    average_percent_score_peer = numpy.mean(average_percent_score_list_peer)
+    average_percent_score_ml = numpy.mean(average_percent_score_list_ml)
+
+    student_course_profile = StudentCourseProfile(
+        course_id = course_id,
+        student_id = student_id,
+        problems_attempted = problems_attempted,
+        attempts_per_problem = attempts_per_problem,
+        graders_per_attempt = graders_per_attempt,
+        stdev_percent_score = stdev_percent_score,
+        average_percent_score = average_percent_score,
+        average_percent_score_last20 = average_percent_score_last20,
+        average_percent_score_last10 = average_percent_score_last10,
+        problems_attempted_peer = problems_attempted_peer,
+        completed_peer_grading = completed_peer_grading,
+        average_length_of_peer_feedback_given = average_length_of_peer_feedback_given,
+        stdev_length_of_peer_feedback_given = stdev_length_of_peer_feedback_given,
+        average_peer_grading_score_given = average_peer_grading_score_given,
+        attempts_per_problem_peer = attempts_per_problem_peer,
+        average_percent_score_peer = average_percent_score_peer,
+        problems_attempted_ml = problems_attempted_ml,
+        attempts_per_problem_ml = attempts_per_problem_ml,
+        average_ml_confidence = average_ml_confidence,
+        average_percent_score_ml = average_percent_score_ml,
+        average_submission_length = average_submission_length,
+        stdev_submission_length = stdev_submission_length,
+    )
+
+    student_course_profile.save()
