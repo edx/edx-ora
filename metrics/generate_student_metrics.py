@@ -3,21 +3,33 @@ import numpy
 from django.conf import settings
 from __future__ import division
 from models import StudentCourseProfile, StudentProfile
+from django.db import transaction
 
 MIN_NEW_ATTEMPTS_TO_REGENERATE = 5
 
 def regenerate_student_data():
+    transaction.commit_unless_managed()
     unique_courses = Submission.objects.all().values('course_id').distinct()
 
     for course in unique_courses:
+        transaction.commit_unless_managed()
         unique_students = Submission.objects.filter(course_id = course).values('student_id').distinct()
+        log.debug("Regenerating data for course {0} with {1} students.".format(course, unique_students.count()))
+        success_count = 0
+        change_count = 0
         for student in unique_students:
             try:
-                read_one_student_data(student, course)
+                success, changed = read_one_student_data(student, course)
+                if success:
+                    success_count+=1
+                if changed:
+                    change_count+=1
             except:
                 error_message = "Could not generate student course profile for student "
+        log.debug("{0} students successfully scanned, {1} updated.".format(success_count, change_count))
 
 def read_one_student_data(student_id, course_id):
+    transaction.commit_unless_managed()
     success = False
     changed = False
     try:
