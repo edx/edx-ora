@@ -106,7 +106,8 @@ def read_one_student_data(student_id, course_id):
     average_percent_score_peer = numpy.mean(average_percent_score_list_peer)
     average_percent_score_ml = numpy.mean(average_percent_score_list_ml)
 
-    student_course_profile = StudentCourseProfile(
+    StudentCourseProfile.objects.filter(id = student_course_profile.id).update(
+        id=student_course_profile.id,
         student_profile = student_profile,
         course_id = course_id,
         student_id = student_id,
@@ -131,8 +132,6 @@ def read_one_student_data(student_id, course_id):
         average_submission_length = round(average_submission_length,DECIMAL_PLACES),
         stdev_submission_length = round(stdev_submission_length,DECIMAL_PLACES),
     )
-
-    student_course_profile.save()
 
     success = True
     changed = True
