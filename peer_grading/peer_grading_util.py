@@ -33,6 +33,7 @@ def get_single_peer_grading_item(location, grader_id):
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
         if to_be_graded_length > 0:
+            course_id = to_be_graded[0].course_id
             submissions_to_grade = (to_be_graded
                                     .filter(grader__status_code=GraderStatus.success, grader__grader_type__in=["PE","BC"])
                                     .exclude(grader__grader_id=grader_id)
@@ -45,7 +46,7 @@ def get_single_peer_grading_item(location, grader_id):
 
             submission_ids = [p['id'] for p in submissions_to_grade]
 
-            student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(grader_id, submissions_to_grade[0].course_id)
+            student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(grader_id, course_id)
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
             fallback_sub_id = None
@@ -55,8 +56,6 @@ def get_single_peer_grading_item(location, grader_id):
                 grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
                 if grader_id not in previous_graders:
-                    grade_item.state = SubmissionState.being_graded
-                    grade_item.save()
                     found = True
                     sub_id = grade_item.id
 
@@ -66,17 +65,26 @@ def get_single_peer_grading_item(location, grader_id):
 
                     if not student_profile_success:
                         initialize_timing(sub_id)
+                        grade_item.state = SubmissionState.being_graded
+                        grade_item.save()
                         return found, sub_id
                     else:
-                        success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id)
+                        success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
+                        log.debug(similarity_score)
                         if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
                             initialize_timing(sub_id)
+                            grade_item.state = SubmissionState.being_graded
+                            grade_item.save()
                             return found, sub_id
                 else:
                     if len(submission_ids) > 1:
                         submission_ids.pop(minimum_index)
                         submission_grader_counts.pop(minimum_index)
             if found:
+                initialize_timing(fallback_sub_id)
+                grade_item = Submission.objects.get(id=fallback_sub_id)
+                grade_item.state = SubmissionState.being_graded
+                grade_item.save()
                 return found, fallback_sub_id
 
     return found, sub_id
