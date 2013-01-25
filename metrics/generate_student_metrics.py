@@ -2,7 +2,7 @@ from __future__ import division
 from controller.models import Grader, Message, Submission, GraderStatus, SubmissionState
 import numpy
 from django.conf import settings
-from models import StudentCourseProfile, StudentProfile
+from models import StudentCourseProfile, StudentProfile, DECIMAL_PLACES
 from django.db import transaction
 
 import logging
@@ -110,26 +110,26 @@ def read_one_student_data(student_id, course_id):
         student_profile = student_profile,
         course_id = course_id,
         student_id = student_id,
-        problems_attempted = problems_attempted,
-        attempts_per_problem = round(attempts_per_problem,3),
-        graders_per_attempt = round(graders_per_attempt,3),
-        stdev_percent_score = round(stdev_percent_score,3),
-        average_percent_score = round(average_percent_score,3),
-        average_percent_score_last20 = round(average_percent_score_last20,3),
-        average_percent_score_last10 = round(average_percent_score_last10,3),
-        problems_attempted_peer = problems_attempted_peer,
-        completed_peer_grading = completed_peer_grading,
-        average_length_of_peer_feedback_given = round(average_length_of_peer_feedback_given,3),
-        stdev_length_of_peer_feedback_given = round(stdev_length_of_peer_feedback_given,3),
-        average_peer_grading_score_given = round(average_peer_grading_score_given,3),
-        attempts_per_problem_peer = round(attempts_per_problem_peer,3),
-        average_percent_score_peer = round(average_percent_score_peer,3),
-        problems_attempted_ml = problems_attempted_ml,
-        attempts_per_problem_ml = round(attempts_per_problem_ml,3),
-        average_ml_confidence = round(average_ml_confidence,3),
-        average_percent_score_ml = round(average_percent_score_ml,3),
-        average_submission_length = round(average_submission_length,3),
-        stdev_submission_length = round(stdev_submission_length,3),
+        problems_attempted = round(problems_attempted, DECIMAL_PLACES),
+        attempts_per_problem = round(attempts_per_problem,DECIMAL_PLACES),
+        graders_per_attempt = round(graders_per_attempt,DECIMAL_PLACES),
+        stdev_percent_score = round(stdev_percent_score,DECIMAL_PLACES),
+        average_percent_score = round(average_percent_score,DECIMAL_PLACES),
+        average_percent_score_last20 = round(average_percent_score_last20,DECIMAL_PLACES),
+        average_percent_score_last10 = round(average_percent_score_last10,DECIMAL_PLACES),
+        problems_attempted_peer = round(problems_attempted_peer, DECIMAL_PLACES),
+        completed_peer_grading = round(completed_peer_grading, DECIMAL_PLACES),
+        average_length_of_peer_feedback_given = round(average_length_of_peer_feedback_given,DECIMAL_PLACES),
+        stdev_length_of_peer_feedback_given = round(stdev_length_of_peer_feedback_given,DECIMAL_PLACES),
+        average_peer_grading_score_given = round(average_peer_grading_score_given,DECIMAL_PLACES),
+        attempts_per_problem_peer = round(attempts_per_problem_peer,DECIMAL_PLACES),
+        average_percent_score_peer = round(average_percent_score_peer,DECIMAL_PLACES),
+        problems_attempted_ml = round(problems_attempted_ml, DECIMAL_PLACES),
+        attempts_per_problem_ml = round(attempts_per_problem_ml,DECIMAL_PLACES),
+        average_ml_confidence = round(average_ml_confidence,DECIMAL_PLACES),
+        average_percent_score_ml = round(average_percent_score_ml,DECIMAL_PLACES),
+        average_submission_length = round(average_submission_length,DECIMAL_PLACES),
+        stdev_submission_length = round(stdev_submission_length,DECIMAL_PLACES),
     )
 
     student_course_profile.save()
