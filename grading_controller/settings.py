@@ -26,6 +26,8 @@ TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired 
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
 MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
 DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to display to students
+MIN_RANDOMIZED_PROCESS_SLEEP_TIME = 0 # Minimum time for a process to sleep, to avoid process collision
+MAX_RANDOMIZED_PROCESS_SLEEP_TIME = 10 * 60 # Maximum time for a process to sleep, to avoid process collision
 
 #Config for specific graders
 #ML

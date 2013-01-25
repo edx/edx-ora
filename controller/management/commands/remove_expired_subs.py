@@ -12,6 +12,7 @@ import time
 import json
 import logging
 from statsd import statsd
+import random
 
 import controller.util as util
 from controller.models import Submission, SubmissionState
@@ -57,4 +58,4 @@ class Command(BaseCommand):
                         tags=["success:Exception"])
                     transaction.commit_unless_managed()
 
-            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS)
+            time.sleep(settings.TIME_BETWEEN_EXPIRED_CHECKS + random.randint(settings.MIN_RANDOMIZED_PROCESS_SLEEP_TIME, settings.MAX_RANDOMIZED_PROCESS_SLEEP_TIME))
