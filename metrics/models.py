@@ -52,6 +52,9 @@ class StudentProfile(models.Model):
 class StudentCourseProfile(models.Model):
     student_profile = models.ForeignKey('StudentProfile')
 
+    date_modified = models.DateTimeField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+
     course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="")
     student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL,default="", db_index = True)
 

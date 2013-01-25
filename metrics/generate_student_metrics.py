@@ -2,14 +2,34 @@ from controller.models import Grader, Message, Submission, GraderStatus, Submiss
 import numpy
 from django.conf import settings
 from __future__ import division
-from models import StudentCourseProfile
+from models import StudentCourseProfile, StudentProfile
+
+MIN_NEW_ATTEMPTS_TO_REGENERATE = 5
+
+def regenerate_student_data():
+    unique_courses = Submission.objects.all().values('course_id').distinct()
+
+    for course in unique_courses:
+        unique_students = Submission.objects.filter(course_id = course).values('student_id').distinct()
+        for student in unique_students:
+            try:
+                read_one_student_data(student, course)
+            except:
+                error_message = "Could not generate student course profile for student "
 
 def read_one_student_data(student_id, course_id):
     success = False
+    changed = False
     try:
+        student_profile = StudentProfile.objects.get_or_create(student_id = student_id)
         student_course_profile = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id)
     except:
-        return success
+        return success, changed
+
+    sub_count = Submission.objects.filter(student_id=student_id, course_id=course_id, state = SubmissionState.finished).count()
+    if sub_count < (student_course_profile.problems_attempted + MIN_NEW_ATTEMPTS_TO_REGENERATE):
+        success = True
+        return success, changed
 
     subs = list(Submission.objects.filter(student_id=student_id, course_id=course_id, state = SubmissionState.finished).order_by("-date_modified"))
     sub_ids = [sub.id for sub in subs]
@@ -69,6 +89,7 @@ def read_one_student_data(student_id, course_id):
     average_percent_score_ml = numpy.mean(average_percent_score_list_ml)
 
     student_course_profile = StudentCourseProfile(
+        student_profile = student_profile,
         course_id = course_id,
         student_id = student_id,
         problems_attempted = problems_attempted,
@@ -94,3 +115,7 @@ def read_one_student_data(student_id, course_id):
     )
 
     student_course_profile.save()
+
+    success = True
+    changed = True
+    return success, changed
