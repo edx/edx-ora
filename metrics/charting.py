@@ -46,6 +46,41 @@ def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None,xsize=20,y
 
     return svg_dta
 
+def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tick_labels=None, xsize = 20, ysize=10):
+    for i in xrange(0,len(x_tick_labels)):
+        x_tick_labels[i] = str(x_tick_labels[i].encode('ascii', 'ignore'))
+
+    jquery_code = """
+        var s1 = {y_data};
+        var ticks = {x_tick_labels};
+
+        var chart = $.jqplot('{chart_name}', [s1], {{
+        seriesDefaults:{{
+            renderer:$.jqplot.BarRenderer,
+            rendererOptions: {{fillToZero: true}}
+        }},
+        series:[
+            {{label:'{y_label}'}}
+        ],
+        legend: {{
+            show: true,
+            placement: 'outsideGrid'
+        }},
+        axes: {{
+            xaxis: {{
+                renderer: $.jqplot.CategoryAxisRenderer,
+                ticks: ticks
+            }},
+            yaxis: {{
+                pad: 1.05,
+                tickOptions: {{formatString: '$%d'}}
+            }}
+        }}
+    }});
+    """.format(x_data=x_data, y_data=y_data, title=title, y_label = y_label, x_tick_labels = x_tick_labels, chart_name = chart_name)
+
+    return jquery_code
+
 
 class BarChartDrawing(Drawing):
     def __init__(self, width=1000, height=1000, title='Timing Data for Request ',*args, **kw):

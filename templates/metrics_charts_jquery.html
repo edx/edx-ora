@@ -1,0 +1,32 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="{%  static "jplot/excanvas.js" %}"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="{%  static "jplot/jquery.js" %}"></script>
+<script language="javascript" type="text/javascript" src="{%  static "jplot/jquery.jqplot.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{%  static "jplot/jquery.jqplot.css" %}"/>
+
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.barRenderer.min.js" %}"></script>
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.categoryAxisRenderer.min.js" %}"></script>
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.pointLabels.min.js" %}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        {% for plot in plot_list %}
+            {{plot.jquery_script|safe}}
+        {% endfor %}
+    });
+</script>
+
+{% for plot in plot_list %}
+    <h4>{{plot.title}}</h4>
+    <div id="{{plot.name}}" style="height:800px;width:600px;"></div>
+{% endfor %}
+
+</body>
+</html>

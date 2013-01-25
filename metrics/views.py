@@ -34,12 +34,9 @@ def metrics_form(request):
                 return HttpResponse("Request missing needed tag metric type.")
 
         metric_type=request.POST.get('metric_type').lower()
-        success,response = metrics_util.render_requested_metric(metric_type,arguments,title)
+        success,response = metrics_util.render_requested_metric(metric_type,arguments,title, type="jquery")
 
-        if not success:
-            return HttpResponse(response)
-
-        return HttpResponse(response,"image/png")
+        return response
 
     elif request.method == "GET":
         available_metric_types = [k for k in metrics_util.AVAILABLE_METRICS]
