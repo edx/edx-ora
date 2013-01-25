@@ -45,6 +45,7 @@ def get_similarity_score(base_student_dict, comparison_student_id, course_id):
 
     log.debug("Difference List : {0}".format(difference_list))
     if len(difference_list)>0:
+        difference_list = [float(i) for i in difference_list]
         similarity_score = numpy.mean(difference_list)
 
     success = True

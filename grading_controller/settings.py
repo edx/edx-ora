@@ -52,7 +52,7 @@ REQUIRED_PEER_GRADING_PER_STUDENT = 3 #Student must peer grade at least 3 submis
 #If they are above this error, student will keep seeing calibration essays until they hit peer_grader_maximum_to_calibrate
 PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
 
-PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING = .5
+PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING = 1
 
 #Submission Expiration
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds.  This will send submissions back to lms with failure
