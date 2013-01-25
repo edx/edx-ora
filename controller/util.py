@@ -5,6 +5,7 @@ import logging
 import requests
 import urlparse
 import project_urls
+import re
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -334,6 +335,7 @@ def sanitize_html(text):
     try:
         cleaner = Cleaner(style=True, links=True, add_nofollow=True, page_structure=True, safe_attrs_only=True)
         clean_html = cleaner.clean_html(text)
+        clean_html = re.sub(r'</p>$', '', re.sub(r'^<p>', '', clean_html))
     except:
         clean_html = text
     return clean_html

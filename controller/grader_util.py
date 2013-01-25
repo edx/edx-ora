@@ -73,8 +73,8 @@ def create_and_handle_grader_object(grader_dict):
     if not isinstance(grader_dict['feedback'], dict):
         grader_dict['feedback'] = {'feedback': grader_dict['feedback']}
 
-    for k,v in grader_dict['feedback']:
-        grader_dict['feedback'][k] = util.sanitize_html(v)
+    for k in grader_dict['feedback']:
+        grader_dict['feedback'][k] = util.sanitize_html(grader_dict['feedback'][k])
 
     if grader_dict['status'] == GraderStatus.failure:
         grader_dict['feedback'] = ' '.join(grader_dict['errors'])
