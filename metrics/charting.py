@@ -47,8 +47,11 @@ def render_bar(x_data,y_data,title,x_label,y_label,x_tick_labels=None,xsize=20,y
     return svg_dta
 
 def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tick_labels=None, xsize = 20, ysize=10):
-    for i in xrange(0,len(x_tick_labels)):
-        x_tick_labels[i] = str(x_tick_labels[i].encode('ascii', 'ignore'))
+    if isinstance(x_tick_labels, list):
+        for i in xrange(0,len(x_tick_labels)):
+            x_tick_labels[i] = str(x_tick_labels[i].encode('ascii', 'ignore'))
+    else:
+        x_tick_labels = x_data
 
     jquery_code = """
         var s1 = {y_data};
