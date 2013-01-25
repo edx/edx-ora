@@ -58,6 +58,7 @@ class StudentCourseProfile(models.Model):
     graders_per_attempt = models.DecimalField(max_digits=10, decimal_places=9, default=0)
 
     #Score data
+    stdev_percent_score = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     average_percent_score = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     average_percent_score_last20 = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     average_percent_score_last10 = models.DecimalField(max_digits=10, decimal_places=9, default=0)
@@ -66,6 +67,7 @@ class StudentCourseProfile(models.Model):
     problems_attempted_peer = models.IntegerField()
     completed_peer_grading = models.IntegerField(default=0)
     average_length_of_peer_feedback_given = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    stdev_length_of_peer_feedback_given = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     average_peer_grading_score_given = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     attempts_per_problem_peer = models.DecimalField(max_digits=10, decimal_places=9, default=0)
     average_percent_score_peer = models.DecimalField(max_digits=10, decimal_places=9, default=0)
@@ -78,6 +80,7 @@ class StudentCourseProfile(models.Model):
 
     #Submission data
     average_submission_length = models.IntegerField()
+    stdev_submission_length = models.DecimalField(max_digits=10, decimal_places=9, default=0)
 
 
 
