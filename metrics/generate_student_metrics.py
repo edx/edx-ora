@@ -38,8 +38,8 @@ def read_one_student_data(student_id, course_id):
     success = False
     changed = False
     try:
-        student_profile = StudentProfile.objects.get_or_create(student_id = student_id)
-        student_course_profile = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id)
+        student_profile, created = StudentProfile.objects.get_or_create(student_id = student_id)
+        student_course_profile, created = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id, student_profile = student_profile)
     except:
         log.exception("Could not find student_profile or student_course_profile.")
         return success, changed
@@ -95,7 +95,7 @@ def read_one_student_data(student_id, course_id):
             elif sub.preferred_grader_type == "PE":
                 final_graders = [sg for sg in successful_grader_set if sg.grader_type=="PE"]
                 if len(final_graders)>0:
-                    final_score = numpy.mean([fg.score for fg in final_grader])
+                    final_score = numpy.mean([fg.score for fg in final_graders])
                     average_percent_score_list_peer.append(final_score/max_score)
                     average_percent_score_list.append(final_score/max_score)
 
@@ -111,25 +111,25 @@ def read_one_student_data(student_id, course_id):
         course_id = course_id,
         student_id = student_id,
         problems_attempted = problems_attempted,
-        attempts_per_problem = attempts_per_problem,
-        graders_per_attempt = graders_per_attempt,
-        stdev_percent_score = stdev_percent_score,
-        average_percent_score = average_percent_score,
-        average_percent_score_last20 = average_percent_score_last20,
-        average_percent_score_last10 = average_percent_score_last10,
+        attempts_per_problem = round(attempts_per_problem,3),
+        graders_per_attempt = round(graders_per_attempt,3),
+        stdev_percent_score = round(stdev_percent_score,3),
+        average_percent_score = round(average_percent_score,3),
+        average_percent_score_last20 = round(average_percent_score_last20,3),
+        average_percent_score_last10 = round(average_percent_score_last10,3),
         problems_attempted_peer = problems_attempted_peer,
         completed_peer_grading = completed_peer_grading,
-        average_length_of_peer_feedback_given = average_length_of_peer_feedback_given,
-        stdev_length_of_peer_feedback_given = stdev_length_of_peer_feedback_given,
-        average_peer_grading_score_given = average_peer_grading_score_given,
-        attempts_per_problem_peer = attempts_per_problem_peer,
-        average_percent_score_peer = average_percent_score_peer,
+        average_length_of_peer_feedback_given = round(average_length_of_peer_feedback_given,3),
+        stdev_length_of_peer_feedback_given = round(stdev_length_of_peer_feedback_given,3),
+        average_peer_grading_score_given = round(average_peer_grading_score_given,3),
+        attempts_per_problem_peer = round(attempts_per_problem_peer,3),
+        average_percent_score_peer = round(average_percent_score_peer,3),
         problems_attempted_ml = problems_attempted_ml,
-        attempts_per_problem_ml = attempts_per_problem_ml,
-        average_ml_confidence = average_ml_confidence,
-        average_percent_score_ml = average_percent_score_ml,
-        average_submission_length = average_submission_length,
-        stdev_submission_length = stdev_submission_length,
+        attempts_per_problem_ml = round(attempts_per_problem_ml,3),
+        average_ml_confidence = round(average_ml_confidence,3),
+        average_percent_score_ml = round(average_percent_score_ml,3),
+        average_submission_length = round(average_submission_length,3),
+        stdev_submission_length = round(stdev_submission_length,3),
     )
 
     student_course_profile.save()
