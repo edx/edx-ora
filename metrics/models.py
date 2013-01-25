@@ -41,3 +41,43 @@ class Timing(models.Model):
     #This is so that we can query on it if we need to get more data
     grader_id=models.IntegerField(blank=True,null=True)
 
+class StudentProfile(models.Model):
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+
+    #Message data
+    messages_sent = models.IntegerField()
+    messages_received = models.IntegerField()
+    average_message_feedback_length = models.IntegerField()
+
+class StudentCourseProfile(models.Model):
+    student_profile = models.ForeignKey('StudentProfile')
+
+    #Attempt data
+    problems_attempted = models.IntegerField(default=0)
+    attempts_per_problem = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    graders_per_attempt = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+
+    #Score data
+    average_percent_score = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_percent_score_last20 = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_percent_score_last10 = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+
+    #Peer grading data
+    problems_attempted_peer = models.IntegerField()
+    completed_peer_grading = models.IntegerField(default=0)
+    average_length_of_peer_feedback_given = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_peer_grading_score_given = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    attempts_per_problem_peer = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_percent_score_peer = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+
+    #ML grading data
+    problems_attempted_ml = models.IntegerField()
+    attempts_per_problem_ml = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_ml_confidence = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+    average_percent_score_ml = models.DecimalField(max_digits=10, decimal_places=9, default=0)
+
+    #Submission data
+    average_submission_length = models.IntegerField()
+
+
+
