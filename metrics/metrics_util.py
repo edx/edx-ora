@@ -84,7 +84,7 @@ def get_message_in_csv_format(locations, name):
     return True, response
 
 
-def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
+def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsize=20,ysize=10):
     """
     Returns a graph for a custom input metric
     Input:
@@ -99,7 +99,10 @@ def render_requested_metric(metric_type,arguments,title,xsize=20,ysize=10):
 
     m_renderer=MetricsRenderer(xsize,ysize)
     success, msg = m_renderer.run_query(arguments,metric_type)
-    success, currently_being_graded=m_renderer.chart_image()
+    if type == "matplotlib":
+        success, currently_being_graded=m_renderer.chart_image()
+    else:
+        success, currently_being_graded=m_renderer.chart_jquery()
 
     return success,currently_being_graded
 
@@ -127,10 +130,28 @@ class MetricsRenderer(object):
    def chart_image(self):
        if self.success:
            response = charting.render_bar(self.x_data, self.y_data, self.title, self.x_title, self.y_title, x_tick_labels=self.x_labels, xsize=self.xsize, ysize=self.ysize)
+           response = HttpResponse(response, "image/png")
        else:
-           return False, IMAGE_ERROR_MESSAGE
+           return False, HttpResponse(IMAGE_ERROR_MESSAGE)
 
        return True, response
+
+   def chart_jquery(self):
+        if self.success:
+            chart_name = "chart1"
+            response = charting.render_bar_jquery(self.x_data, self.y_data, self.title, self.x_title, self.y_title, chart_name = chart_name, x_tick_labels=self.x_labels, xsize=self.xsize, ysize=self.ysize)
+            plot_dict = {
+                'jquery_script' : response,
+                'title' : self.title,
+                'name' : chart_name,
+            }
+            response = HttpResponse(render_to_string("metrics_charts_jquery.html", {
+                'plot_list' : [plot_dict]
+            }))
+        else:
+            return False, HttpResponse(IMAGE_ERROR_MESSAGE)
+
+        return True, response
 
 
 def generate_counts_per_problem(arguments, state):

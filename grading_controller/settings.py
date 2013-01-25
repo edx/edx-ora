@@ -9,7 +9,7 @@ ENV_ROOT = REPO_PATH.dirname()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-PRINT_QUERIES = True
+PRINT_QUERIES = False
 
 ADMINS = (
 # ('Your Name', 'your_email@example.com'),
@@ -26,6 +26,8 @@ TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired 
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
 MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
 DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to display to students
+MIN_RANDOMIZED_PROCESS_SLEEP_TIME = 0 # Minimum time for a process to sleep, to avoid process collision
+MAX_RANDOMIZED_PROCESS_SLEEP_TIME = 10 * 60 # Maximum time for a process to sleep, to avoid process collision
 
 #Config for specific graders
 #ML
@@ -49,6 +51,8 @@ REQUIRED_PEER_GRADING_PER_STUDENT = 3 #Student must peer grade at least 3 submis
 #abs(student_score-actual_score)/max_score
 #If they are above this error, student will keep seeing calibration essays until they hit peer_grader_maximum_to_calibrate
 PEER_GRADER_MIN_NORMALIZED_CALIBRATION_ERROR = .5
+
+PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING = 1
 
 #Submission Expiration
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds.  This will send submissions back to lms with failure
@@ -113,7 +117,7 @@ MEDIA_ROOT = ''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/media/'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files

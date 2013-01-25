@@ -1,10 +1,11 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
 <head>
     <title></title>
 </head>
 <body>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="{%  static "jquery.js" %}"></script>
 <script>
     $(document).ready(function(){
         function submit(action, method, values) {
