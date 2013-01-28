@@ -9,4 +9,5 @@ urlpatterns = patterns('metrics.views',
     url(r'^error_dash/$', 'error_dashboard'),
     url(r'^data_dump/$', 'data_dump_form'),
     url(r'^message_dump/$', 'message_dump_form'),
+    url(r'^student_data_dump/$', 'student_data_dump_form'),
 )

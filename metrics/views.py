@@ -26,13 +26,12 @@ def metrics_form(request):
 
     if request.method == "POST":
 
-        arguments,title=metrics_util.get_arguments(request)
-
         tags=['metric_type']
         for tag in tags:
             if tag not in request.POST:
                 return HttpResponse("Request missing needed tag metric type.")
 
+        arguments,title=metrics_util.get_arguments(request)
         metric_type=request.POST.get('metric_type').lower()
         success,response = metrics_util.render_requested_metric(metric_type,arguments,title, type="jquery")
 
@@ -56,6 +55,10 @@ def data_dump_form(request):
 @login_required
 def message_dump_form(request):
     return metrics_util.dump_form(request,"message_dump")
+
+@csrf_exempt
+def student_data_dump_form(request):
+    return metrics_util.dump_form(request,"student_data_dump")
 
 @csrf_exempt
 @login_required

@@ -1,0 +1,5 @@
+The surface tension of an aqueous solution of a surfactant molecule is measured as a function of concentration. The data is shown below in a plot of surface tension vs. weight percent surfactant. In a few sentences explain what is happening and why. How will the appearance of the solution differ at 0.001 weight percent versus 1 weight?
+        
+        <center><img width="600" src="/static/images/LSQimages/LSQ_W11_21_MLT_img.png"/></center>
+        
+    <br/><br/>
