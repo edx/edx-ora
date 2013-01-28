@@ -203,8 +203,9 @@ class MetricsRenderer(object):
                 'title' : self.title,
                 'name' : chart_name,
             }
+            plot_code = render_to_string("jquery_chart_template.html", plot_dict)
             response = HttpResponse(render_to_string("metrics_charts_jquery.html", {
-                'plot_list' : [plot_dict]
+                'plot_list' : [plot_code]
             }))
         else:
             return False, HttpResponse(IMAGE_ERROR_MESSAGE)

@@ -15,17 +15,9 @@
 <script type="text/javascript" src="{%  static "jplot/plugins/jqplot.categoryAxisRenderer.min.js" %}"></script>
 <script type="text/javascript" src="{%  static "jplot/plugins/jqplot.pointLabels.min.js" %}"></script>
 
-<script type="text/javascript">
-    $(document).ready(function(){
-        {% for plot in plot_list %}
-            {{plot.jquery_script|safe}}
-        {% endfor %}
-    });
-</script>
 
-{% for plot in plot_list %}
-    <h4>{{plot.title}}</h4>
-    <div id="{{plot.name}}" style="height:800px;width:1200px;"></div>
+{% for code in plot_list %}
+    {{code|safe}}
 {% endfor %}
 
 </body>
