@@ -1,0 +1,27 @@
+<rubric>
+    <category>
+	<description>Distillation Point 1</description>
+	<option> The response does not incorporate what is needed for a 2 response. </option>
+	<option> Ignore this option, use either 0 or 2. </option>
+	<option> 
+		By raising the temperature of the ethanol-water solution into the range
+		of the two phase region, one is able to separate the system into an
+		ethanol-rich vapor phase and a water-rich liquid phase. The vapor phase can be
+		separated from the liquid and collected. The vapor can then be continually
+		cooled and heated through additional distillation steps, separating off the
+		ethanol-rich vapor phase until the desired composition is reached.
+	</option>
+    </category>
+    <category>
+	<description> Distillation Point 2</description>
+	<option> The response does not mention the point that is needed for a two answer.</option>
+	<option>
+		The procedure could not be used to completely purify ethanol from water
+		because of the congruent vaporization point at approximately 95% ethanol. As
+		one moves across the two-phase region to the left of this point purification is
+		able to occur due to the presence of the two-phase region. At this point
+		however, the system will no longer phase separate as the temperature is varied,
+		hence purification cannot continue.
+	</option>
+    </category>
+</rubric>

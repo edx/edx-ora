@@ -1,0 +1,29 @@
+<rubric>
+    <category>
+	<description>Crosslinking Point 1</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		In order to form crosslinks, a polymer must be formed from monomers
+		capable of reacting to form more than two bonds. This can be achieved by the
+		presence of additional double bonds or reactive functional groups on a
+		side-chain.
+	</option>
+    </category>
+    <category>
+	<description>Crosslinking Point 2</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		 Polybutadiene has a double bond in its backbone after polymerization has
+		occured. This allows it to be reacted to form additional covalent cross-links
+		between chains.
+	</option>
+    </category>
+     <category>
+	<description>Crosslinking Point 3</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		Polyethylene does not have any additional double bonds or side groups
+		capable of forming covalent cross-links.
+	</option>
+    </category>
+</rubric>

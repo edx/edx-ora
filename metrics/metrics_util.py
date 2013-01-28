@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 import charting
 from django.db.models import Count
-from metrics.models import Timing
+from metrics.models import Timing, FIELDS_TO_EVALUATE, StudentCourseProfile
 from controller.models import  Submission, SubmissionState, Grader, GraderStatus, Message
 import logging
 import matplotlib.pyplot as plt
@@ -12,6 +12,7 @@ from matplotlib import numpy as np
 import re
 import csv
 import numpy
+from django.forms.models import model_to_dict
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +84,55 @@ def get_message_in_csv_format(locations, name):
 
     return True, response
 
+def get_student_data_in_csv_format(locations, name):
+    writer, locations, response = set_up_data_dump(locations, name)
+
+    for z in xrange(0,len(locations)):
+        location=locations[z]
+        fixed_location=re.sub("[/:]","_",location)
+
+        student_course_profiles=StudentCourseProfile.objects.filter(course_id=location)
+        student_course_profiles_count = student_course_profiles.count()
+
+        if z==0:
+            writer.writerow(FIELDS_TO_EVALUATE)
+        for i in xrange(0,student_course_profiles_count):
+            field_values = []
+            all_zeros = True
+            scp_dict = model_to_dict(student_course_profiles[i])
+            for m in xrange(0,len(FIELDS_TO_EVALUATE)):
+                scp_val = scp_dict.get(FIELDS_TO_EVALUATE[m], 0)
+                field_values.append(scp_val)
+                if scp_val!=0:
+                    all_zeros = False
+            if not all_zeros:
+                writer.writerow(field_values)
+
+    return True, response
+
+def generate_student_data_per_course(arguments):
+    """
+    Generate counts of number of attempted problems with a specific state.  Aggreggate by location.
+    Input:
+        Arguments to query on, title of graph, state to query on.
+    Output:
+        PNG image
+    """
+    arguments.pop('location', None)
+    arguments.pop('grader_type', None)
+    metric_type = arguments['metric_type']
+    arguments.pop('metric_type', None)
+
+    student_course_data_list = [float(s[metric_type]) for s in StudentCourseProfile.objects.filter(**arguments).values(metric_type) if float(s[metric_type])!=float(0)]
+
+    if len(student_course_data_list) == 0:
+        return False, "Did not find anything matching that query."
+
+    student_course_data_list.sort()
+    x_data = [i for i in xrange(0, len(student_course_data_list))]
+
+    return x_data, student_course_data_list, None, "Number", "Count"
+
 
 def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsize=20,ysize=10):
     """
@@ -98,6 +148,9 @@ def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsi
         return False, "Could not find the requested type of metric: {0}".format(metric_type)
 
     m_renderer=MetricsRenderer(xsize,ysize)
+    if str(metric_type) not in FIELDS_TO_EVALUATE:
+        arguments.pop("metric_type", None)
+
     success, msg = m_renderer.run_query(arguments,metric_type)
     if type == "matplotlib":
         success, currently_being_graded=m_renderer.chart_image()
@@ -105,6 +158,7 @@ def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsi
         success, currently_being_graded=m_renderer.chart_jquery()
 
     return success,currently_being_graded
+
 
 class MetricsRenderer(object):
    def __init__(self,xsize,ysize):
@@ -119,8 +173,12 @@ class MetricsRenderer(object):
    def run_query(self,arguments,metric_type):
        try:
            self.title=get_title(arguments,metric_type)
-           log.debug(AVAILABLE_METRICS[metric_type](arguments))
            (self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title) = AVAILABLE_METRICS[metric_type](arguments)
+           for i in xrange(0,len(self.x_data)):
+               if not isinstance(self.x_data[i], int):
+                   self.x_data[i] = float(self.x_data[i])
+               if not isinstance(self.y_data[i], int):
+                   self.y_data[i] = float(self.y_data[i])
            self.success=True
        except:
            log.exception(IMAGE_ERROR_MESSAGE)
@@ -145,8 +203,9 @@ class MetricsRenderer(object):
                 'title' : self.title,
                 'name' : chart_name,
             }
+            plot_code = render_to_string("jquery_chart_template.html", plot_dict)
             response = HttpResponse(render_to_string("metrics_charts_jquery.html", {
-                'plot_list' : [plot_dict]
+                'plot_list' : [plot_code]
             }))
         else:
             return False, HttpResponse(IMAGE_ERROR_MESSAGE)
@@ -353,12 +412,13 @@ def get_arguments(request):
     course_id = request.POST.get('course_id')
     grader_type = request.POST.get('grader_type')
     location = request.POST.get('location')
-    metric_type = request.POST.get('metric_type')
+    metric_type = request.POST.get('metric_type').lower()
 
     query_dict = {
         'course_id': course_id,
         'grader_type': grader_type,
-        'location': location
+        'location': location,
+        'metric_type' : metric_type,
     }
 
     title=get_title(query_dict,metric_type)
@@ -374,6 +434,8 @@ def get_arguments(request):
 def dump_form(request, type):
     unique_locations=[x['location'] for x in
                       list(Submission.objects.all().values('location').distinct())]
+    unique_courses = [x['course_id'] for x in
+                      list(Submission.objects.all().values('course_id').distinct())]
     if request.method == "POST":
         tags=['location']
         for tag in tags:
@@ -381,11 +443,18 @@ def dump_form(request, type):
                 return HttpResponse("Request missing needed tag location.")
 
         location=request.POST.get('location')
-        if location not in unique_locations and location!="all":
-            return HttpResponse("Invalid problem location specified")
+        if type!="student_data_dump":
+            if location not in unique_locations and location!="all":
+                return HttpResponse("Invalid problem location specified")
+            if location=="all":
+                location=unique_locations
+        else:
+            if location not in unique_courses and location!="all":
+                return HttpResponse("Invalid course specified")
+            if location=="all":
+                location=unique_courses
+
         name="{0}_{1}".format(location, type)
-        if location=="all":
-            location=unique_locations
 
         success,response = AVAILABLE_DATA_DUMPS[type](location, name)
 
@@ -395,8 +464,13 @@ def dump_form(request, type):
         return response
 
     elif request.method == "GET":
-        unique_locations.append("all")
-        rendered=render_data_dump_form("metrics/{0}/".format(type),unique_locations)
+        if type!="student_data_dump":
+            unique_locations.append("all")
+            rendered=render_data_dump_form("metrics/{0}/".format(type),unique_locations)
+        else:
+            unique_courses.append("all")
+            rendered=render_data_dump_form("metrics/{0}/".format(type),unique_courses)
+
         return HttpResponse(rendered)
 
 AVAILABLE_METRICS={
@@ -409,7 +483,11 @@ AVAILABLE_METRICS={
     'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
     }
 
+for field in FIELDS_TO_EVALUATE:
+    AVAILABLE_METRICS.update({field : generate_student_data_per_course})
+
 AVAILABLE_DATA_DUMPS={
     'message_dump' : get_message_in_csv_format,
     'data_dump' : get_data_in_csv_format,
+    'student_data_dump' : get_student_data_in_csv_format,
 }

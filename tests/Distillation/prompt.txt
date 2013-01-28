@@ -1,0 +1,12 @@
+Shown below is a schematic representation of the water-ethanol phase diagram.
+        
+        <center><img width="450" src="/static/images/LSQimages/eth_wat_PD.png"/></center>
+        
+        
+    <p>Making reference to the phase diagram, explain in a few sentences how one could enrich a solution of 15 percent ethanol - 85 percent water to a composition of 60 percent ethanol - 40 percent water. Be qualitative in your description, not quantitative.</p>
+       
+        
+    <p>Furthermore, explain why this procedure could not be used to reach a completely pure composition of 100 percent ethanol.</p>
+        
+        <p>Grading this problem may take longer than usual. Check back as early as Friday, December 14, for feedback!</p>
+        <br/><br/>

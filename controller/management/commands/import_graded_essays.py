@@ -101,6 +101,7 @@ class Command(BaseCommand):
                 previous_grader_type="BC",
                 max_score=max_score,
                 rubric=rubric,
+                preferred_grader_type = next_grader_type,
             )
 
             sub.save()
