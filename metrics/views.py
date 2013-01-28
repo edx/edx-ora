@@ -58,6 +58,10 @@ def message_dump_form(request):
     return metrics_util.dump_form(request,"message_dump")
 
 @csrf_exempt
+def student_data_dump_form(request):
+    return metrics_util.dump_form(request,"student_data_dump")
+
+@csrf_exempt
 @login_required
 def error_dashboard(request):
     """

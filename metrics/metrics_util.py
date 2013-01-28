@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 import charting
 from django.db.models import Count
-from metrics.models import Timing
+from metrics.models import Timing, FIELDS_TO_EVALUATE, StudentCourseProfile
 from controller.models import  Submission, SubmissionState, Grader, GraderStatus, Message
 import logging
 import matplotlib.pyplot as plt
@@ -12,6 +12,7 @@ from matplotlib import numpy as np
 import re
 import csv
 import numpy
+from django.forms.models import model_to_dict
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +84,32 @@ def get_message_in_csv_format(locations, name):
 
     return True, response
 
+def get_student_data_in_csv_format(locations, name):
+    writer, locations, response = set_up_data_dump(locations, name)
+
+    for z in xrange(0,len(locations)):
+        location=locations[z]
+        fixed_location=re.sub("[/:]","_",location)
+
+        student_course_profiles=StudentCourseProfile.objects.filter(course_id=location)
+        student_course_profiles_count = student_course_profiles.count()
+
+        if z==0:
+            writer.writerow(FIELDS_TO_EVALUATE)
+        for i in xrange(0,student_course_profiles_count):
+            field_values = []
+            all_zeros = True
+            scp_dict = model_to_dict(student_course_profiles[i])
+            for m in xrange(0,len(FIELDS_TO_EVALUATE)):
+                scp_val = scp_dict.get(FIELDS_TO_EVALUATE[m], 0)
+                field_values.append(scp_val)
+                if scp_val!=0:
+                    all_zeros = False
+            if not all_zeros:
+                writer.writerow(field_values)
+
+    return True, response
+
 
 def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsize=20,ysize=10):
     """
@@ -105,6 +132,7 @@ def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsi
         success, currently_being_graded=m_renderer.chart_jquery()
 
     return success,currently_being_graded
+
 
 class MetricsRenderer(object):
    def __init__(self,xsize,ysize):
@@ -374,6 +402,8 @@ def get_arguments(request):
 def dump_form(request, type):
     unique_locations=[x['location'] for x in
                       list(Submission.objects.all().values('location').distinct())]
+    unique_courses = [x['course_id'] for x in
+                      list(Submission.objects.all().values('course_id').distinct())]
     if request.method == "POST":
         tags=['location']
         for tag in tags:
@@ -381,11 +411,18 @@ def dump_form(request, type):
                 return HttpResponse("Request missing needed tag location.")
 
         location=request.POST.get('location')
-        if location not in unique_locations and location!="all":
-            return HttpResponse("Invalid problem location specified")
+        if type!="student_data_dump":
+            if location not in unique_locations and location!="all":
+                return HttpResponse("Invalid problem location specified")
+            if location=="all":
+                location=unique_locations
+        else:
+            if location not in unique_courses and location!="all":
+                return HttpResponse("Invalid course specified")
+            if location=="all":
+                location=unique_courses
+
         name="{0}_{1}".format(location, type)
-        if location=="all":
-            location=unique_locations
 
         success,response = AVAILABLE_DATA_DUMPS[type](location, name)
 
@@ -395,8 +432,13 @@ def dump_form(request, type):
         return response
 
     elif request.method == "GET":
-        unique_locations.append("all")
-        rendered=render_data_dump_form("metrics/{0}/".format(type),unique_locations)
+        if type!="student_data_dump":
+            unique_locations.append("all")
+            rendered=render_data_dump_form("metrics/{0}/".format(type),unique_locations)
+        else:
+            unique_courses.append("all")
+            rendered=render_data_dump_form("metrics/{0}/".format(type),unique_courses)
+
         return HttpResponse(rendered)
 
 AVAILABLE_METRICS={
@@ -412,4 +454,5 @@ AVAILABLE_METRICS={
 AVAILABLE_DATA_DUMPS={
     'message_dump' : get_message_in_csv_format,
     'data_dump' : get_data_in_csv_format,
+    'student_data_dump' : get_student_data_in_csv_format,
 }
