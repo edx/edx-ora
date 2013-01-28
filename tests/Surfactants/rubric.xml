@@ -1,0 +1,32 @@
+<rubric>
+    <category>
+	<description>Surfactants Point 1</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		As the surfactant concentration is increased, the surface tension of the
+		solution decreases since initially surfactant molecules tend to occupy the
+		space at the solution's interface.
+	</option>
+    </category>
+    <category>
+	<description>Surfactants Point 2</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		Beyond a certain critical concentration, the CMC, the surfact molecules
+		are able to aggregate into structures such as micelles. The surface tension no
+		longer drops appreciably beyond this point as the surfactant molecules that are
+		added continue to produce more micelles in solution rather than sit at the
+		solution-air interface.
+	</option>
+    </category>
+     <category>
+	<description>Surfactants Point 3</description>
+	<option> The response does not incorporate what is needed for a 1 response. </option>
+	<option> 
+		At 0.001 weight percent the solution will appear clear as most of the
+		surfactant molecules reside at the surface. At 1 weight percent micelles have
+		formed, and as micelles will scatter light, the solution will appear more
+		opaque.
+	</option>
+    </category>
+</rubric>
