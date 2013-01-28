@@ -110,6 +110,29 @@ def get_student_data_in_csv_format(locations, name):
 
     return True, response
 
+def generate_student_data_per_course(arguments):
+    """
+    Generate counts of number of attempted problems with a specific state.  Aggreggate by location.
+    Input:
+        Arguments to query on, title of graph, state to query on.
+    Output:
+        PNG image
+    """
+    arguments.pop('location', None)
+    arguments.pop('grader_type', None)
+    metric_type = arguments['metric_type']
+    arguments.pop('metric_type', None)
+
+    student_course_data_list = [float(s[metric_type]) for s in StudentCourseProfile.objects.filter(**arguments).values(metric_type) if float(s[metric_type])!=float(0)]
+
+    if len(student_course_data_list) == 0:
+        return False, "Did not find anything matching that query."
+
+    student_course_data_list.sort()
+    x_data = [i for i in xrange(0, len(student_course_data_list))]
+
+    return x_data, student_course_data_list, None, "Number", "Count"
+
 
 def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsize=20,ysize=10):
     """
@@ -125,6 +148,9 @@ def render_requested_metric(metric_type,arguments,title,type = "matplotlib", xsi
         return False, "Could not find the requested type of metric: {0}".format(metric_type)
 
     m_renderer=MetricsRenderer(xsize,ysize)
+    if str(metric_type) not in FIELDS_TO_EVALUATE:
+        arguments.pop("metric_type", None)
+
     success, msg = m_renderer.run_query(arguments,metric_type)
     if type == "matplotlib":
         success, currently_being_graded=m_renderer.chart_image()
@@ -147,8 +173,12 @@ class MetricsRenderer(object):
    def run_query(self,arguments,metric_type):
        try:
            self.title=get_title(arguments,metric_type)
-           log.debug(AVAILABLE_METRICS[metric_type](arguments))
            (self.x_data, self.y_data, self.x_labels, self.x_title, self.y_title) = AVAILABLE_METRICS[metric_type](arguments)
+           for i in xrange(0,len(self.x_data)):
+               if not isinstance(self.x_data[i], int):
+                   self.x_data[i] = float(self.x_data[i])
+               if not isinstance(self.y_data[i], int):
+                   self.y_data[i] = float(self.y_data[i])
            self.success=True
        except:
            log.exception(IMAGE_ERROR_MESSAGE)
@@ -381,12 +411,13 @@ def get_arguments(request):
     course_id = request.POST.get('course_id')
     grader_type = request.POST.get('grader_type')
     location = request.POST.get('location')
-    metric_type = request.POST.get('metric_type')
+    metric_type = request.POST.get('metric_type').lower()
 
     query_dict = {
         'course_id': course_id,
         'grader_type': grader_type,
-        'location': location
+        'location': location,
+        'metric_type' : metric_type,
     }
 
     title=get_title(query_dict,metric_type)
@@ -450,6 +481,9 @@ AVAILABLE_METRICS={
     'pending_counts' : generate_pending_counts_per_problem,
     'currently_being_graded' : generate_currently_being_graded_counts_per_problem,
     }
+
+for field in FIELDS_TO_EVALUATE:
+    AVAILABLE_METRICS.update({field : generate_student_data_per_course})
 
 AVAILABLE_DATA_DUMPS={
     'message_dump' : get_message_in_csv_format,

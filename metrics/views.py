@@ -26,13 +26,12 @@ def metrics_form(request):
 
     if request.method == "POST":
 
-        arguments,title=metrics_util.get_arguments(request)
-
         tags=['metric_type']
         for tag in tags:
             if tag not in request.POST:
                 return HttpResponse("Request missing needed tag metric type.")
 
+        arguments,title=metrics_util.get_arguments(request)
         metric_type=request.POST.get('metric_type').lower()
         success,response = metrics_util.render_requested_metric(metric_type,arguments,title, type="jquery")
 

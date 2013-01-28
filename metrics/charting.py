@@ -76,7 +76,7 @@ def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tic
             }},
             yaxis: {{
                 pad: 1.05,
-                tickOptions: {{formatString: '$%d'}}
+                tickOptions: {{formatString: '%.2f'}}
             }}
         }}
     }});
