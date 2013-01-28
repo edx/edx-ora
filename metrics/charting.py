@@ -53,11 +53,14 @@ def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tic
     else:
         x_tick_labels = x_data
 
+    labeled_list = [[str(x_tick_labels[i]), y_data[i]] for i in xrange(0,len(y_data))]
+
     jquery_code = """
         var s1 = {y_data};
+        var s2 = {labeled_list};
         var ticks = {x_tick_labels};
 
-        var chart = $.jqplot('{chart_name}', [s1], {{
+        var chart = $.jqplot('{chart_name}', [s2], {{
         seriesDefaults:{{
             renderer:$.jqplot.BarRenderer,
             rendererOptions: {{fillToZero: true}}
@@ -72,16 +75,30 @@ def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tic
         axes: {{
             xaxis: {{
                 renderer: $.jqplot.CategoryAxisRenderer,
-                ticks: ticks
             }},
             yaxis: {{
                 pad: 1.05,
                 tickOptions: {{formatString: '%.2f'}}
             }}
+        }},
+        highlighter: {{
+            show: true,
+            sizeAdjust: 7.5,
+            tooltipLocation: 'n',
+            useAxesFormatters: true,
+            tooltipContentEditor: function(str, seriesIndex, pointIndex, plot){{
+                return ticks[pointIndex] + ': ' + str;
+            }},
+            tooltipAxes: 'y',
+            showMarker: false
+        }},
+        cursor: {{
+            show: true
         }}
     }});
-    """.format(x_data=x_data, y_data=y_data, title=title, y_label = y_label, x_tick_labels = x_tick_labels, chart_name = chart_name)
+    """.format(x_data=x_data, y_data=y_data, title=title, y_label = y_label, x_tick_labels = x_tick_labels, chart_name = chart_name, labeled_list = labeled_list)
 
+    log.debug(jquery_code)
     return jquery_code
 
 

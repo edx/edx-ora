@@ -13,8 +13,10 @@
 
 <script type="text/javascript" src="{%  static "jplot/plugins/jqplot.barRenderer.min.js" %}"></script>
 <script type="text/javascript" src="{%  static "jplot/plugins/jqplot.categoryAxisRenderer.min.js" %}"></script>
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.canvasAxisLabelRenderer.min.js" %}"></script>
 <script type="text/javascript" src="{%  static "jplot/plugins/jqplot.pointLabels.min.js" %}"></script>
-
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.highlighter.min.js" %}"></script>
+<script type="text/javascript" src="{%  static "jplot/plugins/jqplot.cursor.min.js" %}"></script>
 
 {% for code in plot_list %}
     {{code|safe}}
