@@ -299,42 +299,52 @@ mkdir "$BASE/grading-controller/log" || true
 mkdir "$BASE/machine-learning/log" || true
 
 #Sync controller db
+cd $BASE/grading-controller
 django-admin.py syncdb --settings=grading-controller.settings --pythonpath=.
 django-admin.py migrate --settings=grading-controller.settings --pythonpath=.
 
 #sync xquque db
+cd $BASE/xqueue
 django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
 django-admin.py migrate --settings=xqueue.settings --pythonpath=.
 
 sudo touch "$BASE/auth.json"
 sudo cat "{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }" > "$BASE/auth.json"
 
+#Update controller users
+cd $BASE/grading-controller
 django-admin.py update_users --pythonpath=. --settings=grading_controller.settings
+
+#Update xqueue users
+cd $BASE/xqueue
+django-admin.py update_users --pythonpath=. --settings=xqueue.settings
+
+#Install machine learning nltk stuff
+python -m nltk.downloader maxent_treebank_pos_tagger wordnet
 
 ### DONE
 
 cat<<END
    Success!!
 
-   To start using Django you will need to activate the local Python
-   and Ruby environment (at this time rvm only supports bash) :
+   See full instructions below if you run into trouble:
+   https://edx-wiki.atlassian.net/wiki/display/ENG/Setting+up+Grading+Controller+and+XQueue
 
-        $ source $RUBY_DIR/scripts/rvm
-        $ source $PYTHON_DIR/bin/activate
+   Next steps are to point the LMS to the xqueue and grading controller (lms/envs/dev.py),
+   then run the xqueue and the grading controller on the correct ports:
 
-   To initialize controller
+   To start the controller:
 
-        $ cd $BASE/mitx
-        $ rake django-admin[syncdb]
-        $ rake django-admin[migrate]
+        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings
 
-   To start the Django on port 8000
+   To start the xqueue:
+        $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=.
 
-        $ rake lms
-
-   Or to start Django on a different <port#>
-
-        $ rake django-admin[runserver,lms,dev,<port#>]
+   Then start the manage.py processes associated with the grading controller:
+        python manage.py pull_from_xqueue
+        python manage.py call_ml_grader
+        python manage.py call_ml_creator
+        python manage.py remove_expired_subs
 
   If the  Django development server starts properly you
   should see:
