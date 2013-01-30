@@ -473,6 +473,7 @@ def dump_form(request, type):
 
         return HttpResponse(rendered)
 
+
 AVAILABLE_METRICS={
     'timing' : generate_timing_response,
     'student_performance' : generate_student_performance_response,
