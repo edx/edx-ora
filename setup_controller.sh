@@ -205,15 +205,6 @@ EO
 
         fi
 
-        command -v brew &>/dev/null || {
-            output "Installing brew"
-            /usr/bin/ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)
-        }
-        command -v git &>/dev/null || {
-            output "Installing git"
-            brew install git
-        }
-
         ;;
     *)
         error "Unsupported platform"
