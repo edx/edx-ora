@@ -9,6 +9,7 @@ class SubmissionState():
     being_graded="C"
     waiting_to_be_graded="W"
     finished="F"
+    flagged= "L"
 
 GRADER_TYPE = (
     ('ML', 'ML'),
