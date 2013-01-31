@@ -355,17 +355,4 @@ def check_for_combined_notifications(notification_dict):
     combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
     return overall_success, combined_notifications
 
-def is_student_banned(student_id):
-    success = False
-    student_banned = False
-    try:
-        student_profile = StudentProfile.objects.get(student_id=student_id)
-        student_banned = student_profile.student_is_staff_banned
-        success = True
-    except:
-        log.exception("Cannot get student profile for student {0}".format(student_id))
-
-    return success, student_banned
-
-
 
