@@ -233,6 +233,16 @@ def take_action_on_flags(course_id, student_id, submission_id, action):
     if action not in VALID_ACTION_TYPES:
         return success, "Action not in valid action types."
 
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        error_message = "Could not find a submission with id: {0}".format(submission_id)
+        log.exception(error_message)
+        return success, error_message
+
+    if sub.state!=SubmissionState.flagged:
+        return success, "Submission is no longer flagged."
+
     success, data = ACTION_HANDLERS[action](course_id, student_id, submission_id)
 
     return success, data
