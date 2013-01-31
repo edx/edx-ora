@@ -155,6 +155,8 @@ def get_flagged_submissions(course_id):
                 'student_id' : f_student_id,
                 'student_response' : f.student_response,
                 'submission_id' : f.id,
+                'problem_name' : f.problem_id,
+                'location' : f.location,
             }
             flagged_submissions.append(loop_dict)
         success = True
