@@ -198,7 +198,7 @@ def get_flagged_problem_list(request):
     success, flagged_submissions = peer_grading_util.get_flagged_submissions(request.GET.get('course_id'))
 
     if not success:
-        return util._error_response("Could not generate a submission list. {0}".format(sub_list),_INTERFACE_VERSION)
+        return util._error_response(flagged_submissions,_INTERFACE_VERSION)
 
     flagged_submission_dict={
         'success' : success,

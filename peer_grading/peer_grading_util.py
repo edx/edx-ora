@@ -9,13 +9,6 @@ from metrics.models import StudentProfile
 
 log = logging.getLogger(__name__)
 
-ACTION_HANDLERS={
-    'ban' : ban_student_from_peer_grading,
-    'unflag' : unflag_student_submission,
-}
-
-VALID_ACTION_TYPES = ACTION_HANDLERS.keys()
-
 def get_single_peer_grading_item(location, grader_id):
     """
     Gets instructor grading for a given course id.
@@ -166,7 +159,15 @@ def get_flagged_submissions(course_id):
             flagged_submissions.append(loop_dict)
         success = True
     except:
-        log.exception("Could not retrieve the flagged submissions.")
+        error_message = "Could not retrieve the flagged submissions for course: {0}".format(course_id)
+        log.exception(error_message)
+        flagged_submissions = error_message
+
+    #Have not actually succeeded if there is nothing to show!
+    if len(flagged_submissions)==0:
+        success = False
+        error_message = "No flagged submissions exist for course: {0}".format(course_id)
+        flagged_submissions = error_message
 
     return success, flagged_submissions
 
@@ -200,5 +201,12 @@ def take_action_on_flags(course_id, student_id, submission_id, action):
     success, data = ACTION_HANDLERS[action](course_id, student_id, submission_id)
 
     return success, data
+
+ACTION_HANDLERS={
+    'ban' : ban_student_from_peer_grading,
+    'unflag' : unflag_student_submission,
+    }
+
+VALID_ACTION_TYPES = ACTION_HANDLERS.keys()
 
 

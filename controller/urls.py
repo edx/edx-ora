@@ -36,7 +36,7 @@ urlpatterns += patterns('controller.grader_interface',
 
 # Peer grading flagging interface
 #------------------------------------------------------------
-urlpatterns = patterns('controller.views',
+urlpatterns += patterns('controller.views',
     url(r'^get_flagged_problem_list/$', 'get_flagged_problem_list'),
     url(r'^take_action_on_flags/$', 'take_action_on_flags'),
 )
