@@ -225,8 +225,20 @@ def take_action_on_flags(request):
     submission_id = request.POST.get('submission_id')
     action_type = request.POST.get('action_type')
 
+    log.debug(request.POST)
     success, data = peer_grading_util.take_action_on_flags(course_id, student_id, submission_id, action_type)
 
+    log.debug(data)
+    if not success:
+        return util._error_response(data,_INTERFACE_VERSION)
+
+    submission_dict={
+        'success' : success,
+        'data' : data,
+        }
+
+    util.log_connection_data()
+    return util._success_response(submission_dict, _INTERFACE_VERSION)
 
 
 
