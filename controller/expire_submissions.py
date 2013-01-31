@@ -6,10 +6,11 @@ from create_grader import create_grader
 import grader_util
 import util
 import logging
-from models import GraderStatus, SubmissionState, Submission
+from models import GraderStatus, SubmissionState, Submission, Grader, Rubric, RubricItem
 from staff_grading import staff_grading_util
 from xqueue_interface import handle_submission
 from ml_grading import ml_grading_util
+from django.db import transaction
 
 from statsd import statsd
 
@@ -224,32 +225,38 @@ def check_if_grading_finished_for_duplicates():
     return True
 
 def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
+    transaction.commit_unless_managed()
     original_grader_set = original_sub.grader_set.all()
 
     #Need to trickle through all layers to copy the info
     for grade in original_grader_set:
         rubric_set = list(grade.rubric_set.all())
+        log.debug(grade.id)
         grade.pk = None
         grade.id = None
         grade.submission = sub
         grade.save()
+        transaction.commit_unless_managed()
         for rubric in rubric_set:
             rubricitem_set = list(rubric.rubricitem_set.all())
             rubric.pk = None
             rubric.id = None
             rubric.grade = grade
             rubric.save()
+            transaction.commit_unless_managed()
             for rubric_item in rubricitem_set:
                 rubricoption_set = list(rubric_item.rubricoption_set.all())
                 rubric_item.pk = None
                 rubric_item.id = None
                 rubric_item.rubric = rubric
                 rubric_item.save()
+                transaction.commit_unless_managed()
                 for rubric_option in rubricoption_set:
                     rubric_option.pk = None
                     rubric_option.id = None
                     rubric_option.rubric_item = rubric_item
                     rubric_option.save()
+                    transaction.commit_unless_managed()
 
     sub.state=SubmissionState.finished
     sub.previous_grader_type="PE"

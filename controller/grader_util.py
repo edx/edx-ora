@@ -277,6 +277,7 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
     if is_plagiarized:
         duplicate_submission_id=plagiarized_submission_id
 
+    log.debug("Duplicate id is {0}".format(duplicate_submission_id))
     return is_duplicate, is_plagiarized, duplicate_submission_id
 
 def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
