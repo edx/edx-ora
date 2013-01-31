@@ -262,6 +262,12 @@ def check_is_duplicate(submission_text,location, student_id, preferred_grader_ty
         is_duplicate=True
         duplicate_id=location_ids[sub_index]
 
+        if not is_duplicate:
+            success, close_match_found, close_match_index = find_close_match_for_string(submission_text, location_text)
+            if success and close_match_found:
+                duplicate_id = location_ids[close_match_index]
+                is_duplicate = True
+
     return is_duplicate,duplicate_id
 
 def check_is_duplicate_and_plagiarized(submission_text,location, student_id, preferred_grader_type):
