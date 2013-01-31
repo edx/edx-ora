@@ -226,11 +226,30 @@ def check_if_grading_finished_for_duplicates():
 def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
     original_grader_set = original_sub.grader_set.all()
 
+    #Need to trickle through all layers to copy the info
     for grade in original_grader_set:
+        rubric_set = list(grade.rubric_set.all())
         grade.pk = None
         grade.id = None
         grade.submission = sub
         grade.save()
+        for rubric in rubric_set:
+            rubricitem_set = list(rubric.rubricitem_set.all())
+            rubric.pk = None
+            rubric.id = None
+            rubric.grade = grade
+            rubric.save()
+            for rubric_item in rubricitem_set:
+                rubricoption_set = list(rubric_item.rubricoption_set.all())
+                rubric_item.pk = None
+                rubric_item.id = None
+                rubric_item.rubric = rubric
+                rubric_item.save()
+                for rubric_option in rubricoption_set:
+                    rubric_option.pk = None
+                    rubric_option.id = None
+                    rubric_option.rubric_item = rubric_item
+                    rubric_option.save()
 
     sub.state=SubmissionState.finished
     sub.previous_grader_type="PE"

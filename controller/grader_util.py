@@ -256,17 +256,18 @@ def check_is_duplicate(submission_text,location, student_id, preferred_grader_ty
         ).exclude(student_id=student_id).values('student_response', 'id')
 
     location_text=[sub['student_response'] for sub in sub_text_and_ids]
+    location_ids = [sub['id'] for sub in sub_text_and_ids]
+
     if submission_text in location_text:
-        location_ids = [sub['id'] for sub in sub_text_and_ids]
         sub_index=location_text.index(submission_text)
         is_duplicate=True
         duplicate_id=location_ids[sub_index]
 
-        if not is_duplicate:
-            success, close_match_found, close_match_index = find_close_match_for_string(submission_text, location_text)
-            if success and close_match_found:
-                duplicate_id = location_ids[close_match_index]
-                is_duplicate = True
+    if not is_duplicate:
+        success, close_match_found, close_match_index = find_close_match_for_string(submission_text, location_text)
+        if success and close_match_found:
+            duplicate_id = location_ids[close_match_index]
+            is_duplicate = True
 
     return is_duplicate,duplicate_id
 
