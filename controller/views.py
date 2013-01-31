@@ -210,7 +210,7 @@ def get_flagged_problem_list(request):
 
 @csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
-    tags=['function:ban_student'])
+    tags=['function:take_action_on_flags'])
 @util.error_if_not_logged_in
 def take_action_on_flags(request):
     if request.method != 'POST':
