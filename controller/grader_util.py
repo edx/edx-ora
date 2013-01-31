@@ -103,31 +103,36 @@ def create_and_handle_grader_object(grader_dict):
     sub.previous_grader_type = grade.grader_type
     sub.next_grader_type = grade.grader_type
 
-    #TODO: Some kind of logic to decide when sub is finished grading.
+    #check to see if submission is flagged.  If so, put it in a flagged state
+    submission_is_flagged = grader_dict.get('is_submission_flagged', False)
+    if submission_is_flagged:
+        sub.state = SubmissionState.flagged
+    else:
+        #TODO: Some kind of logic to decide when sub is finished grading.
 
-    #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
-    if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
-        sub.state = SubmissionState.finished
-    #If submission is ML or IN graded, and was successful, state is finished
-    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
-        sub.state = SubmissionState.finished
-    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
-        #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
-        successful_peer_grader_count = sub.get_successful_peer_graders().count()
-        #If number of successful peer graders equals the needed count, finalize submission.
-        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+        #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
+        if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
             sub.state = SubmissionState.finished
-        else:
-            sub.state = SubmissionState.waiting_to_be_graded
-    #If something fails, immediately mark it for regrading
-    #TODO: Get better logic for handling failure cases
-    elif(grade.status_code == GraderStatus.failure and sub.state == SubmissionState.being_graded):
-        number_of_failures = sub.get_unsuccessful_graders().count()
-        #If it has failed too many times, just return an error
-        if number_of_failures > settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
-            expire_submissions.finalize_expired_submission(sub)
-        else:
-            sub.state = SubmissionState.waiting_to_be_graded
+        #If submission is ML or IN graded, and was successful, state is finished
+        elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
+            sub.state = SubmissionState.finished
+        elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
+            #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
+            successful_peer_grader_count = sub.get_successful_peer_graders().count()
+            #If number of successful peer graders equals the needed count, finalize submission.
+            if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+                sub.state = SubmissionState.finished
+            else:
+                sub.state = SubmissionState.waiting_to_be_graded
+        #If something fails, immediately mark it for regrading
+        #TODO: Get better logic for handling failure cases
+        elif(grade.status_code == GraderStatus.failure and sub.state == SubmissionState.being_graded):
+            number_of_failures = sub.get_unsuccessful_graders().count()
+            #If it has failed too many times, just return an error
+            if number_of_failures > settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
+                expire_submissions.finalize_expired_submission(sub)
+            else:
+                sub.state = SubmissionState.waiting_to_be_graded
 
     #Increment statsd whenever a grader object is saved.
     statsd.increment("open_ended_assessment.grading_controller.controller.create_grader_object",

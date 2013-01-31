@@ -8,6 +8,8 @@ from metrics import utilize_student_metrics
 
 log = logging.getLogger(__name__)
 
+VALID_ACTION_TYPES = ['ban', 'unflag']
+
 def get_single_peer_grading_item(location, grader_id):
     """
     Gets instructor grading for a given course id.
@@ -141,3 +143,29 @@ def get_peer_grading_notifications(course_id, student_id):
             return success, student_needs_to_peer_grade
 
     return success, student_needs_to_peer_grade
+
+def get_flagged_submissions(course_id):
+    success = False
+    flagged_submissions=[]
+    try:
+        flagged_submissions = Submission.objects.filter(state = SubmissionState.flagged, course_id = course_id)
+        for sub in flagged_submissions:
+            f_student_id = sub.student_id
+            f_student_response = sub.student_response
+            loop_dict = {
+                'student_id' : f_student_id,
+                'student_response' : f.student_response,
+            }
+            flagged_submissions.append(loop_dict)
+        success = True
+    except:
+        log.exception("Could not retrieve the flagged submissions.")
+
+    return success, flagged_submissions
+
+def take_action_on_flags(course_id, student_id, action):
+    success = False
+    if action not in VALID_ACTION_TYPES:
+        return success
+
+    
