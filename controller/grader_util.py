@@ -338,6 +338,12 @@ def check_for_combined_notifications(notification_dict):
             if staff_needs_to_grade==True:
                 overall_need_to_check=True
 
+        success, flagged_submissions_exist = peer_grading_util.get_flagged_submissions(course_id)
+        if success:
+            combined_notifications.update({'flagged_submissions_exist' : flagged_submissions_exist})
+            if flagged_submissions_exist==True:
+                overall_need_to_check=True
+
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
     if success:
         combined_notifications.update({

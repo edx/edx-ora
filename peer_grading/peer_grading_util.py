@@ -143,6 +143,19 @@ def get_peer_grading_notifications(course_id, student_id):
 
     return success, student_needs_to_peer_grade
 
+def get_flagged_submission_notifications(course_id):
+    success = False
+    flagged_submissions_exist = False
+    try:
+        flagged_submissions = Submission.objects.filter(state = SubmissionState.flagged, course_id = course_id)
+        success = True
+        if flagged_submissions.count()>0:
+            flagged_submissions_exist = True
+    except:
+        log.exception("Could not get flagged submissions for course: {0}".format(course_id))
+
+    return success, flagged_submissions_exist
+
 def get_flagged_submissions(course_id):
     success = False
     flagged_submissions_list=[]
