@@ -185,6 +185,15 @@ def ban_student_from_peer_grading(course_id, student_id, submission_id):
     student_profile.student_is_staff_banned = True
     student_profile.save()
 
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        return False, "Could not find submission with id: {0}".format(submission_id)
+
+    sub.state = SubmissionState.finished
+    sub.save()
+
+
     return True, "Successful save."
 
 def unflag_student_submission(course_id, student_id, submission_id):
