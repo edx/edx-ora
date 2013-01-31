@@ -185,7 +185,7 @@ def ban_student_from_peer_grading(course_id, student_id, submission_id):
     student_profile.student_is_staff_banned = True
     student_profile.save()
 
-    return True, student_profile
+    return True, "Successful save."
 
 def unflag_student_submission(course_id, student_id, submission_id):
     try:
@@ -196,7 +196,7 @@ def unflag_student_submission(course_id, student_id, submission_id):
     sub.state = SubmissionState.waiting_to_be_graded
     sub.save()
 
-    return True, sub
+    return True, "Successful save."
 
 def take_action_on_flags(course_id, student_id, submission_id, action):
     success = False
