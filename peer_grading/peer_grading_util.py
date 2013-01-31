@@ -145,33 +145,36 @@ def get_peer_grading_notifications(course_id, student_id):
 
 def get_flagged_submissions(course_id):
     success = False
-    flagged_submissions=[]
+    flagged_submissions_list=[]
     try:
         flagged_submissions = Submission.objects.filter(state = SubmissionState.flagged, course_id = course_id)
         for sub in flagged_submissions:
             f_student_id = sub.student_id
             f_student_response = sub.student_response
+            f_submission_id = sub.id
+            f_problem_name = sub.problem_id
+            f_location = sub.location
             loop_dict = {
                 'student_id' : f_student_id,
-                'student_response' : f.student_response,
-                'submission_id' : f.id,
-                'problem_name' : f.problem_id,
-                'location' : f.location,
+                'student_response' : f_student_response,
+                'submission_id' : f_submission_id,
+                'problem_name' : f_problem_name,
+                'location' : f_location,
             }
-            flagged_submissions.append(loop_dict)
+            flagged_submissions_list.append(loop_dict)
         success = True
     except:
         error_message = "Could not retrieve the flagged submissions for course: {0}".format(course_id)
         log.exception(error_message)
-        flagged_submissions = error_message
+        flagged_submissions_list = error_message
 
     #Have not actually succeeded if there is nothing to show!
-    if len(flagged_submissions)==0:
+    if len(flagged_submissions_list)==0:
         success = False
         error_message = "No flagged submissions exist for course: {0}".format(course_id)
-        flagged_submissions = error_message
+        flagged_submissions_list = error_message
 
-    return success, flagged_submissions
+    return success, flagged_submissions_list
 
 def ban_student_from_peer_grading(course_id, student_id, submission_id):
     try:
