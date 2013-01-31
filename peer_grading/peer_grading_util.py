@@ -5,10 +5,16 @@ from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
 from django.conf import settings
 from metrics import utilize_student_metrics
+from metrics.models import StudentProfile
 
 log = logging.getLogger(__name__)
 
-VALID_ACTION_TYPES = ['ban', 'unflag']
+ACTION_HANDLERS={
+    'ban' : ban_student_from_peer_grading,
+    'unflag' : unflag_student_submission,
+}
+
+VALID_ACTION_TYPES = ACTION_HANDLERS.keys()
 
 def get_single_peer_grading_item(location, grader_id):
     """
@@ -155,6 +161,7 @@ def get_flagged_submissions(course_id):
             loop_dict = {
                 'student_id' : f_student_id,
                 'student_response' : f.student_response,
+                'submission_id' : f.id,
             }
             flagged_submissions.append(loop_dict)
         success = True
@@ -163,9 +170,35 @@ def get_flagged_submissions(course_id):
 
     return success, flagged_submissions
 
-def take_action_on_flags(course_id, student_id, action):
+def ban_student_from_peer_grading(course_id, student_id, submission_id):
+    try:
+        student_profile = StudentProfile.objects.get(student_id=student_id)
+    except:
+        return False, "Could not find the student: {0}".format(student_id)
+
+    student_profile.student_is_staff_banned = True
+    student_profile.save()
+
+    return True, student_profile
+
+def unflag_student_submission(course_id, student_id, submission_id):
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        return False, "Could not find submission with id: {0}".format(submission_id)
+
+    sub.state = SubmissionState.waiting_to_be_graded
+    sub.save()
+
+    return True, sub
+
+def take_action_on_flags(course_id, student_id, submission_id, action):
     success = False
     if action not in VALID_ACTION_TYPES:
-        return success
+        return success, "Action not in valid action types."
 
-    
+    success, data = ACTION_HANDLERS[action](course_id, student_id, submission_id)
+
+    return success, data
+
+

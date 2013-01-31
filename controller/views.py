@@ -216,9 +216,16 @@ def take_action_on_flags(request):
     if request.method != 'POST':
         return util._error_response("Request type must be POST", _INTERFACE_VERSION)
 
-    for tag in ['course_id', 'student_id', 'action_type']:
-        if tag not in request.GET:
+    for tag in ['course_id', 'student_id', 'submission_id', 'action_type']:
+        if tag not in request.POST:
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    course_id = request.POST.get('course_id')
+    student_id = request.POST.get('student_id')
+    submission_id = request.POST.get('submission_id')
+    action_type = request.POST.get('action_type')
+
+    success, data = peer_grading_util.take_action_on_flags(course_id, student_id, submission_id, action_type)
 
 
 
