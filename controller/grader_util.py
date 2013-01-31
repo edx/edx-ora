@@ -14,6 +14,7 @@ from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
 from peer_grading import peer_grading_util
 import rubric_functions
+from metrics.models import StudentProfile
 
 log = logging.getLogger(__name__)
 
@@ -342,5 +343,8 @@ def check_for_combined_notifications(notification_dict):
 
     combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
     return overall_success, combined_notifications
+
+def is_student_banned(student_id):
+    student_profile = StudentProfile.objects.get(student_id=student_id)
 
 
