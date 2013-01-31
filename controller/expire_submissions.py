@@ -229,9 +229,9 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
     original_grader_set = original_sub.grader_set.all()
 
     #Need to trickle through all layers to copy the info
-    for grade in original_grader_set:
+    for i in xrange(0,len(original_grader_set)):
+        grade = original_grader_set[i]
         rubric_set = list(grade.rubric_set.all())
-        log.debug(grade.id)
         grade.pk = None
         grade.id = None
         grade.submission = sub
@@ -241,7 +241,7 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
             rubricitem_set = list(rubric.rubricitem_set.all())
             rubric.pk = None
             rubric.id = None
-            rubric.grade = grade
+            rubric.grader = grade
             rubric.save()
             transaction.commit_unless_managed()
             for rubric_item in rubricitem_set:
