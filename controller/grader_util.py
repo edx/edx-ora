@@ -213,6 +213,7 @@ def find_close_match_for_string(string, text_list):
     string_length = len(string)
     length_min = string_length * (1-LENGTH_MATCH_THRESHOLD)
     length_max = string_length * (1+LENGTH_MATCH_THRESHOLD)
+    string_tokens_length = len(tokenized_string)
 
     success = True
     for i in xrange(0,len(text_list)):
@@ -220,6 +221,7 @@ def find_close_match_for_string(string, text_list):
         contains_invalidation_word = False
         if length_min < text_length < length_max:
             tokenized_text = re.sub(SUB_CHARS, '', text_list[i].lower()).split(" ")
+            text_tokens_length = len(tokenized_text)
             for word in CLOSE_MATCH_INVALIDATION_WORDS:
                 if word in tokenized_text:
                     contains_invalidation_word = True
@@ -227,7 +229,7 @@ def find_close_match_for_string(string, text_list):
             if not contains_invalidation_word:
                 string_text_overlap = len([ts for ts in tokenized_string if ts in tokenized_text])
                 text_string_overlap = len([tt for tt in tokenized_text if tt in tokenized_string])
-                if (string_text_overlap + text_string_overlap) > float((string_length + text_length)*CLOSE_MATCH_THRESHOLD):
+                if (string_text_overlap + text_string_overlap) > float((string_tokens_length + text_tokens_length)*CLOSE_MATCH_THRESHOLD):
                     close_match_found = True
                     close_match_index = i
                     break
