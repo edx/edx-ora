@@ -15,6 +15,7 @@ from ml_grading import ml_grading_util
 from peer_grading import peer_grading_util
 import rubric_functions
 from metrics.models import StudentProfile
+import re
 
 log = logging.getLogger(__name__)
 
@@ -197,6 +198,42 @@ def get_eta_for_submission(location):
         pass
 
     return True, eta
+
+def find_close_match_for_string(string, text_list):
+    SUB_CHARS = "[,\.;!?']"
+    CLOSE_MATCH_THRESHOLD = .95
+    CLOSE_MATCH_INVALIDATION_WORDS = ['not', 'isnt', 'cannot']
+    LENGTH_MATCH_THRESHOLD = .05
+
+    success = False
+    close_match_found = False
+    close_match_index = 0
+
+    tokenized_string = re.sub(SUB_CHARS, '', string.lower()).split(" ")
+    string_length = len(string)
+    length_min = string_length * (1-LENGTH_MATCH_THRESHOLD)
+    length_max = string_length * (1+LENGTH_MATCH_THRESHOLD)
+
+    success = True
+    for i in xrange(0,len(text_list)):
+        text_length = len(text_list[i])
+        contains_invalidation_word = False
+        if length_min < text_length < length_max:
+            tokenized_text = re.sub(SUB_CHARS, '', text_list[i].lower()).split(" ")
+            for word in CLOSE_MATCH_INVALIDATION_WORDS:
+                if word in tokenized_text:
+                    contains_invalidation_word = True
+
+            if not contains_invalidation_word:
+                string_text_overlap = len([ts for ts in tokenized_string if ts in tokenized_text])
+                text_string_overlap = len([tt for tt in tokenized_text if tt in tokenized_string])
+                if (string_text_overlap + text_string_overlap) > float((string_length + text_length)*CLOSE_MATCH_THRESHOLD):
+                    close_match_found = True
+                    close_match_index = i
+                    break
+
+    return success, close_match_found, close_match_index
+
 
 def check_is_duplicate(submission_text,location, student_id, preferred_grader_type, check_plagiarized=False):
     is_duplicate=False
