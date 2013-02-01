@@ -5,6 +5,7 @@ from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
 from django.conf import settings
 from metrics import utilize_student_metrics
+from metrics.models import StudentProfile
 
 log = logging.getLogger(__name__)
 
@@ -141,3 +142,116 @@ def get_peer_grading_notifications(course_id, student_id):
             return success, student_needs_to_peer_grade
 
     return success, student_needs_to_peer_grade
+
+def get_flagged_submission_notifications(course_id):
+    success = False
+    flagged_submissions_exist = False
+    try:
+        flagged_submissions = Submission.objects.filter(state = SubmissionState.flagged, course_id = course_id)
+        success = True
+        if flagged_submissions.count()>0:
+            flagged_submissions_exist = True
+    except:
+        log.exception("Could not get flagged submissions for course: {0}".format(course_id))
+
+    return success, flagged_submissions_exist
+
+def get_flagged_submissions(course_id):
+    success = False
+    flagged_submissions_list=[]
+    try:
+        flagged_submissions = Submission.objects.filter(state = SubmissionState.flagged, course_id = course_id)
+        for sub in flagged_submissions:
+            f_student_id = sub.student_id
+            f_student_response = sub.student_response
+            f_submission_id = sub.id
+            f_problem_name = sub.problem_id
+            f_location = sub.location
+            loop_dict = {
+                'student_id' : f_student_id,
+                'student_response' : f_student_response,
+                'submission_id' : f_submission_id,
+                'problem_name' : f_problem_name,
+                'location' : f_location,
+            }
+            flagged_submissions_list.append(loop_dict)
+        success = True
+    except:
+        error_message = "Could not retrieve the flagged submissions for course: {0}".format(course_id)
+        log.exception(error_message)
+        flagged_submissions_list = error_message
+
+    #Have not actually succeeded if there is nothing to show!
+    if len(flagged_submissions_list)==0:
+        success = False
+        error_message = "No flagged submissions exist for course: {0}".format(course_id)
+        flagged_submissions_list = error_message
+
+    return success, flagged_submissions_list
+
+def ban_student_from_peer_grading(course_id, student_id, submission_id):
+    try:
+        student_profile = StudentProfile.objects.get(student_id=student_id)
+    except:
+        return False, "Could not find the student: {0}".format(student_id)
+
+    student_profile.student_is_staff_banned = True
+    student_profile.save()
+
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        return False, "Could not find submission with id: {0}".format(submission_id)
+
+    sub.state = SubmissionState.finished
+    sub.save()
+
+
+    return True, "Successful save."
+
+def unflag_student_submission(course_id, student_id, submission_id):
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        return False, "Could not find submission with id: {0}".format(submission_id)
+
+    if sub.preferred_grader_type!="PE":
+        return False, "Attempt to flag a non peer grading submission!"
+
+    successful_peer_grader_count = sub.get_successful_peer_graders().count()
+    #If number of successful peer graders equals the needed count, finalize submission.
+    if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+        sub.state = SubmissionState.finished
+    else:
+        sub.state = SubmissionState.waiting_to_be_graded
+    sub.save()
+
+    return True, "Successful save."
+
+def take_action_on_flags(course_id, student_id, submission_id, action):
+    success = False
+    if action not in VALID_ACTION_TYPES:
+        return success, "Action not in valid action types."
+
+    try:
+        sub = Submission.objects.get(id=submission_id)
+    except:
+        error_message = "Could not find a submission with id: {0}".format(submission_id)
+        log.exception(error_message)
+        return success, error_message
+
+    if sub.state!=SubmissionState.flagged:
+        return success, "Submission is no longer flagged."
+
+    success, data = ACTION_HANDLERS[action](course_id, student_id, submission_id)
+
+    return success, data
+
+ACTION_HANDLERS={
+    'ban' : ban_student_from_peer_grading,
+    'unflag' : unflag_student_submission,
+    }
+
+VALID_ACTION_TYPES = ACTION_HANDLERS.keys()
+
+

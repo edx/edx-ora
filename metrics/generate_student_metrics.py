@@ -11,6 +11,8 @@ log=logging.getLogger(__name__)
 
 MIN_NEW_ATTEMPTS_TO_REGENERATE = 5
 
+MIN_DIFF_TO_PEER_GRADE = 2
+
 def regenerate_student_data():
     transaction.commit_unless_managed()
     unique_courses = [s['course_id'] for s in Submission.objects.all().values('course_id').distinct()]
@@ -128,13 +130,26 @@ def read_one_student_data(student_id, course_id):
         "stdev_submission_length" : stdev_submission_length,
     }
 
-    for k in value_dict:
-        value_dict[k] = round(value_dict[k], DECIMAL_PLACES)
-        if numpy.isnan(value_dict[k]):
-            value_dict[k]=0
+    value_dict = fix_value_dict(value_dict)
 
     StudentCourseProfile.objects.filter(id = student_course_profile.id).update(**value_dict)
+
+    student_cannot_submit_more_for_peer_grading = (problems_attempted_peer - completed_peer_grading)>MIN_DIFF_TO_PEER_GRADE
+    value_dict_2 = {
+        'student_cannot_submit_more_for_peer_grading' : student_cannot_submit_more_for_peer_grading
+    }
+
+    value_dict_2 = fix_value_dict(value_dict_2)
+
+    StudentProfile.objects.filter(id = student_profile.id).update(**value_dict_2)
 
     success = True
     changed = True
     return success, changed
+
+def fix_value_dict(value_dict):
+    for k in value_dict:
+        value_dict[k] = round(value_dict[k], DECIMAL_PLACES)
+        if numpy.isnan(value_dict[k]):
+            value_dict[k]=0
+    return value_dict

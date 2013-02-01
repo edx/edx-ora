@@ -101,7 +101,7 @@ def save_grade(request):
 
     post_data = request.POST.dict().copy()
 
-    for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback']:
+    for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback', 'submission_flagged']:
         if not tag in post_data:
             return util._error_response("Cannot find needed key {0} in request.".format(tag), _INTERFACE_VERSION)
 
@@ -118,6 +118,10 @@ def save_grade(request):
 
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
     rubric_scores = request.POST.getlist('rubric_scores', [])
+
+    is_submission_flagged = request.POST.get('submission_flagged', False)
+    if isinstance(is_submission_flagged, basestring):
+        is_submission_flagged = (is_submission_flagged in ["True", 'true', "TRUE"])
 
     try:
         score = int(score)
@@ -153,7 +157,8 @@ def save_grade(request):
          #And they don't make any errors
          'errors' : "",
          'rubric_scores_complete' : rubric_scores_complete,
-         'rubric_scores' : rubric_scores
+         'rubric_scores' : rubric_scores,
+         'is_submission_flagged' : is_submission_flagged,
     }
 
     #Currently not posting back to LMS.  Only saving grader object, and letting controller decide when to post back.

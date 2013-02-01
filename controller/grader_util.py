@@ -14,6 +14,8 @@ from staff_grading import staff_grading_util
 from ml_grading import ml_grading_util
 from peer_grading import peer_grading_util
 import rubric_functions
+from metrics.models import StudentProfile
+import re
 
 log = logging.getLogger(__name__)
 
@@ -102,31 +104,36 @@ def create_and_handle_grader_object(grader_dict):
     sub.previous_grader_type = grade.grader_type
     sub.next_grader_type = grade.grader_type
 
-    #TODO: Some kind of logic to decide when sub is finished grading.
+    #check to see if submission is flagged.  If so, put it in a flagged state
+    submission_is_flagged = grader_dict.get('is_submission_flagged', False)
+    if submission_is_flagged:
+        sub.state = SubmissionState.flagged
+    else:
+        #TODO: Some kind of logic to decide when sub is finished grading.
 
-    #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
-    if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
-        sub.state = SubmissionState.finished
-    #If submission is ML or IN graded, and was successful, state is finished
-    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
-        sub.state = SubmissionState.finished
-    elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
-        #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
-        successful_peer_grader_count = sub.get_successful_peer_graders().count()
-        #If number of successful peer graders equals the needed count, finalize submission.
-        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+        #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
+        if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
             sub.state = SubmissionState.finished
-        else:
-            sub.state = SubmissionState.waiting_to_be_graded
-    #If something fails, immediately mark it for regrading
-    #TODO: Get better logic for handling failure cases
-    elif(grade.status_code == GraderStatus.failure and sub.state == SubmissionState.being_graded):
-        number_of_failures = sub.get_unsuccessful_graders().count()
-        #If it has failed too many times, just return an error
-        if number_of_failures > settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
-            expire_submissions.finalize_expired_submission(sub)
-        else:
-            sub.state = SubmissionState.waiting_to_be_graded
+        #If submission is ML or IN graded, and was successful, state is finished
+        elif(grade.status_code == GraderStatus.success and grade.grader_type in ["IN", "ML"]):
+            sub.state = SubmissionState.finished
+        elif(grade.status_code == GraderStatus.success and grade.grader_type in ["PE"]):
+            #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
+            successful_peer_grader_count = sub.get_successful_peer_graders().count()
+            #If number of successful peer graders equals the needed count, finalize submission.
+            if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+                sub.state = SubmissionState.finished
+            else:
+                sub.state = SubmissionState.waiting_to_be_graded
+        #If something fails, immediately mark it for regrading
+        #TODO: Get better logic for handling failure cases
+        elif(grade.status_code == GraderStatus.failure and sub.state == SubmissionState.being_graded):
+            number_of_failures = sub.get_unsuccessful_graders().count()
+            #If it has failed too many times, just return an error
+            if number_of_failures > settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
+                expire_submissions.finalize_expired_submission(sub)
+            else:
+                sub.state = SubmissionState.waiting_to_be_graded
 
     #Increment statsd whenever a grader object is saved.
     statsd.increment("open_ended_assessment.grading_controller.controller.create_grader_object",
@@ -192,6 +199,44 @@ def get_eta_for_submission(location):
 
     return True, eta
 
+def find_close_match_for_string(string, text_list):
+    SUB_CHARS = "[,\.;!?']"
+    CLOSE_MATCH_THRESHOLD = .95
+    CLOSE_MATCH_INVALIDATION_WORDS = ['not', 'isnt', 'cannot']
+    LENGTH_MATCH_THRESHOLD = .05
+
+    success = False
+    close_match_found = False
+    close_match_index = 0
+
+    tokenized_string = re.sub(SUB_CHARS, '', string.lower()).split(" ")
+    string_length = len(string)
+    length_min = string_length * (1-LENGTH_MATCH_THRESHOLD)
+    length_max = string_length * (1+LENGTH_MATCH_THRESHOLD)
+    string_tokens_length = len(tokenized_string)
+
+    success = True
+    for i in xrange(0,len(text_list)):
+        text_length = len(text_list[i])
+        contains_invalidation_word = False
+        if length_min < text_length < length_max:
+            tokenized_text = re.sub(SUB_CHARS, '', text_list[i].lower()).split(" ")
+            text_tokens_length = len(tokenized_text)
+            for word in CLOSE_MATCH_INVALIDATION_WORDS:
+                if word in tokenized_text:
+                    contains_invalidation_word = True
+
+            if not contains_invalidation_word:
+                string_text_overlap = len([ts for ts in tokenized_string if ts in tokenized_text])
+                text_string_overlap = len([tt for tt in tokenized_text if tt in tokenized_string])
+                if (string_text_overlap + text_string_overlap) > float((string_tokens_length + text_tokens_length)*CLOSE_MATCH_THRESHOLD):
+                    close_match_found = True
+                    close_match_index = i
+                    break
+
+    return success, close_match_found, close_match_index
+
+
 def check_is_duplicate(submission_text,location, student_id, preferred_grader_type, check_plagiarized=False):
     is_duplicate=False
     duplicate_id=0
@@ -211,11 +256,18 @@ def check_is_duplicate(submission_text,location, student_id, preferred_grader_ty
         ).exclude(student_id=student_id).values('student_response', 'id')
 
     location_text=[sub['student_response'] for sub in sub_text_and_ids]
+    location_ids = [sub['id'] for sub in sub_text_and_ids]
+
     if submission_text in location_text:
-        location_ids = [sub['id'] for sub in sub_text_and_ids]
         sub_index=location_text.index(submission_text)
         is_duplicate=True
         duplicate_id=location_ids[sub_index]
+
+    if not is_duplicate:
+        success, close_match_found, close_match_index = find_close_match_for_string(submission_text, location_text)
+        if success and close_match_found:
+            duplicate_id = location_ids[close_match_index]
+            is_duplicate = True
 
     return is_duplicate,duplicate_id
 
@@ -225,6 +277,7 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
     if is_plagiarized:
         duplicate_submission_id=plagiarized_submission_id
 
+    log.debug("Duplicate id is {0}".format(duplicate_submission_id))
     return is_duplicate, is_plagiarized, duplicate_submission_id
 
 def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
@@ -330,6 +383,12 @@ def check_for_combined_notifications(notification_dict):
         if success:
             combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
             if staff_needs_to_grade==True:
+                overall_need_to_check=True
+
+        success, flagged_submissions_exist = peer_grading_util.get_flagged_submission_notifications(course_id)
+        if success:
+            combined_notifications.update({'flagged_submissions_exist' : flagged_submissions_exist})
+            if flagged_submissions_exist==True:
                 overall_need_to_check=True
 
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
