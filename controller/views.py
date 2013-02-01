@@ -14,6 +14,7 @@ import util
 import grader_util
 
 from staff_grading import staff_grading_util
+from peer_grading import peer_grading_util
 
 from models import Submission
 
@@ -24,6 +25,7 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
+
 
 @csrf_exempt
 def log_in(request):
@@ -180,6 +182,63 @@ def get_grading_status_list(request):
 
     util.log_connection_data()
     return util._success_response(problem_list_dict, _INTERFACE_VERSION)
+
+@csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
+    tags=['function:get_flagged_problem_list'])
+@util.error_if_not_logged_in
+def get_flagged_problem_list(request):
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['course_id']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    success, flagged_submissions = peer_grading_util.get_flagged_submissions(request.GET.get('course_id'))
+
+    if not success:
+        return util._error_response(flagged_submissions,_INTERFACE_VERSION)
+
+    flagged_submission_dict={
+        'success' : success,
+        'flagged_submissions' : flagged_submissions,
+        }
+
+    util.log_connection_data()
+    return util._success_response(flagged_submission_dict, _INTERFACE_VERSION)
+
+@csrf_exempt
+@statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
+    tags=['function:take_action_on_flags'])
+@util.error_if_not_logged_in
+def take_action_on_flags(request):
+    if request.method != 'POST':
+        return util._error_response("Request type must be POST", _INTERFACE_VERSION)
+
+    for tag in ['course_id', 'student_id', 'submission_id', 'action_type']:
+        if tag not in request.POST:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    course_id = request.POST.get('course_id')
+    student_id = request.POST.get('student_id')
+    submission_id = request.POST.get('submission_id')
+    action_type = request.POST.get('action_type')
+
+    log.debug(request.POST)
+    success, data = peer_grading_util.take_action_on_flags(course_id, student_id, submission_id, action_type)
+
+    log.debug(data)
+    if not success:
+        return util._error_response(data,_INTERFACE_VERSION)
+
+    submission_dict={
+        'success' : success,
+        'data' : data,
+        }
+
+    util.log_connection_data()
+    return util._success_response(submission_dict, _INTERFACE_VERSION)
 
 
 

@@ -75,6 +75,10 @@ class StudentProfile(models.Model):
     messages_received = models.DecimalField(max_digits=MAX_DECIMAL_DIGITS, decimal_places=DECIMAL_PLACES, default=0)
     average_message_feedback_length = models.DecimalField(max_digits=MAX_DECIMAL_DIGITS, decimal_places=DECIMAL_PLACES, default=0)
 
+    #Student metadata (ban state, etc)
+    student_is_staff_banned = models.BooleanField(default=False)
+    student_cannot_submit_more_for_peer_grading = models.BooleanField(default=False)
+
 class StudentCourseProfile(models.Model):
     student_profile = models.ForeignKey('StudentProfile')
 

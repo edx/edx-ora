@@ -9,6 +9,7 @@ import logging
 log=logging.getLogger(__name__)
 
 from controller.models import GraderStatus
+from metrics.models import StudentProfile
 
 
 def perform_spelling_and_grammar_checks(string):
@@ -28,7 +29,7 @@ def perform_spelling_and_grammar_checks(string):
     return feedback, e_set
 
 
-def simple_quality_check(string, initial_display):
+def simple_quality_check(string, initial_display, student_id):
     """
     Performs a simple sanity test on an input string
     Input:
@@ -66,7 +67,31 @@ def simple_quality_check(string, initial_display):
         or string==initial_display):
         quality_dict['score'] = 0
 
+    #If student is banned by staff from peer grading, then they will not get any feedback here.
+    success, quality_dict = handle_banned_students(student_id, quality_dict)
+
     return True, quality_dict
+
+def handle_banned_students(student_id, quality_dict):
+    success, student_banned = is_student_banned(student_id)
+    if success and student_banned:
+        quality_dict['score']=0
+
+    return success, quality_dict
+
+def is_student_banned(student_id):
+    success = False
+    student_banned = False
+    try:
+        student_profile = StudentProfile.objects.get(student_id=student_id)
+        student_banned = student_profile.student_is_staff_banned
+        success = True
+    except:
+        log.exception("Cannot get student profile for student {0}".format(student_id))
+
+    return success, student_banned
+
+
 
 
 

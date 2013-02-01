@@ -159,11 +159,11 @@ def handle_submission(sub):
         True/False status code
     """
     try:
-        #Run some basic sanity checks on submission
+        #Run some basic sanity checks on submission.  Also check to see if student is banned, and fail them if they are.
         sub.next_grader_type = "BC"
         sub.save()
         timing_functions.initialize_timing(sub.id)
-        success, check_dict = basic_check_util.simple_quality_check(sub.student_response, sub.initial_display)
+        success, check_dict = basic_check_util.simple_quality_check(sub.student_response, sub.initial_display, sub.student_id)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
 

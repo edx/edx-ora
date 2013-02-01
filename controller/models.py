@@ -9,6 +9,7 @@ class SubmissionState():
     being_graded="C"
     waiting_to_be_graded="W"
     finished="F"
+    flagged= "L"
 
 GRADER_TYPE = (
     ('ML', 'ML'),
@@ -27,7 +28,8 @@ STATUS_CODES = (
 STATE_CODES = (
     (SubmissionState.being_graded, "Currently being Graded"),
     (SubmissionState.waiting_to_be_graded, "Waiting to be Graded"),
-    (SubmissionState.finished, "Finished" )
+    (SubmissionState.finished, "Finished" ),
+    (SubmissionState.flagged, "Flagged" )
     )
 
 CHARFIELD_LEN_SMALL = 128
