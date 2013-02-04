@@ -100,6 +100,7 @@ def save_grade(request):
         raise Http404
 
     post_data = request.POST.dict().copy()
+    log.debug(post_data)
 
     for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback', 'submission_flagged']:
         if not tag in post_data:
