@@ -215,14 +215,16 @@ def unflag_student_submission(course_id, student_id, submission_id):
     except:
         return False, "Could not find submission with id: {0}".format(submission_id)
 
-    if sub.preferred_grader_type!="PE":
-        return False, "Attempt to flag a non peer grading submission!"
 
-    successful_peer_grader_count = sub.get_successful_peer_graders().count()
-    #If number of successful peer graders equals the needed count, finalize submission.
-    if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
-        sub.state = SubmissionState.finished
+    if sub.preferred_grader_type == "PE":
+        successful_peer_grader_count = sub.get_successful_peer_graders().count()
+        #If number of successful peer graders equals the needed count, finalize submission.
+        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+            sub.state = SubmissionState.finished
+        else:
+            sub.state = SubmissionState.waiting_to_be_graded
     else:
+        # if we're not peer graded, assume that the submission still needs to be graded
         sub.state = SubmissionState.waiting_to_be_graded
     sub.save()
 
