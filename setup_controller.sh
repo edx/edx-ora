@@ -219,8 +219,8 @@ clone_repos
 
 
 # Install system-level dependencies
-bash $BASE/grading-controller/install-system-req.sh
-bash $BASE/machine-learning/install-system-req.sh
+bash $BASE/grading-controller/install_system_req.sh
+bash $BASE/machine-learning/install_system_req.sh
 
 # Activate Python virtualenv
 source $PYTHON_DIR/bin/activate
@@ -259,9 +259,6 @@ case `uname -s` in
         pip install -e git+https://github.com/scipy/scipy#egg=scipy-dev
         ;;
 esac
-
-output "Installing xqueue"
-bash $BASE/xqueue/install_xqueue.sh
 
 output "Installing Controller pre-requirements"
 pip install -r $BASE/grading-controller/pre-requirements.txt
