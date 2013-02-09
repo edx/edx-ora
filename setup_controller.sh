@@ -285,16 +285,20 @@ pip install -r requirements.txt
 mkdir "$BASE/log" || true
 mkdir "$BASE/grading-controller/log" || true
 mkdir "$BASE/machine-learning/log" || true
+mkdir "$BASE/xqueue/log" || true
+touch "$BASE/grading-controller/log/edx.log" || true
+touch "$BASE/machine-learning/log/edx.log" || true
+touch "$BASE/xqueue/log/edx.log" || true
 
 #Sync controller db
 cd $BASE/grading-controller
-django-admin.py syncdb --settings=grading-controller.settings --pythonpath=.
-django-admin.py migrate --settings=grading-controller.settings --pythonpath=.
+yes | django-admin.py syncdb --settings=grading_controller.settings --pythonpath=.
+yes | django-admin.py migrate --settings=grading_controller.settings --pythonpath=.
 
 #sync xquque db
 cd $BASE/xqueue
-django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
-django-admin.py migrate --settings=xqueue.settings --pythonpath=.
+yes | django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
+yes | django-admin.py migrate --settings=xqueue.settings --pythonpath=.
 
 sudo touch "$BASE/auth.json"
 sudo cat "{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }" > "$BASE/auth.json"
