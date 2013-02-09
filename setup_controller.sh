@@ -300,16 +300,16 @@ cd $BASE/xqueue
 yes | django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
 yes | django-admin.py migrate --settings=xqueue.settings --pythonpath=.
 
-sudo touch "$BASE/auth.json"
-sudo cat "{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }" > "$BASE/auth.json"
+touch "$BASE/auth.json"
+echo '{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }' > "$BASE/auth.json"
 
 #Update controller users
 cd $BASE/grading-controller
-django-admin.py update_users --pythonpath=. --settings=grading_controller.settings
+django-admin.py update_users --pythonpath=$BASE/grading-controller --settings=grading_controller.settings
 
 #Update xqueue users
 cd $BASE/xqueue
-django-admin.py update_users --pythonpath=. --settings=xqueue.settings
+django-admin.py update_users --pythonpath=$BASE/xqueue --settings=xqueue.settings
 
 #Install machine learning nltk stuff
 python -m nltk.downloader maxent_treebank_pos_tagger wordnet
