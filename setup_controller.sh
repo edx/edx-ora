@@ -327,16 +327,16 @@ cat<<END
 
    To start the controller:
 
-        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings
+        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings --pythonpath=$BASE/grading-controller
 
    To start the xqueue:
-        $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=.
+        $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=. --pythonpath=$BASE/xqueue
 
    Then start the manage.py processes associated with the grading controller:
-        python manage.py pull_from_xqueue
-        python manage.py call_ml_grader
-        python manage.py call_ml_creator
-        python manage.py remove_expired_subs
+        python manage.py pull_from_xqueue --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py call_ml_grader --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py call_ml_creator --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py remove_expired_subs --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
 
   If the  Django development server starts properly you
   should see:
