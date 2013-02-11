@@ -226,6 +226,7 @@ def unflag_student_submission(course_id, student_id, submission_id):
     else:
         # if we're not peer graded, assume that the submission still needs to be graded
         sub.state = SubmissionState.waiting_to_be_graded
+        sub.next_grader_type = sub.preferred_grader_type
     sub.save()
 
     return True, "Successful save."
