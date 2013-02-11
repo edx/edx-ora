@@ -126,7 +126,8 @@ def get_next_submission(request):
                 'ml_error_info' : ml_error_message,
                 'problem_name' : submission.problem_id,
                 'num_graded' : staff_grading_util.finished_submissions_graded_by_instructor(submission.location).count(),
-                'num_pending' : staff_grading_util.submissions_pending_instructor(submission.location).count(),
+                'num_pending' : staff_grading_util.submissions_pending_instructor(submission.location, 
+                                    state_in=SubmissionState.waiting_to_be_graded).count(),
                 'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
@@ -278,7 +279,7 @@ def get_problem_list(request):
     location_info=[]
     for location in locations_for_course:
         problem_name = Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending = staff_grading_util.submissions_pending_instructor(location).count()
+        submissions_pending = staff_grading_util.submissions_pending_instructor(location, state_in=SubmissionState.waiting_to_be_graded).count()
         finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
         min_scored_for_location=settings.MIN_TO_USE_PEER
         location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()

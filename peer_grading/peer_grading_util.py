@@ -22,55 +22,65 @@ def get_single_peer_grading_item(location, grader_id):
     """
     found = False
     sub_id = 0
-    submissions_to_grade = peer_grading_submissions_pending_for_location(location, grader_id) 
+    to_be_graded = peer_grading_submissions_pending_for_location(location, grader_id) 
     #Do some checks to ensure that there are actually items to grade
-    if submissions_to_grade is not None:
-        course_id = submissions_to_grade[0].course_id
-        submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
-        #log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
+    if to_be_graded is not None:
+        to_be_graded_length = to_be_graded.count()
+        if to_be_graded_length > 0:
+            course_id = to_be_graded[0].course_id
+            submissions_to_grade = (to_be_graded
+                                    .filter(grader__status_code=GraderStatus.success, grader__grader_type__in=["PE","BC"])
+                                    .exclude(grader__grader_id=grader_id)
+                                    .annotate(num_graders=Count('grader'))
+                                    .values("num_graders", "id")
+                                    .order_by("num_graders")[:50])
 
-        submission_ids = [p['id'] for p in submissions_to_grade]
+            if submissions_to_grade is not None:
+                submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
+                #log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
 
-        student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(grader_id, course_id)
-        #Ensure that student hasn't graded this submission before!
-        #Also ensures that all submissions are searched through if student has graded the minimum one
-        fallback_sub_id = None
-        for i in xrange(0, len(submission_ids)):
-            #log.debug("Looping through graders, on {0}".format(i))
-            minimum_index = submission_grader_counts.index(min(submission_grader_counts))
-            grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
-            previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
-            if grader_id not in previous_graders:
-                found = True
-                sub_id = grade_item.id
+                submission_ids = [p['id'] for p in submissions_to_grade]
 
-                #Insert timing initialization code
-                if fallback_sub_id is None:
-                    fallback_sub_id = grade_item.id
+                student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(grader_id, course_id)
+                #Ensure that student hasn't graded this submission before!
+                #Also ensures that all submissions are searched through if student has graded the minimum one
+                fallback_sub_id = None
+                for i in xrange(0, len(submission_ids)):
+                    #log.debug("Looping through graders, on {0}".format(i))
+                    minimum_index = submission_grader_counts.index(min(submission_grader_counts))
+                    grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
+                    previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
+                    if grader_id not in previous_graders:
+                        found = True
+                        sub_id = grade_item.id
 
-                if not student_profile_success:
-                    initialize_timing(sub_id)
+                        #Insert timing initialization code
+                        if fallback_sub_id is None:
+                            fallback_sub_id = grade_item.id
+
+                        if not student_profile_success:
+                            initialize_timing(sub_id)
+                            grade_item.state = SubmissionState.being_graded
+                            grade_item.save()
+                            return found, sub_id
+                        else:
+                            success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
+                            log.debug(similarity_score)
+                            if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
+                                initialize_timing(sub_id)
+                                grade_item.state = SubmissionState.being_graded
+                                grade_item.save()
+                                return found, sub_id
+                    else:
+                        if len(submission_ids) > 1:
+                            submission_ids.pop(minimum_index)
+                            submission_grader_counts.pop(minimum_index)
+                if found:
+                    initialize_timing(fallback_sub_id)
+                    grade_item = Submission.objects.get(id=fallback_sub_id)
                     grade_item.state = SubmissionState.being_graded
                     grade_item.save()
-                    return found, sub_id
-                else:
-                    success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
-                    log.debug(similarity_score)
-                    if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
-                        initialize_timing(sub_id)
-                        grade_item.state = SubmissionState.being_graded
-                        grade_item.save()
-                        return found, sub_id
-            else:
-                if len(submission_ids) > 1:
-                    submission_ids.pop(minimum_index)
-                    submission_grader_counts.pop(minimum_index)
-        if found:
-            initialize_timing(fallback_sub_id)
-            grade_item = Submission.objects.get(id=fallback_sub_id)
-            grade_item.state = SubmissionState.being_graded
-            grade_item.save()
-            return found, fallback_sub_id
+                    return found, fallback_sub_id
 
     return found, sub_id
 
@@ -100,19 +110,8 @@ def peer_grading_submissions_pending_for_location(location, grader_id):
     ).exclude(student_id=grader_id)
 
     log.debug("Looking for grading for student {0}, found {1}".format(grader_id, to_be_graded))
-    submissions_to_grade = to_be_graded
     #Do some checks to ensure that there are actually items to grade
-    if to_be_graded is not None:
-        to_be_graded_length = to_be_graded.count()
-        if to_be_graded_length > 0:
-            submissions_to_grade = (to_be_graded
-                                    .filter(grader__status_code=GraderStatus.success, grader__grader_type__in=["PE","BC"])
-                                    .exclude(grader__grader_id=grader_id)
-                                    .annotate(num_graders=Count('grader'))
-                                    .values("num_graders", "id")
-                                    .order_by("num_graders")[:50]
-                )
-    return submissions_to_grade
+    return to_be_graded
 
 def peer_grading_submissions_graded_for_location(location, student_id):
     """
