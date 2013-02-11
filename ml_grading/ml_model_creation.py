@@ -131,6 +131,8 @@ def handle_single_location(location):
                         'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
                         's3_bucketname' : str(settings.S3_BUCKETNAME),
                         'creation_finished' : True,
+                        'model_relative_path' : relative_model_path,
+                        'model_full_path' : full_model_path,
                         }
 
                     transaction.commit_unless_managed()

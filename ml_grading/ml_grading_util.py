@@ -54,6 +54,29 @@ def get_latest_created_model(location):
 
     return True, created_models[0]
 
+def check_if_model_started(location):
+    """
+    Gets the currently active model file for a given location
+    Input:
+        location
+    Output:
+        Boolean success/fail, Boolean started/not started
+    """
+    model_started = False
+    created_models=CreatedModel.objects.filter(
+        location=location,
+        creation_started=True
+    ).order_by("-date_created")[:1]
+
+    if created_models.count()==0:
+        return True, model_started
+
+    created_model = created_models[0]
+    if created_model.creation_finished==False:
+        model_started = True
+
+    return True, model_started
+
 def check_for_all_model_and_rubric_success(location):
     subs_graded_by_instructor = Submission.objects.filter(location=location,
         previous_grader_type="IN",
@@ -95,7 +118,15 @@ def save_created_model(model_data, update_model=False, update_id=0):
     ]
 
     final_tags = [
-        
+        'cv_kappa',
+        'cv_mean_absolute_error',
+        'creation_succeeded',
+        's3_public_url',
+        'model_stored_in_s3',
+        's3_bucketname',
+        'creation_finished',
+        'model_relative_path',
+        'model_full_path',
     ]
     if update_model:
         tags = final_tags
@@ -108,24 +139,7 @@ def save_created_model(model_data, update_model=False, update_id=0):
 
     try:
         if not update_model:
-            created_model=CreatedModel(
-                max_score=model_data['max_score'],
-                prompt=model_data['prompt'],
-                rubric=model_data['rubric'],
-                location=model_data['location'],
-                course_id=model_data['course_id'],
-                submission_ids_used=model_data['submission_ids_used'],
-                problem_id=model_data['problem_id'],
-                model_relative_path=model_data['model_relative_path'],
-                model_full_path=model_data['model_full_path'],
-                number_of_essays=model_data['number_of_essays'],
-                cv_kappa=model_data['cv_kappa'],
-                cv_mean_absolute_error=model_data['cv_mean_absolute_error'],
-                creation_succeeded=model_data['creation_succeeded'],
-                model_stored_in_s3=model_data['model_stored_in_s3'],
-                s3_public_url=model_data['s3_public_url'],
-                s3_bucketname=model_data['s3_bucketname'],
-            )
+            created_model=CreatedModel(**model_data)
             created_model.save()
         else:
             created_model = CreatedModel.objects.filter(id=update_id).order_by('-date_modified')
