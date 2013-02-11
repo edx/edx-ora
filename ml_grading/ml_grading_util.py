@@ -152,7 +152,6 @@ def save_created_model(model_data, update_model=False, update_id=0):
                                "location: {1}, relative_path: {2}").format(created_model_count, model_data['location'],
                                 model_data['model_relative_path'])
             created_model.update(**model_data)
-            created_model.save()
     except:
         log.exception("Could not make ModelCreator object.")
         return False, "Failed to create model!"
