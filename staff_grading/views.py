@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission, GraderStatus
+from controller.models import Submission, GraderStatus, SubmissionState
 from controller import util
 from controller import grader_util
 from controller import rubric_functions
@@ -126,7 +126,7 @@ def get_next_submission(request):
                 'ml_error_info' : ml_error_message,
                 'problem_name' : submission.problem_id,
                 'num_graded' : staff_grading_util.finished_submissions_graded_by_instructor(submission.location).count(),
-                'num_pending' : staff_grading_util.submissions_pending_for_location(submission.location).count(),
+                'num_pending' : staff_grading_util.submissions_pending_instructor(submission.location).count(),
                 'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
@@ -278,7 +278,7 @@ def get_problem_list(request):
     location_info=[]
     for location in locations_for_course:
         problem_name = Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending = staff_grading_util.submissions_pending_for_location(location).count()
+        submissions_pending = staff_grading_util.submissions_pending_instructor(location).count()
         finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
         min_scored_for_location=settings.MIN_TO_USE_PEER
         location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()

@@ -69,11 +69,15 @@ def submissions_pending_instructor(location, state_in=[SubmissionState.being_gra
         subs_pending = Submission.objects.filter(location=location,
             next_grader_type="IN",
             state=state_in,
+            is_duplicate=False,
+            is_plagiarized=False
         )
     else:
         subs_pending = Submission.objects.filter(location=location,
             next_grader_type="IN",
             state__in=state_in,
+            is_duplicate=False,
+            is_plagiarized=False
         )
 
     return subs_pending
@@ -96,8 +100,6 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
     Output:
         Boolean success/fail, and then either error message or submission id of a valid submission.
     """
-
-    finished_submission_text=submission_text_graded_by_instructor(location)
 
     if not types_to_check_for:
         types_to_check_for="IN"
@@ -130,17 +132,16 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
             except:
                 return False, 0
             if to_be_graded_obj is not None:
-                if to_be_graded_obj.student_response not in finished_submission_text:
-                    to_be_graded_obj.state = SubmissionState.being_graded
-                    to_be_graded_obj.next_grader_type="IN"
-                    to_be_graded_obj.save()
-                    found = True
-                    sub_id = to_be_graded_obj.id
+                to_be_graded_obj.state = SubmissionState.being_graded
+                to_be_graded_obj.next_grader_type="IN"
+                to_be_graded_obj.save()
+                found = True
+                sub_id = to_be_graded_obj.id
 
-                    #Insert timing initialization code
-                    initialize_timing(sub_id)
+                #Insert timing initialization code
+                initialize_timing(sub_id)
 
-                    return found, sub_id
+                return found, sub_id
 
         #If nothing is found, return false
     return False, 0
@@ -155,6 +156,7 @@ def get_single_instructor_grading_item_for_location(location):
     log.debug("Checked for ml.")
     if success:
         return success, sub_id
+
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=False,
         types_to_check_for="ML", submission_state_to_check_for=SubmissionState.finished)
     if success:
