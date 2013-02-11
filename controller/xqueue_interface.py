@@ -18,6 +18,7 @@ from basic_check import basic_check_util
 from metrics import timing_functions
 import message_util
 from ml_grading import ml_grading_util
+import rubric_functions
 
 from django.db import connection
 
@@ -169,6 +170,13 @@ def handle_submission(sub):
 
         #add additional tags needed to create a grader object
         check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
+        if check_dict['score']==0:
+            success, max_rubric_scores = rubric_functions.generate_targets_from_rubric(sub.rubric)
+            log.debug(max_rubric_scores)
+            if success:
+                check_dict['rubric_scores_complete'] = True
+                check_dict['rubric_scores'] = [0 for i in xrange(0,len(max_rubric_scores))]
+                log.debug(check_dict)
 
         #Create and handle the grader, and return
         grader_util.create_and_handle_grader_object(check_dict)

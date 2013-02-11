@@ -10,6 +10,7 @@ urlpatterns = patterns('peer_grading.lms_interface',
     url(r'^save_calibration_essay/$', 'save_calibration_essay'),
     url(r'^get_problem_list/$', 'get_problem_list'),
     url(r'^get_notifications/$', 'get_notifications'),
+    url(r'^get_data_for_location/$', 'get_peer_grading_data_for_location'),
 )
 
 # Temporary stub view

@@ -219,8 +219,8 @@ clone_repos
 
 
 # Install system-level dependencies
-bash $BASE/grading-controller/install-system-req.sh
-bash $BASE/machine-learning/install-system-req.sh
+bash $BASE/grading-controller/install_system_req.sh
+bash $BASE/machine-learning/install_system_req.sh
 
 # Activate Python virtualenv
 source $PYTHON_DIR/bin/activate
@@ -260,9 +260,6 @@ case `uname -s` in
         ;;
 esac
 
-output "Installing xqueue"
-bash $BASE/xqueue/install_xqueue.sh
-
 output "Installing Controller pre-requirements"
 pip install -r $BASE/grading-controller/pre-requirements.txt
 
@@ -288,27 +285,31 @@ pip install -r requirements.txt
 mkdir "$BASE/log" || true
 mkdir "$BASE/grading-controller/log" || true
 mkdir "$BASE/machine-learning/log" || true
+mkdir "$BASE/xqueue/log" || true
+touch "$BASE/grading-controller/log/edx.log" || true
+touch "$BASE/machine-learning/log/edx.log" || true
+touch "$BASE/xqueue/log/edx.log" || true
 
 #Sync controller db
 cd $BASE/grading-controller
-django-admin.py syncdb --settings=grading-controller.settings --pythonpath=.
-django-admin.py migrate --settings=grading-controller.settings --pythonpath=.
+yes | django-admin.py syncdb --settings=grading_controller.settings --pythonpath=.
+yes | django-admin.py migrate --settings=grading_controller.settings --pythonpath=.
 
 #sync xquque db
 cd $BASE/xqueue
-django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
-django-admin.py migrate --settings=xqueue.settings --pythonpath=.
+yes | django-admin.py syncdb --settings=xqueue.settings --pythonpath=.
+yes | django-admin.py migrate --settings=xqueue.settings --pythonpath=.
 
-sudo touch "$BASE/auth.json"
-sudo cat "{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }" > "$BASE/auth.json"
+touch "$BASE/auth.json"
+echo '{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }' > "$BASE/auth.json"
 
 #Update controller users
 cd $BASE/grading-controller
-django-admin.py update_users --pythonpath=. --settings=grading_controller.settings
+django-admin.py update_users --pythonpath=$BASE/grading-controller --settings=grading_controller.settings
 
 #Update xqueue users
 cd $BASE/xqueue
-django-admin.py update_users --pythonpath=. --settings=xqueue.settings
+django-admin.py update_users --pythonpath=$BASE/xqueue --settings=xqueue.settings
 
 #Install machine learning nltk stuff
 python -m nltk.downloader maxent_treebank_pos_tagger wordnet
@@ -326,16 +327,16 @@ cat<<END
 
    To start the controller:
 
-        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings
+        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings --pythonpath=$BASE/grading-controller
 
    To start the xqueue:
-        $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=.
+        $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=. --pythonpath=$BASE/xqueue
 
    Then start the manage.py processes associated with the grading controller:
-        python manage.py pull_from_xqueue
-        python manage.py call_ml_grader
-        python manage.py call_ml_creator
-        python manage.py remove_expired_subs
+        python manage.py pull_from_xqueue --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py call_ml_grader --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py call_ml_creator --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py remove_expired_subs --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
 
   If the  Django development server starts properly you
   should see:
