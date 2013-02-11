@@ -136,6 +136,7 @@ def handle_single_location(location):
                             'creation_finished' : True,
                             'model_relative_path' : relative_model_path,
                             'model_full_path' : full_model_path,
+                            'location' : location + suffix,
                             }
 
                         transaction.commit_unless_managed()

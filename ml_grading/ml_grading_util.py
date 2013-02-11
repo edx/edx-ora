@@ -127,6 +127,7 @@ def save_created_model(model_data, update_model=False, update_id=0):
         'creation_finished',
         'model_relative_path',
         'model_full_path',
+        'location',
     ]
     if update_model:
         tags = final_tags
