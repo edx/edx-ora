@@ -66,7 +66,6 @@ def create_and_handle_grader_object(grader_dict):
     except:
         return False, "Error getting submission."
 
-
     try:
         grader_dict['feedback'] = json.loads(grader_dict['feedback'])
     except:
@@ -92,7 +91,7 @@ def create_and_handle_grader_object(grader_dict):
         except:
             pass
 
-        if grader_dict['rubric_scores_complete']=='True':
+        if grader_dict['rubric_scores_complete'] in ['True', "TRUE", 'true', True]:
             grader_dict['rubric_scores']=[int(r) for r in grader_dict['rubric_scores']]
             try:
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
