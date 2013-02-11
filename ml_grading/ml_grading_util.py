@@ -46,6 +46,7 @@ def get_latest_created_model(location):
     created_models=CreatedModel.objects.filter(
         location=location,
         creation_succeeded=True,
+        creation_finished = True,
     ).order_by("-date_created")[:1]
 
     if created_models.count()==0:
@@ -68,7 +69,7 @@ def check_for_all_model_and_rubric_success(location):
             overall_success=False
     return overall_success
 
-def save_created_model(model_data):
+def save_created_model(model_data, update_model=False, update_id=0):
     """
     Creates and saves a createdmodel object from an input dictionary.
     Input:
@@ -77,35 +78,64 @@ def save_created_model(model_data):
         Boolean success/fail, and model id/error message
     """
 
-    tags=['max_score', 'prompt', 'rubric', 'location', 'course_id',
-          'submission_ids_used', 'problem_id', 'model_relative_path',
-          'model_full_path', 'number_of_essays', 'cv_kappa',
-          'cv_mean_absolute_error', 'creation_succeeded', 'save_to_s3', 's3_public_url', 's3_bucketname']
+    initial_tags=[
+        'max_score',
+        'prompt',
+        'rubric',
+        'location',
+        'course_id',
+        'submission_ids_used',
+        'problem_id',
+        'model_relative_path',
+        'model_full_path',
+        'number_of_essays',
+        'creation_succeeded',
+        'creation_started',
+        'creation_finished',
+    ]
+
+    final_tags = [
+        
+    ]
+    if update_model:
+        tags = final_tags
+    else:
+        tags = initial_tags
 
     for tag in tags:
         if tag not in model_data:
             return False, "Does not contain needed tag {0}".format(tag)
 
     try:
-        created_model=CreatedModel(
-            max_score=model_data['max_score'],
-            prompt=model_data['prompt'],
-            rubric=model_data['rubric'],
-            location=model_data['location'],
-            course_id=model_data['course_id'],
-            submission_ids_used=model_data['submission_ids_used'],
-            problem_id=model_data['problem_id'],
-            model_relative_path=model_data['model_relative_path'],
-            model_full_path=model_data['model_full_path'],
-            number_of_essays=model_data['number_of_essays'],
-            cv_kappa=model_data['cv_kappa'],
-            cv_mean_absolute_error=model_data['cv_mean_absolute_error'],
-            creation_succeeded=model_data['creation_succeeded'],
-            model_stored_in_s3=model_data['save_to_s3'],
-            s3_public_url=model_data['s3_public_url'],
-            s3_bucketname=model_data['s3_bucketname'],
-        )
-        created_model.save()
+        if not update_model:
+            created_model=CreatedModel(
+                max_score=model_data['max_score'],
+                prompt=model_data['prompt'],
+                rubric=model_data['rubric'],
+                location=model_data['location'],
+                course_id=model_data['course_id'],
+                submission_ids_used=model_data['submission_ids_used'],
+                problem_id=model_data['problem_id'],
+                model_relative_path=model_data['model_relative_path'],
+                model_full_path=model_data['model_full_path'],
+                number_of_essays=model_data['number_of_essays'],
+                cv_kappa=model_data['cv_kappa'],
+                cv_mean_absolute_error=model_data['cv_mean_absolute_error'],
+                creation_succeeded=model_data['creation_succeeded'],
+                model_stored_in_s3=model_data['model_stored_in_s3'],
+                s3_public_url=model_data['s3_public_url'],
+                s3_bucketname=model_data['s3_bucketname'],
+            )
+            created_model.save()
+        else:
+            created_model = CreatedModel.objects.filter(id=update_id).order_by('-date_modified')
+            created_model_count = created_model.count()
+            if created_model_count >1 or created_model_count==0:
+                return False, ("Too few or too many records to update: {0} records exist, 1 needed for parameters "
+                               "location: {1}, relative_path: {2}").format(created_model_count, model_data['location'],
+                                model_data['model_relative_path'])
+            created_model.update(**model_data)
+            created_model.save()
     except:
         log.exception("Could not make ModelCreator object.")
         return False, "Failed to create model!"

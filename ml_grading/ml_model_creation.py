@@ -85,6 +85,25 @@ def handle_single_location(location):
                     prompt = str(first_sub.prompt.encode('ascii', 'ignore'))
                     rubric = str(first_sub.rubric.encode('ascii', 'ignore'))
 
+                    created_model_dict_initial={
+                        'max_score' : first_sub.max_score,
+                        'prompt' : prompt,
+                        'rubric' : rubric,
+                        'location' : location + suffix,
+                        'course_id' : first_sub.course_id,
+                        'submission_ids_used' : json.dumps(ids),
+                        'problem_id' :  first_sub.problem_id,
+                        'model_relative_path' : relative_model_path,
+                        'model_full_path' : full_model_path,
+                        'number_of_essays' : graded_sub_count,
+                        'creation_succeeded': False,
+                        'creation_started' : True,
+                        'creation_finished' : False,
+                        }
+                    transaction.commit_unless_managed()
+                    success, initial_id = ml_grading_util.save_created_model(created_model_dict_initial)
+                    transaction.commit_unless_managed()
+
                     results = create.create(text, scores, prompt, full_model_path)
 
                     scores = [int(score_item) for score_item in scores]
@@ -104,27 +123,18 @@ def handle_single_location(location):
                             results['s3_public_url'] = ""
                             log.exception("Problem saving ML model.")
 
-                    created_model_dict={
-                        'max_score' : first_sub.max_score,
-                        'prompt' : prompt,
-                        'rubric' : rubric,
-                        'location' : location + suffix,
-                        'course_id' : first_sub.course_id,
-                        'submission_ids_used' : json.dumps(ids),
-                        'problem_id' :  first_sub.problem_id,
-                        'model_relative_path' : relative_model_path,
-                        'model_full_path' : full_model_path,
-                        'number_of_essays' : graded_sub_count,
+                    created_model_dict_final={
                         'cv_kappa' : results['cv_kappa'],
                         'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
                         'creation_succeeded': results['success'],
                         's3_public_url' : results['s3_public_url'],
-                        'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
+                        'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
                         's3_bucketname' : str(settings.S3_BUCKETNAME),
+                        'creation_finished' : True,
                         }
 
                     transaction.commit_unless_managed()
-                    success, id = ml_grading_util.save_created_model(created_model_dict)
+                    success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
 
                     if not success:
                         log.error("ModelCreator creation failed.  Error: {0}".format(id))
