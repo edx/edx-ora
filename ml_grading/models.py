@@ -45,7 +45,7 @@ class CreatedModel(models.Model):
 
     creation_succeeded=models.BooleanField(default=False)
     creation_started =models.BooleanField(default=False)
-    created_finished = models.BooleanField(default=False)
+    creation_finished = models.BooleanField(default=False)
 
     #Amazon S3 stuff if we do use it
     model_stored_in_s3=models.BooleanField(default=False)
