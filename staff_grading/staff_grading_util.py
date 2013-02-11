@@ -119,6 +119,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
         )
 
         #Order by confidence if we are looking for finished ML submissions
+        finished_submission_text=submission_text_graded_by_instructor(location)
         if types_to_check_for == "ML" and submission_state_to_check_for == SubmissionState.finished:
             to_be_graded = to_be_graded.filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
 
@@ -131,7 +132,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
                 to_be_graded_obj = to_be_graded[i]
             except:
                 return False, 0
-            if to_be_graded_obj is not None:
+            if to_be_graded_obj is not None and to_be_graded_obj.student_response not in finished_submission_text:
                 to_be_graded_obj.state = SubmissionState.being_graded
                 to_be_graded_obj.next_grader_type="IN"
                 to_be_graded_obj.save()
