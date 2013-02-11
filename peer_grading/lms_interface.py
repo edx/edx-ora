@@ -100,6 +100,7 @@ def save_grade(request):
         raise Http404
 
     post_data = request.POST.dict().copy()
+    log.debug(post_data)
 
     for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback', 'submission_flagged']:
         if not tag in post_data:
@@ -371,4 +372,29 @@ def get_notifications(request):
 
     util.log_connection_data()
     return util._success_response({'student_needs_to_peer_grade' : student_needs_to_peer_grade}, _INTERFACE_VERSION)
+
+def get_peer_grading_data_for_location(request):
+    if request.method != 'GET':
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    for tag in ['student_id', 'location']:
+        if tag not in request.GET:
+            return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
+
+    location = request.POST.get('location')
+    student_id = request.POST.get('student_id')
+
+    student_sub_count=Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE").count()
+    submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
+    submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
+
+    peer_data = {
+        'count_graded' : submissions_graded,
+        'count_required' : submissions_required,
+    }
+
+    util.log_connection_data()
+    return util._success_response(peer_data, _INTERFACE_VERSION)
+
+
 
