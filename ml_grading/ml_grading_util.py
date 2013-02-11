@@ -5,6 +5,7 @@ import re
 from django.utils import timezone
 from django.db import transaction
 import pickle
+import logging
 
 from models import CreatedModel
 
@@ -13,6 +14,7 @@ from boto.s3.key import Key
 
 import controller.rubric_functions
 from controller.models import Submission, SubmissionState, Grader
+log=logging.getLogger(__name__)
 
 def create_directory(model_path):
     directory=path(model_path).dirname()
