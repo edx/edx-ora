@@ -85,9 +85,10 @@ def handle_single_location(location):
                     prompt = str(first_sub.prompt.encode('ascii', 'ignore'))
                     rubric = str(first_sub.rubric.encode('ascii', 'ignore'))
 
+                    transaction.commit_unless_managed()
                     success, model_started = ml_grading_util.check_if_model_started(location)
 
-                    if not started:
+                    if not model_started:
                         created_model_dict_initial={
                             'max_score' : first_sub.max_score,
                             'prompt' : prompt,
