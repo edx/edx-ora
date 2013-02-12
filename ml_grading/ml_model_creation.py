@@ -95,6 +95,8 @@ def handle_single_location(location):
                         now = timezone.now()
                         second_difference = (now - created_model.date_modified).total_seconds()
                         if second_difference > settings.TIME_BEFORE_REMOVING_STARTED_MODEL:
+                            log.error("Model for location {0} started over {1} seconds ago, removing and re-attempting.".format(
+                                location + suffix, settings.TIME_BEFORE_REMOVING_STARTED_MODEL))
                             created_model.delete()
                             model_started = False
 
