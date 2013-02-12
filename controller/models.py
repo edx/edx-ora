@@ -77,6 +77,10 @@ class Submission(models.Model):
     is_plagiarized = models.BooleanField(default=False)
     duplicate_submission_id = models.IntegerField(null=True, blank=True)
 
+    #Control logic passed from the LMS
+    skip_basic_checks = models.BooleanField(default = False)
+
+
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
             self.student_id, self.course_id, self.problem_id)
