@@ -381,8 +381,8 @@ def get_peer_grading_data_for_location(request):
         if tag not in request.GET:
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
 
-    location = request.POST.get('location')
-    student_id = request.POST.get('student_id')
+    location = request.GET.get('location')
+    student_id = request.GET.get('student_id')
 
     student_sub_count=Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE").count()
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
@@ -391,7 +391,11 @@ def get_peer_grading_data_for_location(request):
     peer_data = {
         'count_graded' : submissions_graded,
         'count_required' : submissions_required,
+        'student_sub_count' : student_sub_count,
     }
+    log.debug(peer_data)
+    log.debug(student_id)
+    log.debug(location)
 
     util.log_connection_data()
     return util._success_response(peer_data, _INTERFACE_VERSION)

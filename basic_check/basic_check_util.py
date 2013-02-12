@@ -67,8 +67,12 @@ def simple_quality_check(string, initial_display, student_id, skip_basic_checks)
            basic_check['grammar_per_char'] > GRAMMAR_MAXIMUM or basic_check['spelling_per_char'] > SPELLING_MAXIMUM
             or string==initial_display):
             quality_dict['score'] = 0
+    else:
+        if(string==initial_display):
+            quality_dict['score'] = 0
 
     #If student is banned by staff from peer grading, then they will not get any feedback here.
+    log.debug(quality_dict)
     success, quality_dict = handle_banned_students(student_id, quality_dict)
 
     return True, quality_dict
