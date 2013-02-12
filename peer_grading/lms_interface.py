@@ -393,9 +393,6 @@ def get_peer_grading_data_for_location(request):
         'count_required' : submissions_required,
         'student_sub_count' : student_sub_count,
     }
-    log.debug(peer_data)
-    log.debug(student_id)
-    log.debug(location)
 
     util.log_connection_data()
     return util._success_response(peer_data, _INTERFACE_VERSION)
