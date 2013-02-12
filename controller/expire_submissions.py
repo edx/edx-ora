@@ -10,7 +10,9 @@ from models import GraderStatus, SubmissionState, Submission, Grader, Rubric, Ru
 from staff_grading import staff_grading_util
 from xqueue_interface import handle_submission
 from ml_grading import ml_grading_util
+from ml_grading.models import CreatedModel
 from django.db import transaction
+import os
 
 from statsd import statsd
 
@@ -263,3 +265,22 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
     sub.save()
 
     return True
+
+def remove_old_model_files():
+    transaction.commit_unless_managed()
+    locations = [cm['location'] for cm in CreatedModel.objects.all().values('location').distinct()]
+    path_whitelist = []
+    for loc in locations:
+        success, latest_model = ml_grading_util.get_latest_created_model(loc)
+        if success:
+            grader_path = latest_model.model_relative_path
+            path_whitelist.append(str(grader_path))
+    onlyfiles = [ f for f in os.listdir(settings.ML_MODEL_PATH) if os.path.isfile(os.path.join(settings.ML_MODEL_PATH,f)) ]
+    files_to_delete = [f for f in onlyfiles if f not in path_whitelist]
+    could_not_delete_list=[]
+    for i in xrange(0,len(files_to_delete)):
+        file = files_to_delete[i]
+        try:
+            os.remove(str(os.path.join(settings.ML_MODEL_PATH,file)))
+        except:
+            could_not_delete_list.append(i)

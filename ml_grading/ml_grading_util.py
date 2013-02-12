@@ -37,6 +37,7 @@ def get_model_path(location, suffix=""):
     full_path=os.path.join(base_path,fixed_location)
     return fixed_location,full_path
 
+
 def get_latest_created_model(location):
     """
     Gets the current model file for a given location
