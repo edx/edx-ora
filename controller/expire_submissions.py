@@ -284,3 +284,6 @@ def remove_old_model_files():
             os.remove(str(os.path.join(settings.ML_MODEL_PATH,file)))
         except:
             could_not_delete_list.append(i)
+    
+    log.debug("Deleted {0} old ML models.  Could not delete {1}".format((
+        len(files_to_delete)-len(could_not_delete_list)), len(could_not_delete_list)))
