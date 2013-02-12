@@ -71,13 +71,13 @@ def check_if_model_started(location):
     ).order_by("-date_created")[:1]
 
     if created_models.count()==0:
-        return True, model_started
+        return True, model_started, ""
 
     created_model = created_models[0]
     if created_model.creation_finished==False:
         model_started = True
 
-    return True, model_started
+    return True, model_started, created_model
 
 def check_for_all_model_and_rubric_success(location):
     subs_graded_by_instructor = Submission.objects.filter(location=location,

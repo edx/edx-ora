@@ -86,7 +86,17 @@ def handle_single_location(location):
                     rubric = str(first_sub.rubric.encode('ascii', 'ignore'))
 
                     transaction.commit_unless_managed()
-                    success, model_started = ml_grading_util.check_if_model_started(location)
+
+                    #Checks to see if another model creator process has started amodel for this location
+                    success, model_started, created_model = ml_grading_util.check_if_model_started(location)
+
+                    #Checks to see if model was started a long time ago, and removes and retries if it was.
+                    if model_started:
+                        now = timezone.now()
+                        second_difference = (now - created_model.date_modified).total_seconds()
+                        if second_difference > settings.TIME_BEFORE_REMOVING_STARTED_MODEL:
+                            created_model.delete()
+                            model_started = False
 
                     if not model_started:
                         created_model_dict_initial={
