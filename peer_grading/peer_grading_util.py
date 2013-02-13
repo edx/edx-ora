@@ -1,5 +1,5 @@
 from django.db.models import Count
-from controller.models import SubmissionState, GraderStatus, Grader, Submission
+from controller.models import SubmissionState, GraderStatus, Grader, Submission, NotificationTypes, NotificationsSeen
 import logging
 from metrics import metrics_util
 from metrics.timing_functions import initialize_timing
@@ -139,7 +139,20 @@ def get_peer_grading_notifications(course_id, student_id):
 
         if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
             student_needs_to_peer_grade = True
-            return success, student_needs_to_peer_grade
+            notification_created_recently = NotificationsSeen.check_for_recent_notifications(
+                student_id,
+                location = location,
+                notification_type=NotificationTypes.peer_grading
+            )
+
+            if not notification_created_recently:
+                notification_seen = NotificationsSeen(
+                    student_id = student_id,
+                    course_id = course_id,
+                    location = location,
+                    notification_type = NotificationTypes.peer_grading
+                )
+                notification_seen.save()
 
     return success, student_needs_to_peer_grade
 

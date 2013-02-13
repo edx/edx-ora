@@ -28,6 +28,7 @@ MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should 
 DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to display to students
 MIN_RANDOMIZED_PROCESS_SLEEP_TIME = 0 # Minimum time for a process to sleep, to avoid process collision
 MAX_RANDOMIZED_PROCESS_SLEEP_TIME = 10 * 60 # Maximum time for a process to sleep, to avoid process collision
+RECENT_NOTIFICATION_CHECK_INTERVAL = 1 * 24 * 60 * 60 #in seconds. Will not save a record for a student notification check if it happens at least this timeframe apart
 
 #Config for specific graders
 #ML

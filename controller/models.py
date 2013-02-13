@@ -11,6 +11,13 @@ class SubmissionState():
     finished="F"
     flagged= "L"
 
+class NotificationTypes():
+    peer_grading = 'student_needs_to_peer_grade'
+    staff_grading = 'staff_needs_to_grade'
+    flagged_submissions = 'flagged_submissions_exist'
+    new_grading_to_view = 'new_student_grading_to_view'
+    overall = 'overall_need_to_check'
+
 GRADER_TYPE = (
     ('ML', 'ML'),
     ('IN', 'Instructor'),
@@ -304,4 +311,10 @@ class NotificationsSeen(models.Model):
     notification_type = models.CharField(max_length=CHARFIELD_LEN_SMALL)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def check_for_recent_notifications(student_id,location, notification_type):
+        seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__lt=timezone.now()).count()
+        return seen > 0
+
 

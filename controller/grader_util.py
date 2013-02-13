@@ -4,7 +4,7 @@ from create_grader import create_grader
 from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
-from models import GraderStatus, SubmissionState, STATE_CODES
+from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
 import expire_submissions
 from statsd import statsd
 import json
@@ -373,32 +373,32 @@ def check_for_combined_notifications(notification_dict):
     combined_notifications = {}
     success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
     if success:
-        combined_notifications.update({'student_needs_to_peer_grade' : student_needs_to_peer_grade})
+        combined_notifications.update({NotificationTypes.peer_grading : student_needs_to_peer_grade})
         if student_needs_to_peer_grade==True:
             overall_need_to_check=True
 
     if user_is_staff==True:
         success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
         if success:
-            combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
+            combined_notifications.update({NotificationTypes.staff_grading : staff_needs_to_grade})
             if staff_needs_to_grade==True:
                 overall_need_to_check=True
 
         success, flagged_submissions_exist = peer_grading_util.get_flagged_submission_notifications(course_id)
         if success:
-            combined_notifications.update({'flagged_submissions_exist' : flagged_submissions_exist})
+            combined_notifications.update({NotificationTypes.flagged_submissions : flagged_submissions_exist})
             if flagged_submissions_exist==True:
                 overall_need_to_check=True
 
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
     if success:
         combined_notifications.update({
-            'new_student_grading_to_view' : new_student_grading
+            NotificationTypes.new_grading_to_view : new_student_grading
         })
         if new_student_grading==True:
             overall_need_to_check=True
 
-    combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
+    combined_notifications.update({NotificationTypes.overall : overall_need_to_check})
     return overall_success, combined_notifications
 
 
