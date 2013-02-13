@@ -140,9 +140,10 @@ def get_peer_grading_notifications(course_id, student_id):
         if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
             student_needs_to_peer_grade = True
             notification_created_recently = NotificationsSeen.check_for_recent_notifications(
-                student_id,
+                student_id = student_id,
                 location = location,
-                notification_type=NotificationTypes.peer_grading
+                notification_type=NotificationTypes.peer_grading,
+                recent_notification_interval=settings.RECENT_NOTIFICATION_CHECK_INTERVAL
             )
 
             if not notification_created_recently:

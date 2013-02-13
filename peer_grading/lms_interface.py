@@ -6,8 +6,8 @@ from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission, Grader
-from controller.models import SubmissionState, GraderStatus
+from controller.models import Submission, Grader, NotificationsSeen
+from controller.models import SubmissionState, GraderStatus, NotificationTypes
 from controller import util
 
 import calibration
@@ -389,6 +389,15 @@ def get_peer_grading_data_for_location(request):
     submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
 
     ##Check to see if submissions were available to grade in the past week
+    notification_seen_recently = NotificationsSeen.check_for_recent_notifications(
+        student_id = student_id,
+        location = location,
+        notification_type=NotificationTypes.peer_grading,
+        recent_notification_interval=settings.PEER_GRADING_TIMEOUT_INTERVAL
+    )
+
+    if not notification_seen_recently:
+        submissions_required = submissions_graded
 
     peer_data = {
         'count_graded' : submissions_graded,
