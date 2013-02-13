@@ -47,6 +47,7 @@ PEER_GRADER_COUNT = 1 #Number of peer graders for each submission
 PEER_GRADER_MINIMUM_TO_CALIBRATE = 3 #Minimum number of calibration essays each peer grader will see
 PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6 #Maximum number of calibration essays each peer grader will see
 REQUIRED_PEER_GRADING_PER_STUDENT = 3 #Student must peer grade at least 3 submissions for each question they answer.
+PEER_GRADING_TIMEOUT_INTERVAL = 7 * 24 * 60 * 60 #In seconds.  Time before a student is marked as "finished grading" if they have not peer graded anything.
 
 #Error units are defined as the absolute value of student calibration score minus actual score divided by maximum score
 #abs(student_score-actual_score)/max_score

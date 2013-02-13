@@ -297,5 +297,11 @@ class RubricOption(models.Model):
         formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
         return formatted_item
 
-
+class NotificationsSeen(models.Model):
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    notification_type = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
 

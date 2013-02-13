@@ -388,6 +388,8 @@ def get_peer_grading_data_for_location(request):
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
     submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
 
+    ##Check to see if submissions were available to grade in the past week
+
     peer_data = {
         'count_graded' : submissions_graded,
         'count_required' : submissions_required,
