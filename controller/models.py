@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
+import datetime
 
 class GraderStatus():
     failure="F"
@@ -314,7 +316,9 @@ class NotificationsSeen(models.Model):
 
     @staticmethod
     def check_for_recent_notifications(student_id,location, notification_type):
-        seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__lt=timezone.now()).count()
+        now = timezone.now()
+        recent_check_time = now - datetime.timedelta(seconds=settings.RECENT_NOTIFICATION_CHECK_INTERVAL)
+        seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__gt=recent_check_time).count()
         return seen > 0
 
 
