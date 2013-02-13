@@ -122,7 +122,18 @@ def save_grade(request):
 
     is_submission_flagged = request.POST.get('submission_flagged', False)
     if isinstance(is_submission_flagged, basestring):
-        is_submission_flagged = (is_submission_flagged in ["True", 'true', "TRUE"])
+        is_submission_flagged = (is_submission_flagged.lower()=="true")
+
+    status = GraderStatus.success
+    confidence = 1.0
+
+    is_answer_unknown = request.POST.get('answer_unknown', False)
+    if isinstance(is_answer_unknown, basestring):
+        is_answer_unknown = (is_answer_unknown.lower()=="true")
+
+    if is_answer_unknown:
+        status = GraderStatus.failure
+        confidence = 0.0
 
     try:
         score = int(score)
@@ -152,9 +163,9 @@ def save_grade(request):
          'grader_id': grader_id,
          'grader_type': 'PE',
          # Humans always succeed (if they grade at all)...
-         'status': 'S',
+         'status': status,
          # ...and they're always confident too.
-         'confidence': 1.0,
+         'confidence': confidence,
          #And they don't make any errors
          'errors' : "",
          'rubric_scores_complete' : rubric_scores_complete,
