@@ -49,7 +49,7 @@ def get_next_submission(request):
     (found, sub_id) = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
-        error_message="No current grading."
+        error_message="You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded."
         log.debug(error_message)
         return  util._error_response(error_message, _INTERFACE_VERSION)
 
