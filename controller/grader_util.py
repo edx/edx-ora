@@ -185,15 +185,17 @@ def get_eta_for_submission(location):
         return False, "No current problems for given location."
 
     eta = settings.DEFAULT_ESTIMATED_GRADING_TIME
-    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub_graders.grader_settings)
-    grader_settings = get_grader_settings(grader_settings_path)
+    grader_type = sub_graders.preferred_grader_type
 
-    if grader_settings['grader_type'] in ["ML", "IN"]:
+    if grader_type == "ML":
         success= ml_grading_util.check_for_all_model_and_rubric_success(location)
         if success:
             eta = settings.ML_ESTIMATED_GRADING_TIME
-    elif grader_settings['grader_type'] in "PE":
+    elif grader_type == "PE":
         #Just use the default timing for now.
+        pass
+    elif grader_type=="IN":
+        #Use default for now
         pass
 
     return True, eta
@@ -347,11 +349,18 @@ def get_problems_student_has_tried(student_id, course_id):
             sub_codes = [s[0] for s in STATE_CODES]
             state_index = sub_codes.index(sub_state)
             sub_human_state = STATE_CODES[state_index][1]
+            eta = 0
+            eta_available = False
+            if sub_state in ["W","C"]:
+                success, eta = get_eta_for_submission(location)
+                eta_available = success
             sub_dict={
                 'state' : sub_human_state,
                 'location' : location,
                 'grader_type' : last_sub.previous_grader_type,
                 'problem_name' : last_sub.problem_id,
+                'eta' : eta,
+                'eta_available' : eta_available,
             }
             sub_list.append(sub_dict)
     return success, sub_list
