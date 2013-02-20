@@ -188,9 +188,10 @@ def get_eta_for_submission(location):
     grader_type = sub_graders.preferred_grader_type
 
     if grader_type == "ML":
-        success= ml_grading_util.check_for_all_model_and_rubric_success(location)
-        if success:
-            eta = settings.ML_ESTIMATED_GRADING_TIME
+        #success= ml_grading_util.check_for_all_model_and_rubric_success(location)
+        #if success:
+        #    eta = settings.ML_ESTIMATED_GRADING_TIME
+        pass
     elif grader_type == "PE":
         #Just use the default timing for now.
         pass
