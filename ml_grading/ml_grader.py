@@ -83,8 +83,7 @@ def handle_single_item(controller_session):
 
                 success, grader_data=load_model_file(created_model,use_full_path=False)
                 if success:
-                    results = grade.grade(grader_data, None,
-                        student_response) #grader config is none for now, could be different later
+                    results = grade.grade(grader_data, student_response)
                 else:
                     results=RESULT_FAILURE_DICT
 
@@ -94,8 +93,7 @@ def handle_single_item(controller_session):
                     try:
                         success, grader_data=load_model_file(created_model,use_full_path=True)
                         if success:
-                            results = grade.grade(grader_data, None,
-                                student_response) #grader config is none for now, could be different later
+                            results = grade.grade(grader_data, student_response)
                         else:
                             results=RESULT_FAILURE_DICT
                     except:

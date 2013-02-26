@@ -120,7 +120,7 @@ def handle_single_location(location):
                         success, initial_id = ml_grading_util.save_created_model(created_model_dict_initial)
                         transaction.commit_unless_managed()
 
-                        results = create.create(text, scores, prompt, full_model_path)
+                        results = create.create(text, scores, prompt)
 
                         scores = [int(score_item) for score_item in scores]
                         #Add in needed stuff that ml creator does not pass back
