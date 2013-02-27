@@ -29,7 +29,7 @@ def perform_spelling_and_grammar_checks(string):
     return feedback, e_set
 
 
-def simple_quality_check(string, initial_display, student_id):
+def simple_quality_check(string, initial_display, student_id, skip_basic_checks):
     """
     Performs a simple sanity test on an input string
     Input:
@@ -52,22 +52,27 @@ def simple_quality_check(string, initial_display, student_id):
     CHARS_PER_WORD_MINIMUM = 3
 
     quality_dict = {'feedback': {}, 'score': 1, 'grader_type': 'BC', 'status': GraderStatus.success}
-    try:
-        basic_check, e_set = perform_spelling_and_grammar_checks(string)
-        total_length = len(string)
-        word_length_ratio = total_length / float(len(e_set._tokens[0])+.1)
-    except:
-        log.exception("could not run basic checks.")
-        quality_dict['status'] = GraderStatus.failure
-        return False, quality_dict
+    if not skip_basic_checks:
+        try:
+            basic_check, e_set = perform_spelling_and_grammar_checks(string)
+            total_length = len(string)
+            word_length_ratio = total_length / float(len(e_set._tokens[0])+.1)
+        except:
+            log.exception("could not run basic checks.")
+            quality_dict['status'] = GraderStatus.failure
+            return False, quality_dict
 
-    quality_dict['feedback'] = json.dumps({k: basic_check[k] for k in ['markup_text', 'spelling', 'grammar']})
-    if(total_length < LENGTH_MINIMUM or word_length_ratio <= CHARS_PER_WORD_MINIMUM or
-       basic_check['grammar_per_char'] > GRAMMAR_MAXIMUM or basic_check['spelling_per_char'] > SPELLING_MAXIMUM
-        or string==initial_display):
-        quality_dict['score'] = 0
+        quality_dict['feedback'] = json.dumps({k: basic_check[k] for k in ['markup_text', 'spelling', 'grammar']})
+        if(total_length < LENGTH_MINIMUM or word_length_ratio <= CHARS_PER_WORD_MINIMUM or
+           basic_check['grammar_per_char'] > GRAMMAR_MAXIMUM or basic_check['spelling_per_char'] > SPELLING_MAXIMUM
+            or string==initial_display):
+            quality_dict['score'] = 0
+    else:
+        if(string==initial_display):
+            quality_dict['score'] = 0
 
     #If student is banned by staff from peer grading, then they will not get any feedback here.
+    log.debug(quality_dict)
     success, quality_dict = handle_banned_students(student_id, quality_dict)
 
     return True, quality_dict

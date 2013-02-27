@@ -85,59 +85,88 @@ def handle_single_location(location):
                     prompt = str(first_sub.prompt.encode('ascii', 'ignore'))
                     rubric = str(first_sub.rubric.encode('ascii', 'ignore'))
 
-                    results = create.create(text, scores, prompt, full_model_path)
-
-                    scores = [int(score_item) for score_item in scores]
-                    #Add in needed stuff that ml creator does not pass back
-                    results.update({'text' : text, 'score' : scores, 'model_path' : full_model_path,
-                                    'relative_model_path' : relative_model_path, 'prompt' : prompt})
-
-                    #Try to create model if ml model creator was successful
-                    if results['success']:
-                        try:
-                            success, s3_public_url = save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
-                            results.update({'s3_public_url' : s3_public_url, 'success' : success})
-                            if not success:
-                                results['errors'].append("Could not save model.")
-                        except:
-                            results['errors'].append("Could not save model.")
-                            results['s3_public_url'] = ""
-                            log.exception("Problem saving ML model.")
-
-                    created_model_dict={
-                        'max_score' : first_sub.max_score,
-                        'prompt' : prompt,
-                        'rubric' : rubric,
-                        'location' : location + suffix,
-                        'course_id' : first_sub.course_id,
-                        'submission_ids_used' : json.dumps(ids),
-                        'problem_id' :  first_sub.problem_id,
-                        'model_relative_path' : relative_model_path,
-                        'model_full_path' : full_model_path,
-                        'number_of_essays' : graded_sub_count,
-                        'cv_kappa' : results['cv_kappa'],
-                        'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
-                        'creation_succeeded': results['success'],
-                        's3_public_url' : results['s3_public_url'],
-                        'save_to_s3' : settings.USE_S3_TO_STORE_MODELS,
-                        's3_bucketname' : str(settings.S3_BUCKETNAME),
-                        }
-
                     transaction.commit_unless_managed()
-                    success, id = ml_grading_util.save_created_model(created_model_dict)
 
-                    if not success:
-                        log.error("ModelCreator creation failed.  Error: {0}".format(id))
+                    #Checks to see if another model creator process has started amodel for this location
+                    success, model_started, created_model = ml_grading_util.check_if_model_started(location)
+
+                    #Checks to see if model was started a long time ago, and removes and retries if it was.
+                    if model_started:
+                        now = timezone.now()
+                        second_difference = (now - created_model.date_modified).total_seconds()
+                        if second_difference > settings.TIME_BEFORE_REMOVING_STARTED_MODEL:
+                            log.error("Model for location {0} started over {1} seconds ago, removing and re-attempting.".format(
+                                location + suffix, settings.TIME_BEFORE_REMOVING_STARTED_MODEL))
+                            created_model.delete()
+                            model_started = False
+
+                    if not model_started:
+                        created_model_dict_initial={
+                            'max_score' : first_sub.max_score,
+                            'prompt' : prompt,
+                            'rubric' : rubric,
+                            'location' : location + suffix,
+                            'course_id' : first_sub.course_id,
+                            'submission_ids_used' : json.dumps(ids),
+                            'problem_id' :  first_sub.problem_id,
+                            'model_relative_path' : relative_model_path,
+                            'model_full_path' : full_model_path,
+                            'number_of_essays' : graded_sub_count,
+                            'creation_succeeded': False,
+                            'creation_started' : True,
+                            'creation_finished' : False,
+                            }
+                        transaction.commit_unless_managed()
+                        success, initial_id = ml_grading_util.save_created_model(created_model_dict_initial)
+                        transaction.commit_unless_managed()
+
+                        results = create.create(text, scores, prompt)
+
+                        scores = [int(score_item) for score_item in scores]
+                        #Add in needed stuff that ml creator does not pass back
+                        results.update({'text' : text, 'score' : scores, 'model_path' : full_model_path,
+                                        'relative_model_path' : relative_model_path, 'prompt' : prompt})
+
+                        #Try to create model if ml model creator was successful
+                        if results['success']:
+                            try:
+                                success, s3_public_url = save_model_file(results,settings.USE_S3_TO_STORE_MODELS)
+                                results.update({'s3_public_url' : s3_public_url, 'success' : success})
+                                if not success:
+                                    results['errors'].append("Could not save model.")
+                            except:
+                                results['errors'].append("Could not save model.")
+                                results['s3_public_url'] = ""
+                                log.exception("Problem saving ML model.")
+
+                        created_model_dict_final={
+                            'cv_kappa' : results['cv_kappa'],
+                            'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
+                            'creation_succeeded': results['success'],
+                            's3_public_url' : results['s3_public_url'],
+                            'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
+                            's3_bucketname' : str(settings.S3_BUCKETNAME),
+                            'creation_finished' : True,
+                            'model_relative_path' : relative_model_path,
+                            'model_full_path' : full_model_path,
+                            'location' : location + suffix,
+                            }
+
+                        transaction.commit_unless_managed()
+                        success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
+
+                        if not success:
+                            log.error("ModelCreator creation failed.  Error: {0}".format(id))
+                            statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
+                                tags=["success:False", "location:{0}".format(location)])
+
+                        log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
+                            full_model_path,
+                            results['success'],
+                            results['errors'],
+                        ))
                         statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
-                            tags=["success:False", "location:{0}".format(location)])
-
-                    log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
-                        full_model_path,
-                        results['success'],
-                        results['errors'],
-                    ))
-                    statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
-                        tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
+                            tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
         util.log_connection_data()
     except:
         log.exception("Problem creating model for location {0}".format(location))

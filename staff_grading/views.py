@@ -169,6 +169,9 @@ def save_grade(request):
     skipped = request.POST.get('skipped')=="True"
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
     rubric_scores = request.POST.getlist('rubric_scores', [])
+    is_submission_flagged = request.POST.get('submission_flagged', False)
+    if isinstance(is_submission_flagged, basestring):
+        is_submission_flagged = is_submission_flagged.lower() == 'true'
 
     if (# These have to be truthy
         not (course_id and grader_id and submission_id) or
@@ -227,7 +230,8 @@ def save_grade(request):
          #And they don't make errors
          'errors' : "",
          'rubric_scores_complete' : rubric_scores_complete,
-         'rubric_scores' : rubric_scores
+         'rubric_scores' : rubric_scores,
+         'is_submission_flagged' : is_submission_flagged,
          }
 
     success, header = grader_util.create_and_handle_grader_object(d)

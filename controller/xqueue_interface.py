@@ -78,6 +78,10 @@ def submit(request):
                 submission_time_string = util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
 
+                skip_basic_checks = util._value_or_default(body['grader_payload']['skip_basic_checks'], False)
+                if isinstance(skip_basic_checks, basestring):
+                    skip_basic_checks = (skip_basic_checks.lower() == "true")
+
                 #TODO: find a better way to do this
                 #Need to set rubric to whatever the first submission for this location had
                 #as its rubric.  If the rubric is changed in the course XML, it will break things.
@@ -113,6 +117,7 @@ def submit(request):
                     grader_settings=grader_settings,
                     initial_display=initial_display,
                     answer=answer,
+                    skip_basic_checks = skip_basic_checks,
                 )
 
                 if created==False:
@@ -164,7 +169,8 @@ def handle_submission(sub):
         sub.next_grader_type = "BC"
         sub.save()
         timing_functions.initialize_timing(sub.id)
-        success, check_dict = basic_check_util.simple_quality_check(sub.student_response, sub.initial_display, sub.student_id)
+        success, check_dict = basic_check_util.simple_quality_check(sub.student_response,
+            sub.initial_display, sub.student_id, sub.skip_basic_checks)
         if not success:
             log.exception("could not run basic checks on {0}".format(sub.student_response))
 

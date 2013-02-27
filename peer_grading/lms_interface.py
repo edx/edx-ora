@@ -6,8 +6,8 @@ from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission, Grader
-from controller.models import SubmissionState, GraderStatus
+from controller.models import Submission, Grader, NotificationsSeen
+from controller.models import SubmissionState, GraderStatus, NotificationTypes
 from controller import util
 
 import calibration
@@ -49,7 +49,7 @@ def get_next_submission(request):
     (found, sub_id) = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
-        error_message="No current grading."
+        error_message="You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded."
         log.debug(error_message)
         return  util._error_response(error_message, _INTERFACE_VERSION)
 
@@ -122,7 +122,18 @@ def save_grade(request):
 
     is_submission_flagged = request.POST.get('submission_flagged', False)
     if isinstance(is_submission_flagged, basestring):
-        is_submission_flagged = (is_submission_flagged in ["True", 'true', "TRUE"])
+        is_submission_flagged = (is_submission_flagged.lower()=="true")
+
+    status = GraderStatus.success
+    confidence = 1.0
+
+    is_answer_unknown = request.POST.get('answer_unknown', False)
+    if isinstance(is_answer_unknown, basestring):
+        is_answer_unknown = (is_answer_unknown.lower()=="true")
+
+    if is_answer_unknown:
+        status = GraderStatus.failure
+        confidence = 0.0
 
     try:
         score = int(score)
@@ -152,9 +163,9 @@ def save_grade(request):
          'grader_id': grader_id,
          'grader_type': 'PE',
          # Humans always succeed (if they grade at all)...
-         'status': 'S',
+         'status': status,
          # ...and they're always confident too.
-         'confidence': 1.0,
+         'confidence': confidence,
          #And they don't make any errors
          'errors' : "",
          'rubric_scores_complete' : rubric_scores_complete,
@@ -381,16 +392,28 @@ def get_peer_grading_data_for_location(request):
         if tag not in request.GET:
             return util._error_response("Missing required key {0}".format(tag), _INTERFACE_VERSION)
 
-    location = request.POST.get('location')
-    student_id = request.POST.get('student_id')
+    location = request.GET.get('location')
+    student_id = request.GET.get('student_id')
 
     student_sub_count=Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE").count()
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
     submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
 
+    ##Check to see if submissions were available to grade in the past week
+    notification_seen_recently = NotificationsSeen.check_for_recent_notifications(
+        student_id = student_id,
+        location = location,
+        notification_type=NotificationTypes.peer_grading,
+        recent_notification_interval=settings.PEER_GRADING_TIMEOUT_INTERVAL
+    )
+
+    if not notification_seen_recently:
+        submissions_required = submissions_graded
+
     peer_data = {
         'count_graded' : submissions_graded,
         'count_required' : submissions_required,
+        'student_sub_count' : student_sub_count,
     }
 
     util.log_connection_data()

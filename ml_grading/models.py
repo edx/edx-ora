@@ -37,13 +37,15 @@ class CreatedModel(models.Model):
     #being used to also evaluate them. (ie, this is "True" error)
     #Kappa is interrater agreement-closer to 1 is better.
     #If the actual scores and the predicted scores perfectly agree, kappa will be 1.
-    cv_kappa=models.DecimalField(max_digits=10,decimal_places=9)
+    cv_kappa=models.DecimalField(max_digits=10,decimal_places=9, default=1)
 
     #Mean absolute error is mean(abs(actual_score-predicted_score))
     #A mean absolute error of .5 means that, on average, the predicted score is +/- .5 points from the actual score
-    cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10)
+    cv_mean_absolute_error=models.DecimalField(max_digits=15,decimal_places=10, default=1)
 
     creation_succeeded=models.BooleanField(default=False)
+    creation_started =models.BooleanField(default=False)
+    creation_finished = models.BooleanField(default=False)
 
     #Amazon S3 stuff if we do use it
     model_stored_in_s3=models.BooleanField(default=False)

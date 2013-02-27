@@ -31,6 +31,7 @@ class Command(NoArgsCommand):
         while flag:
             unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
             for location in unique_locations:
+                time.sleep(random.randint(0, 3))
                 ml_model_creation.handle_single_location(location)
             transaction.commit_unless_managed()
 
