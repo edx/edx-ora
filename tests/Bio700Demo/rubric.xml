@@ -1,0 +1,16 @@
+<rubric>
+    <category>
+	<description>Polarity</description>
+	<option> The response does not incorporate what is needed for a one response. </option>
+	<option> 
+		Correctly identifies polarity changes.
+	</option>
+    </category>
+    <category>
+       <description> Hydrophobia </description>
+       <option> The response does not incorporate what is needed for a one response. </option>
+       <option> 
+		The response ties the polarity changes to a change in bonding behavior with water.
+      </option>
+    </category>
+</rubric>

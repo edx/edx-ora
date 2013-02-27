@@ -28,6 +28,7 @@ MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should 
 DEFAULT_ESTIMATED_GRADING_TIME = 3 * 24 * 60 * 60 # seconds, amount of time to display to students
 MIN_RANDOMIZED_PROCESS_SLEEP_TIME = 0 # Minimum time for a process to sleep, to avoid process collision
 MAX_RANDOMIZED_PROCESS_SLEEP_TIME = 10 * 60 # Maximum time for a process to sleep, to avoid process collision
+RECENT_NOTIFICATION_CHECK_INTERVAL = 1 * 24 * 60 * 60 #in seconds. Will not save a record for a student notification check if it happens at least this timeframe apart
 
 #Config for specific graders
 #ML
@@ -39,6 +40,7 @@ TIME_BETWEEN_ML_GRADER_CHECKS= 5 # seconds.  Time between ML grader checking to 
 USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 S3_BUCKETNAME="OpenEnded"
 ML_ESTIMATED_GRADING_TIME= 5 * 60 #Estimated grading time for machine learning in seconds
+TIME_BEFORE_REMOVING_STARTED_MODEL = 10 * 60 * 60 # in seconds, time before removing an ml model that was started (assume it wont finish)
 
 #Peer
 MIN_TO_USE_PEER=20 #Minimum instructor graded (calibration) essays before peer grading can be used
@@ -46,6 +48,7 @@ PEER_GRADER_COUNT = 1 #Number of peer graders for each submission
 PEER_GRADER_MINIMUM_TO_CALIBRATE = 3 #Minimum number of calibration essays each peer grader will see
 PEER_GRADER_MAXIMUM_TO_CALIBRATE = 6 #Maximum number of calibration essays each peer grader will see
 REQUIRED_PEER_GRADING_PER_STUDENT = 3 #Student must peer grade at least 3 submissions for each question they answer.
+PEER_GRADING_TIMEOUT_INTERVAL = 7 * 24 * 60 * 60 #In seconds.  Time before a student is marked as "finished grading" if they have not peer graded anything.
 
 #Error units are defined as the absolute value of student calibration score minus actual score divided by maximum score
 #abs(student_score-actual_score)/max_score

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+import datetime
 
 class GraderStatus():
     failure="F"
@@ -10,6 +11,13 @@ class SubmissionState():
     waiting_to_be_graded="W"
     finished="F"
     flagged= "L"
+
+class NotificationTypes():
+    peer_grading = 'student_needs_to_peer_grade'
+    staff_grading = 'staff_needs_to_grade'
+    flagged_submissions = 'flagged_submissions_exist'
+    new_grading_to_view = 'new_student_grading_to_view'
+    overall = 'overall_need_to_check'
 
 GRADER_TYPE = (
     ('ML', 'ML'),
@@ -76,6 +84,10 @@ class Submission(models.Model):
     is_duplicate = models.BooleanField(default=False)
     is_plagiarized = models.BooleanField(default=False)
     duplicate_submission_id = models.IntegerField(null=True, blank=True)
+
+    #Control logic passed from the LMS
+    skip_basic_checks = models.BooleanField(default = False)
+
 
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(
@@ -293,5 +305,19 @@ class RubricOption(models.Model):
         formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
         return formatted_item
 
+class NotificationsSeen(models.Model):
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    notification_type = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def check_for_recent_notifications(student_id,location, notification_type, recent_notification_interval):
+        now = timezone.now()
+        recent_check_time = now - datetime.timedelta(seconds=recent_notification_interval)
+        seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__gt=recent_check_time).count()
+        return seen > 0
 
 

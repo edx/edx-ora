@@ -4,7 +4,7 @@ from create_grader import create_grader
 from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
-from models import GraderStatus, SubmissionState, STATE_CODES
+from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
 import expire_submissions
 from statsd import statsd
 import json
@@ -185,15 +185,18 @@ def get_eta_for_submission(location):
         return False, "No current problems for given location."
 
     eta = settings.DEFAULT_ESTIMATED_GRADING_TIME
-    grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub_graders.grader_settings)
-    grader_settings = get_grader_settings(grader_settings_path)
+    grader_type = sub_graders.preferred_grader_type
 
-    if grader_settings['grader_type'] in ["ML", "IN"]:
-        success= ml_grading_util.check_for_all_model_and_rubric_success(location)
-        if success:
-            eta = settings.ML_ESTIMATED_GRADING_TIME
-    elif grader_settings['grader_type'] in "PE":
+    if grader_type == "ML":
+        #success= ml_grading_util.check_for_all_model_and_rubric_success(location)
+        #if success:
+        #    eta = settings.ML_ESTIMATED_GRADING_TIME
+        pass
+    elif grader_type == "PE":
         #Just use the default timing for now.
+        pass
+    elif grader_type=="IN":
+        #Use default for now
         pass
 
     return True, eta
@@ -347,11 +350,18 @@ def get_problems_student_has_tried(student_id, course_id):
             sub_codes = [s[0] for s in STATE_CODES]
             state_index = sub_codes.index(sub_state)
             sub_human_state = STATE_CODES[state_index][1]
+            eta = 0
+            eta_available = False
+            if sub_state in ["W","C"]:
+                success, eta = get_eta_for_submission(location)
+                eta_available = success
             sub_dict={
                 'state' : sub_human_state,
                 'location' : location,
                 'grader_type' : last_sub.previous_grader_type,
                 'problem_name' : last_sub.problem_id,
+                'eta' : eta,
+                'eta_available' : eta_available,
             }
             sub_list.append(sub_dict)
     return success, sub_list
@@ -373,32 +383,32 @@ def check_for_combined_notifications(notification_dict):
     combined_notifications = {}
     success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
     if success:
-        combined_notifications.update({'student_needs_to_peer_grade' : student_needs_to_peer_grade})
+        combined_notifications.update({NotificationTypes.peer_grading : student_needs_to_peer_grade})
         if student_needs_to_peer_grade==True:
             overall_need_to_check=True
 
     if user_is_staff==True:
         success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
         if success:
-            combined_notifications.update({'staff_needs_to_grade' : staff_needs_to_grade})
+            combined_notifications.update({NotificationTypes.staff_grading : staff_needs_to_grade})
             if staff_needs_to_grade==True:
                 overall_need_to_check=True
 
         success, flagged_submissions_exist = peer_grading_util.get_flagged_submission_notifications(course_id)
         if success:
-            combined_notifications.update({'flagged_submissions_exist' : flagged_submissions_exist})
+            combined_notifications.update({NotificationTypes.flagged_submissions : flagged_submissions_exist})
             if flagged_submissions_exist==True:
                 overall_need_to_check=True
 
     success, new_student_grading = check_for_student_grading_notifications(student_id, course_id, last_time_viewed)
     if success:
         combined_notifications.update({
-            'new_student_grading_to_view' : new_student_grading
+            NotificationTypes.new_grading_to_view : new_student_grading
         })
         if new_student_grading==True:
             overall_need_to_check=True
 
-    combined_notifications.update({'overall_need_to_check' : overall_need_to_check})
+    combined_notifications.update({NotificationTypes.overall : overall_need_to_check})
     return overall_success, combined_notifications
 
 

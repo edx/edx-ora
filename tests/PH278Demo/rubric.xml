@@ -1,0 +1,23 @@
+<rubric>
+    <category>
+	<description>Identification of an Effect</description>
+	<option> The response does not incorporate what is needed for a one response. </option>
+	<option> 
+		The response identifies a plausible combination of a climate change effect and region.
+	</option>
+    </category>
+    <category>
+       <description> Impact on Human Health </description>
+       <option> The response does not incorporate what is needed for a one response. </option>
+       <option> 
+		The response indicates how much of a threat to human health the identified climate change effect poses.
+      </option>
+    </category>
+    <category>
+	<description> Evidence/Support</description>
+	<option> The response does not incorporate what is needed for a one response.</option>
+	<option>
+		Adequate evidence is presented to corroborate the threat to human health of the chose climate change effect.
+	</option>
+    </category>
+</rubric>

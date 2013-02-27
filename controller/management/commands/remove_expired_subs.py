@@ -61,6 +61,10 @@ class Command(BaseCommand):
 
                 generate_student_metrics.regenerate_student_data()
 
+                #Remove old ML grading models
+                expire_submissions.remove_old_model_files()
+
+                log.debug("Finished looping through.")
 
             except Exception as err:
                     log.exception("Could not get submissions to expire! Error: {0}".format(err))
