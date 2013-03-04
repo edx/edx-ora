@@ -33,7 +33,7 @@ log = logging.getLogger(__name__)
 def handle_single_location(location):
     try:
         transaction.commit_unless_managed()
-        subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
+        subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)[:settings.MAX_TO_USE_ML]
         log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
             location,
             subs_graded_by_instructor.count(),
