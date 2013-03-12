@@ -220,7 +220,7 @@ clone_repos
 
 # Install system-level dependencies
 bash $BASE/grading-controller/install_system_req.sh
-bash $BASE/machine-learning/install/install_system_req.sh
+bash $BASE/machine-learning/install_system_req.sh
 
 # Activate Python virtualenv
 source $PYTHON_DIR/bin/activate
