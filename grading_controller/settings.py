@@ -20,7 +20,7 @@ MANAGERS = ADMINS
 #General
 GRADING_QUEUES_TO_PULL_FROM=['open-ended']
 MESSAGE_QUEUES_TO_PULL_FROM=['open-ended-message']
-REQUESTS_TIMEOUT = 5    # seconds
+REQUESTS_TIMEOUT = 60    # seconds
 TIME_BETWEEN_XQUEUE_PULLS = 5 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
@@ -33,6 +33,7 @@ RECENT_NOTIFICATION_CHECK_INTERVAL = 1 * 24 * 60 * 60 #in seconds. Will not save
 #Config for specific graders
 #ML
 MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use machine learning
+MAX_TO_USE_ML = 300 #Maximum number of instructor graded essays to use for ml model creation
 ML_PATH = os.path.join(ENV_ROOT, "machine-learning/") #Path to ML repo containing grade.py and create.py
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.

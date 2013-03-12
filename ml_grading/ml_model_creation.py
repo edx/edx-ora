@@ -51,6 +51,7 @@ def handle_single_location(location):
                     success, scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
+            subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
             for m in xrange(0,len(location_suffixes)):
                 log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
                 suffix=location_suffixes[m]

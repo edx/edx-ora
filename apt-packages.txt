@@ -6,7 +6,6 @@ python-virtualenv
 build-essential
 python-dev
 gfortran
-liblapack-dev
 libfreetype6-dev
 libpng12-dev
 libxml2-dev
@@ -14,9 +13,13 @@ libxslt-dev
 yui-compressor
 graphviz
 graphviz-dev
-mysql-server
 libmysqlclient-dev
 libreadline6
 libreadline6-dev
 super
 aspell
+libblas3gf
+libblas-dev
+liblapack3gf
+liblapack-dev
+libatlas-base-dev
