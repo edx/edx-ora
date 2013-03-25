@@ -6,6 +6,7 @@ from django.db import transaction
 import time
 import logging
 from statsd import statsd
+from django import db
 
 log=logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class Command(NoArgsCommand):
 
             #TODO: add in some logic that figures out how many submissions are left to grade and loops based on that
             time.sleep(settings.TIME_BETWEEN_ML_GRADER_CHECKS)
+            db.reset_queries()
 
 
 

@@ -28,11 +28,14 @@ import create
 
 import controller.rubric_functions
 
+import gc
+
 log = logging.getLogger(__name__)
 
 def handle_single_location(location):
     try:
         transaction.commit_unless_managed()
+        gc.collect()
         subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
         log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
             location,
@@ -69,9 +72,8 @@ def handle_single_location(location):
                 #Retrain if no model exists, or every 5 graded essays.
                 if not success or sub_count_diff>=5:
 
-                    combined_data=list(subs_graded_by_instructor.values('student_response', 'id'))
-                    text = [str(i['student_response'].encode('ascii', 'ignore')) for i in combined_data]
-                    ids=[i['id'] for i in combined_data]
+                    text = [str(i.student_response.encode('ascii', 'ignore')) for i in subs_graded_by_instructor]
+                    ids=[i.id for i in subs_graded_by_instructor]
 
                     #TODO: Make queries more efficient
                     #This is for the basic overall score
