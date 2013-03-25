@@ -13,6 +13,7 @@ import json
 import logging
 from statsd import statsd
 import random
+from django import db
 
 import controller.util as util
 from controller.models import Submission, SubmissionState
@@ -33,6 +34,7 @@ class Command(BaseCommand):
         while flag:
             try:
                 gc.collect()
+                db.reset_queries()
                 transaction.commit_unless_managed()
                 subs = Submission.objects.all()
 
