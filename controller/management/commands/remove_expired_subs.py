@@ -13,12 +13,14 @@ import json
 import logging
 from statsd import statsd
 import random
+from django import db
 
 import controller.util as util
 from controller.models import Submission, SubmissionState
 import controller.expire_submissions as expire_submissions
 from staff_grading import staff_grading_util
 from metrics import generate_student_metrics
+import gc
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +33,8 @@ class Command(BaseCommand):
         log.debug("Starting check for expired subs.")
         while flag:
             try:
+                gc.collect()
+                db.reset_queries()
                 transaction.commit_unless_managed()
                 subs = Submission.objects.all()
 
