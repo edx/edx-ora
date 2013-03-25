@@ -4,6 +4,7 @@ import numpy
 from django.conf import settings
 from models import StudentCourseProfile, StudentProfile, DECIMAL_PLACES, FIELDS_TO_EVALUATE
 from django.db import transaction
+import gc
 
 import logging
 
@@ -34,6 +35,7 @@ def regenerate_student_data():
                 error_message = "Could not generate student course profile for student "
                 log.exception(error_message)
         log.debug("{0} students successfully scanned, {1} updated.".format(success_count, change_count))
+        gc.collect()
 
 def read_one_student_data(student_id, course_id):
     transaction.commit_unless_managed()

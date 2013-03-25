@@ -19,6 +19,7 @@ from controller.models import Submission, SubmissionState
 import controller.expire_submissions as expire_submissions
 from staff_grading import staff_grading_util
 from metrics import generate_student_metrics
+import gc
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class Command(BaseCommand):
         log.debug("Starting check for expired subs.")
         while flag:
             try:
+                gc.collect()
                 transaction.commit_unless_managed()
                 subs = Submission.objects.all()
 
