@@ -303,7 +303,7 @@ def save_calibration_essay(request):
         return util._error_response("Failed to create and save calibration record.", _INTERFACE_VERSION)
 
     util.log_connection_data()
-    return util._success_response({'message' : "Successfully saved calibration record.", 'actual_score' : data['actual_score']}, _INTERFACE_VERSION)
+    return util._success_response({'message' : "Successfully saved calibration record.", 'actual_score' : data['actual_score'], 'actual_rubric' : data['actual_rubric']}, _INTERFACE_VERSION)
 
 @csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
