@@ -47,6 +47,7 @@ def create_and_save_calibration_record(calibration_data):
         last_grader = submission.get_last_successful_instructor_grader()
         actual_score = last_grader['score']
         actual_rubric = last_grader['rubric']
+        actual_feedback = last_grader['feedback']
     except:
         error_msg = "Error getting actual score for submission id {0}.".format(calibration_data['submission_id'])
         log.exception(error_msg)
@@ -69,7 +70,7 @@ def create_and_save_calibration_record(calibration_data):
 
     cal_record.save()
 
-    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score, 'actual_rubric' : actual_rubric}
+    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score, 'actual_rubric' : actual_rubric, 'actual_feedback' : actual_feedback}
 
 
 def get_calibration_essay_data(calibration_essay_id):
