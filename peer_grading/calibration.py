@@ -1,6 +1,6 @@
 import random
 from django.conf import settings
-from controller.models import Submission
+from controller.models import Submission, GraderStatus
 import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
 import json
@@ -19,7 +19,9 @@ def create_and_save_calibration_record(calibration_data):
 
     for tag in ['submission_id', 'score', 'feedback', 'student_id', 'location', 'rubric_scores_complete', 'rubric_scores']:
         if not tag in calibration_data:
-            return False, ("Cannot find needed key {0} in request.".format(tag))
+            error_msg = "Cannot find needed key {0} in request.".format(tag)
+            log.error(error_msg)
+            return False, (error_msg)
 
     try:
         calibration_history, success = CalibrationHistory.objects.get_or_create(
@@ -27,24 +29,33 @@ def create_and_save_calibration_record(calibration_data):
             location=calibration_data['location'],
         )
     except:
-        return False, ("Cannot get or create CalibrationRecord with "
-                       "student id {0} and location {1}.".format(calibration_data['student_id'],
-            calibration_data['location']))
+        error_msg = "Cannot get or create CalibrationRecord with "
+        "student id {0} and location {1}.".format(calibration_data['student_id'],
+                                                  calibration_data['location'])
+        log.exception(error_msg)
+        return False, (error_msg)
     try:
         submission = Submission.objects.get(
             id=calibration_data['submission_id']
         )
     except:
-        return False, ("Invalid submission id {0}.".format(calibration_data['submission_id']))
+        error_msg = "Invalid submission id {0}.".format(calibration_data['submission_id'])
+        log.exception(error_msg)
+        return False, (error_msg)
 
     try:
-        actual_score = submission.get_last_successful_instructor_grader()['score']
+        last_grader = submission.get_last_successful_instructor_grader()
+        actual_score = last_grader['score']
+        actual_rubric = last_grader['rubric']
     except:
-        return False, ("Error getting actual score for submission id {0}.".format(calibration_data['submission_id']))
+        error_msg = "Error getting actual score for submission id {0}.".format(calibration_data['submission_id'])
+        log.exception(error_msg)
+        return False, (error_msg)
 
     if actual_score == -1:
-        return False, (
-        "No instructor graded submission for submission id {0}.".format(calibration_data['submission_id']))
+        error_msg = "No instructor graded submission for submission id {0}.".format(calibration_data['submission_id'])
+        log.error(error_msg)
+        return False, (error_msg)
 
     cal_record = CalibrationRecord(
         submission=submission,
@@ -58,7 +69,7 @@ def create_and_save_calibration_record(calibration_data):
 
     cal_record.save()
 
-    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score}
+    return True, {'cal_id': cal_record.id, 'actual_score' : actual_score, 'actual_rubric' : actual_rubric}
 
 
 def get_calibration_essay_data(calibration_essay_id):
@@ -102,6 +113,7 @@ def get_calibration_essay(location, student_id):
         location=location,
         grader__grader_type="IN",
         grader__is_calibration=True,
+        grader__status_code=GraderStatus.success,
     )
 
     #Check to ensure sufficient calibration essays exists

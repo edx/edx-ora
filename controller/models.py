@@ -175,10 +175,10 @@ class Submission(models.Model):
             grader_type="IN",
         ).order_by("-date_created")
         if successful_instructor_graders.count() == 0:
-            return {'score': -1}
+            return {'score': -1, 'rubric' : ""}
 
         last_successful_instructor = successful_instructor_graders[0]
-        return {'score': last_successful_instructor.score}
+        return {'score': last_successful_instructor.score, 'rubric' : last_successful_instructor.check_for_and_return_latest_rubric()['rubric_xml']}
 
     def get_oldest_unassociated_timing_object(self):
         all_timing=self.timing_set.filter(
