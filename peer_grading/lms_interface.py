@@ -300,7 +300,9 @@ def save_calibration_essay(request):
     (success, data) = calibration.create_and_save_calibration_record(d)
 
     if not success:
-        return util._error_response("Failed to create and save calibration record.", _INTERFACE_VERSION)
+        error_msg = "Failed to create and save calibration record. {0}".format(data)
+        log.error(error_msg)
+        return util._error_response(error_msg, _INTERFACE_VERSION)
 
     util.log_connection_data()
     return util._success_response({'message' : "Successfully saved calibration record.", 'actual_score' : data['actual_score'], 'actual_rubric' : data['actual_rubric']}, _INTERFACE_VERSION)

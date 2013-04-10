@@ -1,6 +1,6 @@
 import random
 from django.conf import settings
-from controller.models import Submission
+from controller.models import Submission, GraderStatus
 import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
 import json
@@ -113,6 +113,7 @@ def get_calibration_essay(location, student_id):
         location=location,
         grader__grader_type="IN",
         grader__is_calibration=True,
+        grader__status_code=GraderStatus.success,
     )
 
     #Check to ensure sufficient calibration essays exists
