@@ -295,7 +295,8 @@ def get_problem_list(request):
         problem_name_from_location=location.split("://")[1]
         location_dict={
             'location' : location,
-            'problem_name' : problem_name_from_location,
+            'problem_name' : problem_name,
+            'problem_name_from_location' : problem_name_from_location,
             'num_graded' : finished_instructor_graded,
             'num_pending' : submissions_pending,
             'num_required' : submissions_required,

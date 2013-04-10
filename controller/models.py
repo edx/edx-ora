@@ -178,7 +178,7 @@ class Submission(models.Model):
             return {'score': -1, 'rubric' : ""}
 
         last_successful_instructor = successful_instructor_graders[0]
-        return {'score': last_successful_instructor.score, 'rubric' : last_successful_instructor.check_for_and_return_latest_rubric()['rubric_xml']}
+        return {'score': last_successful_instructor.score, 'rubric' : last_successful_instructor.check_for_and_return_latest_rubric()['rubric_xml'], 'feedback' : last_successful_instructor.feedback}
 
     def get_oldest_unassociated_timing_object(self):
         all_timing=self.timing_set.filter(
