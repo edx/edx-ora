@@ -122,6 +122,7 @@ def get_calibration_essay(location, student_id):
         calibration_submissions = Submission.objects.filter(
             location=location,
             grader__grader_type="IN",
+            grader__status_code=GraderStatus.success,
         )
         calibration_submission_count = calibration_submissions.count()
 
