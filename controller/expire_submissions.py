@@ -297,11 +297,12 @@ def mark_student_duplicate_submissions():
         responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False).values_list('student_response', 'location').distinct())
         for resp, loc in zip(responses, locations):
             #.update(is_duplicate=True)
+            original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
             duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
             duplicate_data = zip(*duplicates)
             if len(duplicates)>0:
                 student_dup_count+=len(duplicates)
-                Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True)
+                Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original.id)
                 transaction.commit_unless_managed()
                 log.debug(duplicate_data)
         if student_dup_count>0:
