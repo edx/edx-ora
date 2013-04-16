@@ -62,14 +62,18 @@ class Command(BaseCommand):
 
                 #See if duplicate peer grading items have been finished grading
                 expire_submissions.check_if_grading_finished_for_duplicates()
+                transaction.commit_unless_managed()
 
                 #Mark submissions as duplicates if needed
                 expire_submissions.mark_student_duplicate_submissions()
+                transaction.commit_unless_managed()
 
                 generate_student_metrics.regenerate_student_data()
+                transaction.commit_unless_managed()
 
                 #Remove old ML grading models
                 expire_submissions.remove_old_model_files()
+                transaction.commit_unless_managed()
 
                 log.debug("Finished looping through.")
 
