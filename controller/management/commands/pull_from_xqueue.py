@@ -48,8 +48,13 @@ class Command(NoArgsCommand):
             for queue_name in settings.MESSAGE_QUEUES_TO_PULL_FROM:
                 pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit_message)
 
+            #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
+            time_sleep_value = random.uniform(0, .1)
+            time.sleep(time_sleep_value)
+
             #Check for finalized results from controller, and post back to xqueue
             transaction.commit_unless_managed()
+
             submissions_to_post = check_for_completed_submissions()
             for submission in list(submissions_to_post):
                 post_one_submission_back_to_queue(submission, self.xqueue_session)
