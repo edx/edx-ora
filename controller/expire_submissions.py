@@ -287,3 +287,23 @@ def remove_old_model_files():
 
     log.debug("Deleted {0} old ML models.  Could not delete {1}".format((
         len(files_to_delete)-len(could_not_delete_list)), len(could_not_delete_list)))
+
+def mark_student_duplicate_submissions():
+    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=False).values('student_id').distinct()]
+    total_dup_count=0
+    for student in unique_students:
+        student_dup_count=0
+        responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False).values_list('student_response', 'location').distinct())
+        for resp, loc in zip(responses, locations):
+            #.update(is_duplicate=True)
+            duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
+            duplicate_data = zip(*duplicates)
+            if len(duplicates)>0:
+                student_dup_count+=len(duplicates)
+                Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True)
+                log.debug(duplicate_data)
+        if student_dup_count>0:
+            log.info("Marked {0} duplicate subs from student {1}".format(student_dup_count,student))
+            total_dup_count+=student_dup_count
+    log.info("Marked duplicate subs for {0} students total.".format(total_dup_count))
+
