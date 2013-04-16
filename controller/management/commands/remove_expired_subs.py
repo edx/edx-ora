@@ -47,33 +47,62 @@ class Command(BaseCommand):
                     statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                         tags=["success:{0}".format(success)])
                 """
+                try:
+                    expire_submissions.reset_in_subs_to_ml(subs)
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not reset in to ml!")
+                try:
+                    expire_submissions.reset_subs_in_basic_check(subs)
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could reset subs in basic check!")
 
-                expire_submissions.reset_in_subs_to_ml(subs)
-                transaction.commit_unless_managed()
+                try:
+                    expire_submissions.reset_failed_subs_in_basic_check(subs)
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not reset failed subs in basic check!")
 
-                expire_submissions.reset_subs_in_basic_check(subs)
-                transaction.commit_unless_managed()
+                try:
+                    expire_submissions.reset_ml_subs_to_in()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not reset ml to in!")
 
-                expire_submissions.reset_failed_subs_in_basic_check(subs)
-                transaction.commit_unless_managed()
+                try:
+                    #See if duplicate peer grading items have been finished grading
+                    expire_submissions.add_in_duplicate_ids()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not finish checking for duplicate ids!")
 
-                expire_submissions.reset_ml_subs_to_in()
-                transaction.commit_unless_managed()
+                try:
+                    #See if duplicate peer grading items have been finished grading
+                    expire_submissions.check_if_grading_finished_for_duplicates()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not finish checking if duplicates are graded!")
 
-                #See if duplicate peer grading items have been finished grading
-                expire_submissions.check_if_grading_finished_for_duplicates()
-                transaction.commit_unless_managed()
+                try:
+                    #Mark submissions as duplicates if needed
+                    expire_submissions.mark_student_duplicate_submissions()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not mark subs as duplicate!")
 
-                #Mark submissions as duplicates if needed
-                expire_submissions.mark_student_duplicate_submissions()
-                transaction.commit_unless_managed()
+                try:
+                    generate_student_metrics.regenerate_student_data()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not regenerate student data!")
 
-                generate_student_metrics.regenerate_student_data()
-                transaction.commit_unless_managed()
-
-                #Remove old ML grading models
-                expire_submissions.remove_old_model_files()
-                transaction.commit_unless_managed()
+                try:
+                    #Remove old ML grading models
+                    expire_submissions.remove_old_model_files()
+                    transaction.commit_unless_managed()
+                except:
+                    log.exception("Could not remove ml grading models!")
 
                 log.debug("Finished looping through.")
 

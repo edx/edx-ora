@@ -296,7 +296,6 @@ def mark_student_duplicate_submissions():
         student_dup_count=0
         responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False).values_list('student_response', 'location').distinct())
         for resp, loc in zip(responses, locations):
-            #.update(is_duplicate=True)
             original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
             duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
             duplicate_data = zip(*duplicates)
@@ -309,4 +308,28 @@ def mark_student_duplicate_submissions():
             log.info("Marked {0} duplicate subs from student {1}".format(student_dup_count,student))
             total_dup_count+=student_dup_count
     log.info("Marked duplicate subs for {0} students total.".format(total_dup_count))
+
+def add_in_duplicate_ids():
+    transaction.commit_unless_managed()
+    total_dup_count=0
+    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False).values('student_id').distinct()]
+    for student in unique_students:
+        student_dup_count=0
+        duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False)
+        for sub in duplicate_without_id:
+            if sub.duplicate_submission_id is None:
+                matching_sub = Submission.objects.filter(student_id=student,location=sub.location,is_duplicate=False)
+                student_dup_count+=1
+                if matching_sub.count()>0:
+                    matching_sub_id = matching_sub[0].id
+                    sub.duplicate_submission_id = matching_sub_id
+                else:
+                    sub.is_duplicate = False
+                sub.save()
+        if student_dup_count>0:
+            log.info("Added ids for {0} duplicates for student {1}".format(student_dup_count, student))
+        total_dup_count+=student_dup_count
+    log.info("Added ids for {0} duplicates total".format(total_dup_count))
+    transaction.commit_unless_managed()
+
 
