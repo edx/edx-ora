@@ -102,6 +102,26 @@ def submit(request):
                     answer = util._value_or_default(body['grader_payload']['answer'], "")
 
                 transaction.commit()
+                #Without this, sometimes a race condition creates duplicate submissions
+                sub_count = Submission.objects.filter(
+                    prompt=prompt,
+                    rubric=rubric,
+                    student_id=student_id,
+                    problem_id=problem_id,
+                    student_submission_time=student_submission_time,
+                    xqueue_submission_id=xqueue_submission_id,
+                    xqueue_submission_key=xqueue_submission_key,
+                    xqueue_queue_name=xqueue_queue_name,
+                    location=location,
+                    course_id=course_id,
+                    grader_settings=grader_settings,
+                    ).count()
+
+                if sub_count>0:
+                    log.error("Exact submission already exists.")
+                    return util._error_response('Submission already exists.', _INTERFACE_VERSION)
+
+                transaction.commit()
                 #Create submission object
                 sub, created = Submission.objects.get_or_create(
                     prompt=prompt,
