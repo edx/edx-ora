@@ -125,6 +125,17 @@ def peer_grading_submissions_graded_for_location(location, student_id):
 
     return subs_graded
 
+def get_required_peer_grading_for_location(query_params):
+    duplicate_params = query_params.copy()
+    duplicate_params.update({'is_duplicate' : False})
+
+    plagiarized_params = query_params.copy()
+    plagiarized_params.update({'is_duplicate' : True, 'is_plagiarized' : True})
+
+    student_sub_count = Submission.objects.filter(**duplicate_params).count() + Submission.objects.filter(**plagiarized_params).count()
+
+    return student_sub_count
+
 def get_peer_grading_notifications(course_id, student_id):
     student_needs_to_peer_grade = False
     success = True
@@ -133,7 +144,7 @@ def get_peer_grading_notifications(course_id, student_id):
     unique_student_locations = [x['location'] for x in
                                 student_responses_for_course.values('location').distinct()]
     for location in unique_student_locations:
-        location_response_count = student_responses_for_course.filter(location=location).count()
+        location_response_count = get_required_peer_grading_for_location({'student_id' : student_id, 'preferred_grader_type' : "PE", 'location' : location})
         required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
         completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
         submissions_pending = peer_grading_submissions_pending_for_location(location, student_id).count()
