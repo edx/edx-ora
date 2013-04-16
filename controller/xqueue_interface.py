@@ -19,6 +19,9 @@ from metrics import timing_functions
 import message_util
 from ml_grading import ml_grading_util
 import rubric_functions
+from django.db import transaction
+import time
+import random
 
 from django.db import connection
 
@@ -29,6 +32,7 @@ _INTERFACE_VERSION = 1
 @csrf_exempt
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.xqueue_interface.time', tags=['function:submit'])
+@transaction.commit_manually
 def submit(request):
     '''
     Xqueue pull script posts objects here.
@@ -99,6 +103,31 @@ def submit(request):
                 if 'answer' in body['grader_payload'].keys():
                     answer = util._value_or_default(body['grader_payload']['answer'], "")
 
+                #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
+                time_sleep_value = random.uniform(0, .1)
+                time.sleep(time_sleep_value)
+
+                transaction.commit()
+                #Without this, sometimes a race condition creates duplicate submissions
+                sub_count = Submission.objects.filter(
+                    prompt=prompt,
+                    rubric=rubric,
+                    student_id=student_id,
+                    problem_id=problem_id,
+                    student_submission_time=student_submission_time,
+                    xqueue_submission_id=xqueue_submission_id,
+                    xqueue_submission_key=xqueue_submission_key,
+                    xqueue_queue_name=xqueue_queue_name,
+                    location=location,
+                    course_id=course_id,
+                    grader_settings=grader_settings,
+                    ).count()
+
+                if sub_count>0:
+                    log.error("Exact submission already exists.")
+                    return util._error_response('Submission already exists.', _INTERFACE_VERSION)
+
+                transaction.commit()
                 #Create submission object
                 sub, created = Submission.objects.get_or_create(
                     prompt=prompt,
@@ -119,6 +148,7 @@ def submit(request):
                     answer=answer,
                     skip_basic_checks = skip_basic_checks,
                 )
+                transaction.commit()
 
                 if created==False:
                     log.error("Exact submission already exists.")
@@ -148,12 +178,13 @@ def submit(request):
                     "course_id:{0}".format(course_id),
                 ])
 
+            transaction.commit()
             if not success:
                 return util._error_response("Failed to handle submission.", _INTERFACE_VERSION)
 
             util.log_connection_data()
+            transaction.commit()
             return util._success_response({'message': "Saved successfully."}, _INTERFACE_VERSION)
-
 
 def handle_submission(sub):
     """
