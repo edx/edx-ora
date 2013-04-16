@@ -213,11 +213,15 @@ def check_if_grading_finished_for_duplicates():
     )
     counter=0
     for sub in duplicate_submissions:
-        original_sub=Submission.objects.get(id=sub.duplicate_submission_id)
-        if original_sub.state == SubmissionState.finished:
-            finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
-            counter+=1
-            log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
+        if sub.duplicate_submission_id is not None:
+            try:
+                original_sub=Submission.objects.get(id=sub.duplicate_submission_id)
+                if original_sub.state == SubmissionState.finished:
+                    finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
+                    counter+=1
+                    log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
+            except:
+                log.error("Could not finalize grade for submission with id {0}".format(sub.duplicate_submission_id))
 
     statsd.increment("open_ended_assessment.grading_controller.expire_submissions.check_if_duplicate_grading_finished",
         tags=[
