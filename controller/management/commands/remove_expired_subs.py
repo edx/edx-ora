@@ -63,6 +63,9 @@ class Command(BaseCommand):
                 #See if duplicate peer grading items have been finished grading
                 expire_submissions.check_if_grading_finished_for_duplicates()
 
+                #Mark submissions as duplicates if needed
+                expire_submissions.mark_student_duplicate_submissions()
+
                 generate_student_metrics.regenerate_student_data()
 
                 #Remove old ML grading models
