@@ -289,6 +289,7 @@ def remove_old_model_files():
         len(files_to_delete)-len(could_not_delete_list)), len(could_not_delete_list)))
 
 def mark_student_duplicate_submissions():
+    transaction.commit_unless_managed()
     unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=False).values('student_id').distinct()]
     total_dup_count=0
     for student in unique_students:
@@ -301,6 +302,7 @@ def mark_student_duplicate_submissions():
             if len(duplicates)>0:
                 student_dup_count+=len(duplicates)
                 Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True)
+                transaction.commit_unless_managed()
                 log.debug(duplicate_data)
         if student_dup_count>0:
             log.info("Marked {0} duplicate subs from student {1}".format(student_dup_count,student))
