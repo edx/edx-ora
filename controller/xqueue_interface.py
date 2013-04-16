@@ -20,6 +20,8 @@ import message_util
 from ml_grading import ml_grading_util
 import rubric_functions
 from django.db import transaction
+import time
+import random
 
 from django.db import connection
 
@@ -100,6 +102,10 @@ def submit(request):
                 answer=""
                 if 'answer' in body['grader_payload'].keys():
                     answer = util._value_or_default(body['grader_payload']['answer'], "")
+
+                #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
+                time_sleep_value = random.uniform(0, .1)
+                time.sleep(time_sleep_value)
 
                 transaction.commit()
                 #Without this, sometimes a race condition creates duplicate submissions

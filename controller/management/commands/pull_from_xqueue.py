@@ -19,6 +19,8 @@ import controller.util as util
 from controller.models import Submission
 from controller.models import GraderStatus, SubmissionState
 import project_urls
+import time
+import random
 
 log = logging.getLogger(__name__)
 
@@ -79,6 +81,10 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,
         #Get and parse queue objects
         success, queue_length= get_queue_length(queue_name,xqueue_session)
         while success and queue_length>0:
+            #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
+            time_sleep_value = random.uniform(0, .1)
+            time.sleep(time_sleep_value)
+
             success, queue_item = get_from_queue(queue_name, xqueue_session)
             success, content = util.parse_xobject(queue_item, queue_name)
 
