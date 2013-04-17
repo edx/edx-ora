@@ -96,8 +96,6 @@ def is_peer_grading_finished_for_submission(submission_id):
     pass
 
 
-
-
 def peer_grading_submissions_pending_for_location(location, grader_id):
     """
     Get submissions that are to graded be graded by the student
