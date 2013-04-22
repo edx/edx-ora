@@ -1,9 +1,8 @@
 from django.conf import settings
 import sys
 
-sys.path.append(settings.ML_PATH)
-import feature_extractor
-import essay_set
+from machine_learning import feature_extractor
+from machine_learning import essay_set
 import json
 import logging
 log=logging.getLogger(__name__)
