@@ -13,4 +13,4 @@ boto==2.6.0
 lxml==3.0.1
 gunicorn
 wsgiref
-
+-e git+https://github.com/edx/machine-learning.git@98ec66ee1ad6ae92bbbc581ecbd2246e564cd7c0#egg=machine-learning

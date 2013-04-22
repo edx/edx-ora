@@ -27,8 +27,7 @@ from ml_grading.models import CreatedModel
 
 import ml_grading.ml_grading_util as ml_grading_util
 
-sys.path.append(settings.ML_PATH)
-import grade
+from machine_learning import grade
 
 from staff_grading import staff_grading_util
 
