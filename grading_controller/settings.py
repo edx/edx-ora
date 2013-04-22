@@ -34,7 +34,6 @@ RECENT_NOTIFICATION_CHECK_INTERVAL = 1 * 24 * 60 * 60 #in seconds. Will not save
 #ML
 MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use machine learning
 MAX_TO_USE_ML = 300 #Maximum number of instructor graded essays to use for ml model creation
-ML_PATH = os.path.join(ENV_ROOT, "machine-learning/") #Path to ML repo containing grade.py and create.py
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
 TIME_BETWEEN_ML_GRADER_CHECKS= 5 # seconds.  Time between ML grader checking to see if models need to be made.
