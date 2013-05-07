@@ -42,11 +42,11 @@ class Command(NoArgsCommand):
             #Loop through each queue that is given in arguments
             for queue_name in settings.GRADING_QUEUES_TO_PULL_FROM:
                 #Check for new submissions on xqueue, and send to controller
-                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit)
+                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit, project_urls.ControllerURLs.status)
 
             #Loop through message queues to see if there are any messages
             for queue_name in settings.MESSAGE_QUEUES_TO_PULL_FROM:
-                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit_message)
+                pull_from_single_grading_queue(queue_name,self.controller_session,self.xqueue_session, project_urls.ControllerURLs.submit_message, project_urls.ControllerURLs.status)
 
             #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
             time_sleep_value = random.uniform(0, .1)
@@ -81,11 +81,17 @@ def post_one_submission_back_to_queue(submission,xqueue_session):
     else:
         log.warning("Could not post back.  Error: {0}".format(msg))
 
-def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,post_url):
+def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,post_url, status_url):
     try:
         #Get and parse queue objects
         success, queue_length= get_queue_length(queue_name,xqueue_session)
-        while success and queue_length>0:
+
+        #Check to see if the grading_controller server is up so that we can post to it
+        (is_alive, status_string) = util._http_get(controller_session, urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
+                                                                                        status_url))
+
+        #Only post while we were able to get a queue length from the xqueue, there are items in the queue, and the grading controller is up for us to post to.
+        while success and queue_length>0 and is_alive:
             #Sleep for some time to allow other pull_from_xqueue processes to get behind/ahead
             time_sleep_value = random.uniform(0, .1)
             time.sleep(time_sleep_value)
@@ -97,14 +103,14 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,
             if  success:
                 #Post to controller
                 log.debug("Trying to post.")
-                util._http_post(
+                post_data = util._http_post(
                     controller_session,
                     urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
                         post_url),
                     content,
                     settings.REQUESTS_TIMEOUT,
                 )
-                log.debug("Successful post!")
+                log.debug(post_data)
                 statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
                     tags=["success:True", "queue_name:{0}".format(queue_name)])
             else:
