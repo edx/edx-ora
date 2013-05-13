@@ -70,16 +70,16 @@ clone_repos() {
 
     # Also need machine learning repo for everything to work properly
     cd "$BASE"
-    if [[ -d "$BASE/machine-learning/.git" ]]; then
-        output "Pulling machine learning"
-        cd "$BASE/machine-learning"
+    if [[ -d "$BASE/ease/.git" ]]; then
+        output "Pulling ease"
+        cd "$BASE/ease"
         git pull
     else
         output "Cloning machine learning"
-        if [[ -d "$BASE/machine-learning" ]]; then
-            mv "$BASE/machine-learning" "${BASE}/machine-learning.bak.$$"
+        if [[ -d "$BASE/ease" ]]; then
+            mv "$BASE/ease" "${BASE}/ease.bak.$$"
         fi
-        git clone git@github.com:MITx/machine-learning.git
+        git clone git@github.com:MITx/ease.git
     fi
 
     # Also need xqueue for everything to work properly
@@ -220,7 +220,7 @@ clone_repos
 
 # Install system-level dependencies
 bash $BASE/grading-controller/install_system_req.sh
-bash $BASE/machine-learning/install_system_req.sh
+bash $BASE/ease/install_system_req.sh
 
 # Activate Python virtualenv
 source $PYTHON_DIR/bin/activate
@@ -264,7 +264,7 @@ output "Installing Controller pre-requirements"
 pip install -r $BASE/grading-controller/pre-requirements.txt
 
 output "Installing ML pre-requirements"
-pip install -r $BASE/machine-learning/pre-requirements.txt
+pip install -r $BASE/ease/pre-requirements.txt
 
 output "Installing Controller requirements"
 # Need to be in the mitx dir to get the paths to local modules right
@@ -273,7 +273,7 @@ pip install -r requirements.txt
 
 output "Installing ml requirements"
 # Need to be in the mitx dir to get the paths to local modules right
-cd $BASE/machine-learning
+cd $BASE/ease
 pip install -r requirements.txt
 
 output "Installing xqueue requirements"
@@ -284,10 +284,10 @@ pip install -r requirements.txt
 
 mkdir "$BASE/log" || true
 mkdir "$BASE/grading-controller/log" || true
-mkdir "$BASE/machine-learning/log" || true
+mkdir "$BASE/ease/log" || true
 mkdir "$BASE/xqueue/log" || true
 touch "$BASE/grading-controller/log/edx.log" || true
-touch "$BASE/machine-learning/log/edx.log" || true
+touch "$BASE/ease/log/edx.log" || true
 touch "$BASE/xqueue/log/edx.log" || true
 
 #Sync controller db
