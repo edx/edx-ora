@@ -1,8 +1,8 @@
 from django.conf import settings
 import sys
 
-from machine_learning import feature_extractor
-from machine_learning import essay_set
+from ease import feature_extractor
+from ease import essay_set
 import json
 import logging
 log=logging.getLogger(__name__)
