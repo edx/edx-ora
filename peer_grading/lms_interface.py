@@ -143,7 +143,7 @@ def save_grade(request):
     try:
         sub=Submission.objects.get(id=submission_id)
     except:
-        return util.error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}
@@ -151,7 +151,7 @@ def save_grade(request):
 
     success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
     if not success:
-        return util.error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": error_message}
@@ -282,7 +282,7 @@ def save_calibration_essay(request):
     try:
         sub=Submission.objects.get(id=submission_id)
     except:
-        return util.error_response(
+        return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}

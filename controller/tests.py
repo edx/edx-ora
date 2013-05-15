@@ -8,27 +8,15 @@ import datetime
 from django.utils import timezone
 import logging
 import urlparse
-from string import lower
 
-from django.contrib.auth.models import User
 from django.test.client import Client
-import requests
 from django.conf import settings
 
-import xqueue_interface
-import grader_interface
 import util
 import test_util
 
 from models import Submission, Grader
-from models import GraderStatus, SubmissionState
-
-from staff_grading import staff_grading_util
 import expire_submissions
-
-import management.commands.pull_from_xqueue as pull_from_xqueue
-
-from mock import Mock
 
 import project_urls
 
@@ -117,6 +105,7 @@ class XQueueInterfaceTest(unittest.TestCase):
             'prompt' : 'This is a prompt',
             'rubric' : 'This is a rubric.',
             'grader_settings' : "ml_grading.conf",
+            'skip_basic_checks': False
         }
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
@@ -268,6 +257,8 @@ class GraderInterfaceTest(unittest.TestCase):
             'grader_id' : 1,
             'score' : 1,
             'errors' : "test",
+            "rubric_scores_complete" : True,
+            "rubric_scores" : json.dumps([1,1]),
             }
 
         content = self.c.post(

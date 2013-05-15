@@ -14,6 +14,21 @@ from ml_grading import ml_model_creation
 
 MAX_SCORE = 3
 
+RUBRIC_XML = """
+<rubric>
+    <category>
+        <description>One</description>
+        <option>0</option>
+        <option>1</option>
+    </category>
+    <category>
+        <description>Two</description>
+        <option>0</option>
+        <option>1</option>
+    </category>
+</rubric>
+            """
+
 def create_user():
 
     if(User.objects.filter(username='test').count() == 0):
@@ -33,7 +48,7 @@ def delete_all():
     for cal_record in CalibrationRecord.objects.all():
         cal_record.delete()
 
-def get_sub(grader_type,student_id,location, course_id="course_id"):
+def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_id="course_id"):
     test_sub = Submission(
         prompt="prompt",
         student_id=student_id,
@@ -50,7 +65,9 @@ def get_sub(grader_type,student_id,location, course_id="course_id"):
         next_grader_type=grader_type,
         previous_grader_type=grader_type,
         grader_settings="ml_grading.conf",
-    )
+        preferred_grader_type=preferred_grader_type,
+        rubric = RUBRIC_XML,
+        )
     return test_sub
 
 def get_grader(grader_type):
@@ -84,7 +101,7 @@ def get_xqueue_header():
 def create_ml_model(student_id, location):
     #Create enough instructor graded submissions that ML will work
     for i in xrange(0,settings.MIN_TO_USE_ML):
-        sub=get_sub("IN",student_id,location)
+        sub=get_sub("IN",student_id,location, "ML")
         sub.state=SubmissionState.finished
         sub.save()
 

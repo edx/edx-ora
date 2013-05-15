@@ -88,7 +88,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         #Ensure that correct response is received.
         self.assertEqual(body['success'], False)
-        self.assertEqual(body['error'],"No current grading.")
+        self.assertEqual(body['error'],u'You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded.')
 
     def test_save_grade_false(self):
         test_dict={
@@ -114,7 +114,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
     def test_get_next_submission_same_student(self):
         #Try to get an essay submitted by the same student for peer grading.  Should fail
-        test_sub=test_util.get_sub("PE", STUDENT_ID,LOCATION)
+        test_sub=test_util.get_sub("PE", STUDENT_ID,LOCATION, "PE")
         test_sub.save()
 
         content = self.c.get(
@@ -127,10 +127,10 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         #Ensure that correct response is received.
         self.assertEqual(body['success'], False)
-        self.assertEqual(body['error'],"No current grading.")
+        self.assertEqual(body['error'],u'You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded.')
 
     def test_save_grade_true(self):
-        test_sub=test_util.get_sub("PE", "blah",LOCATION)
+        test_sub=test_util.get_sub("PE", "blah",LOCATION, "PE")
         test_sub.save()
 
         test_dict={
@@ -140,6 +140,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             'score': 0,
             'feedback': 'feedback',
             'submission_key' : 'string',
+            'submission_flagged' : False,
             }
 
         content = self.c.post(
