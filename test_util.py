@@ -49,6 +49,9 @@ def delete_all():
         cal_record.delete()
 
 def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_id="course_id"):
+    prefix = "ml"
+    if preferred_grader_type=="PE":
+        prefix = "peer"
     test_sub = Submission(
         prompt="prompt",
         student_id=student_id,
@@ -64,7 +67,7 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         max_score=MAX_SCORE,
         next_grader_type=grader_type,
         previous_grader_type=grader_type,
-        grader_settings="ml_grading.conf",
+        grader_settings= prefix + "_grading.conf",
         preferred_grader_type=preferred_grader_type,
         rubric = RUBRIC_XML,
         )

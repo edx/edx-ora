@@ -18,6 +18,8 @@ import test_util
 from models import Submission, Grader, GraderStatus, SubmissionState
 import expire_submissions
 
+from xqueue_interface import handle_submission
+
 import project_urls
 
 log = logging.getLogger(__name__)
@@ -425,6 +427,28 @@ class ExpireSubmissionsTests(unittest.TestCase):
 
         self.assertEqual(test_sub.state, SubmissionState.finished)
 
+    def test_check_if_grading_finished_for_duplicates(self):
+
+        for i in xrange(0,settings.MIN_TO_USE_PEER):
+            test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+            test_sub.save()
+            handle_submission(test_sub)
+            test_grader = test_util.get_grader("IN")
+            test_grader.submission=test_sub
+            test_grader.save()
+
+            test_sub.state = SubmissionState.finished
+            test_sub.previous_grader_type = "IN"
+            test_sub.posted_results_back_to_queue = True
+            test_sub.save()
+
+        test_sub2 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub2.save()
+        handle_submission(test_sub2)
+        self.assertTrue(test_sub2.is_duplicate)
+
+        success = expire_submissions.check_if_grading_finished_for_duplicates()
+        self.assertEqual(success, True)
 
 
 

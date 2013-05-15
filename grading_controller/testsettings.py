@@ -25,6 +25,7 @@ DATABASES = {
 
 RESET_SUBMISSIONS_AFTER = 0 #seconds
 EXPIRE_SUBMISSIONS_AFTER = 0 #seconds
+MIN_TO_USE_PEER = 2
 
 # Nose Test Runner
 INSTALLED_APPS += ('django_nose',)
