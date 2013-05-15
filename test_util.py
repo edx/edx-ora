@@ -70,11 +70,11 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         )
     return test_sub
 
-def get_grader(grader_type):
+def get_grader(grader_type, status_code=GraderStatus.success):
     test_grader=Grader(
         score= random.randint(0, MAX_SCORE),
         feedback="",
-        status_code=GraderStatus.success,
+        status_code=status_code,
         grader_id="1",
         grader_type=grader_type,
         confidence=1,

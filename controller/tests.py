@@ -15,7 +15,7 @@ from django.conf import settings
 import util
 import test_util
 
-from models import Submission, Grader
+from models import Submission, Grader, GraderStatus
 import expire_submissions
 
 import project_urls
@@ -378,5 +378,24 @@ class ExpireSubmissionsTests(unittest.TestCase):
         self.assertTrue(success)
         self.assertNotEqual(test_sub.next_grader_type, "BC")
         self.assertEqual(test_grader.grader_type, "BC")
+
+    def test_reset_failed_subs_in_basic_check(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        grader = test_util.get_grader("BC", GraderStatus.failure)
+        grader.submission = test_sub
+        grader.save()
+
+        success = expire_submissions.reset_failed_subs_in_basic_check(Submission.objects.all())
+        self.assertTrue(success)
+
+        graders = test_sub.grader_set.all()
+        success_grader = graders[1]
+
+        self.assertEqual(success_grader.status_code, GraderStatus.success)
+
+
+
 
 
