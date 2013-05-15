@@ -98,6 +98,8 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             'score': 0,
             'feedback': 'feedback',
             'submission_key' : 'string',
+            'rubric_scores_complete' : True,
+            'rubric_scores' : json.dumps([1,1]),
         }
 
         content = self.c.post(
@@ -141,6 +143,8 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             'feedback': 'feedback',
             'submission_key' : 'string',
             'submission_flagged' : False,
+            'rubric_scores_complete' : True,
+            'rubric_scores' : [1,1],
             }
 
         content = self.c.post(
