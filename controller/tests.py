@@ -256,6 +256,8 @@ class GraderInterfaceTest(unittest.TestCase):
             'grader_id' : 1,
             'score' : 1,
             'errors' : "test",
+            "rubric_scores_complete" : True,
+            "rubric_scores" : [1,1]
             }
 
         content = self.c.post(
