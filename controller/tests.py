@@ -414,6 +414,18 @@ class ExpireSubmissionsTests(unittest.TestCase):
 
         self.assertEqual(len(expired_submissions),1)
 
+    def test_finalize_expired_submissions(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        success = expire_submissions.finalize_expired_submissions(Submission.objects.all())
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+
+        self.assertEqual(test_sub.state, SubmissionState.finished)
+
+
 
 
 
