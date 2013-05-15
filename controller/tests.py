@@ -15,7 +15,7 @@ from django.conf import settings
 import util
 import test_util
 
-from models import Submission, Grader, GraderStatus
+from models import Submission, Grader, GraderStatus, SubmissionState
 import expire_submissions
 
 import project_urls
@@ -394,6 +394,17 @@ class ExpireSubmissionsTests(unittest.TestCase):
         success_grader = graders[1]
 
         self.assertEqual(success_grader.status_code, GraderStatus.success)
+
+    def test_reset_timed_out_submissions(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.state = SubmissionState.being_graded
+        test_sub.save()
+
+        success = expire_submissions.reset_timed_out_submissions(Submission.objects.all())
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+        self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 
 
 
