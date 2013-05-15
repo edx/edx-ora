@@ -24,6 +24,7 @@ DATABASES = {
 }
 
 RESET_SUBMISSIONS_AFTER = 0 #seconds
+EXPIRE_SUBMISSIONS_AFTER = 0 #seconds
 
 # Nose Test Runner
 INSTALLED_APPS += ('django_nose',)

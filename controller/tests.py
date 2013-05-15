@@ -406,6 +406,14 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = Submission.objects.all()[0]
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 
+    def test_get_submissions_that_have_expired(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        expired_submissions = expire_submissions.get_submissions_that_have_expired(Submission.objects.all())
+
+        self.assertEqual(len(expired_submissions),1)
+
 
 
 
