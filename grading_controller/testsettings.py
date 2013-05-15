@@ -25,10 +25,12 @@ DATABASES = {
 
 # Nose Test Runner
 INSTALLED_APPS += ('django_nose',)
-NOSE_ARGS = ['--cover-erase', '--with-xunit', '--with-xcoverage', '--cover-html',
-             '--cover-inclusive', '--cover-html-dir',
-             'cover',
-             '--cover-package', 'controller',
-             '--cover-package', 'staff_grading',
-             '--cover-package', 'peer_grading']
+NOSE_ARGS = [ '--with-xunit', '--with-coverage',
+              '--cover-html-dir', 'cover',
+              '--cover-package', 'controller',
+              '--cover-package', 'ml_grading',
+              '--cover-package', 'staff_grading',
+              '--cover-package', 'peer_grading',
+              '--cover-package', 'basic_check',
+              ]
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

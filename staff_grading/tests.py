@@ -112,7 +112,7 @@ class StaffGradingViewTest(unittest.TestCase):
         )
 
         body=json.loads(content.content)
-
+        log.info(body)
         self.assertEqual(body['success'], should_work)
 
     def test_get_problem_list_false(self):

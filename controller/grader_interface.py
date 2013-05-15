@@ -162,8 +162,8 @@ def put_result(request):
         try:
             sub=Submission.objects.get(id=int(post_data['submission_id']))
         except:
-            return util.error_response(
-                "Submission id {0} is not valid.".format(submission_id),
+            return util._error_response(
+                "Submission id {0} is not valid.".format(post_data.get('submission_id', "NA")),
                 _INTERFACE_VERSION,
             )
 
@@ -177,7 +177,7 @@ def put_result(request):
 
         success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
         if not success:
-            return util.error_response(
+            return util._error_response(
                 error_message,
                 _INTERFACE_VERSION,
             )
