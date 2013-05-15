@@ -105,6 +105,7 @@ class XQueueInterfaceTest(unittest.TestCase):
             'prompt' : 'This is a prompt',
             'rubric' : 'This is a rubric.',
             'grader_settings' : "ml_grading.conf",
+            'skip_basic_checks': False
         }
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
@@ -257,7 +258,7 @@ class GraderInterfaceTest(unittest.TestCase):
             'score' : 1,
             'errors' : "test",
             "rubric_scores_complete" : True,
-            "rubric_scores" : [1,1]
+            "rubric_scores" : json.dumps([1,1]),
             }
 
         content = self.c.post(

@@ -14,6 +14,21 @@ from ml_grading import ml_model_creation
 
 MAX_SCORE = 3
 
+RUBRIC_XML = """
+<rubric>
+    <category>
+        <description>One</description>
+        <option>0</option>
+        <option>1</option>
+    </category>
+    <category>
+        <description>Two</description>
+        <option>0</option>
+        <option>1</option>
+    </category>
+</rubric>
+            """
+
 def create_user():
 
     if(User.objects.filter(username='test').count() == 0):
@@ -50,7 +65,8 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         next_grader_type=grader_type,
         previous_grader_type=grader_type,
         grader_settings="ml_grading.conf",
-        preferred_grader_type=preferred_grader_type
+        preferred_grader_type=preferred_grader_type,
+        rubric = RUBRIC_XML,
         )
     return test_sub
 
