@@ -17,6 +17,8 @@ from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
 import project_urls
+from controller.xqueue_interface import handle_submission
+import peer_grading_util
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +32,7 @@ SAVE_CALIBRATION= project_urls.PeerGradingURLs.save_calibration_essay
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
+ALTERNATE_STUDENT="4"
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
     test_subs=[test_util.get_sub("IN",STUDENT_ID,LOCATION) for i in xrange(0,num_to_create)]
@@ -98,6 +101,8 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             'score': 0,
             'feedback': 'feedback',
             'submission_key' : 'string',
+            'rubric_scores_complete' : True,
+            'rubric_scores' : json.dumps([1,1]),
         }
 
         content = self.c.post(
@@ -141,6 +146,8 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             'feedback': 'feedback',
             'submission_key' : 'string',
             'submission_flagged' : False,
+            'rubric_scores_complete' : True,
+            'rubric_scores' : [1,1],
             }
 
         content = self.c.post(
@@ -307,6 +314,61 @@ class IsCalibratedTest(unittest.TestCase):
         #Now records exist and error is 0, so student should be calibrated
         self.assertEqual(body['calibrated'], calibration_val)
 
+class PeerGradingUtilTest(unittest.TestCase):
+    def setUp(self):
+        test_util.create_user()
+        self.c = Client()
+        response = self.c.login(username='test', password='CambridgeMA')
+
+        self.get_data={
+            'student_id' : STUDENT_ID,
+            'problem_id' : LOCATION,
+            }
+
+    def test_get_single_peer_grading_item(self):
+        for i in xrange(0,settings.MIN_TO_USE_PEER):
+            test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+            test_sub.save()
+            handle_submission(test_sub)
+            test_grader = test_util.get_grader("IN")
+            test_grader.submission=test_sub
+            test_grader.save()
+
+            test_sub.state = SubmissionState.finished
+            test_sub.previous_grader_type = "IN"
+            test_sub.posted_results_back_to_queue = True
+            test_sub.save()
+
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.save()
+        handle_submission(test_sub)
+        test_sub.is_duplicate = False
+        test_sub.save()
+
+        found, grading_item = peer_grading_util.get_single_peer_grading_item(LOCATION, STUDENT_ID)
+        log.info(grading_item)
+        self.assertEqual(found, True)
+
+        subs_graded = peer_grading_util.peer_grading_submissions_graded_for_location(LOCATION,"1")
+
+    def test_get_peer_grading_notifications(self):
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.save()
+        handle_submission(test_sub)
+        test_sub.next_grader_type = "PE"
+        test_sub.is_duplicate = False
+        test_sub.save()
+
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        handle_submission(test_sub)
+        test_sub.next_grader_type = "PE"
+        test_sub.is_duplicate = False
+        test_sub.save()
+
+        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications("course_id", ALTERNATE_STUDENT)
+        self.assertEqual(success, True)
+        self.assertEqual(student_needs_to_peer_grade, True)
 
 
 

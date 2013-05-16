@@ -211,6 +211,7 @@ def check_if_grading_finished_for_duplicates():
         is_duplicate= True,
         posted_results_back_to_queue=False,
     )
+    log.info(duplicate_submissions)
     counter=0
     for sub in duplicate_submissions:
         if sub.duplicate_submission_id is not None:
@@ -304,13 +305,15 @@ def mark_student_duplicate_submissions():
                 original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
                 duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
                 duplicate_data = zip(*duplicates)
+                log.info(original)
+                log.info(duplicates)
                 if len(duplicates)>0:
                     student_dup_count+=len(duplicates)
-                    Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original.id)
+                    Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original[0])
                     transaction.commit_unless_managed()
                     log.debug(duplicate_data)
             except:
-                log.error("Could not mark duplicates for student {0} location {1}".format(student,loc))
+                log.exception("Could not mark duplicates for student {0} location {1}".format(student,loc))
         if student_dup_count>0:
             log.info("Marked {0} duplicate subs from student {1}".format(student_dup_count,student))
             total_dup_count+=student_dup_count

@@ -15,8 +15,10 @@ from django.conf import settings
 import util
 import test_util
 
-from models import Submission, Grader
+from models import Submission, Grader, GraderStatus, SubmissionState
 import expire_submissions
+
+from xqueue_interface import handle_submission
 
 import project_urls
 
@@ -378,5 +380,95 @@ class ExpireSubmissionsTests(unittest.TestCase):
         self.assertTrue(success)
         self.assertNotEqual(test_sub.next_grader_type, "BC")
         self.assertEqual(test_grader.grader_type, "BC")
+
+    def test_reset_failed_subs_in_basic_check(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        grader = test_util.get_grader("BC", GraderStatus.failure)
+        grader.submission = test_sub
+        grader.save()
+
+        success = expire_submissions.reset_failed_subs_in_basic_check(Submission.objects.all())
+        self.assertTrue(success)
+
+        graders = test_sub.grader_set.all()
+        success_grader = graders[1]
+
+        self.assertEqual(success_grader.status_code, GraderStatus.success)
+
+    def test_reset_timed_out_submissions(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.state = SubmissionState.being_graded
+        test_sub.save()
+
+        success = expire_submissions.reset_timed_out_submissions(Submission.objects.all())
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+        self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
+
+    def test_get_submissions_that_have_expired(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        expired_submissions = expire_submissions.get_submissions_that_have_expired(Submission.objects.all())
+
+        self.assertEqual(len(expired_submissions),1)
+
+    def test_finalize_expired_submissions(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        success = expire_submissions.finalize_expired_submissions(Submission.objects.all())
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+
+        self.assertEqual(test_sub.state, SubmissionState.finished)
+
+    def test_check_if_grading_finished_for_duplicates(self):
+
+        for i in xrange(0,settings.MIN_TO_USE_PEER):
+            test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+            test_sub.save()
+            handle_submission(test_sub)
+            test_grader = test_util.get_grader("IN")
+            test_grader.submission=test_sub
+            test_grader.save()
+
+            test_sub.state = SubmissionState.finished
+            test_sub.previous_grader_type = "IN"
+            test_sub.posted_results_back_to_queue = True
+            test_sub.save()
+
+        test_sub2 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub2.save()
+        handle_submission(test_sub2)
+        self.assertTrue(test_sub2.is_duplicate)
+
+        success = expire_submissions.check_if_grading_finished_for_duplicates()
+        self.assertEqual(success, True)
+        test_sub2.is_duplicate = False
+        test_sub2.save()
+
+        test_sub3 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub3.is_duplicate = False
+        test_sub3.save()
+
+        self.assertEqual(test_sub3.is_duplicate, False)
+        expire_submissions.mark_student_duplicate_submissions()
+        test_sub3 = Submission.objects.get(id=test_sub3.id)
+        self.assertEqual(test_sub3.is_duplicate,True)
+
+        test_sub3.duplicate_submission_id = None
+        test_sub3.is_plagiarized = False
+        test_sub3.save()
+        expire_submissions.add_in_duplicate_ids()
+        test_sub3 = Submission.objects.get(id=test_sub3.id)
+        self.assertTrue(test_sub3.duplicate_submission_id is not None)
+
+
+
 
 
