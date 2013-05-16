@@ -449,6 +449,24 @@ class ExpireSubmissionsTests(unittest.TestCase):
 
         success = expire_submissions.check_if_grading_finished_for_duplicates()
         self.assertEqual(success, True)
+        test_sub2.is_duplicate = False
+        test_sub2.save()
+
+        test_sub3 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub3.is_duplicate = False
+        test_sub3.save()
+
+        self.assertEqual(test_sub3.is_duplicate, False)
+        expire_submissions.mark_student_duplicate_submissions()
+        test_sub3 = Submission.objects.get(id=test_sub3.id)
+        self.assertEqual(test_sub3.is_duplicate,True)
+
+        test_sub3.duplicate_submission_id = None
+        test_sub3.is_plagiarized = False
+        test_sub3.save()
+        expire_submissions.add_in_duplicate_ids()
+        test_sub3 = Submission.objects.get(id=test_sub3.id)
+        self.assertTrue(test_sub3.duplicate_submission_id is not None)
 
 
 
