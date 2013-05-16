@@ -103,7 +103,9 @@ class StaffGradingViewTest(unittest.TestCase):
             'submission_id' : 1,
             'score' : 0,
             'feedback' : 'string',
-            'skipped': skipped
+            'skipped': skipped,
+            'rubric_scores_complete' : True,
+            'rubric_scores' : [1,1]
         }
 
         content = self.c.post(
