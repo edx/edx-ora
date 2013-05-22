@@ -3,9 +3,10 @@ import random
 import time
 import urlparse
 from django.conf import settings
-from controller import util as util
+from controller import util
 from controller.models import Submission, SubmissionState
-from controller.tasks import log
+import logging
+log = logging.getLogger(__name__)
 import project_urls
 from statsd import statsd
 
