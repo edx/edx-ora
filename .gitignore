@@ -11,3 +11,4 @@ cover/
 nosetests.xml
 coverage.xml
 .coverage
+ml_models

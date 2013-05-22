@@ -14,3 +14,5 @@ lxml==3.0.1
 gunicorn
 wsgiref
 -e git+https://github.com/edx/ease.git@8cc465cbcca2f925f52581654763fde618cd1203#egg=ease
+django-celery==3.0.11
+celery-with-redis==3.0
