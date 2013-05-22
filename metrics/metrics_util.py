@@ -9,6 +9,7 @@ import logging
 import matplotlib.pyplot as plt
 from matplotlib import numpy as np
 from metrics import tasks
+import json
 
 log = logging.getLogger(__name__)
 
@@ -359,13 +360,8 @@ def dump_form(request, type):
                 location=unique_courses
 
         name="{0}_{1}".format(location, type)
-
-        success,response = AVAILABLE_DATA_DUMPS[type](location, name)
-
-        if not success:
-            return response
-
-        return response
+        task = AVAILABLE_DATA_DUMPS[type].delay(location, name)
+        return HttpResponse(json.dumps({'task_id' : task.task_id, 'message' : 'Task queued.  Check back later for results', 'result_url' : "tasks/{0}/status".format(task.task_id)}))
 
     elif request.method == "GET":
         if type!="student_data_dump":
