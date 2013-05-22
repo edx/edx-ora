@@ -18,7 +18,6 @@ import gc
 from controller import util
 from ml_grading import ml_grader
 
-
 RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : ""}
 
 from celery.task import periodic_task
@@ -29,7 +28,6 @@ log = logging.getLogger(__name__)
 def create_ml_models():
     """
     Polls ml model creator to evaluate database, decide what needs to have a model created, and do so.
-    Persistent loop.
     """
 
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
@@ -46,7 +44,7 @@ def create_ml_models():
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_GRADER_CHECKS)
 def grade_essays():
     """
-    Constant loop that polls grading controller
+    Polls grading controller for essays to grade and tries to grade them.
     """
     controller_session = util.controller_login()
     log.info(' [*] Polling grading controller...')

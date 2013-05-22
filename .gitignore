@@ -12,3 +12,4 @@ nosetests.xml
 coverage.xml
 .coverage
 ml_models
+celerybeat-schedule
