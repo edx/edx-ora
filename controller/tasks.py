@@ -17,16 +17,17 @@ from metrics import generate_student_metrics
 import gc
 from statsd import statsd
 import project_urls
+from . single_instance_task import single_instance_task
 
 from celery.task import periodic_task, task
 
 import json
 import urlparse
 
-
 log = logging.getLogger(__name__)
 
 @periodic_task(run_every=settings.TIME_BETWEEN_EXPIRED_CHECKS)
+@single_instance_task(60*10)
 def expire_submissions():
     flag = True
     log.debug("Starting check for expired subs.")
@@ -114,6 +115,7 @@ def expire_submissions():
     transaction.commit_unless_managed()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_XQUEUE_PULLS)
+@single_instance_task(60*10)
 def pull_from_xqueue():
     """
     Constant loop that pulls from queue and posts to grading controller

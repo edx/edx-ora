@@ -17,6 +17,7 @@ from . import ml_model_creation
 import gc
 from controller import util
 from . import ml_grader
+from controller.single_instance_task import single_instance_task
 
 RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : ""}
 
@@ -25,6 +26,7 @@ from celery.task import periodic_task
 log = logging.getLogger(__name__)
 
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_CREATOR_CHECKS)
+@single_instance_task(60*10)
 def create_ml_models():
     """
     Polls ml model creator to evaluate database, decide what needs to have a model created, and do so.
@@ -42,6 +44,7 @@ def create_ml_models():
     db.reset_queries()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_GRADER_CHECKS)
+@single_instance_task(60*10)
 def grade_essays():
     """
     Polls grading controller for essays to grade and tries to grade them.
