@@ -61,16 +61,17 @@ def write_to_json(headers, values):
     for val in values:
         loop_dict = {}
         for i in xrange(0,len(headers)):
-            loop_dict.update({headers[i] : val[i]})
+            try:
+                loop_dict.update({headers[i] : val[i]})
+            except IndexError:
+                continue
         json_data.append(loop_dict)
     return json.dumps(json_data)
 
 @task
 def get_data_in_csv_format(locations, name):
     writer, locations, response = set_up_data_dump(locations, name)
-    headers = ["Student ID", "Score", "Grader Type", "Success", "Submission Text", "Location", "Feedback"]
     values = []
-    grader_info = []
 
     for z in xrange(0,len(locations)):
         location=locations[z]
@@ -110,15 +111,19 @@ def get_data_in_csv_format(locations, name):
         student_ids = [grade['student_id'] for grade in grader_info]
 
         for i in xrange(0,len(grader_info)):
-            values.append([student_ids[i], score[i], grader_type[i], success[i], submission_text[i], location, feedback[i]] + grader_info[i]['rubric_scores'])
-    if len(grader_info) > 0:
-        rubric_headers = grader_info[0]['rubric_headers']
-        for i in xrange(0,len(rubric_headers)):
-            rubric_headers[i] = "rubric_{0}".format(rubric_headers[i])
-            if rubric_headers[i] in headers:
-                rubric_headers[i] = "{0}.1".format(rubric_headers[i])
-        headers+=rubric_headers
-    return write_to_json(headers,values)
+            value_dict = {
+                'student_id' : student_ids[i],
+                'score' : score[i],
+                'grader_type' : grader_type[i],
+                'success' : success[i],
+                'submission_text' : submission_text[i],
+                'location' : location,
+                'feedback' : feedback[i]
+            }
+            for m in xrange(0,len(grader_info[i]['rubric_scores'])):
+                value_dict.update({"rubric_{0}".format(grader_info[i]['rubric_headers'][m]) : grader_info[i]['rubric_scores'][m]})
+            values.append(value_dict)
+    return json.dumps(values)
 
 @task
 def get_student_data_in_csv_format(locations, name):
