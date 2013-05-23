@@ -141,20 +141,24 @@ class Submission(models.Model):
         if len(all_graders) == 0:
             last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
             return_dict = {'score': 0, 'feedback': last_grader.feedback, 'grader_type' : last_grader.grader_type,
-                    'success' : False, 'grader_id' : last_grader.id, 'submission_id' : self.id}
+                    'success' : False, 'grader_id' : last_grader.id, 'submission_id' : self.id, 'student_id' : self.student_id}
             return_dict.update(last_grader.check_for_and_return_latest_rubric())
+            return_dict.update(last_grader.get_latest_rubric_headers_and_scores())
             return return_dict
         #If grader is ML or instructor, only send back last successful submission
         elif all_graders[0].grader_type in ["IN", "ML", "BC"]:
             return_dict =  {'score': all_graders[0].score, 'feedback': all_graders[0].feedback,
                     'grader_type' : all_graders[0].grader_type, 'success' : True,
-                    'grader_id' : all_graders[0].id , 'submission_id' : self.id}
+                    'grader_id' : all_graders[0].id , 'submission_id' : self.id , 'student_id' : self.student_id}
             return_dict.update(all_graders[0].check_for_and_return_latest_rubric())
+            return_dict.update(all_graders[0].get_latest_rubric_headers_and_scores())
             return return_dict
         #If grader is peer, send back all peer judgements
         elif self.previous_grader_type == "PE":
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
             combined_rubrics = [p.check_for_and_return_latest_rubric() for p in peer_graders]
+            rubric_headers = [p.get_latest_rubric_headers_and_scores().get("rubric_headers", []) for p in peer_graders]
+            rubric_scores = [p.get_latest_rubric_headers_and_scores().get("rubric_scores", []) for p in peer_graders]
             rubric_xml = [cr['rubric_xml'] for cr in combined_rubrics]
             rubric_scores_complete = [cr['rubric_scores_complete'] for cr in combined_rubrics]
             score = [p.score for p in peer_graders]
@@ -162,11 +166,12 @@ class Submission(models.Model):
             grader_ids=[p.id for p in peer_graders]
             return {'score': score, 'feedback': feedback, 'grader_type' : "PE", 'success' : True,
                     'grader_id' : grader_ids, 'submission_id' : self.id, 'rubric_xml' : rubric_xml,
-                    'rubric_scores_complete' : rubric_scores_complete}
+                    'rubric_scores_complete' : rubric_scores_complete, "rubric_headers" : rubric_headers,
+                    "rubric_scores" : rubric_scores, 'student_id' : self.student_id}
         else:
             return {'score': -1, 'feedback' : "There was an error with your submission.",
                     'grader_type' : self.previous_grader_type, 'success' : False, 'rubric_scores_complete' : False,
-                    'rubric_xml' : ""}
+                    'rubric_xml' : "", "rubric_headers" : [], "rubric_scores" : [], 'student_id' : self.student_id}
 
     def get_last_successful_instructor_grader(self):
         all_graders = self.get_all_graders()
@@ -232,6 +237,17 @@ class Grader(models.Model):
             latest_rubric['rubric_scores_complete']=True
         return latest_rubric
 
+    def get_latest_rubric_headers_and_scores(self):
+        rubric_headers_and_scores = {"rubric_headers" : [], "rubric_scores" : []}
+        if self.has_rubric():
+            latest_rubric_object=self.get_latest_rubric()
+            headers = latest_rubric_object.get_rubric_headers()
+            scores = latest_rubric_object.get_rubric_scores()
+            rubric_headers_and_scores['rubric_scores'] = scores
+            rubric_headers_and_scores['rubric_headers'] = headers
+
+        return rubric_headers_and_scores
+
 class Message(models.Model):
     grader = models.ForeignKey('Grader', db_index = True)
     message = models.TextField()
@@ -262,6 +278,19 @@ class Rubric(models.Model):
         formatted_rubric+="</rubric>"
         return formatted_rubric
 
+    def get_rubric_scores(self):
+        rubric_items = self.rubricitem_set.all().order_by('item_number')
+        rubric_scores = []
+        for ri in rubric_items:
+            rubric_scores.append(float(ri.score))
+        return rubric_scores
+
+    def get_rubric_headers(self):
+        rubric_items = self.rubricitem_set.all().order_by('item_number')
+        rubric_headers = []
+        for ri in rubric_items:
+            rubric_headers.append(ri.text)
+        return rubric_headers
 
 class RubricItem(models.Model):
     """

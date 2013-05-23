@@ -6,4 +6,5 @@ urlpatterns = patterns('',
     url(r'^staff_grading/', include('staff_grading.urls')),
     url(r'^metrics/', include('metrics.urls')),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    url('^tasks/', include('djcelery.urls')),
 )

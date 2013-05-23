@@ -206,6 +206,7 @@ INSTALLED_APPS = (
     'peer_grading',
     'ml_grading',
     'metrics',
+    'djcelery',
     )
 
 LOGGING = get_logger_config(ENV_ROOT / "log",
@@ -218,3 +219,8 @@ SESSION_COOKIE_NAME="controller_session_id"
 
 AWS_ACCESS_KEY_ID= ""
 AWS_SECRET_ACCESS_KEY= ""
+
+#Celery settings
+BROKER_URL = 'redis://localhost:6379/6'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
