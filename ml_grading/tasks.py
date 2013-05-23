@@ -33,7 +33,7 @@ def create_ml_models():
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
         gc.collect()
-        time.sleep(random.randint(0, 3))
+        time.sleep(random.randint(0, settings.TIME_BETWEEN_ML_CREATOR_CHECKS))
         ml_model_creation.handle_single_location(location)
     transaction.commit_unless_managed()
 
@@ -54,14 +54,7 @@ def grade_essays():
         success, pending_count=ml_grader.get_pending_length_from_controller(controller_session)
         #log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
         while success and pending_count>0:
-            sub_get_success = ml_grader.handle_single_item(controller_session)
-            if not sub_get_success:
-                log.info("Could not get a submission even though pending count is above 0."
-                         "Could be an error, or could just be that instructor has "
-                         "skipped submissions.")
-                break
-                #Refresh the pending submission count
-            success, pending_count=ml_grader.get_pending_length_from_controller(controller_session)
+            success = ml_grader.handle_single_item(controller_session)
         transaction.commit_unless_managed()
 
     except Exception as err:

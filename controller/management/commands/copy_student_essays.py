@@ -34,7 +34,7 @@ class Command(BaseCommand):
         """
         if len(args)!=2:
             raise Exception("Not enough input arguments!")
-        number, location = args
+        number, location= args
 
         number = int(number)
 
