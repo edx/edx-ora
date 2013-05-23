@@ -21,7 +21,7 @@ MANAGERS = ADMINS
 GRADING_QUEUES_TO_PULL_FROM=['open-ended']
 MESSAGE_QUEUES_TO_PULL_FROM=['open-ended-message']
 REQUESTS_TIMEOUT = 60    # seconds
-TIME_BETWEEN_XQUEUE_PULLS = 20 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
+TIME_BETWEEN_XQUEUE_PULLS = 10 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
 MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
@@ -36,7 +36,7 @@ MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use ma
 MAX_TO_USE_ML = 300 #Maximum number of instructor graded essays to use for ml model creation
 ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
-TIME_BETWEEN_ML_GRADER_CHECKS= 30 # seconds.  Time between ML grader checking to see if models need to be made.
+TIME_BETWEEN_ML_GRADER_CHECKS= 10 # seconds.  Time between ML grader checking to see if models need to be made.
 USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 S3_BUCKETNAME="OpenEnded"
 ML_ESTIMATED_GRADING_TIME= 5 * 60 #Estimated grading time for machine learning in seconds
@@ -184,10 +184,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     )
 
-ROOT_URLCONF = 'grading_controller.urls'
+ROOT_URLCONF = 'edx_ora.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'grading_controller.wsgi.application'
+WSGI_APPLICATION = 'edx_ora.wsgi.application'
 
 TEMPLATE_DIRS = (
     str(os.path.join(REPO_PATH, "templates/"))
