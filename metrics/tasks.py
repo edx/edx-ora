@@ -2,7 +2,7 @@ from controller.models import Submission, SubmissionState, Message
 from django.http import HttpResponse
 import re
 import csv
-from metrics.models import StudentCourseProfile, FIELDS_TO_EVALUATE
+from .models import StudentCourseProfile, FIELDS_TO_EVALUATE
 import numpy
 from django.forms.models import model_to_dict
 from celery import task

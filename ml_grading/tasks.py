@@ -13,10 +13,10 @@ from statsd import statsd
 import random
 
 from controller.models import Submission
-from ml_grading import ml_model_creation
+from . import ml_model_creation
 import gc
 from controller import util
-from ml_grading import ml_grader
+from . import ml_grader
 
 RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 'feedback' : ""}
 
