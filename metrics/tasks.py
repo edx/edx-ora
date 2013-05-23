@@ -90,9 +90,9 @@ def get_data_in_csv_format(locations, name):
                     new_grader_info = {}
                     for key in grader_info[i]:
                         if isinstance(grader_info[i][key], list):
-                            new_grader_info.update({key : grader_info[i][key]})
+                            new_grader_info.update({key : grader_info[i][key][j]})
                         else:
-                            new_grader_info.update({key : grader_info[i]})
+                            new_grader_info.update({key : grader_info[i][key]})
                     additional_list.append(new_grader_info)
                     additional_text.append(submission_text[i])
 
