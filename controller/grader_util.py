@@ -5,7 +5,6 @@ from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
 from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
-import expire_submissions
 from statsd import statsd
 import json
 import os
@@ -18,6 +17,23 @@ from metrics.models import StudentProfile
 import re
 
 log = logging.getLogger(__name__)
+
+error_template = u"""
+
+<section>
+    <div class="shortform">
+        <div class="result-errors">
+          There was an error with your submission.  Please contact the course staff.
+        </div>
+    </div>
+    <div class="longform">
+        <div class="result-errors">
+          {errors}
+        </div>
+    </div>
+</section>
+
+"""
 
 def add_additional_tags_to_dict(grader_dict, sub_id):
     """
@@ -130,7 +146,7 @@ def create_and_handle_grader_object(grader_dict):
             number_of_failures = sub.get_unsuccessful_graders().count()
             #If it has failed too many times, just return an error
             if number_of_failures > settings.MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING:
-                expire_submissions.finalize_expired_submission(sub)
+                finalize_expired_submission(sub)
             else:
                 sub.state = SubmissionState.waiting_to_be_graded
 
@@ -410,5 +426,39 @@ def check_for_combined_notifications(notification_dict):
 
     combined_notifications.update({NotificationTypes.overall : overall_need_to_check})
     return overall_success, combined_notifications
+
+
+def finalize_expired_submission(sub):
+    """
+    Expire submissions by posting back to LMS with error message.
+    Input:
+        timed_out_list from check_if_expired method
+    Output:
+        Success code.
+    """
+
+    grader_dict = {
+        'score': 0,
+        'feedback': error_template.format(errors="Error scoring submission."),
+        'status': GraderStatus.failure,
+        'grader_id': "0",
+        'grader_type': sub.next_grader_type,
+        'confidence': 1,
+        'submission_id' : sub.id,
+        }
+
+    sub.state = SubmissionState.finished
+    sub.save()
+
+    grade = create_grader(grader_dict,sub)
+
+    statsd.increment("open_ended_assessment.grading_controller.expire_submissions.finalize_expired_submission",
+                     tags=[
+                         "course:{0}".format(sub.course_id),
+                         "location:{0}".format(sub.location),
+                         'grader_type:{0}'.format(sub.next_grader_type)
+                     ])
+
+    return True
 
 

@@ -17,6 +17,7 @@ import test_util
 
 from models import Submission, Grader, GraderStatus, SubmissionState
 import expire_submissions
+import grader_util
 
 from xqueue_interface import handle_submission
 
