@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 
 @periodic_task(run_every=settings.TIME_BETWEEN_EXPIRED_CHECKS)
 @single_instance_task(60*10)
-def expire_submissions():
+def expire_submissions_task():
     flag = True
     log.debug("Starting check for expired subs.")
     #Sleep for some time to allow other processes to get ahead/behind
