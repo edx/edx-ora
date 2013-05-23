@@ -386,8 +386,6 @@ def submit_message(request):
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-
-
     try:
         grade = Grader.objects.get(id=grader_id)
     except:

@@ -18,6 +18,12 @@ COUNT_MIN=1
 COUNT_MAX=100
 COPIED_STUDENT_ID = "copied_student"
 
+GRADER_SETTINGS = {
+    'ML' : "ml_grading.conf",
+    'PE' : 'peer_grading.conf',
+    'IN' : 'instructor_grading.conf'
+}
+
 class Command(BaseCommand):
     args = "<number> <location>"
     help = "Copy {count} student submissions.  Creates more submissions in the peer grading pool"
@@ -50,20 +56,29 @@ class Command(BaseCommand):
 
         subs = Submission.objects.filter(location=location)[slice_start:(slice_start+number)]
 
+        last_sub = Submission.objects.filter(location=location).order_by('-date_modified')[0]
+        preferred_grader_type = last_sub.preferred_grader_type
+
         log.info("Copying {0} submissions from location {1}.  Starting from number {2}.".format(number, location, slice_start))
         for sub in subs:
+            #Set these to none to copy the submission
+            sub.pk = None
+            sub.id = None
+
             #Reset basic information
             sub.student_id = COPIED_STUDENT_ID
             sub.state = SubmissionState.waiting_to_be_graded
+            if sub.preferred_grader_type == "NA":
+                sub.preferred_grader_type = preferred_grader_type
+            if sub.preferred_grader_type == "IN":
+                sub.preferred_grader_type = preferred_grader_type
+            if sub.grader_settings == "":
+                sub.grader_settings = GRADER_SETTINGS[sub.preferred_grader_type]
             sub.previous_grader_type = "NA"
             sub.next_grader_type = "BC"
             sub.xqueue_submission_id = ""
             sub.xqueue_submission_key = ""
             sub.skip_basic_checks = False
-
-            #Set these to none to copy the submission
-            sub.pk = None
-            sub.id = None
 
             sub.save()
             #Run basic checks on the sub
