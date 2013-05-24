@@ -56,16 +56,16 @@ EO
 clone_repos() {
     cd "$BASE"
 
-    if [[ -d "$BASE/grading-controller/.git" ]]; then
+    if [[ -d "$BASE/edx-ora/.git" ]]; then
         output "Pulling grading controller"
-        cd "$BASE/grading-controller"
+        cd "$BASE/edx-ora"
         git pull
     else
         output "Cloning grading controller"
-        if [[ -d "$BASE/grading-controller" ]]; then
-            mv "$BASE/grading-controller" "${BASE}/grading-controller.bak.$$"
+        if [[ -d "$BASE/edx-ora" ]]; then
+            mv "$BASE/edx-ora" "${BASE}/edx-ora.bak.$$"
         fi
-        git clone git@github.com:MITx/grading-controller.git
+        git clone git@github.com:MITx/edx-ora.git
     fi
 
     # Also need machine learning repo for everything to work properly
@@ -219,7 +219,7 @@ clone_repos
 
 
 # Install system-level dependencies
-bash $BASE/grading-controller/install_system_req.sh
+bash $BASE/edx-ora/install_system_req.sh
 bash $BASE/ease/install_system_req.sh
 
 # Activate Python virtualenv
@@ -261,14 +261,14 @@ case `uname -s` in
 esac
 
 output "Installing Controller pre-requirements"
-pip install -r $BASE/grading-controller/pre-requirements.txt
+pip install -r $BASE/edx-ora/pre-requirements.txt
 
 output "Installing ML pre-requirements"
 pip install -r $BASE/ease/pre-requirements.txt
 
 output "Installing Controller requirements"
 # Need to be in the mitx dir to get the paths to local modules right
-cd $BASE/grading-controller
+cd $BASE/edx-ora
 pip install -r requirements.txt
 
 output "Installing ml requirements"
@@ -283,17 +283,17 @@ pip install -r requirements.txt
 
 
 mkdir "$BASE/log" || true
-mkdir "$BASE/grading-controller/log" || true
+mkdir "$BASE/edx-ora/log" || true
 mkdir "$BASE/ease/log" || true
 mkdir "$BASE/xqueue/log" || true
-touch "$BASE/grading-controller/log/edx.log" || true
+touch "$BASE/edx-ora/log/edx.log" || true
 touch "$BASE/ease/log/edx.log" || true
 touch "$BASE/xqueue/log/edx.log" || true
 
 #Sync controller db
-cd $BASE/grading-controller
-yes | django-admin.py syncdb --settings=grading_controller.settings --pythonpath=.
-yes | django-admin.py migrate --settings=grading_controller.settings --pythonpath=.
+cd $BASE/edx-ora
+yes | django-admin.py syncdb --settings=edx_ora.settings --pythonpath=.
+yes | django-admin.py migrate --settings=edx_ora.settings --pythonpath=.
 
 #sync xquque db
 cd $BASE/xqueue
@@ -304,8 +304,8 @@ touch "$BASE/auth.json"
 echo '{ "USERS": {"lms": "abcd", "xqueue_pull": "abcd"} }' > "$BASE/auth.json"
 
 #Update controller users
-cd $BASE/grading-controller
-django-admin.py update_users --pythonpath=$BASE/grading-controller --settings=grading_controller.settings
+cd $BASE/edx-ora
+django-admin.py update_users --pythonpath=$BASE/edx-ora --settings=edx_ora.settings
 
 #Update xqueue users
 cd $BASE/xqueue
@@ -327,16 +327,16 @@ cat<<END
 
    To start the controller:
 
-        $ django-admin.py runserver 127.0.0.1:3033 --settings=grading_controller.settings --pythonpath=$BASE/grading-controller
+        $ django-admin.py runserver 127.0.0.1:3033 --settings=edx_ora.settings --pythonpath=$BASE/edx-ora
 
    To start the xqueue:
         $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=. --pythonpath=$BASE/xqueue
 
    Then start the manage.py processes associated with the grading controller:
-        python manage.py pull_from_xqueue --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
-        python manage.py call_ml_grader --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
-        python manage.py call_ml_creator --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
-        python manage.py remove_expired_subs --settings = grading_controller.settings --pythonpath=$BASE/grading-controller
+        python manage.py pull_from_xqueue --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
+        python manage.py call_ml_grader --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
+        python manage.py call_ml_creator --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
+        python manage.py remove_expired_subs --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
 
   If the  Django development server starts properly you
   should see:

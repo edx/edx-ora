@@ -1,6 +1,6 @@
 """
 Run me with:
-    python manage.py test --settings=grading_controller.test_settings ml_grading
+    python manage.py test --settings=edx_ora.test_settings ml_grading
 """
 
 import json
