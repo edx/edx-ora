@@ -65,7 +65,7 @@ clone_repos() {
         if [[ -d "$BASE/edx-ora" ]]; then
             mv "$BASE/edx-ora" "${BASE}/edx-ora.bak.$$"
         fi
-        git clone git@github.com:MITx/edx-ora.git
+        git clone git@github.com:edx/edx-ora.git
     fi
 
     # Also need machine learning repo for everything to work properly
@@ -79,7 +79,7 @@ clone_repos() {
         if [[ -d "$BASE/ease" ]]; then
             mv "$BASE/ease" "${BASE}/ease.bak.$$"
         fi
-        git clone git@github.com:MITx/ease.git
+        git clone git@github.com:edx/ease.git
     fi
 
     # Also need xqueue for everything to work properly
@@ -93,7 +93,7 @@ clone_repos() {
         if [[ -d "$BASE/xqueue" ]]; then
             mv "$BASE/xqueue" "${BASE}/xqueue.bak.$$"
         fi
-        git clone git@github.com:MITx/xqueue.git
+        git clone git@github.com:edx/xqueue.git
     fi
 }
 
@@ -332,11 +332,8 @@ cat<<END
    To start the xqueue:
         $ django-admin.py runserver 127.0.0.1:3032 --settings=xqueue.settings --pythonpath=. --pythonpath=$BASE/xqueue
 
-   Then start the manage.py processes associated with the grading controller:
-        python manage.py pull_from_xqueue --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
-        python manage.py call_ml_grader --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
-        python manage.py call_ml_creator --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
-        python manage.py remove_expired_subs --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
+   Then start the celery processes associated with the grading controller:
+        python manage.py celeryd -B --settings = edx_ora.settings --pythonpath=$BASE/edx-ora
 
   If the  Django development server starts properly you
   should see:
