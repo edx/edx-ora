@@ -1,0 +1,13 @@
+language: python
+python:
+  - "2.7"
+virtualenv:
+  system_site_packages: true
+before_install:
+  - sudo xargs -a apt-packages.txt apt-get install
+install:
+  - pip install -r base_requirements.txt
+before_script:
+  - python manage.py syncdb --settings=edx_ora.settings --pythonpath=. --noinput
+  - python manage.py migrate --settings=edx_ora.settings --pythonpath=. --noinput
+script:  python manage.py test --settings=edx_ora.testsettings --pythonpath=. --noinput

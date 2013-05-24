@@ -33,7 +33,7 @@ log = logging.getLogger(__name__)
 
 def handle_single_location(location):
     try:
-        transaction.commit_unless_managed()
+        transaction.commit()
         gc.collect()
         subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
         log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
@@ -53,6 +53,9 @@ def handle_single_location(location):
                     success, scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
+            if settings.MAX_TO_USE_ML<graded_sub_count:
+                graded_sub_count = settings.MAX_TO_USE_ML
+
             subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
             for m in xrange(0,len(location_suffixes)):
                 log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
@@ -60,11 +63,11 @@ def handle_single_location(location):
                 #Get paths to ml model from database
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location + suffix)
                 #Get last created model for given location
-                transaction.commit_unless_managed()
+                transaction.commit()
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location + suffix)
 
                 if success:
-                    sub_count_diff=subs_graded_by_instructor.count()-latest_created_model.number_of_essays
+                    sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
                 else:
                     sub_count_diff = graded_sub_count
 
@@ -87,7 +90,7 @@ def handle_single_location(location):
                     prompt = str(first_sub.prompt.encode('ascii', 'ignore'))
                     rubric = str(first_sub.rubric.encode('ascii', 'ignore'))
 
-                    transaction.commit_unless_managed()
+                    transaction.commit()
 
                     #Checks to see if another model creator process has started amodel for this location
                     success, model_started, created_model = ml_grading_util.check_if_model_started(location + suffix)
@@ -118,9 +121,9 @@ def handle_single_location(location):
                             'creation_started' : True,
                             'creation_finished' : False,
                             }
-                        transaction.commit_unless_managed()
+                        transaction.commit()
                         success, initial_id = ml_grading_util.save_created_model(created_model_dict_initial)
-                        transaction.commit_unless_managed()
+                        transaction.commit()
 
                         results = create.create(text, scores, prompt)
 
@@ -154,7 +157,7 @@ def handle_single_location(location):
                             'location' : location + suffix,
                             }
 
-                        transaction.commit_unless_managed()
+                        transaction.commit()
                         success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
 
                         if not success:

@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_CREATOR_CHECKS)
 @single_instance_task(60*10)
+@transaction.commit_manually
 def create_ml_models():
     """
     Polls ml model creator to evaluate database, decide what needs to have a model created, and do so.
@@ -37,14 +38,15 @@ def create_ml_models():
         gc.collect()
         time.sleep(random.randint(0, settings.TIME_BETWEEN_ML_CREATOR_CHECKS))
         ml_model_creation.handle_single_location(location)
-    transaction.commit_unless_managed()
 
     log.debug("Finished looping through.")
 
     db.reset_queries()
+    transaction.commit()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_GRADER_CHECKS)
 @single_instance_task(30*60)
+@transaction.commit_manually
 def grade_essays():
     """
     Polls grading controller for essays to grade and tries to grade them.
@@ -58,7 +60,7 @@ def grade_essays():
         #log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
         while success and pending_count>0:
             success = ml_grader.handle_single_item(controller_session)
-        transaction.commit_unless_managed()
+        transaction.commit()
 
     except Exception as err:
         log.exception("Error getting submission: {0}".format(err))
@@ -66,6 +68,7 @@ def grade_essays():
                          tags=["success:Exception"])
 
     db.reset_queries()
+    transaction.commit()
 
 
 
