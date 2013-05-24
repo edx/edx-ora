@@ -199,6 +199,7 @@ def handle_submission(sub):
         #Run some basic sanity checks on submission.  Also check to see if student is banned, and fail them if they are.
         sub.next_grader_type = "BC"
         sub.save()
+        transaction.commit_unless_managed()
         timing_functions.initialize_timing(sub.id)
         success, check_dict = basic_check_util.simple_quality_check(sub.student_response,
             sub.initial_display, sub.student_id, sub.skip_basic_checks)
@@ -273,6 +274,7 @@ def handle_submission(sub):
         log.exception("Submission creation failed!")
         return False
 
+    transaction.commit_unless_managed()
     return True
 
 
