@@ -9,6 +9,7 @@ from celery import task
 import StringIO
 import json
 import logging
+from django.db import transaction
 
 log = logging.getLogger(__name__)
 

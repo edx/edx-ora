@@ -40,7 +40,7 @@ def handle_single_item(controller_session):
     log.debug(content)
     #Grade and handle here
     if sub_get_success:
-        transaction.commit_unless_managed()
+        transaction.commit()
         sub = Submission.objects.get(id=int(content['submission_id']))
         subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(sub.location)
         first_sub = subs_graded_by_instructor.order_by('date_created')[0]
@@ -53,7 +53,7 @@ def handle_single_item(controller_session):
         student_response = sub.student_response.encode('ascii', 'ignore')
 
         #Get the latest created model for the given location
-        transaction.commit_unless_managed()
+        transaction.commit()
 
         location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading = True)
 

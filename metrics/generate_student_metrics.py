@@ -15,11 +15,11 @@ MIN_NEW_ATTEMPTS_TO_REGENERATE = 5
 MIN_DIFF_TO_PEER_GRADE = 2
 
 def regenerate_student_data():
-    transaction.commit_unless_managed()
+    transaction.commit()
     unique_courses = [s['course_id'] for s in Submission.objects.all().values('course_id').distinct()]
 
     for course in unique_courses:
-        transaction.commit_unless_managed()
+        transaction.commit()
         unique_students = [s['student_id'] for s in Submission.objects.filter(course_id = course).values('student_id').distinct()]
         log.debug("Regenerating data for course {0} with {1} students.".format(course, len(unique_students)))
         success_count = 0
@@ -38,7 +38,7 @@ def regenerate_student_data():
         gc.collect()
 
 def read_one_student_data(student_id, course_id):
-    transaction.commit_unless_managed()
+    transaction.commit()
     success = False
     changed = False
     try:
