@@ -44,7 +44,7 @@ def create_ml_models():
     db.reset_queries()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_ML_GRADER_CHECKS)
-@single_instance_task(60*60)
+@single_instance_task(30*60)
 def grade_essays():
     """
     Polls grading controller for essays to grade and tries to grade them.
