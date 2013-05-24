@@ -32,7 +32,7 @@ If it does not work:
 - python manage.py syncdb --settings=edx_ora.settings --noinput --pythonpath=.
 - python manage.py migrate --settings=edx_ora.settings --noinput --pythonpath=.
 
-You will also need to install the .. _ease repo: https://github.com/edx/ease and follow the install instructions there in order to get AI scoring.
+You will also need to install the ease repo from https://github.com/edx/ease and follow the install instructions there in order to get AI scoring.
 
 License
 -------
