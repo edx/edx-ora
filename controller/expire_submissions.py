@@ -182,7 +182,7 @@ def check_if_grading_finished_for_duplicates():
     return True
 
 def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
-    transaction.commit_unless_managed()
+    transaction.commit()
     original_grader_set = original_sub.grader_set.all()
 
     #Need to trickle through all layers to copy the info
@@ -193,27 +193,27 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
         grade.id = None
         grade.submission = sub
         grade.save()
-        transaction.commit_unless_managed()
+        transaction.commit()
         for rubric in rubric_set:
             rubricitem_set = list(rubric.rubricitem_set.all())
             rubric.pk = None
             rubric.id = None
             rubric.grader = grade
             rubric.save()
-            transaction.commit_unless_managed()
+            transaction.commit()
             for rubric_item in rubricitem_set:
                 rubricoption_set = list(rubric_item.rubricoption_set.all())
                 rubric_item.pk = None
                 rubric_item.id = None
                 rubric_item.rubric = rubric
                 rubric_item.save()
-                transaction.commit_unless_managed()
+                transaction.commit()
                 for rubric_option in rubricoption_set:
                     rubric_option.pk = None
                     rubric_option.id = None
                     rubric_option.rubric_item = rubric_item
                     rubric_option.save()
-                    transaction.commit_unless_managed()
+                    transaction.commit()
 
     sub.state=SubmissionState.finished
     sub.previous_grader_type="PE"
@@ -222,7 +222,7 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
     return True
 
 def remove_old_model_files():
-    transaction.commit_unless_managed()
+    transaction.commit()
     locations = [cm['location'] for cm in CreatedModel.objects.all().values('location').distinct()]
     path_whitelist = []
     for loc in locations:
@@ -244,7 +244,7 @@ def remove_old_model_files():
         len(files_to_delete)-len(could_not_delete_list)), len(could_not_delete_list)))
 
 def mark_student_duplicate_submissions():
-    transaction.commit_unless_managed()
+    transaction.commit()
     unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=False).values('student_id').distinct()]
     total_dup_count=0
     for student in unique_students:
@@ -260,7 +260,7 @@ def mark_student_duplicate_submissions():
                 if len(duplicates)>0:
                     student_dup_count+=len(duplicates)
                     Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original[0])
-                    transaction.commit_unless_managed()
+                    transaction.commit()
                     log.debug(duplicate_data)
             except:
                 log.exception("Could not mark duplicates for student {0} location {1}".format(student,loc))
@@ -270,7 +270,7 @@ def mark_student_duplicate_submissions():
     log.info("Marked duplicate subs for {0} students total.".format(total_dup_count))
 
 def add_in_duplicate_ids():
-    transaction.commit_unless_managed()
+    transaction.commit()
     total_dup_count=0
     unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False).values('student_id').distinct()]
     for student in unique_students:
@@ -290,6 +290,6 @@ def add_in_duplicate_ids():
             log.info("Added ids for {0} duplicates for student {1}".format(student_dup_count, student))
         total_dup_count+=student_dup_count
     log.info("Added ids for {0} duplicates total".format(total_dup_count))
-    transaction.commit_unless_managed()
+    transaction.commit()
 
 

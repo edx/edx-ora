@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 
 @periodic_task(run_every=settings.TIME_BETWEEN_EXPIRED_CHECKS)
 @single_instance_task(60*10)
+@transaction.commit_manually
 def expire_submissions_task():
     flag = True
     log.debug("Starting check for expired subs.")
@@ -37,7 +38,7 @@ def expire_submissions_task():
     try:
         gc.collect()
         db.reset_queries()
-        transaction.commit_unless_managed()
+        transaction.commit()
         subs = Submission.objects.all()
 
         #Comment out submission expiration for now.  Not really needed while testing.
@@ -51,58 +52,58 @@ def expire_submissions_task():
         """
         try:
             expire_submissions.reset_in_subs_to_ml(subs)
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not reset in to ml!")
         try:
             expire_submissions.reset_subs_in_basic_check(subs)
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could reset subs in basic check!")
 
         try:
             expire_submissions.reset_failed_subs_in_basic_check(subs)
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not reset failed subs in basic check!")
 
         try:
             expire_submissions.reset_ml_subs_to_in()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not reset ml to in!")
 
         try:
             #See if duplicate peer grading items have been finished grading
             expire_submissions.add_in_duplicate_ids()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not finish checking for duplicate ids!")
 
         try:
             #See if duplicate peer grading items have been finished grading
             expire_submissions.check_if_grading_finished_for_duplicates()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not finish checking if duplicates are graded!")
 
         try:
             #Mark submissions as duplicates if needed
             expire_submissions.mark_student_duplicate_submissions()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not mark subs as duplicate!")
 
         try:
             generate_student_metrics.regenerate_student_data()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not regenerate student data!")
 
         try:
             #Remove old ML grading models
             expire_submissions.remove_old_model_files()
-            transaction.commit_unless_managed()
+            transaction.commit()
         except:
             log.exception("Could not remove ml grading models!")
 
@@ -112,10 +113,11 @@ def expire_submissions_task():
         log.exception("Could not get submissions to expire! Error: {0}".format(err))
         statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                          tags=["success:Exception"])
-    transaction.commit_unless_managed()
+    transaction.commit()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_XQUEUE_PULLS)
 @single_instance_task(60*10)
+@transaction.commit_manually
 def pull_from_xqueue():
     """
     Constant loop that pulls from queue and posts to grading controller
@@ -140,12 +142,13 @@ def pull_from_xqueue():
         pull_from_single_grading_queue(queue_name,controller_session,xqueue_session, project_urls.ControllerURLs.submit_message, project_urls.ControllerURLs.status)
 
     #Check for finalized results from controller, and post back to xqueue
-    transaction.commit_unless_managed()
+    transaction.commit()
 
     submissions_to_post = check_for_completed_submissions()
     for submission in list(submissions_to_post):
         post_one_submission_back_to_queue(submission, xqueue_session)
-    transaction.commit_unless_managed()
+
+    transaction.commit()
 
 
 def check_for_completed_submissions():

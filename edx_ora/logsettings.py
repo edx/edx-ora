@@ -36,8 +36,7 @@ def get_logger_config(log_dir,
                      "- %(message)s").format(
         logging_env=logging_env, hostname=hostname)
 
-    handlers = ['console', 'local'] if debug else ['console',
-                                                   'syslogger-remote', 'local']
+    handlers = ['console']
 
     logger_config = {
         'version': 1,
@@ -87,28 +86,5 @@ def get_logger_config(log_dir,
             },
         }
     }
-
-    if dev_env:
-        edx_file_loc = os.path.join(log_dir, edx_filename)
-        logger_config['handlers'].update({
-            'local': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'level': local_loglevel,
-                'formatter': 'standard',
-                'filename': edx_file_loc,
-                'maxBytes': 1024 * 1024 * 2,
-                'backupCount': 5,
-            },
-        })
-    else:
-        logger_config['handlers'].update({
-            'local': {
-                'level': local_loglevel,
-                'class': 'logging.handlers.SysLogHandler',
-                'address': '/dev/log',
-                'formatter': 'syslog_format',
-                'facility': SysLogHandler.LOG_LOCAL0,
-            },
-        })
 
     return logger_config
