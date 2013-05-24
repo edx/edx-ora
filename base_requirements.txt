@@ -14,3 +14,4 @@ gunicorn
 wsgiref
 django-celery==3.0.11
 celery-with-redis==3.0
+django-nose==1.1
