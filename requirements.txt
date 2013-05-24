@@ -1,4 +1,6 @@
 -r base_requirements.txt
 scipy==0.11.0
 -e git+https://github.com/edx/ease.git@8cc465cbcca2f925f52581654763fde618cd1203#egg=ease
-
+coverage==3.5.3   # coverage breaks travis, so move it out of base-requirements
+sphinx==1.1.3
+django-sphinx-autodoc==0.2
