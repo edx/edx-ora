@@ -1,7 +1,5 @@
-edx-ORA (Open Response Assessor)
+edx ORA (Open Response Assessor)
 =======================
-
-A skeleton that can be used as the basis for open-source edX repositories.
 
 The ORA will take a submission from an xqueue installation, pass it through machine learning grading, peer grading, and staff grading as appropriate, and return a result to LMS.  This is to be used with the edx-platform and xqueue.  It allows for the assessment of open response problems on the edx platform.
 
