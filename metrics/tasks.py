@@ -2,7 +2,7 @@ from controller.models import Submission, SubmissionState, Message
 from django.http import HttpResponse
 import re
 import csv
-from metrics.models import StudentCourseProfile, FIELDS_TO_EVALUATE
+from .models import StudentCourseProfile, FIELDS_TO_EVALUATE
 import numpy
 from django.forms.models import model_to_dict
 from celery import task
@@ -61,16 +61,17 @@ def write_to_json(headers, values):
     for val in values:
         loop_dict = {}
         for i in xrange(0,len(headers)):
-            loop_dict.update({headers[i] : val[i]})
+            try:
+                loop_dict.update({headers[i] : val[i]})
+            except IndexError:
+                continue
         json_data.append(loop_dict)
     return json.dumps(json_data)
 
 @task
 def get_data_in_csv_format(locations, name):
     writer, locations, response = set_up_data_dump(locations, name)
-    headers = ["Student ID", "Score", "Max Score","Grader Type", "Success", "Submission Text", "Location"]
     values = []
-    grader_info = []
 
     for z in xrange(0,len(locations)):
         location=locations[z]
@@ -80,6 +81,8 @@ def get_data_in_csv_format(locations, name):
         grader_info=[sub.get_all_successful_scores_and_feedback() for sub in subs]
         bad_list = []
         additional_list = []
+        additional_text = []
+        submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
 
         for i in xrange(0,len(grader_info)):
             if isinstance(grader_info[i]['score'], list):
@@ -88,32 +91,39 @@ def get_data_in_csv_format(locations, name):
                     new_grader_info = {}
                     for key in grader_info[i]:
                         if isinstance(grader_info[i][key], list):
-                            new_grader_info.update({key : grader_info[i][key]})
+                            new_grader_info.update({key : grader_info[i][key][j]})
                         else:
-                            new_grader_info.update({key : grader_info[i]})
+                            new_grader_info.update({key : grader_info[i][key]})
                     additional_list.append(new_grader_info)
+                    additional_text.append(submission_text[i])
 
         grader_info = [grader_info[i] for i in xrange(0,len(grader_info)) if i not in bad_list]
         grader_info += additional_list
 
+        submission_text = [submission_text[i] for i in xrange(0,len(submission_text)) if i not in bad_list]
+        submission_text += additional_text
+
         grader_type=[grade['grader_type'] for grade in grader_info]
         score=[numpy.median(grade['score']) for grade in grader_info]
-        feedback=[sub_commas(encode_ascii(join_if_list(grade['feedback']))) for grade in grader_info]
+        feedback=[sub_commas(encode_ascii(grade['feedback'])) for grade in grader_info]
         success=[grade['success'] for grade in grader_info]
-        submission_text=[sub_commas(encode_ascii(sub.student_response)) for sub in subs]
-        max_score=[sub.max_score for sub in subs]
+
         student_ids = [grade['student_id'] for grade in grader_info]
 
         for i in xrange(0,len(grader_info)):
-            values.append([student_ids[i], score[i], max_score[i], grader_type[i], success[i], submission_text[i], location] + grader_info[i]['rubric_scores'])
-    if len(grader_info) > 0:
-        rubric_headers = grader_info[0]['rubric_headers']
-        for i in xrange(0,len(rubric_headers)):
-            rubric_headers[i] = "rubric_{0}".format(rubric_headers[i])
-            if rubric_headers[i] in headers:
-                rubric_headers[i] = "{0}.1".format(rubric_headers[i])
-        headers+=rubric_headers
-    return write_to_json(headers,values)
+            value_dict = {
+                'student_id' : student_ids[i],
+                'score' : score[i],
+                'grader_type' : grader_type[i],
+                'success' : success[i],
+                'submission_text' : submission_text[i],
+                'location' : location,
+                'feedback' : feedback[i]
+            }
+            for m in xrange(0,len(grader_info[i]['rubric_scores'])):
+                value_dict.update({"rubric_{0}".format(grader_info[i]['rubric_headers'][m]) : grader_info[i]['rubric_scores'][m]})
+            values.append(value_dict)
+    return json.dumps(values)
 
 @task
 def get_student_data_in_csv_format(locations, name):

@@ -13,3 +13,5 @@ coverage.xml
 .coverage
 ml_models
 celerybeat-schedule
+django_cache/*
+!.vc
