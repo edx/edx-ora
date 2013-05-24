@@ -64,7 +64,7 @@ def handle_single_location(location):
                 success, latest_created_model=ml_grading_util.get_latest_created_model(location + suffix)
 
                 if success:
-                    sub_count_diff=graded_sub_count-latest_created_model.number_of_essays
+                    sub_count_diff=subs_graded_by_instructor.count()-latest_created_model.number_of_essays
                 else:
                     sub_count_diff = graded_sub_count
 
@@ -90,7 +90,7 @@ def handle_single_location(location):
                     transaction.commit_unless_managed()
 
                     #Checks to see if another model creator process has started amodel for this location
-                    success, model_started, created_model = ml_grading_util.check_if_model_started(location)
+                    success, model_started, created_model = ml_grading_util.check_if_model_started(location + suffix)
 
                     #Checks to see if model was started a long time ago, and removes and retries if it was.
                     if model_started:
