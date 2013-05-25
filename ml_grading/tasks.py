@@ -36,7 +36,6 @@ def create_ml_models():
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
         gc.collect()
-        time.sleep(random.randint(0, settings.TIME_BETWEEN_ML_CREATOR_CHECKS))
         ml_model_creation.handle_single_location(location)
 
     log.debug("Finished looping through.")
