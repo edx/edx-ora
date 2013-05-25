@@ -8,7 +8,7 @@ before_install:
 install:
   - pip install -r base_requirements.txt
   - pip install nltk==2.0.3
-  - python -m nltk.downloader maxent_treebank_pos_tagger wordnet
+  - sudo mv nltk_data /usr/share/nltk_data
   - sudo apt-get install python-sklearn python-matplotlib
 before_script:
   - python manage.py syncdb --settings=edx_ora.settings --pythonpath=. --noinput
