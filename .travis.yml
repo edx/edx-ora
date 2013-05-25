@@ -7,9 +7,9 @@ before_install:
   - sudo xargs -a apt-packages.txt apt-get install
 install:
   - pip install -r base_requirements.txt
-  - pip install nltk==2.0.3
+  - pip install nltk==2.0.3 scikit-learn==0.12.1
   - sudo mv nltk_data /usr/share/nltk_data
-  - sudo apt-get install python-sklearn python-matplotlib
+  - sudo apt-get install python-matplotlib
 before_script:
   - python manage.py syncdb --settings=edx_ora.settings --pythonpath=. --noinput
   - python manage.py migrate --settings=edx_ora.settings --pythonpath=. --noinput
