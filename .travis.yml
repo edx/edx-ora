@@ -7,8 +7,7 @@ before_install:
   - sudo xargs -a apt-packages.txt apt-get install
 install:
   - pip install -r base_requirements.txt
-  - git clone git@github.com:edx/ease
-  - pip install -r ease/base_requirements.txt
+  - pip install nltk==2.0.3 scikit-learn==0.12.1
   - python -m nltk.downloader maxent_treebank_pos_tagger wordnet
 before_script:
   - python manage.py syncdb --settings=edx_ora.settings --pythonpath=. --noinput
