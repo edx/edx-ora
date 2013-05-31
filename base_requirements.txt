@@ -12,4 +12,4 @@ lxml==3.0.1
 django-celery==3.0.11
 celery-with-redis==3.0
 django-nose==1.1
--e git+https://github.com/edx/ease.git@2d3b69894ba8ea53a3960339d8dc59b9e1dae3f5#egg=ease
+-e git+https://github.com/edx/ease.git@0e9ed3dddad514bc399808d8b15d16f0509cd46c#egg=ease
