@@ -52,8 +52,6 @@ Reporting Security Issues
 
 Please do not report security issues in public. Please email security@edx.org
 
-Please see http://code.edx.org/security/ for details.
-
 Mailing List and IRC Channel
 ----------------------------
 
