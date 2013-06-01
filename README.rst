@@ -1,3 +1,7 @@
+Part of `edX code`__.
+
+__ http://code.edx.org/
+
 edx ORA (Open Response Assessor)
 =======================
 
