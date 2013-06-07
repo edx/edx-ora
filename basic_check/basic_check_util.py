@@ -20,7 +20,7 @@ def perform_spelling_and_grammar_checks(string):
         Feedback dictionary and an essay set object
     """
     feature_ext = feature_extractor.FeatureExtractor()
-    e_set = essay_set.EssaySet(type="test")
+    e_set = essay_set.EssaySet(essaytype="test")
     e_set.add_essay(string, 0)
 
     feedback = feature_ext.gen_feedback(e_set)[0]
