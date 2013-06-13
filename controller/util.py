@@ -139,6 +139,14 @@ def login(session, url, username, password):
         }
     )
 
+    if response.status_code == 500 and url.endswith("/"):
+        response = session.post(url[:-1],
+                                {'username': username,
+                                 'password': password,
+                                 }
+        )
+
+
     response.raise_for_status()
     log.debug("login response from %r: %r", url, response.json)
     (success, msg) = parse_xreply(response.content)
@@ -157,6 +165,9 @@ def _http_get(session, url, data={}):
     except requests.exceptions.ConnectionError, err:
         log.error(err)
         return (False, 'Cannot connect to server.')
+
+    if r.status_code == 500 and url.endswith("/"):
+        r = session.get(url[:-1], params=data)
 
     if r.status_code not in [200]:
         return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
@@ -182,6 +193,9 @@ def _http_post(session, url, data, timeout):
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
         return (False, 'Cannot connect to server.')
+
+    if r.status_code == 500 and url.endswith("/"):
+        r = session.post(url[:-1], data=data, timeout=timeout, verify=False)
 
     if r.status_code not in [200]:
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
