@@ -144,21 +144,23 @@ def handle_single_location(location):
                                 results['s3_public_url'] = ""
                                 log.exception("Problem saving ML model.")
 
-                        created_model_dict_final={
-                            'cv_kappa' : results['cv_kappa'],
-                            'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
-                            'creation_succeeded': results['success'],
-                            's3_public_url' : results['s3_public_url'],
-                            'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
-                            's3_bucketname' : str(settings.S3_BUCKETNAME),
-                            'creation_finished' : True,
-                            'model_relative_path' : relative_model_path,
-                            'model_full_path' : full_model_path,
-                            'location' : location + suffix,
-                            }
+                            created_model_dict_final={
+                                'cv_kappa' : results['cv_kappa'],
+                                'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
+                                'creation_succeeded': results['success'],
+                                's3_public_url' : results['s3_public_url'],
+                                'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
+                                's3_bucketname' : str(settings.S3_BUCKETNAME),
+                                'creation_finished' : True,
+                                'model_relative_path' : relative_model_path,
+                                'model_full_path' : full_model_path,
+                                'location' : location + suffix,
+                                }
 
-                        transaction.commit()
-                        success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
+                            transaction.commit()
+                            success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
+                        else:
+                            log.error("Could not create an ML model.  Have you installed all the needed requirements for ease?")
 
                         if not success:
                             log.error("ModelCreator creation failed.  Error: {0}".format(id))
