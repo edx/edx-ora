@@ -321,7 +321,7 @@ def update_users_from_file():
 
                 user = User.objects.create(username=username,
                     email=username + '@dummy.edx.org',
-                    is_active=True)
+                    is_active=True, is_staff=True, is_superuser=True)
                 user.set_password(pwd)
                 user.save()
         log.info(' [*] All done!')
