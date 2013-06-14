@@ -386,7 +386,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
 
-        grader = test_util.get_grader("BC", GraderStatus.failure)
+        grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
         grader.submission = test_sub
         grader.save()
 
