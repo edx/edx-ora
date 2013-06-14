@@ -47,16 +47,18 @@ def handle_single_location(location):
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
+
+            if settings.MAX_TO_USE_ML<graded_sub_count:
+                graded_sub_count = settings.MAX_TO_USE_ML
+
+            subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
+
             sub_rubric_scores=[]
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
                     success, scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
-            if settings.MAX_TO_USE_ML<graded_sub_count:
-                graded_sub_count = settings.MAX_TO_USE_ML
-
-            subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
             for m in xrange(0,len(location_suffixes)):
                 log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
                 suffix=location_suffixes[m]
