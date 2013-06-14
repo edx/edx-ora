@@ -355,14 +355,14 @@ def log_connection_data():
         for i in xrange(0,len(query_time)):
             try:
                 if query_time[i]>.02:
-                    log.debug("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
+                    log.info("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
             except:
                 pass
 
-        log.debug("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
+        log.info("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
         if len(query_time)>30:
             for i in xrange(0,30):
-                log.debug(query_sql[i])
+                log.info("{0} Time: {1}".format(query_sql[i], str(float(query_time[i]))))
             traceback.print_stack()
 
 def sanitize_html(text):

@@ -39,7 +39,6 @@ def expire_submissions_task():
         gc.collect()
         db.reset_queries()
         transaction.commit()
-        subs = Submission.objects.all()
 
         #Comment out submission expiration for now.  Not really needed while testing.
         expire_submissions.reset_timed_out_submissions(subs)
@@ -51,18 +50,18 @@ def expire_submissions_task():
                 tags=["success:{0}".format(success)])
         """
         try:
-            expire_submissions.reset_in_subs_to_ml(subs)
+            expire_submissions.reset_in_subs_to_ml()
             transaction.commit()
         except:
             log.exception("Could not reset in to ml!")
         try:
-            expire_submissions.reset_subs_in_basic_check(subs)
+            expire_submissions.reset_subs_in_basic_check()
             transaction.commit()
         except:
             log.exception("Could reset subs in basic check!")
 
         try:
-            expire_submissions.reset_failed_subs_in_basic_check(subs)
+            expire_submissions.reset_failed_subs_in_basic_check()
             transaction.commit()
         except:
             log.exception("Could not reset failed subs in basic check!")
@@ -113,6 +112,7 @@ def expire_submissions_task():
         log.exception("Could not get submissions to expire! Error: {0}".format(err))
         statsd.increment("open_ended_assessment.grading_controller.remove_expired_subs",
                          tags=["success:Exception"])
+    util.log_connection_data()
     transaction.commit()
 
 @periodic_task(run_every=settings.TIME_BETWEEN_XQUEUE_PULLS)

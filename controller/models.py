@@ -70,7 +70,7 @@ class Submission(models.Model):
     # passed by the LMS
     location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
     max_score = models.IntegerField(default=1)
-    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
+    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
     student_response = models.TextField(default="")
     student_submission_time = models.DateTimeField(default=timezone.now)
 
@@ -84,6 +84,7 @@ class Submission(models.Model):
     is_duplicate = models.BooleanField(default=False)
     is_plagiarized = models.BooleanField(default=False)
     duplicate_submission_id = models.IntegerField(null=True, blank=True)
+    has_been_duplicate_checked = models.BooleanField(default=False)
 
     #Control logic passed from the LMS
     skip_basic_checks = models.BooleanField(default = False)
@@ -213,7 +214,7 @@ class Grader(models.Model):
     # For machine grading, it's the name and version of the algorithm that was
     # used.
     grader_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="1")
-    grader_type = models.CharField(max_length=2, choices=GRADER_TYPE)
+    grader_type = models.CharField(max_length=2, choices=GRADER_TYPE, db_index = True)
 
     # should be between 0 and 1, with 1 being most confident.
     confidence = models.DecimalField(max_digits=10, decimal_places=9, default=0)
