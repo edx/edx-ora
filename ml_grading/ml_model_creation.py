@@ -162,7 +162,7 @@ def handle_single_location(location):
                             transaction.commit()
                             success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
                         else:
-                            log.error("Could not create an ML model.  Have you installed all the needed requirements for ease?")
+                            log.error("Could not create an ML model.  Have you installed all the needed requirements for ease?  This is for location {0} and rubric item {1}".format(location, m))
 
                         if not success:
                             log.error("ModelCreator creation failed.  Error: {0}".format(id))
