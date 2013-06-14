@@ -21,6 +21,7 @@ log = logging.getLogger(__name__)
 
 @csrf_exempt
 @login_required
+@util.is_submitter
 def peer_grading(request):
     """
     Temporary peer grading view.  Can be removed once real peer grading is wired in.
