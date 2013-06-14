@@ -41,7 +41,7 @@ def expire_submissions_task():
         transaction.commit()
 
         #Comment out submission expiration for now.  Not really needed while testing.
-        expire_submissions.reset_timed_out_submissions(subs)
+        expire_submissions.reset_timed_out_submissions()
         """
         expired_list = expire_submissions.get_submissions_that_have_expired(subs)
         if len(expired_list) > 0:
