@@ -32,6 +32,7 @@ _INTERFACE_VERSION = 1
 @csrf_exempt
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.xqueue_interface.time', tags=['function:submit'])
+@util.is_submitter
 def submit(request):
     '''
     Xqueue pull script posts objects here.

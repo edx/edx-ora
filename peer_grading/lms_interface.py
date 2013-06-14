@@ -25,6 +25,7 @@ _INTERFACE_VERSION = 1
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:get_next_submission'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def get_next_submission(request):
     """
     Gets next submission from controller for peer grading.
@@ -79,6 +80,7 @@ def get_next_submission(request):
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:save_grade'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def save_grade(request):
     """
     Supports POST requests with the following arguments:
@@ -188,6 +190,7 @@ def save_grade(request):
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:is_student_calibrated'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def is_student_calibrated(request):
     """
     Decides if student has fulfilled criteria for peer grading calibration for a given location (problem id).
@@ -217,6 +220,7 @@ def is_student_calibrated(request):
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:show_calibration_essay'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def show_calibration_essay(request):
     """
     Shows a calibration essay when it receives a GET request.
@@ -244,6 +248,7 @@ def show_calibration_essay(request):
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:save_calibration_essay'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def save_calibration_essay(request):
     """
     Saves a calibration essay sent back from LMS.
@@ -311,6 +316,7 @@ def save_calibration_essay(request):
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
     tags=['function:get_problem_list'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def get_problem_list(request):
     """
     Get the list of problems that need grading in course_id request.GET['course_id'].
@@ -365,6 +371,7 @@ def get_problem_list(request):
 
 @csrf_exempt
 @util.error_if_not_logged_in
+@util.is_submitter
 def get_notifications(request):
     if request.method!="GET":
         error_message="Request needs to be GET."

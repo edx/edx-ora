@@ -8,7 +8,7 @@ import project_urls
 import re
 
 from django.http import HttpResponse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 
 from django.db import connection
 
@@ -18,6 +18,17 @@ from lxml.html.clean import Cleaner
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
+
+def is_submitter(view):
+    """
+    Check whether the user calling the view is in the submitters group.
+    """
+    @wraps(view)
+    def wrapper(request, *args, **kwds):
+        if not request.user.groups.filter(name=settings.SUBMITTERS_GROUP).count()>0:
+            return _error_response('insufficient_permissions', _INTERFACE_VERSION)
+        return view(request, *args, **kwds)
+    return wrapper
 
 def error_if_not_logged_in(view):
     """
@@ -330,11 +341,19 @@ def update_users_from_file():
     with open(auth_path) as auth_file:
         AUTH_TOKENS = json.load(auth_file)
         users = AUTH_TOKENS.get('USERS', {})
+
+        submitters, created = Group.objects.get_or_create(name=settings.SUBMITTERS_GROUP)
+        view_submission = Permission.objects.get(codename=settings.EDIT_SUBMISSIONS_PERMISSION)
+        submitters.permissions.add(view_submission)
+
         for username, pwd in users.items():
             log.info(' [*] Creating/updating user {0}'.format(username))
             try:
                 user = User.objects.get(username=username)
                 user.set_password(pwd)
+                user.groups.add(submitters)
+                user.is_staff = True
+                user.is_superuser = True
                 user.save()
             except User.DoesNotExist:
                 log.info('     ... {0} does not exist. Creating'.format(username))
@@ -343,6 +362,7 @@ def update_users_from_file():
                     email=username + '@dummy.edx.org',
                     is_active=True, is_staff=True, is_superuser=True)
                 user.set_password(pwd)
+                user.groups.add(submitters)
                 user.save()
         log.info(' [*] All done!')
 
