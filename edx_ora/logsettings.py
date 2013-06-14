@@ -84,6 +84,16 @@ def get_logger_config(log_dir,
                 'level': 'DEBUG',
                 'propagate': False
             },
+            'ease': {
+                'handlers': handlers,
+                'level': 'DEBUG',
+                'propagate': False
+            },
+            'edx-ora': {
+                'handlers': handlers,
+                'level': 'DEBUG',
+                'propagate': False
+            },
         }
     }
 
