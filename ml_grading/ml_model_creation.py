@@ -139,7 +139,7 @@ def handle_single_location(location):
                                 results.update({'s3_public_url' : s3_public_url, 'success' : success})
                                 if not success:
                                     results['errors'].append("Could not save model.")
-                            except:
+                            except Exception:
                                 results['errors'].append("Could not save model.")
                                 results['s3_public_url'] = ""
                                 log.exception("Problem saving ML model.")
