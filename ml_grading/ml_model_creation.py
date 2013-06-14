@@ -47,16 +47,18 @@ def handle_single_location(location):
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
+
+            if settings.MAX_TO_USE_ML<graded_sub_count:
+                graded_sub_count = settings.MAX_TO_USE_ML
+
+            subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
+
             sub_rubric_scores=[]
             if len(location_suffixes)>0:
                 for sub in subs_graded_by_instructor:
                     success, scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
                     sub_rubric_scores.append(scores)
 
-            if settings.MAX_TO_USE_ML<graded_sub_count:
-                graded_sub_count = settings.MAX_TO_USE_ML
-
-            subs_graded_by_instructor  = subs_graded_by_instructor[:settings.MAX_TO_USE_ML]
             for m in xrange(0,len(location_suffixes)):
                 log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
                 suffix=location_suffixes[m]
@@ -139,26 +141,28 @@ def handle_single_location(location):
                                 results.update({'s3_public_url' : s3_public_url, 'success' : success})
                                 if not success:
                                     results['errors'].append("Could not save model.")
-                            except:
+                            except Exception:
                                 results['errors'].append("Could not save model.")
                                 results['s3_public_url'] = ""
                                 log.exception("Problem saving ML model.")
 
-                        created_model_dict_final={
-                            'cv_kappa' : results['cv_kappa'],
-                            'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
-                            'creation_succeeded': results['success'],
-                            's3_public_url' : results['s3_public_url'],
-                            'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
-                            's3_bucketname' : str(settings.S3_BUCKETNAME),
-                            'creation_finished' : True,
-                            'model_relative_path' : relative_model_path,
-                            'model_full_path' : full_model_path,
-                            'location' : location + suffix,
-                            }
+                            created_model_dict_final={
+                                'cv_kappa' : results['cv_kappa'],
+                                'cv_mean_absolute_error' : results['cv_mean_absolute_error'],
+                                'creation_succeeded': results['success'],
+                                's3_public_url' : results['s3_public_url'],
+                                'model_stored_in_s3' : settings.USE_S3_TO_STORE_MODELS,
+                                's3_bucketname' : str(settings.S3_BUCKETNAME),
+                                'creation_finished' : True,
+                                'model_relative_path' : relative_model_path,
+                                'model_full_path' : full_model_path,
+                                'location' : location + suffix,
+                                }
 
-                        transaction.commit()
-                        success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
+                            transaction.commit()
+                            success, id = ml_grading_util.save_created_model(created_model_dict_final,update_model=True,update_id=initial_id)
+                        else:
+                            log.error("Could not create an ML model.  Have you installed all the needed requirements for ease?  This is for location {0} and rubric item {1}".format(location, m))
 
                         if not success:
                             log.error("ModelCreator creation failed.  Error: {0}".format(id))

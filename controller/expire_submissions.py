@@ -24,7 +24,7 @@ def reset_ml_subs_to_in():
     This happens if the instructor skips too many submissions
     """
     counter=0
-    unique_locations=[x['location'] for x in list(Submission.objects.values('location').distinct())]
+    unique_locations=[x['location'] for x in Submission.objects.all().values('location').distinct()]
     for location in unique_locations:
         subs_graded, subs_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(location)
         subs_pending_total= Submission.objects.filter(
@@ -44,7 +44,7 @@ def reset_ml_subs_to_in():
             tags=["counter:{0}".format(counter)])
         log.debug("Reset {0} submission from ML to IN".format(counter))
 
-def reset_in_subs_to_ml(subs):
+def reset_in_subs_to_ml():
     count=0
     in_subs=Submission.objects.filter(
         state=SubmissionState.waiting_to_be_graded,
@@ -68,9 +68,9 @@ def reset_in_subs_to_ml(subs):
 
     return True
 
-def reset_subs_in_basic_check(subs):
+def reset_subs_in_basic_check():
     #Reset submissions that are stuck in basic check state
-    subs_stuck_in_basic_check=subs.filter(
+    subs_stuck_in_basic_check=Submission.objects.filter(
         next_grader_type="BC",
         state__in=[SubmissionState.waiting_to_be_graded, SubmissionState.being_graded]
     )
@@ -86,9 +86,9 @@ def reset_subs_in_basic_check(subs):
         log.debug("Reset {0} basic check subs properly.".format(count))
     return True
 
-def reset_failed_subs_in_basic_check(subs):
+def reset_failed_subs_in_basic_check():
     #Reset submissions that are stuck in basic check state
-    subs_failed_basic_check=subs.filter(
+    subs_failed_basic_check=Submission.objects.filter(
         grader__grader_type="BC",
         grader__status_code= GraderStatus.failure,
         state=SubmissionState.waiting_to_be_graded,
@@ -105,7 +105,7 @@ def reset_failed_subs_in_basic_check(subs):
         log.debug("Reset {0} basic check failed subs properly.".format(count))
     return True
 
-def reset_timed_out_submissions(subs):
+def reset_timed_out_submissions():
     """
     Check if submissions have timed out, and reset them to waiting to grade state if they have
     Input:
@@ -115,26 +115,17 @@ def reset_timed_out_submissions(subs):
     """
     now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
-    timed_out_subs=subs.filter(date_modified__lt=now-min_time)
-    timed_out_sub_count=timed_out_subs.count()
-    count = 0
+    reset_count = Submission.objects.filter(date_modified__lt=now-min_time, state=SubmissionState.being_graded).update(state=SubmissionState.waiting_to_be_graded)
 
-    for i in xrange(0, timed_out_sub_count):
-        sub = subs[i]
-        if sub.state == SubmissionState.being_graded:
-            sub.state = SubmissionState.waiting_to_be_graded
-            sub.save()
-            count += 1
-
-    if count>0:
+    if reset_count>0:
         statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_timed_out_submissions",
-            tags=["counter:{0}".format(count)])
-        log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
+            tags=["counter:{0}".format(reset_count)])
+        log.debug("Reset {0} submissions that had timed out in their current grader.".format(reset_count))
 
     return True
 
 
-def get_submissions_that_have_expired(subs):
+def get_submissions_that_have_expired():
     """
     Check if submissions have expired, and return them if they have.
     Input:
@@ -142,12 +133,11 @@ def get_submissions_that_have_expired(subs):
     """
     now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.EXPIRE_SUBMISSIONS_AFTER)
-    expired_subs=subs.filter(date_modified__lt=now-min_time, posted_results_back_to_queue=False, state=SubmissionState.waiting_to_be_graded)
+    expired_subs=Submission.objects.filter(date_modified__lt=now-min_time, posted_results_back_to_queue=False, state=SubmissionState.waiting_to_be_graded)
 
-    return list(expired_subs)
+    return expired_subs
 
 def finalize_expired_submissions(timed_out_list):
-
     for sub in timed_out_list:
         grader_util.finalize_expired_submission(sub)
 
@@ -234,9 +224,9 @@ def remove_old_model_files():
     files_to_delete = [f for f in onlyfiles if f not in path_whitelist]
     could_not_delete_list=[]
     for i in xrange(0,len(files_to_delete)):
-        file = files_to_delete[i]
+        mfile = files_to_delete[i]
         try:
-            os.remove(str(os.path.join(settings.ML_MODEL_PATH,file)))
+            os.remove(str(os.path.join(settings.ML_MODEL_PATH, mfile)))
         except:
             could_not_delete_list.append(i)
 
@@ -245,23 +235,20 @@ def remove_old_model_files():
 
 def mark_student_duplicate_submissions():
     transaction.commit()
-    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=False).values('student_id').distinct()]
+    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=False, has_been_duplicate_checked = False).values('student_id').distinct()]
     total_dup_count=0
     for student in unique_students:
         student_dup_count=0
-        responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False).values_list('student_response', 'location').distinct())
+        responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False, has_been_duplicate_checked = False).values_list('student_response', 'location').distinct())
         for resp, loc in zip(responses, locations):
             try:
-                original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
-                duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
+                original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False, has_been_duplicate_checked = True).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
+                duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False, has_been_duplicate_checked = False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')
                 duplicate_data = zip(*duplicates)
-                log.info(original)
-                log.info(duplicates)
                 if len(duplicates)>0:
                     student_dup_count+=len(duplicates)
-                    Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original[0])
+                    Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original[0], has_been_duplicate_checked = True)
                     transaction.commit()
-                    log.debug(duplicate_data)
             except:
                 log.exception("Could not mark duplicates for student {0} location {1}".format(student,loc))
         if student_dup_count>0:
@@ -272,20 +259,23 @@ def mark_student_duplicate_submissions():
 def add_in_duplicate_ids():
     transaction.commit()
     total_dup_count=0
-    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False).values('student_id').distinct()]
+    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None).values('student_id').distinct()]
+    log.info(unique_students)
+    log.info("ADDING IDS")
     for student in unique_students:
         student_dup_count=0
-        duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False)
+        duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None)
+        log.info(duplicate_without_id)
         for sub in duplicate_without_id:
-            if sub.duplicate_submission_id is None:
-                matching_sub = Submission.objects.filter(student_id=student,location=sub.location,is_duplicate=False)
-                student_dup_count+=1
-                if matching_sub.count()>0:
-                    matching_sub_id = matching_sub[0].id
-                    sub.duplicate_submission_id = matching_sub_id
-                else:
-                    sub.is_duplicate = False
-                sub.save()
+            matching_sub = Submission.objects.filter(student_id=student, location=sub.location, is_duplicate=False, has_been_duplicate_checked = True)
+            log.info(matching_sub)
+            student_dup_count+=1
+            if matching_sub.count()>0:
+                matching_sub_id = matching_sub[0].id
+                sub.duplicate_submission_id = matching_sub_id
+            else:
+                sub.is_duplicate = False
+            sub.save()
         if student_dup_count>0:
             log.info("Added ids for {0} duplicates for student {1}".format(student_dup_count, student))
         total_dup_count+=student_dup_count

@@ -361,7 +361,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         new_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         new_sub.save()
 
-        success = expire_submissions.reset_in_subs_to_ml([new_sub])
+        success = expire_submissions.reset_in_subs_to_ml()
         
         new_sub = Submission.objects.get(id = new_sub.id)
 
@@ -373,7 +373,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub.save()
         subs = Submission.objects.all()
 
-        success = expire_submissions.reset_subs_in_basic_check(subs)
+        success = expire_submissions.reset_subs_in_basic_check()
 
         test_sub = Submission.objects.get(id = test_sub.id)
         test_grader = Grader.objects.get(submission_id = test_sub.id)
@@ -386,11 +386,11 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
 
-        grader = test_util.get_grader("BC", GraderStatus.failure)
+        grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
         grader.submission = test_sub
         grader.save()
 
-        success = expire_submissions.reset_failed_subs_in_basic_check(Submission.objects.all())
+        success = expire_submissions.reset_failed_subs_in_basic_check()
         self.assertTrue(success)
 
         graders = test_sub.grader_set.all()
@@ -403,7 +403,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub.state = SubmissionState.being_graded
         test_sub.save()
 
-        success = expire_submissions.reset_timed_out_submissions(Submission.objects.all())
+        success = expire_submissions.reset_timed_out_submissions()
         self.assertEqual(success, True)
 
         test_sub = Submission.objects.all()[0]
@@ -413,7 +413,7 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
 
-        expired_submissions = expire_submissions.get_submissions_that_have_expired(Submission.objects.all())
+        expired_submissions = expire_submissions.get_submissions_that_have_expired()
 
         self.assertEqual(len(expired_submissions),1)
 
@@ -458,6 +458,8 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub3.save()
 
         self.assertEqual(test_sub3.is_duplicate, False)
+        test_sub3.has_been_duplicate_checked = False
+        test_sub3.save()
         expire_submissions.mark_student_duplicate_submissions()
         test_sub3 = Submission.objects.get(id=test_sub3.id)
         self.assertEqual(test_sub3.is_duplicate,True)

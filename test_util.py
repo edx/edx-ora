@@ -48,7 +48,7 @@ def delete_all():
     for cal_record in CalibrationRecord.objects.all():
         cal_record.delete()
 
-def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_id="course_id"):
+def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_id="course_id", rubric=RUBRIC_XML, student_response = "This is a response that will hopefully pass basic sanity checks."):
     prefix = "ml"
     if preferred_grader_type=="PE":
         prefix = "peer"
@@ -57,7 +57,7 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         student_id=student_id,
         problem_id="id",
         state=SubmissionState.waiting_to_be_graded,
-        student_response="This is a response that will hopefully pass basic sanity checks.",
+        student_response= student_response,
         student_submission_time=timezone.now(),
         xqueue_submission_id="id",
         xqueue_submission_key="key",
@@ -69,13 +69,15 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         previous_grader_type=grader_type,
         grader_settings= prefix + "_grading.conf",
         preferred_grader_type=preferred_grader_type,
-        rubric = RUBRIC_XML,
+        rubric = rubric,
         )
     return test_sub
 
-def get_grader(grader_type, status_code=GraderStatus.success):
+def get_grader(grader_type, status_code=GraderStatus.success, score = None):
+    if score is None:
+        score = random.randint(0, MAX_SCORE)
     test_grader=Grader(
-        score= random.randint(0, MAX_SCORE),
+        score= score,
         feedback="",
         status_code=status_code,
         grader_id="1",

@@ -13,7 +13,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
 import controller.rubric_functions
-from controller.models import Submission, SubmissionState, Grader
+from controller.models import Submission, SubmissionState, Grader, GraderStatus
 log=logging.getLogger(__name__)
 
 def create_directory(model_path):
@@ -211,7 +211,9 @@ def upload_to_s3(string_to_upload, keyname, bucketname):
 
         return True, public_url
     except:
-        return False, "Could not connect to S3."
+        error = "Could not connect to S3."
+        log.exception(error)
+        return False, error
 
 def get_pickle_data(prompt_string, feature_ext, classifier, text, score):
     """
