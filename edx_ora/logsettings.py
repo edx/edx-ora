@@ -31,10 +31,6 @@ def get_logger_config(log_dir,
         local_loglevel = 'INFO'
 
     hostname = platform.node().split(".")[0]
-    syslog_format = ("[%(name)s][env:{logging_env}] %(levelname)s "
-                     "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
-                     "- %(message)s").format(
-        logging_env=logging_env, hostname=hostname)
 
     handlers = ['console']
 
@@ -45,9 +41,7 @@ def get_logger_config(log_dir,
             'standard': {
                 'format': '%(asctime)s %(levelname)s %(process)d '
                           '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
-            },
-            'syslog_format': {'format': syslog_format},
-            'raw': {'format': '%(message)s'},
+            }
         },
         'handlers': {
             'console': {
@@ -55,12 +49,6 @@ def get_logger_config(log_dir,
                 'class': 'logging.StreamHandler',
                 'formatter': 'standard',
                 'stream': sys.stdout,
-            },
-            'syslogger-remote': {
-                'level': 'INFO',
-                'class': 'logging.handlers.SysLogHandler',
-                'address': syslog_addr,
-                'formatter': 'syslog_format',
             },
         },
         'loggers': {
@@ -74,12 +62,12 @@ def get_logger_config(log_dir,
                 'level': 'DEBUG',
                 'propagate': False
             },
-            'mitx': {
+            'ease': {
                 'handlers': handlers,
                 'level': 'DEBUG',
                 'propagate': False
             },
-            'keyedcache': {
+            'edx-ora': {
                 'handlers': handlers,
                 'level': 'DEBUG',
                 'propagate': False

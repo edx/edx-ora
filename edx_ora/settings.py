@@ -9,7 +9,7 @@ ENV_ROOT = REPO_PATH.dirname()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-PRINT_QUERIES = False
+PRINT_QUERIES = True
 
 ADMINS = (
 # ('Your Name', 'your_email@example.com'),
@@ -204,7 +204,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'controller',

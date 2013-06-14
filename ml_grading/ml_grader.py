@@ -176,6 +176,7 @@ def query_controller(controller_session,end_path,data={}):
             data=data,
         )
     except Exception as err:
+        log.exception(err)
         return False, "Error getting response: {0}".format(err)
 
     return success, content

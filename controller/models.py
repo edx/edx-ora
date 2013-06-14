@@ -84,6 +84,7 @@ class Submission(models.Model):
     is_duplicate = models.BooleanField(default=False)
     is_plagiarized = models.BooleanField(default=False)
     duplicate_submission_id = models.IntegerField(null=True, blank=True)
+    has_been_duplicate_checked = models.BooleanField(default=False)
 
     #Control logic passed from the LMS
     skip_basic_checks = models.BooleanField(default = False)
@@ -194,6 +195,11 @@ class Submission(models.Model):
             return False, "Could not find timing object"
 
         return True, all_timing[0]
+
+    class Meta:
+        permissions = (
+            ('view_submission', 'Allows a user to view submission objects, and by extension, all objects.'),
+        )
 
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):

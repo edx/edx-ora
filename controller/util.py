@@ -153,13 +153,15 @@ def login(session, url, username, password):
     return success, msg
 
 
-def _http_get(session, url, data={}):
+def _http_get(session, url, data=None):
     """
     Send an HTTP get request:
     session: requests.session object.
     url : url to send request to
     data: optional dictionary to send
     """
+    if data is None:
+        data = {}
     try:
         r = session.get(url, params=data)
     except requests.exceptions.ConnectionError, err:
@@ -171,7 +173,15 @@ def _http_get(session, url, data={}):
 
     if r.status_code not in [200]:
         return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
-    return parse_xreply(r.text)
+    if hasattr(r, "text"):
+        text = r.text
+    elif hasattr(r, "content"):
+        text = r.content
+    else:
+        error_message = "Could not get response from http object."
+        log.exception(error_message)
+        return False, error_message
+    return parse_xreply(text)
 
 
 def _http_post(session, url, data, timeout):
@@ -200,7 +210,17 @@ def _http_post(session, url, data, timeout):
     if r.status_code not in [200]:
         log.error('Server %s returned status_code=%d' % (url, r.status_code))
         return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
-    return (True, r.text)
+
+    if hasattr(r, "text"):
+        text = r.text
+    elif hasattr(r, "content"):
+        text = r.content
+    else:
+        error_message = "Could not get response from http object."
+        log.exception(error_message)
+        return False, error_message
+
+    return (True, text)
 
 
 def post_results_to_xqueue(session, header, body):
@@ -321,7 +341,7 @@ def update_users_from_file():
 
                 user = User.objects.create(username=username,
                     email=username + '@dummy.edx.org',
-                    is_active=True)
+                    is_active=True, is_staff=True, is_superuser=True)
                 user.set_password(pwd)
                 user.save()
         log.info(' [*] All done!')
@@ -335,14 +355,14 @@ def log_connection_data():
         for i in xrange(0,len(query_time)):
             try:
                 if query_time[i]>.02:
-                    log.debug("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
+                    log.info("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
             except:
                 pass
 
-        log.debug("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
+        log.info("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
         if len(query_time)>30:
             for i in xrange(0,30):
-                log.debug(query_sql[i])
+                log.info("{0} Time: {1}".format(query_sql[i], str(float(query_time[i]))))
             traceback.print_stack()
 
 def sanitize_html(text):

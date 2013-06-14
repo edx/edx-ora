@@ -6,3 +6,4 @@ django-sphinx-autodoc==0.2
 matplotlib==1.2.0
 gunicorn
 wsgiref
+ipython
