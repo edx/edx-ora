@@ -115,21 +115,12 @@ def reset_timed_out_submissions():
     """
     now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
-    timed_out_subs=Submission.objects.filter(date_modified__lt=now-min_time)
-    timed_out_sub_count=timed_out_subs.count()
-    count = 0
+    reset_count = Submission.objects.filter(date_modified__lt=now-min_time, state=SubmissionState.being_graded).update(state=SubmissionState.waiting_to_be_graded)
 
-    for i in xrange(0, timed_out_sub_count):
-        sub = timed_out_subs[i]
-        if sub.state == SubmissionState.being_graded:
-            sub.state = SubmissionState.waiting_to_be_graded
-            sub.save()
-            count += 1
-
-    if count>0:
+    if reset_count>0:
         statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_timed_out_submissions",
-            tags=["counter:{0}".format(count)])
-        log.debug("Reset {0} submissions that had timed out in their current grader.".format(count))
+            tags=["counter:{0}".format(reset_count)])
+        log.debug("Reset {0} submissions that had timed out in their current grader.".format(reset_count))
 
     return True
 
@@ -233,9 +224,9 @@ def remove_old_model_files():
     files_to_delete = [f for f in onlyfiles if f not in path_whitelist]
     could_not_delete_list=[]
     for i in xrange(0,len(files_to_delete)):
-        file = files_to_delete[i]
+        mfile = files_to_delete[i]
         try:
-            os.remove(str(os.path.join(settings.ML_MODEL_PATH,file)))
+            os.remove(str(os.path.join(settings.ML_MODEL_PATH, mfile)))
         except:
             could_not_delete_list.append(i)
 
