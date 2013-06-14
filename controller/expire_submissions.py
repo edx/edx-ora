@@ -242,8 +242,8 @@ def mark_student_duplicate_submissions():
         responses, locations = zip(*Submission.objects.filter(student_id=student, is_duplicate=False, has_been_duplicate_checked = False).values_list('student_response', 'location').distinct())
         for resp, loc in zip(responses, locations):
             try:
-                original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
-                duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False, has_been_duplicate_checked = False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[1:]
+                original = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False, has_been_duplicate_checked = True).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')[0]
+                duplicates = Submission.objects.filter(student_id=student, student_response=resp, location=loc, is_duplicate=False, has_been_duplicate_checked = False).values_list('id', 'student_response', 'location', 'date_created').order_by('date_created')
                 duplicate_data = zip(*duplicates)
                 if len(duplicates)>0:
                     student_dup_count+=len(duplicates)
@@ -259,20 +259,23 @@ def mark_student_duplicate_submissions():
 def add_in_duplicate_ids():
     transaction.commit()
     total_dup_count=0
-    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False, has_been_duplicate_checked = True).values('student_id').distinct()]
+    unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None).values('student_id').distinct()]
+    log.info(unique_students)
+    log.info("ADDING IDS")
     for student in unique_students:
         student_dup_count=0
-        duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False, has_been_duplicate_checked = True)
+        duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None)
+        log.info(duplicate_without_id)
         for sub in duplicate_without_id:
-            if sub.duplicate_submission_id is None:
-                matching_sub = Submission.objects.filter(student_id=student,location=sub.location,is_duplicate=False, has_been_duplicate_checked = True)
-                student_dup_count+=1
-                if matching_sub.count()>0:
-                    matching_sub_id = matching_sub[0].id
-                    sub.duplicate_submission_id = matching_sub_id
-                else:
-                    sub.is_duplicate = False
-                sub.save()
+            matching_sub = Submission.objects.filter(student_id=student, location=sub.location, is_duplicate=False, has_been_duplicate_checked = True)
+            log.info(matching_sub)
+            student_dup_count+=1
+            if matching_sub.count()>0:
+                matching_sub_id = matching_sub[0].id
+                sub.duplicate_submission_id = matching_sub_id
+            else:
+                sub.is_duplicate = False
+            sub.save()
         if student_dup_count>0:
             log.info("Added ids for {0} duplicates for student {1}".format(student_dup_count, student))
         total_dup_count+=student_dup_count
