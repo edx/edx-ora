@@ -195,6 +195,11 @@ class Submission(models.Model):
 
         return True, all_timing[0]
 
+    class Meta:
+        permissions = (
+            ('view_submission', 'Allows a user to view submission objects, and by extension, all objects.'),
+        )
+
 # TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
     submission = models.ForeignKey('Submission', db_index = True)

@@ -12,6 +12,6 @@ nosetests.xml
 coverage.xml
 .coverage
 ml_models
-celerybeat-schedule
+celerybeat-schedule.*
 django_cache/*
 !.vc
