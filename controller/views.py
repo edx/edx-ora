@@ -65,6 +65,7 @@ def status(request):
 
 @csrf_exempt
 @util.error_if_not_logged_in
+@util.is_submitter
 def request_eta_for_submission(request):
     """
     Gets the ETA (in seconds) for a student submission to be graded for a given location
@@ -91,6 +92,7 @@ def request_eta_for_submission(request):
 
 @csrf_exempt
 @login_required
+@util.is_submitter
 def verify_name_uniqueness(request):
     """
     Check if a given problem name, location tuple is unique
@@ -123,6 +125,7 @@ def verify_name_uniqueness(request):
 @statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
     tags=['function:check_for_notifications'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def check_for_notifications(request):
     """
     Check if a given problem name, location tuple is unique
@@ -151,6 +154,7 @@ def check_for_notifications(request):
 @statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
     tags=['function:get_grading_status_list'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def get_grading_status_list(request):
     """
     Get a list of locations where student has submitted open ended questions and the status of each.
@@ -187,6 +191,7 @@ def get_grading_status_list(request):
 @statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
     tags=['function:get_flagged_problem_list'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def get_flagged_problem_list(request):
     if request.method != 'GET':
         return util._error_response("Request type must be GET", _INTERFACE_VERSION)
@@ -212,6 +217,7 @@ def get_flagged_problem_list(request):
 @statsd.timed('open_ended_assessment.grading_controller.controller.views.time',
     tags=['function:take_action_on_flags'])
 @util.error_if_not_logged_in
+@util.is_submitter
 def take_action_on_flags(request):
     if request.method != 'POST':
         return util._error_response("Request type must be POST", _INTERFACE_VERSION)

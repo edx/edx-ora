@@ -61,6 +61,9 @@ PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING = 1
 EXPIRE_SUBMISSIONS_AFTER = 5 * 24 * 60 * 60  #Seconds.  This will send submissions back to lms with failure
 RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds.  This will make submissions that are locked by graders available for grading again
 
+EDIT_SUBMISSIONS_PERMISSION = "change_submission"
+SUBMITTERS_GROUP = "submitters"
+
 #SQLite settings
 DATABASES = {
     'default': {

@@ -28,6 +28,7 @@ _INTERFACE_VERSION=1
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_ml'])
+@util.is_submitter
 def get_submission_ml(request):
     """
     Gets a submission for the ML grader
@@ -60,6 +61,7 @@ def get_submission_ml(request):
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_pending_count'])
+@util.is_submitter
 def get_pending_count(request):
     """
     Returns the number of submissions pending grading
@@ -85,6 +87,7 @@ def get_pending_count(request):
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_instructor'])
+@util.is_submitter
 def get_submission_instructor(request):
     """
     Gets a submission for the Instructor grading view
@@ -108,6 +111,7 @@ def get_submission_instructor(request):
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_peer'])
+@util.is_submitter
 def get_submission_peer(request):
     """
     Gets a submission for the Peer grading view
@@ -133,6 +137,7 @@ def get_submission_peer(request):
 @csrf_exempt
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:put_result'])
+@util.is_submitter
 def put_result(request):
     """
     Used by external interfaces to post results back to controller

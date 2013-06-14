@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.test.client import Client
 from django.conf import settings
 
@@ -33,6 +33,12 @@ def create_user():
 
     if(User.objects.filter(username='test').count() == 0):
         user = User.objects.create_user('test', 'test@test.com', 'CambridgeMA')
+        user.is_staff = True
+        user.is_superuser = True
+        submitters, created = Group.objects.get_or_create(name=settings.SUBMITTERS_GROUP)
+        view_submission = Permission.objects.get(codename=settings.EDIT_SUBMISSIONS_PERMISSION)
+        submitters.permissions.add(view_submission)
+        user.groups.add(submitters)
         user.save()
 
 def delete_all():
