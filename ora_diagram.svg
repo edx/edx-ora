@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1200.09"
+   height="600"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="ora_diagram.svg">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend"
+       style="overflow:visible">
+      <path
+         id="path3790"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend"
+       style="overflow:visible">
+      <path
+         id="path3784"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend"
+       style="overflow:visible">
+      <path
+         id="path3802"
+         style="fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3781"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="891.21931"
+     inkscape:cy="396.62477"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2495"
+     inkscape:window-height="1576"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-452.36218)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2985"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:124.00000095%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:0;font-family:Sans"
+       transform="translate(10.101525,412.96113)"><flowRegion
+         id="flowRegion2987"><rect
+           id="rect2989"
+           width="154.55334"
+           height="55.558392"
+           x="25.253813"
+           y="170.69028"
+           style="font-size:20px;line-height:124.00000095%;stroke:#000000;stroke-opacity:0" /></flowRegion><flowPara
+         id="flowPara2991">Student answer </flowPara></flowRoot>    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect3761"
+       width="125.25892"
+       height="88.893425"
+       x="21.213203"
+       y="562.43823" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1;marker-start:none;marker-end:url(#Arrow1Lstart)"
+       d="m 154.55334,642.24024 c 150.51273,1.01016 150.51273,1.01016 150.51273,1.01016 l -2.0203,0"
+       id="path3775"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect5345"
+       width="125.25892"
+       height="73.741135"
+       x="314.15741"
+       y="626.07788" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot5347"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(1.0101527,459.42814)"><flowRegion
+         id="flowRegion5349"><rect
+           id="rect5351"
+           width="91.923882"
+           height="40.406101"
+           x="326.27927"
+           y="183.82225"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara5353">Router</flowPara></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="M 369.71584,605.87475 C 368.70568,528.093 368.70568,528.093 368.70568,528.093 l 0,0 152.53304,1.01016 0,0"
+       id="path5355"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="m 447.49758,664.4636 c 75.76144,1.01015 75.76144,1.01015 75.76144,1.01015"
+       id="path5921"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="m 367.69553,709.92046 c 0,77.78175 0,77.78175 0,77.78175 l 145.46197,-1.01015"
+       id="path6299"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677"
+       width="180.81731"
+       height="91.923882"
+       x="523.25903"
+       y="753.35699" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot6679"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(-6.0609152,423.06265)"><flowRegion
+         id="flowRegion6681"><rect
+           id="rect6683"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685">AI Assessment</flowPara></flowRoot>    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677-8"
+       width="180.81731"
+       height="91.923882"
+       x="536.89606"
+       y="617.49152" />
+    <flowRoot
+       transform="translate(7.5761293,287.19714)"
+       xml:space="preserve"
+       id="flowRoot6679-6"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion6681-4"><rect
+           id="rect6683-7"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685-8">Peer Assessment</flowPara></flowRoot>    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677-2"
+       width="180.81731"
+       height="91.923882"
+       x="531.84534"
+       y="482.13107" />
+    <flowRoot
+       transform="translate(2.525367,151.83669)"
+       xml:space="preserve"
+       id="flowRoot6679-9"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion6681-8"><rect
+           id="rect6683-4"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685-2">Self Assessment</flowPara></flowRoot>    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677-2-5"
+       width="180.81731"
+       height="91.923882"
+       x="970.2514"
+       y="619.51184" />
+    <flowRoot
+       transform="translate(440.93153,289.21744)"
+       xml:space="preserve"
+       id="flowRoot6679-9-9"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion6681-8-6"><rect
+           id="rect6683-4-3"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685-2-0">Instructor Assessment</flowPara></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1, 1;stroke-dashoffset:0;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="m 727.30984,660.42299 c 223.24371,1.01015 224.25386,1.01015 224.25386,1.01015"
+       id="path7163"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1, 1;stroke-dashoffset:0;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="m 723.26923,810.93572 319.20817,-2.0203 -2.0203,-62.62946"
+       id="path7919"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 309.10668,688.70726 c -153.54319,-2.0203 -155.56349,-2.0203 -155.56349,-2.0203"
+       id="path8485"
+       inkscape:connector-curvature="0" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2985-1"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:124.00000095%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:0;font-family:Sans"
+       transform="translate(8.0812183,513.97638)"><flowRegion
+         id="flowRegion2987-5"><rect
+           id="rect2989-3"
+           width="154.55334"
+           height="55.558392"
+           x="25.253813"
+           y="170.69028"
+           style="font-size:20px;line-height:124.00000095%;stroke:#000000;stroke-opacity:0" /></flowRegion><flowPara
+         id="flowPara2991-1">Student feedback </flowPara></flowRoot>    <rect
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="rect3761-2"
+       width="125.25892"
+       height="88.893425"
+       x="19.192896"
+       y="663.45349" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot8705"
+       style="font-size:15px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(-5.0507623,521.05766)"><flowRegion
+         id="flowRegion8707"><rect
+           id="rect8709"
+           width="158.59395"
+           height="61.619305"
+           x="767.71594"
+           y="118.15213"
+           style="font-size:15px" /></flowRegion><flowPara
+         id="flowPara8711">Generate Calibration</flowPara><flowPara
+         id="flowPara8713" /></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot8715"
+       style="font-size:15px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(0,352.36218)"><flowRegion
+         id="flowRegion8717"><rect
+           id="rect8719"
+           width="221.2234"
+           height="46.467018"
+           x="768.72607"
+           y="285.83746"
+           style="font-size:15px" /></flowRegion><flowPara
+         id="flowPara8721" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:15px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="812.16266"
+       y="801.84436"
+       id="text8723"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan8725"
+         x="812.16266"
+         y="801.84436">Train ML Model</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.91861033px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend)"
+       d="m 715.188,837.19969 c 269.36226,-2.02031 269.36226,-2.02031 269.36226,-2.02031"
+       id="path9293"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677-2-5-0"
+       width="180.81731"
+       height="91.923882"
+       x="1001.5663"
+       y="818.5119" />
+    <flowRoot
+       transform="translate(472.24635,488.2175)"
+       xml:space="preserve"
+       id="flowRoot6679-9-9-4"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion6681-8-6-8"><rect
+           id="rect6683-4-3-5"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685-2-0-5">Machine Learning</flowPara></flowRoot>    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#Arrow1Lstart);marker-mid:none;marker-end:url(#Arrow1Lend)"
+       d="m 727.30984,694.76818 39.39594,0 0,0 0,209.10158"
+       id="path10079"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-linecap:square;stroke-opacity:1"
+       id="rect6677-2-5-3"
+       width="180.81731"
+       height="91.923882"
+       x="694.47986"
+       y="927.60834" />
+    <flowRoot
+       transform="translate(165.15998,597.31397)"
+       xml:space="preserve"
+       id="flowRoot6679-9-9-8"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><flowRegion
+         id="flowRegion6681-8-6-6"><rect
+           id="rect6683-4-3-6"
+           width="128.28937"
+           height="61.619305"
+           x="545.48236"
+           y="343.42636"
+           style="font-size:20px" /></flowRegion><flowPara
+         id="flowPara6685-2-0-54">Student Reviewers</flowPara></flowRoot>  </g>
+</svg>
