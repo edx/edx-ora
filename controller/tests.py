@@ -22,6 +22,8 @@ import grader_util
 from xqueue_interface import handle_submission
 from tasks import expire_submissions_task, pull_from_xqueue
 
+import datetime
+
 import project_urls
 
 log = logging.getLogger(__name__)
@@ -485,6 +487,50 @@ class TasksTest(unittest.TestCase):
 
     def test_pull_from_xqueue(self):
         pull_from_xqueue.apply()
+
+class GraderUtilTest(unittest.TestCase):
+    def test_check_name_uniqueness(self):
+        success, name_unique = grader_util.check_name_uniqueness("temp", LOCATION, "course_id")
+        self.assertTrue(name_unique)
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION + "1", "PE")
+        test_sub.save()
+        success, name_unique = grader_util.check_name_uniqueness("id", LOCATION, "course_id")
+        self.assertFalse(name_unique)
+
+    def test_check_for_student_grading_notifications(self):
+        success, new_student_grading = grader_util.check_for_student_grading_notifications(STUDENT_ID, "course_id", datetime.datetime.now() - datetime.timedelta(minutes=10))
+        self.assertFalse(new_student_grading)
+
+    def test_get_problems_student_has_tried(self):
+        success, sub_list = grader_util.get_problems_student_has_tried(STUDENT_ID, "course_id")
+        self.assertTrue(isinstance(sub_list, list))
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        success, sub_list = grader_util.get_problems_student_has_tried(STUDENT_ID, "course_id")
+        self.assertTrue(len(sub_list)>0)
+
+    def test_check_for_combined_notifications(self):
+        notification_dict = {
+            'course_id' : 'course_id',
+            'user_is_staff' : False,
+            'last_time_viewed' : datetime.datetime.now() - datetime.timedelta(minutes=10),
+            'student_id' : STUDENT_ID
+        }
+
+        success, combined_notifications = grader_util.check_for_combined_notifications(notification_dict)
+        self.assertTrue(len(combined_notifications.keys())==3)
+
+        notification_dict['user_is_staff'] = True
+        self.assertTrue(len(combined_notifications.keys())==5)
+
+    def test_finalize_expired_submission(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        grader_util.finalize_expired_submission(test_sub)
+        self.assertEqual(test_sub.state, SubmissionState.finished)
+
 
 
 
