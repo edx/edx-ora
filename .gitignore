@@ -17,3 +17,4 @@ django_cache/*
 !.vc
 tmpfile
 celerybeat-schedule
+docs/_build
