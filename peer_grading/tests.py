@@ -98,6 +98,11 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
     def test_get_next_submission_true(self):
         test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
         test_sub.save()
+        grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
+        grader.submission = test_sub
+        grader.save()
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
         content = self.c.get(
             GET_NEXT,
             data={'grader_id' : STUDENT_ID, "location" : LOCATION},
