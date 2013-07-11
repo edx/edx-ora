@@ -14,27 +14,12 @@ Each type of grader is a separate django application, with the controller having
 
 Tests can be run by running `sh run_tests.sh` .
 
-Getting Started
--------------------------------
+Documentation
+-------------------------
 
-In order to get started, you may run the setup_controller.sh shell script.  Depending on your system, it may or may not work.
+You can find full documentation in the docs directory, and build it using `make html`, or see `here`__ for built documentation.
 
-If it does not work:
-
-- git clone git@github.com:edx/edx-ora
-- cd edx-ora
-- xargs -a apt-packages.txt apt-get install -y
-- Now, either create a virtualenv and activate it, or use the global python env.  This will assume you made a virtualenv.
-- apt-get install python-pip
-- pip install virtualenv
-- virtualenv /opt/edx
-- source /opt/edx/bin/activate
-- pip install -r pre-requirements.txt
-- pip install -r requirements.txt
-- python manage.py syncdb --settings=edx_ora.settings --noinput --pythonpath=.
-- python manage.py migrate --settings=edx_ora.settings --noinput --pythonpath=.
-
-You will also need to install the ease repo from https://github.com/edx/ease and follow the install instructions there in order to get AI scoring.
+__ http://edx-ora.readthedocs.org/en/latest/
 
 License
 -------
