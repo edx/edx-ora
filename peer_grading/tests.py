@@ -110,7 +110,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         body = json.loads(content.content)
 
-        self.assertEqual(body['success'], True)
+        self.assertEqual(body['success'], False)
 
     def test_save_grade_false(self):
         test_dict={
