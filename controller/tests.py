@@ -520,16 +520,27 @@ class GraderUtilTest(unittest.TestCase):
         }
 
         success, combined_notifications = grader_util.check_for_combined_notifications(notification_dict)
-        self.assertTrue(len(combined_notifications.keys())==3)
+        self.assertEqual(len(combined_notifications.keys()), 3)
 
         notification_dict['user_is_staff'] = True
-        self.assertTrue(len(combined_notifications.keys())==5)
+        success, combined_notifications = grader_util.check_for_combined_notifications(notification_dict)
+        self.assertEqual(len(combined_notifications.keys()), 5)
 
     def test_finalize_expired_submission(self):
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
         test_sub.save()
         grader_util.finalize_expired_submission(test_sub)
         self.assertEqual(test_sub.state, SubmissionState.finished)
+
+class UtilTest(unittest.TestCase):
+    def test_create_xqueue_header_and_body(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        xqueue_header, xqueue_body = util.create_xqueue_header_and_body(test_sub)
+        self.assertIsInstance(xqueue_header, dict)
+        self.assertIsInstance(xqueue_body, dict)
+
+
 
 
 
