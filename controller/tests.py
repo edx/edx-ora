@@ -20,6 +20,7 @@ import expire_submissions
 import grader_util
 
 from xqueue_interface import handle_submission
+from tasks import expire_submissions_task, pull_from_xqueue
 
 import project_urls
 
@@ -470,6 +471,20 @@ class ExpireSubmissionsTests(unittest.TestCase):
         expire_submissions.add_in_duplicate_ids()
         test_sub3 = Submission.objects.get(id=test_sub3.id)
         self.assertTrue(test_sub3.duplicate_submission_id is not None)
+
+class TasksTest(unittest.TestCase):
+    def test_expire_submissions(self):
+        test_sub = test_util.get_sub("ML", STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        expire_submissions_task.apply()
+
+        test_sub = Submission.objects.get(id=test_sub.id)
+
+        self.assertEqual(test_sub.next_grader_type, "IN")
+
+    def test_pull_from_xqueue(self):
+        pull_from_xqueue.apply()
 
 
 

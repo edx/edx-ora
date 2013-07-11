@@ -41,3 +41,5 @@ NOSE_ARGS = [ '--with-xunit', '--with-coverage',
               '--cover-package', 'basic_check',
               ]
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+CELERY_ALWAYS_EAGER = True
