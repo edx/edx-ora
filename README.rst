@@ -12,12 +12,12 @@ Overview
 
 Each type of grader is a separate django application, with the controller having common logic, such as submission and returning the result to the LMS.
 
-Tests can be run by running `sh run_tests.sh` .
+After installation, tests can be run by running ``sh run_tests.sh`` .
 
 Documentation
 -------------------------
 
-You can find full documentation in the docs directory, and build it using `make html`, or see `here`__ for built documentation.
+You can find full documentation in the docs directory, and build it using ``make html``, or see `here`__ for built documentation.
 
 __ http://edx-ora.readthedocs.org/en/latest/
 
