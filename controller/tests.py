@@ -536,6 +536,9 @@ class UtilTest(unittest.TestCase):
     def test_create_xqueue_header_and_body(self):
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
         test_sub.save()
+        grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
+        grader.submission = test_sub
+        grader.save()
         xqueue_header, xqueue_body = util.create_xqueue_header_and_body(test_sub)
         self.assertIsInstance(xqueue_header, dict)
         self.assertIsInstance(xqueue_body, dict)

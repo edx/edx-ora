@@ -29,8 +29,10 @@ IS_CALIBRATED= project_urls.PeerGradingURLs.is_student_calibrated
 SAVE_GRADE= project_urls.PeerGradingURLs.save_grade
 SHOW_CALIBRATION= project_urls.PeerGradingURLs.show_calibration_essay
 SAVE_CALIBRATION= project_urls.PeerGradingURLs.save_calibration_essay
+GET_PROBLEM_LIST = project_urls.PeerGradingURLs.get_problem_list
+GET_PEER_GRADING_DATA = project_urls.PeerGradingURLs.get_peer_grading_data_for_location
 
-LOCATION="MITx/6.002x"
+LOCATION="i4x://MITx/6.002x"
 STUDENT_ID="5"
 ALTERNATE_STUDENT="4"
 
@@ -92,6 +94,18 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         #Ensure that correct response is received.
         self.assertEqual(body['success'], False)
         self.assertEqual(body['error'],u'You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded.')
+
+    def test_get_next_submission_true(self):
+        test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
+        test_sub.save()
+        content = self.c.get(
+            GET_NEXT,
+            data={'grader_id' : STUDENT_ID, "location" : LOCATION},
+            )
+
+        body = json.loads(content.content)
+
+        self.assertEqual(body['success'], True)
 
     def test_save_grade_false(self):
         test_dict={
@@ -155,8 +169,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             test_dict,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
         #Should succeed, as we created a submission above that save_grade can use
         self.assertEqual(body['success'], True)
@@ -165,6 +177,27 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         #Ensure that grader object is created
         self.assertEqual(sub.grader_set.all().count(),1)
+
+    def test_get_problem_list(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        request_data = {'course_id' : 'course_id', 'student_id' : STUDENT_ID}
+        content = self.c.get(
+            GET_PROBLEM_LIST,
+            data=request_data,
+        )
+        body=json.loads(content.content)
+        self.assertIsInstance(body['problem_list'], list)
+
+    def test_get_peer_grading_data_for_location(self):
+        request_data = {'student_id' : STUDENT_ID, 'location' : LOCATION}
+        content = self.c.get(
+            GET_PEER_GRADING_DATA,
+            data=request_data,
+            )
+        body=json.loads(content.content)
+        self.assertIsInstance(body['count_required'], int)
+
 
 class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
     def setUp(self):
