@@ -10,6 +10,7 @@ from controller.models import Submission, Grader, NotificationsSeen
 from controller.models import SubmissionState, GraderStatus, NotificationTypes
 from controller import util
 
+from controller import rubric_functions
 import calibration
 import peer_grading_util
 
@@ -138,7 +139,11 @@ def save_grade(request):
     try:
         score = int(score)
     except ValueError:
-        return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
+        #Score may not be filled out if answer_unknown or flagged
+        if is_answer_unknown or is_submission_flagged:
+            score = 0
+        else:
+            return util._error_response("Expected integer score.  Got {0}".format(score), _INTERFACE_VERSION)
 
     try:
         sub=Submission.objects.get(id=submission_id)
@@ -148,6 +153,12 @@ def save_grade(request):
             _INTERFACE_VERSION,
             data={"msg": "Submission id {0} is not valid.".format(submission_id)}
         )
+
+    #Patch to handle rubric scores in the case of "I don't know" or flagging if scores aren't filled out
+    if is_answer_unknown or is_submission_flagged and len(rubric_scores)==0:
+        success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
+        rubric_scores = [0 for l in targets]
+        rubric_scores_complete = True
 
     success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
     if not success:
