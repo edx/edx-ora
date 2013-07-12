@@ -35,6 +35,7 @@ GET_PEER_GRADING_DATA = project_urls.PeerGradingURLs.get_peer_grading_data_for_l
 LOCATION="i4x://MITx/6.002x"
 STUDENT_ID="5"
 ALTERNATE_STUDENT="4"
+COURSE_ID = "course_id"
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
     test_subs=[test_util.get_sub("IN",STUDENT_ID,LOCATION) for i in xrange(0,num_to_create)]
@@ -402,9 +403,29 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.is_duplicate = False
         test_sub.save()
 
-        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications("course_id", ALTERNATE_STUDENT)
+        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(COURSE_ID, ALTERNATE_STUDENT)
         self.assertEqual(success, True)
         self.assertEqual(student_needs_to_peer_grade, True)
+    
+    def test_get_flagged_submissions(self):
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.state = SubmissionState.flagged
+        test_sub.save()
+        
+        success, flagged_submission_list = peer_grading_util.get_flagged_submissions(COURSE_ID)
+
+        self.assertTrue(len(flagged_submission_list)==1)
+
+    def test_unflag_student_submission(self):
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.state = SubmissionState.flagged
+        test_sub.save()
+
+        peer_grading_util.unflag_student_submission(COURSE_ID, ALTERNATE_STUDENT, test_sub.id)
+
+        self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
+
+        
 
 
 
