@@ -10,7 +10,7 @@ from controller.models import Submission, Grader, NotificationsSeen
 from controller.models import SubmissionState, GraderStatus, NotificationTypes
 from controller import util
 
-import rubric_functions
+from controller import rubric_functions
 import calibration
 import peer_grading_util
 
