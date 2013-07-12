@@ -422,6 +422,7 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.save()
 
         peer_grading_util.unflag_student_submission(COURSE_ID, ALTERNATE_STUDENT, test_sub.id)
+        test_sub = Submission.objects.get(id=test_sub.id)
 
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 

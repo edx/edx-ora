@@ -115,7 +115,7 @@ def verify_name_uniqueness(request):
     success, unique = grader_util.check_name_uniqueness(problem_name,location, course_id)
 
     if not success:
-        return util._error_response(eta,_INTERFACE_VERSION)
+        return util._error_response(unique,_INTERFACE_VERSION)
 
     return util._success_response({
         'name_is_unique' : unique,
