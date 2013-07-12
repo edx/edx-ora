@@ -233,7 +233,6 @@ def take_action_on_flags(request):
 
     success, data = peer_grading_util.take_action_on_flags(course_id, student_id, submission_id, action_type)
 
-    log.debug(data)
     if not success:
         return util._error_response(data,_INTERFACE_VERSION)
 

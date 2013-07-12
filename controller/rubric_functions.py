@@ -62,15 +62,14 @@ def parse_rubric_object(rubric_xml):
     success=True
     try:
         parsed_rubric=etree.fromstring(rubric_xml)
-    except:
+    except Exception:
         log.info("Could not parse rubric properly. {0}".format(rubric_xml))
         return False, []
     try:
         parsed_category=parse_task('category', parsed_rubric)
-    except:
+    except Exception:
         error_message="Cannot properly parse the category from rubric {0}".format(parsed_rubric)
-        log.info(error_message)
-        parsed_category=""
+        log.error(error_message)
         return False, []
 
     return True, parsed_category
@@ -82,9 +81,9 @@ def parse_rubric_item(rubric_item):
     try:
         description=stringify_children(parse('description', rubric_item))
         options=[stringify_children(node) for node in parse_task('option', rubric_item)]
-    except:
+    except Exception:
         error_message="Cannot find the proper tags in rubric item {0}".format(rubric_item)
-        log.info(error_message)
+        log.error(error_message)
         success=False
 
     return {'description' : description, 'options' : options, 'success' : success}
@@ -119,7 +118,7 @@ def generate_rubric_object(grader, scores, rubric_xml):
         score=scores[i]
         try:
             score=int(score)
-        except:
+        except Exception:
             return False, "Scores must be numeric."
         if score<0:
             return False, "Scores cannot be below zero. : {0}".format(score)
@@ -167,9 +166,9 @@ def generate_rubric_object(grader, scores, rubric_xml):
                 )
                 rubric_option.save()
         return True, rubric
-    except:
+    except Exception:
         error_message="Could not save and/or parse rubric properly"
-        log.info(error_message)
+        log.error(error_message)
         return False, error_message
 
 def get_submission_rubric_instructor_scores(sub):

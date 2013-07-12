@@ -9,7 +9,7 @@ log_dir = REPO_PATH / "log"
 
 try:
     os.makedirs(log_dir)
-except:
+except Exception:
     pass
 
 LOGGING = get_logger_config(log_dir,

@@ -61,7 +61,7 @@ class CreatedModel(models.Model):
 
         try:
             submission_id_list=json.loads(self.submission_ids_used)
-        except:
+        except Exception:
             return False, "No essays used or not in json format."
 
         return True, submission_id_list

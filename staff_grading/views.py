@@ -72,9 +72,6 @@ def get_next_submission(request):
     grader_id = request.GET.get('grader_id')
     location = request.GET.get('location')
 
-    log.debug("Getting next submission for instructor grading for course: {0}."
-              .format(course_id))
-
 
     if not (course_id or location) or not grader_id:
    
@@ -133,8 +130,6 @@ def get_next_submission(request):
                 }
 
     util.log_connection_data()
-    log.debug("Sending success response back to instructor grading!")
-    log.debug("Sub id from get next: {0}".format(submission.id))
     return util._success_response(response, _INTERFACE_VERSION)
 
 
@@ -182,7 +177,6 @@ def save_grade(request):
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if skipped:
-        log.debug(submission_id)
         success, sub=staff_grading_util.set_instructor_grading_item_back_to_ml(submission_id)
 
         if not success:
@@ -200,7 +194,7 @@ def save_grade(request):
 
     try:
         sub=Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
@@ -308,7 +302,6 @@ def get_problem_list(request):
         location_info.append(location_dict)
 
     util.log_connection_data()
-    log.debug(location_info)
     return util._success_response({'problem_list' : location_info},
                                   _INTERFACE_VERSION)
 

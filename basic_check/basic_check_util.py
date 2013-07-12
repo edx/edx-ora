@@ -56,7 +56,7 @@ def simple_quality_check(string, initial_display, student_id, skip_basic_checks)
             basic_check, e_set = perform_spelling_and_grammar_checks(string)
             total_length = len(string)
             word_length_ratio = total_length / float(len(e_set._tokens[0])+.1)
-        except:
+        except Exception:
             log.exception("could not run basic checks.")
             quality_dict['status'] = GraderStatus.failure
             return False, quality_dict
@@ -71,7 +71,6 @@ def simple_quality_check(string, initial_display, student_id, skip_basic_checks)
             quality_dict['score'] = 0
 
     #If student is banned by staff from peer grading, then they will not get any feedback here.
-    log.debug(quality_dict)
     success, quality_dict = handle_banned_students(student_id, quality_dict)
 
     return True, quality_dict
@@ -90,7 +89,7 @@ def is_student_banned(student_id):
         student_profile = StudentProfile.objects.get(student_id=student_id)
         student_banned = student_profile.student_is_staff_banned
         success = True
-    except:
+    except Exception:
         log.exception("Cannot get student profile for student {0}".format(student_id))
 
     return success, student_banned

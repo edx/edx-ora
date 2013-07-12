@@ -94,7 +94,7 @@ def get_submission_instructor(request):
     """
     try:
         course_id = util._value_or_default(request.GET['course_id'], None)
-    except:
+    except Exception:
         return util._error_response("'get_submission' requires parameter 'course_id'", _INTERFACE_VERSION)
 
     found, sub_id = staff_grading_util.get_single_instructor_grading_item(course_id)
@@ -161,12 +161,12 @@ def put_result(request):
 
         try:
             post_data['score'] = int(post_data['score'])
-        except:
+        except Exception:
             return util._error_response("Can't parse score {0} into an int.".format(post_data['score']), _INTERFACE_VERSION)
 
         try:
             sub=Submission.objects.get(id=int(post_data['submission_id']))
-        except:
+        except Exception:
             return util._error_response(
                 "Submission id {0} is not valid.".format(post_data.get('submission_id', "NA")),
                 _INTERFACE_VERSION,
@@ -177,7 +177,7 @@ def put_result(request):
 
         try:
             rubric_scores=json.loads(rubric_scores)
-        except:
+        except Exception:
             pass
 
         success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)

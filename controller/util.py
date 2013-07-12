@@ -92,9 +92,10 @@ def parse_xreply(xreply):
 
     try:
         xreply = json.loads(xreply)
-    except ValueError, err:
-        log.error(err)
-        return (False, 'Unexpected reply from server.')
+    except ValueError:
+        error_message =  "Could not parse xreply."
+        log.error(error_message)
+        return (False, error_message)
 
     #This is to correctly parse xserver replies and internal success/failure messages
     if 'return_code' in xreply:
@@ -130,9 +131,10 @@ def parse_xobject(xobject, queue_name):
         content = {'xqueue_header': json.dumps(header),
                    'xqueue_body': json.dumps(body)
         }
-    except ValueError, err:
-        log.error(err)
-        return (False, 'unexpected reply from server')
+    except ValueError:
+        error_message = "Unexpected reply from server."
+        log.error(error_message)
+        return (False, error_message)
 
     return True, content
 
@@ -175,9 +177,10 @@ def _http_get(session, url, data=None):
         data = {}
     try:
         r = session.get(url, params=data)
-    except requests.exceptions.ConnectionError, err:
-        log.error(err)
-        return (False, 'Cannot connect to server.')
+    except requests.exceptions.ConnectionError:
+        error_message = "Cannot connect to server."
+        log.error(error_message)
+        return (False, error_message)
 
     if r.status_code == 500 and url.endswith("/"):
         r = session.get(url[:-1], params=data)
@@ -212,15 +215,17 @@ def _http_post(session, url, data, timeout):
     try:
         r = session.post(url, data=data, timeout=timeout, verify=False)
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-        log.error('Could not connect to server at %s in timeout=%f' % (url, timeout))
-        return (False, 'Cannot connect to server.')
+        error_message = 'Could not connect to server at %s in timeout=%f' % (url, timeout)
+        log.error(error_message)
+        return (False, error_message)
 
     if r.status_code == 500 and url.endswith("/"):
         r = session.post(url[:-1], data=data, timeout=timeout, verify=False)
 
     if r.status_code not in [200]:
-        log.error('Server %s returned status_code=%d' % (url, r.status_code))
-        return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
+        error_message = "Server %s returned status_code=%d' % (url, r.status_code)"
+        log.error(error_message)
+        return (False, error_message)
 
     if hasattr(r, "text"):
         text = r.text
@@ -376,7 +381,7 @@ def log_connection_data():
             try:
                 if query_time[i]>.02:
                     log.info("Time: {0} SQL: {1}".format(query_time[i], query_sql[i].encode('ascii', 'ignore')))
-            except:
+            except Exception:
                 pass
 
         log.info("Query Count: {0} Total time: {1}".format(len(query_time), sum(query_time)))
@@ -390,6 +395,6 @@ def sanitize_html(text):
         cleaner = Cleaner(style=True, links=True, add_nofollow=False, page_structure=True, safe_attrs_only=False, allow_tags = ["img", "a"])
         clean_html = cleaner.clean_html(text)
         clean_html = re.sub(r'</p>$', '', re.sub(r'^<p>', '', clean_html))
-    except:
+    except Exception:
         clean_html = text
     return clean_html

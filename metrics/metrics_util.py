@@ -85,7 +85,7 @@ class MetricsRenderer(object):
                if not isinstance(self.y_data[i], int):
                    self.y_data[i] = float(self.y_data[i])
            self.success=True
-       except:
+       except Exception:
            log.exception(IMAGE_ERROR_MESSAGE)
            return False, IMAGE_ERROR_MESSAGE
        return True, "Success."

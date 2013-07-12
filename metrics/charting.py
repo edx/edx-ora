@@ -98,7 +98,6 @@ def render_bar_jquery(x_data, y_data, title, x_label, y_label, chart_name, x_tic
     }});
     """.format(x_data=x_data, y_data=y_data, title=title, y_label = y_label, x_tick_labels = x_tick_labels, chart_name = chart_name, labeled_list = labeled_list)
 
-    log.debug(jquery_code)
     return jquery_code
 
 

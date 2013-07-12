@@ -100,6 +100,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         test_sub.save()
         grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
         grader.submission = test_sub
+        grader.grader_id = "2"
         grader.save()
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
         test_sub.save()
@@ -110,7 +111,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         body = json.loads(content.content)
 
-        self.assertEqual(body['success'], False)
+        self.assertEqual(body['success'], True)
 
     def test_save_grade_false(self):
         test_dict={
@@ -129,8 +130,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             test_dict,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
 
         #Should be false, submission id does not exist right now!
@@ -147,7 +146,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         #Ensure that correct response is received.
         self.assertEqual(body['success'], False)
@@ -221,7 +219,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         #No calibration essays exist, impossible to get any
         self.assertEqual(body['success'], False)
@@ -242,7 +239,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         self.assertEqual(body['success'], should_work)
 
@@ -271,7 +267,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         self.assertEqual(body['success'], should_work)
 
@@ -312,8 +307,6 @@ class IsCalibratedTest(unittest.TestCase):
             data=self.get_data,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
 
         #Now one record exists for given problem_id, so calibration check should return False (student is not calibrated)
@@ -344,8 +337,6 @@ class IsCalibratedTest(unittest.TestCase):
             IS_CALIBRATED,
             data=self.get_data,
         )
-
-        log.debug(content)
 
         body=json.loads(content.content)
 
@@ -384,7 +375,6 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.save()
 
         found, grading_item = peer_grading_util.get_single_peer_grading_item(LOCATION, STUDENT_ID)
-        log.info(grading_item)
         self.assertEqual(found, True)
 
         subs_graded = peer_grading_util.peer_grading_submissions_graded_for_location(LOCATION,"1")
