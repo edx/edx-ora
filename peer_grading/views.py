@@ -44,7 +44,7 @@ def peer_grading(request):
             post_data['submission_id'] = int(post_data['submission_id'])
             post_data['student_id'] = post_data['student_id']
             post_data['feedback'] = {'feedback' : post_data['feedback']}
-        except:
+        except Exception:
             return HttpResponse("Can't parse score into an int.")
 
         if post_data['type'] == "calibration":
@@ -57,7 +57,7 @@ def peer_grading(request):
             }
             try:
                 success, data = create_and_save_calibration_record(calibration_data)
-            except:
+            except Exception:
                 return HttpResponse("Could not create calibration record.")
 
             if not success:
@@ -77,7 +77,7 @@ def peer_grading(request):
                     'feedback': post_data['feedback'],
                     'errors' : "",
                 })
-            except:
+            except Exception:
                 return HttpResponse("Cannot create grader object.")
 
             return HttpResponse("Submission object created!  Reload for next essay.")
@@ -101,17 +101,17 @@ def peer_grading(request):
             if not found:
                 try:
                     post_data.pop('submission_id')
-                except:
+                except Exception:
                     return HttpResponse("Could not find submission_id in post_data")
                 return HttpResponse("No available grading.  Check back later.")
 
             try:
                 sub_id = post_data['submission_id']
                 sub = Submission.objects.get(id=int(sub_id))
-            except:
+            except Exception:
                 try:
                     post_data.pop('submission_id')
-                except:
+                except Exception:
                     return HttpResponse("Could not find key submission_id in post data.")
                 return HttpResponse("Invalid submission id in session.  Cannot find it.  Try reloading.")
 

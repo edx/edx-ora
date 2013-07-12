@@ -38,8 +38,6 @@ def create_ml_models():
         gc.collect()
         ml_model_creation.handle_single_location(location)
 
-    log.debug("Finished looping through.")
-
     db.reset_queries()
     transaction.commit()
 
@@ -56,7 +54,6 @@ def grade_essays():
     try:
         #See if there are any submissions waiting
         success, pending_count=ml_grader.get_pending_length_from_controller(controller_session)
-        #log.debug("Success : {0}, Pending Count: {1}".format(success, pending_count))
         while success and pending_count>0:
             success = ml_grader.handle_single_item(controller_session)
         transaction.commit()

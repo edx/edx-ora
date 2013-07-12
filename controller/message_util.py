@@ -33,7 +33,7 @@ def create_message(message_dict):
 
     try:
         msg.save()
-    except:
+    except Exception:
         error="Could not save the message"
         log.exception(error)
         return False, error

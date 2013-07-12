@@ -130,7 +130,7 @@ def get_single_instructor_grading_item_for_location_with_options(location,check_
             #In some cases, this causes a model query error without the try/except block due to the checked out state
             try:
                 to_be_graded_obj = to_be_graded[i]
-            except:
+            except Exception:
                 return False, 0
             if to_be_graded_obj is not None and to_be_graded_obj.student_response not in finished_submission_text:
                 to_be_graded_obj.state = SubmissionState.being_graded
@@ -154,7 +154,6 @@ def get_single_instructor_grading_item_for_location(location):
     #through submissions that are marked for instructor or ML grading and are pending, then finally
     #looks through submisisons that have been marked finished and have been graded already by ML.
     success, sub_id = get_single_instructor_grading_item_for_location_with_options(location,check_for_ml=True)
-    log.debug("Checked for ml.")
     if success:
         return success, sub_id
 
@@ -212,7 +211,6 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     if not success:
         return success, sub
 
-    log.debug("Setting back to ML.")
     grader_dict={
         'feedback' : 'Instructor skipped',
         'status' : GraderStatus.failure,
@@ -235,7 +233,7 @@ def check_submission_id(submission_id):
     if not isinstance(submission_id,Submission):
         try:
             sub=Submission.objects.get(id=submission_id)
-        except:
+        except Exception:
             error_message="Could not find a submission id."
             log.exception(error_message)
             return False, error_message
@@ -257,7 +255,6 @@ def set_ml_grading_item_back_to_instructor(submission_id):
     if not success:
         return success, sub
 
-    log.debug("Setting back to Instructor.")
     sub.next_grader_type="IN"
     sub.state=SubmissionState.waiting_to_be_graded
     sub.save()

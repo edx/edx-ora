@@ -17,7 +17,7 @@ def get_student_profile(student_id, course_id):
         student_profile = StudentCourseProfile.objects.get(student_id = student_id, course_id = course_id)
         student_profile = model_to_dict(student_profile, FIELDS_TO_EVALUATE)
         success = True
-    except:
+    except Exception:
         student_profile = None
 
     return success, student_profile
@@ -28,12 +28,10 @@ def get_similarity_score(base_student_dict, comparison_student_id, course_id):
     success = False
     try:
         comparison_student_profile = StudentCourseProfile.objects.get(student_id = comparison_student_id, course_id = course_id)
-    except:
+    except Exception:
         return success, similarity_score
 
     comparison_student_dict = model_to_dict(comparison_student_profile, fields = FIELDS_TO_EVALUATE)
-    log.debug(base_student_dict)
-    log.debug(comparison_student_dict)
     difference_list=[]
     for field in FIELDS_TO_EVALUATE:
         if field in base_student_dict and field in comparison_student_dict:
@@ -43,7 +41,6 @@ def get_similarity_score(base_student_dict, comparison_student_id, course_id):
                 field_diff = abs(base_field - comparison_field)/base_field
                 difference_list.append(field_diff)
 
-    log.debug("Difference List : {0}".format(difference_list))
     if len(difference_list)>0:
         difference_list = [float(i) for i in difference_list]
         similarity_score = numpy.mean(difference_list)

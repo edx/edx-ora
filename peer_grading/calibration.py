@@ -28,7 +28,7 @@ def create_and_save_calibration_record(calibration_data):
             student_id=calibration_data['student_id'],
             location=calibration_data['location'],
         )
-    except:
+    except Exception:
         error_msg = "Cannot get or create CalibrationRecord with "
         "student id {0} and location {1}.".format(calibration_data['student_id'],
                                                   calibration_data['location'])
@@ -38,7 +38,7 @@ def create_and_save_calibration_record(calibration_data):
         submission = Submission.objects.get(
             id=calibration_data['submission_id']
         )
-    except:
+    except Exception:
         error_msg = "Invalid submission id {0}.".format(calibration_data['submission_id'])
         log.exception(error_msg)
         return False, (error_msg)
@@ -48,7 +48,7 @@ def create_and_save_calibration_record(calibration_data):
         actual_score = last_grader['score']
         actual_rubric = last_grader['rubric']
         actual_feedback = last_grader['feedback']
-    except:
+    except Exception:
         error_msg = "Error getting actual score for submission id {0}.".format(calibration_data['submission_id'])
         log.exception(error_msg)
         return False, (error_msg)
@@ -85,7 +85,7 @@ def get_calibration_essay_data(calibration_essay_id):
 
     try:
         sub = Submission.objects.get(id=int(calibration_essay_id))
-    except:
+    except Exception:
         return "Could not find submission!"
 
     response = {
@@ -171,7 +171,6 @@ def check_calibration_status(location,student_id):
     calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
     max_score = matching_submissions[0].max_score
     calibration_record_count = calibration_history.get_calibration_record_count()
-    #log.debug("Calibration record count: {0}".format(calibration_record_count))
 
     calibration_dict={'total_calibrated_on_so_far' : calibration_record_count}
     #If student has calibrated more than the minimum and less than the max, check if error is higher than specified

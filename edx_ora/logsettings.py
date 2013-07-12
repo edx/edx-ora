@@ -4,13 +4,7 @@ import sys
 from logging.handlers import SysLogHandler
 
 
-def get_logger_config(log_dir,
-                      logging_env="no_env",
-                      edx_filename="edx.log",
-                      dev_env=False,
-                      syslog_addr=None,
-                      debug=False,
-                      local_loglevel='INFO'):
+def get_logger_config(debug=False,):
     """
 
     Return the appropriate logging config dictionary. You should assign the
@@ -25,12 +19,6 @@ def get_logger_config(log_dir,
     "edx_filename" is ignored unless dev_env is set to true since otherwise logging is handled by rsyslogd.
 
     """
-
-    # Revert to INFO if an invalid string is passed in
-    if local_loglevel not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
-        local_loglevel = 'INFO'
-
-    hostname = platform.node().split(".")[0]
 
     handlers = ['console']
 

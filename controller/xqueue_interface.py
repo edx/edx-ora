@@ -93,7 +93,7 @@ def submit(request):
                 try:
                     first_sub_for_location=Submission.objects.filter(location=location).order_by('date_created')[0]
                     rubric= first_sub_for_location.rubric
-                except:
+                except Exception:
                     error_message="Could not find an existing submission in location.  rubric is original."
                     log.info(error_message)
 
@@ -125,7 +125,6 @@ def submit(request):
                     ).count()
 
                 if sub_count>0:
-                    log.error("Exact submission already exists.")
                     return util._error_response('Submission already exists.', _INTERFACE_VERSION)
 
                 transaction.commit_unless_managed()
@@ -152,7 +151,6 @@ def submit(request):
                 transaction.commit_unless_managed()
 
                 if created==False:
-                    log.error("Exact submission already exists.")
                     return util._error_response('Submission already exists.', _INTERFACE_VERSION)
 
             except Exception as err:
@@ -211,11 +209,9 @@ def handle_submission(sub):
         check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
         if check_dict['score']==0:
             success, max_rubric_scores = rubric_functions.generate_targets_from_rubric(sub.rubric)
-            log.debug(max_rubric_scores)
             if success:
                 check_dict['rubric_scores_complete'] = True
                 check_dict['rubric_scores'] = [0 for i in xrange(0,len(max_rubric_scores))]
-                log.debug(check_dict)
 
         #Create and handle the grader, and return
         grader_util.create_and_handle_grader_object(check_dict)
@@ -270,9 +266,8 @@ def handle_submission(sub):
                 ])
 
         sub.save()
-        log.debug("Submission object created successfully!")
 
-    except:
+    except Exception:
         log.exception("Submission creation failed!")
         return False
 
@@ -301,14 +296,14 @@ def _is_valid_reply(external_reply):
 
     for tag in ['grader_payload', 'student_response', 'student_info']:
         if not body.has_key(tag):
-            log.debug("{0} not found in body".format(tag))
+            log.error("{0} not found in body".format(tag))
             return fail
 
     try:
         body['grader_payload'] = json.loads(body['grader_payload'])
         body['student_info'] = json.loads(body['student_info'])
-    except:
-        log.debug("Cannot load payload or info.")
+    except Exception:
+        log.error("Cannot load payload or info.")
         return fail
 
     return True, header, body
@@ -319,7 +314,7 @@ def _is_valid_reply_generic(external_reply):
         header = json.loads(external_reply['xqueue_header'])
         body = json.loads(external_reply['xqueue_body'])
     except KeyError:
-        log.debug("Cannot load header or body.")
+        log.error("Cannot load header or body.")
         return False, "", ""
 
     if not isinstance(header, dict) or not isinstance(body, dict):
@@ -327,7 +322,7 @@ def _is_valid_reply_generic(external_reply):
 
     for tag in ['submission_id', 'submission_key', 'queue_name']:
         if not header.has_key(tag):
-            log.debug("{0} not found in header".format(tag))
+            log.error("{0} not found in header".format(tag))
             return False, "", ""
     return True, header, body
 
@@ -342,13 +337,13 @@ def _is_valid_reply_message(external_reply):
 
     for tag in ['student_info', 'submission_id', 'grader_id', 'feedback']:
         if not body.has_key(tag):
-            log.debug("{0} not found in body".format(tag))
+            log.error("{0} not found in body".format(tag))
             return fail
 
     body['student_info'] = json.loads(body['student_info'])
     for tag in ['anonymous_student_id']:
         if not body['student_info'].has_key(tag):
-            log.debug("{0} not found in student info".format(tag))
+            log.error("{0} not found in student info".format(tag))
             return fail
 
     return True, header, body
@@ -385,21 +380,21 @@ def submit_message(request):
             score = int(body['score'])
         else:
             score = None
-    except:
+    except Exception:
         error_message = "Score was not an integer, received \"{0}\" instead.".format(score)
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
     try:
         grade = Grader.objects.get(id=grader_id)
-    except:
+    except Exception:
         error_message = "Could not find a grader object for message from xqueue"
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
     try:
         submission = Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         error_message = "Could not find a submission object for message from xqueue"
         log.exception(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)

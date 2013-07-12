@@ -36,7 +36,7 @@ def handle_single_location(location):
         transaction.commit()
         gc.collect()
         subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location)
-        log.debug("Checking location {0} to see if essay count {1} greater than min {2}".format(
+        log.info("Checking location {0} to see if essay count {1} greater than min {2}".format(
             location,
             subs_graded_by_instructor.count(),
             settings.MIN_TO_USE_ML,
@@ -60,7 +60,7 @@ def handle_single_location(location):
                     sub_rubric_scores.append(scores)
 
             for m in xrange(0,len(location_suffixes)):
-                log.debug("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
+                log.info("Currently on location {0}.  Greater than zero is a rubric item.".format(m))
                 suffix=location_suffixes[m]
                 #Get paths to ml model from database
                 relative_model_path, full_model_path= ml_grading_util.get_model_path(location + suffix)
@@ -169,7 +169,7 @@ def handle_single_location(location):
                             statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                                 tags=["success:False", "location:{0}".format(location)])
 
-                        log.debug("Location: {0} Creation Status: {1} Errors: {2}".format(
+                        log.info("Location: {0} Creation Status: {1} Errors: {2}".format(
                             full_model_path,
                             results['success'],
                             results['errors'],
@@ -177,7 +177,7 @@ def handle_single_location(location):
                         statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
                             tags=["success:{0}".format(results['success']), "location:{0}".format(location)])
         util.log_connection_data()
-    except:
+    except Exception:
         log.exception("Problem creating model for location {0}".format(location))
         statsd.increment("open_ended_assessment.grading_controller.call_ml_creator",
             tags=["success:Exception", "location:{0}".format(location)])
@@ -197,5 +197,5 @@ def save_model_file(results, save_to_s3):
             return True, s3_public_url
         else:
             return True, "Saved model to file."
-    except:
+    except Exception:
         return False, "Could not save model."

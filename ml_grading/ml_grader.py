@@ -37,7 +37,6 @@ RESULT_FAILURE_DICT={'success' : False, 'errors' : 'Errors!', 'confidence' : 0, 
 
 def handle_single_item(controller_session):
     sub_get_success, content = get_item_from_controller(controller_session)
-    log.debug(content)
     #Grade and handle here
     if sub_get_success:
         transaction.commit()
@@ -66,7 +65,7 @@ def handle_single_item(controller_session):
             success, created_model=ml_grading_util.get_latest_created_model(sub.location + suffix)
 
             if not success:
-                log.debug("Could not identify a valid created model!")
+                log.error("Could not identify a valid created model!")
                 if m==0:
                     results= RESULT_FAILURE_DICT
                     formatted_feedback="error"
@@ -95,12 +94,12 @@ def handle_single_item(controller_session):
                             results = grade.grade(grader_data, student_response)
                         else:
                             results=RESULT_FAILURE_DICT
-                    except:
+                    except Exception:
                         error_message="Could not find a valid model file."
                         log.exception(error_message)
                         results=RESULT_FAILURE_DICT
 
-                log.debug("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
+                log.info("ML Grader:  Success: {0} Errors: {1}".format(results['success'], results['errors']))
                 statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
                     tags=["success:{0}".format(results['success']), 'location:{0}'.format(sub.location)])
 
@@ -139,9 +138,8 @@ def handle_single_item(controller_session):
             grader_dict,
             settings.REQUESTS_TIMEOUT,
         )
-        log.debug("Got response of {0} from server, message: {1}".format(created, msg))
     else:
-        log.info("Error getting item from controller or no items to get.")
+        log.error("Error getting item from controller or no items to get.")
         statsd.increment("open_ended_assessment.grading_controller.call_ml_grader",
             tags=["success:False"])
 
@@ -161,7 +159,6 @@ def get_pending_length_from_controller(controller_session):
     Get the number of pending submissions from the controller
     """
     success,content=query_controller(controller_session,project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
-    #log.debug(content)
     return success, content['to_be_graded_count']
 
 def query_controller(controller_session,end_path,data={}):
@@ -188,7 +185,7 @@ def load_model_file(created_model,use_full_path):
         else:
             grader_data=pickle.load(file(os.path.join(settings.ML_MODEL_PATH,created_model.model_relative_path),"r"))
         return True, grader_data
-    except:
+    except Exception:
         log.exception("Could not load model file.  This is okay.")
         #Move on to trying S3
         pass
@@ -196,13 +193,13 @@ def load_model_file(created_model,use_full_path):
     try:
         r = requests.get(created_model.s3_public_url, timeout=2)
         grader_data=pickle.loads(r.text)
-    except:
+    except Exception:
         log.exception("Problem with S3 connection.")
         return False, "Could not load."
 
     try:
         store_model_locally(created_model,grader_data)
-    except:
+    except Exception:
         log.exception("Could not save model.  This is not a show-stopping error.")
         #This is okay if it isn't possible to save locally
         pass
@@ -215,7 +212,7 @@ def store_model_locally(created_model,results):
     try:
         ml_grading_util.dump_model_to_file(results['prompt'], results['extractor'],
             results['model'], results['text'],results['score'],full_model_path)
-    except:
+    except Exception:
         error_message="Could not save model to file."
         log.exception(error_message)
         return False, error_message

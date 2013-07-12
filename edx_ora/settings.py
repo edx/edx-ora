@@ -9,7 +9,7 @@ ENV_ROOT = REPO_PATH.dirname()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-PRINT_QUERIES = True
+PRINT_QUERIES = False
 
 ADMINS = (
 # ('Your Name', 'your_email@example.com'),
@@ -219,11 +219,7 @@ INSTALLED_APPS = (
     'djcelery',
     )
 
-LOGGING = get_logger_config(ENV_ROOT / "log",
-    logging_env="dev",
-    dev_env=True,
-    debug=True,
-    local_loglevel="DEBUG")
+LOGGING = get_logger_config(debug=True)
 
 SESSION_COOKIE_NAME="controller_session_id"
 

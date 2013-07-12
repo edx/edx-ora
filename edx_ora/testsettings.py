@@ -9,12 +9,10 @@ log_dir = REPO_PATH / "log"
 
 try:
     os.makedirs(log_dir)
-except:
+except Exception:
     pass
 
-LOGGING = get_logger_config(log_dir,
-    logging_env="test",
-    debug=True)
+LOGGING = get_logger_config(debug=True)
 
 DATABASES = {
     'default': {
@@ -41,3 +39,5 @@ NOSE_ARGS = [ '--with-xunit', '--with-coverage',
               '--cover-package', 'basic_check',
               ]
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+CELERY_ALWAYS_EAGER = True

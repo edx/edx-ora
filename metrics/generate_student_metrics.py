@@ -21,7 +21,6 @@ def regenerate_student_data():
     for course in unique_courses:
         transaction.commit()
         unique_students = [s['student_id'] for s in Submission.objects.filter(course_id = course).values('student_id').distinct()]
-        log.debug("Regenerating data for course {0} with {1} students.".format(course, len(unique_students)))
         success_count = 0
         change_count = 0
         for student in unique_students:
@@ -31,7 +30,7 @@ def regenerate_student_data():
                     success_count+=1
                 if changed:
                     change_count+=1
-            except:
+            except Exception:
                 error_message = "Could not generate student course profile for student "
                 log.exception(error_message)
         log.debug("{0} students successfully scanned, {1} updated.".format(success_count, change_count))
@@ -44,7 +43,7 @@ def read_one_student_data(student_id, course_id):
     try:
         student_profile, created = StudentProfile.objects.get_or_create(student_id = student_id)
         student_course_profile, created = StudentCourseProfile.objects.get_or_create(student_id = student_id, course_id = course_id, student_profile = student_profile)
-    except:
+    except Exception:
         log.exception("Could not find student_profile or student_course_profile.")
         return success, changed
 

@@ -36,7 +36,7 @@ def get_next_submission(request):
     """
 
     if request.method != "GET":
-        log.debug("Improper request method")
+        log.error("Improper request method")
         raise Http404
 
     grader_id = request.GET.get("grader_id")
@@ -44,24 +44,24 @@ def get_next_submission(request):
 
     if not grader_id or not location:
         error_message="Failed to find needed keys 'grader_id' and 'location'"
-        log.debug(error_message)
+        log.error(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
     (found, sub_id) = peer_grading_util.get_single_peer_grading_item(location, grader_id)
 
     if not found:
         error_message="You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded."
-        log.debug(error_message)
+        log.error(error_message)
         return  util._error_response(error_message, _INTERFACE_VERSION)
 
     try:
         sub = Submission.objects.get(id=int(sub_id))
-    except:
-        log.debug("Could not find submission with id {0}".format(sub_id))
+    except Exception:
+        log.exception("Could not find submission with id {0}".format(sub_id))
         return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 
     if sub.state != SubmissionState.being_graded:
-        log.debug("Submission with id {0} has incorrect internal state {1}.".format(sub_id, sub.state))
+        log.error("Submission with id {0} has incorrect internal state {1}.".format(sub_id, sub.state))
         return util._error_response("Error getting grading.", _INTERFACE_VERSION)
 
     response = {
@@ -73,7 +73,6 @@ def get_next_submission(request):
         'max_score': sub.max_score,
     }
 
-    #log.debug(response)
     return util._success_response(response, _INTERFACE_VERSION)
 
 @csrf_exempt
@@ -102,7 +101,6 @@ def save_grade(request):
         raise Http404
 
     post_data = request.POST.dict().copy()
-    log.debug(post_data)
 
     for tag in ['location', 'grader_id', 'submission_id', 'submission_key', 'score', 'feedback', 'submission_flagged']:
         if not tag in post_data:
@@ -144,7 +142,7 @@ def save_grade(request):
 
     try:
         sub=Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
@@ -286,7 +284,7 @@ def save_calibration_essay(request):
 
     try:
         sub=Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
