@@ -12,9 +12,7 @@ try:
 except Exception:
     pass
 
-LOGGING = get_logger_config(log_dir,
-    logging_env="test",
-    debug=True)
+LOGGING = get_logger_config(debug=True)
 
 DATABASES = {
     'default': {

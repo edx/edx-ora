@@ -219,11 +219,7 @@ INSTALLED_APPS = (
     'djcelery',
     )
 
-LOGGING = get_logger_config(ENV_ROOT / "log",
-    logging_env="dev",
-    dev_env=True,
-    debug=True,
-    local_loglevel="DEBUG")
+LOGGING = get_logger_config(debug=True)
 
 SESSION_COOKIE_NAME="controller_session_id"
 
