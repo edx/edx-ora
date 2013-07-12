@@ -90,7 +90,7 @@ def is_student_banned(student_id):
         student_banned = student_profile.student_is_staff_banned
         success = True
     except Exception:
-        log.exception("Cannot get student profile for student {0}".format(student_id))
+        pass
 
     return success, student_banned
 
