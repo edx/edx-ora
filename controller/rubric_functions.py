@@ -113,15 +113,21 @@ def generate_targets_from_rubric(rubric_xml):
 def generate_rubric_object(grader, scores, rubric_xml):
     success, max_scores=generate_targets_from_rubric(rubric_xml)
     if not success:
-        return False, "Could not parse rubric XML to extract max scores."
+        error_message = "Could not parse rubric XML to extract max scores."
+        log.error(error_message)
+        return False, error_message
     for i in xrange(0,len(scores)):
         score=scores[i]
         try:
             score=int(score)
         except Exception:
-            return False, "Scores must be numeric."
+            error_message = "Scores must be numeric."
+            log.exception(error_message)
+            return False, error_message
         if score<0:
-            return False, "Scores cannot be below zero. : {0}".format(score)
+            error_message = "Scores cannot be below zero. : {0}".format(score)
+            log.error(error_message)
+            return False, error_message
         if score>max_scores[i]:
             return False, "Score: {0} is greater than max score for this item: {1}".format(score, max_scores[i])
 
@@ -134,9 +140,13 @@ def generate_rubric_object(grader, scores, rubric_xml):
         rubric.save()
         success, rubric_items=parse_rubric(rubric_xml)
         if not success:
-            return False, "Could not parsed rubric items properly: {0}".format(rubric_items)
+            error_message = "Could not parse rubric items properly: {0}".format(rubric_items)
+            log.error(error_message)
+            return False, error_message
         if len(scores)!=len(rubric_items):
-            return False, "Length of passed in scores: {0} does not match number of rubric items: {1}".format(len(scores), len(rubric_items))
+            error_message = "Length of passed in scores: {0} does not match number of rubric items: {1}".format(len(scores), len(rubric_items))
+            log.error(error_message)
+            return False, error_message
 
         for i in xrange(0,len(rubric_items)):
             rubric_item=rubric_items[i]
