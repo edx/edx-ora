@@ -151,7 +151,6 @@ def check_if_grading_finished_for_duplicates():
         is_duplicate= True,
         posted_results_back_to_queue=False,
     )
-    log.info(duplicate_submissions)
     counter=0
     for sub in duplicate_submissions:
         if sub.duplicate_submission_id is not None:
@@ -161,8 +160,8 @@ def check_if_grading_finished_for_duplicates():
                     finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub)
                     counter+=1
                     log.debug("Finalized one duplicate submission: Original: {0} Duplicate: {1}".format(original_sub,sub))
-            except:
-                log.error("Could not finalize grade for submission with id {0}".format(sub.duplicate_submission_id))
+            except Exception:
+                log.exception("Could not finalize grade for submission with id {0}".format(sub.duplicate_submission_id))
 
     statsd.increment("open_ended_assessment.grading_controller.expire_submissions.check_if_duplicate_grading_finished",
         tags=[
@@ -227,7 +226,7 @@ def remove_old_model_files():
         mfile = files_to_delete[i]
         try:
             os.remove(str(os.path.join(settings.ML_MODEL_PATH, mfile)))
-        except:
+        except Exception:
             could_not_delete_list.append(i)
 
     log.debug("Deleted {0} old ML models.  Could not delete {1}".format((
@@ -249,7 +248,7 @@ def mark_student_duplicate_submissions():
                     student_dup_count+=len(duplicates)
                     Submission.objects.filter(id__in=duplicate_data[0]).update(is_duplicate=True, duplicate_submission_id=original[0], has_been_duplicate_checked = True)
                     transaction.commit()
-            except:
+            except Exception:
                 log.exception("Could not mark duplicates for student {0} location {1}".format(student,loc))
         if student_dup_count>0:
             log.info("Marked {0} duplicate subs from student {1}".format(student_dup_count,student))
@@ -260,15 +259,11 @@ def add_in_duplicate_ids():
     transaction.commit()
     total_dup_count=0
     unique_students = [s['student_id'] for s in Submission.objects.filter(is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None).values('student_id').distinct()]
-    log.info(unique_students)
-    log.info("ADDING IDS")
     for student in unique_students:
         student_dup_count=0
         duplicate_without_id = Submission.objects.filter(student_id=student, is_duplicate=True, is_plagiarized=False, duplicate_submission_id = None)
-        log.info(duplicate_without_id)
         for sub in duplicate_without_id:
             matching_sub = Submission.objects.filter(student_id=student, location=sub.location, is_duplicate=False, has_been_duplicate_checked = True)
-            log.info(matching_sub)
             student_dup_count+=1
             if matching_sub.count()>0:
                 matching_sub_id = matching_sub[0].id

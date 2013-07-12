@@ -79,12 +79,12 @@ def create_and_handle_grader_object(grader_dict):
 
     try:
         sub = Submission.objects.get(id=int(grader_dict['submission_id']))
-    except:
+    except Exception:
         return False, "Error getting submission."
 
     try:
         grader_dict['feedback'] = json.loads(grader_dict['feedback'])
-    except:
+    except Exception:
         pass
 
     if not isinstance(grader_dict['feedback'], dict):
@@ -104,14 +104,14 @@ def create_and_handle_grader_object(grader_dict):
     if 'rubric_scores_complete' in grader_dict and 'rubric_scores' in grader_dict:
         try:
             grader_dict['rubric_scores']=json.loads(grader_dict['rubric_scores'])
-        except:
+        except Exception:
             pass
 
         if grader_dict['rubric_scores_complete'] in ['True', "TRUE", 'true', True]:
             grader_dict['rubric_scores']=[int(r) for r in grader_dict['rubric_scores']]
             try:
                 rubric_functions.generate_rubric_object(grade,grader_dict['rubric_scores'], sub.rubric)
-            except:
+            except Exception:
                 log.exception("Problem with getting rubric scores from dict : {0}".format(grader_dict))
 
     #TODO: Need some kind of logic somewhere else to handle setting next_grader
@@ -197,7 +197,7 @@ def get_eta_for_submission(location):
     """
     try:
         sub_graders = Submission.objects.filter(location=location)[0]
-    except:
+    except Exception:
         return False, "No current problems for given location."
 
     eta = settings.DEFAULT_ESTIMATED_GRADING_TIME
@@ -295,7 +295,6 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
     if is_plagiarized:
         duplicate_submission_id=plagiarized_submission_id
 
-    log.debug("Duplicate id is {0}".format(duplicate_submission_id))
     return is_duplicate, is_plagiarized, duplicate_submission_id
 
 def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
@@ -316,7 +315,7 @@ def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
     for i in xrange(0,len(rubric_scores)):
         try:
             rubric_scores[i]=int(rubric_scores[i])
-        except:
+        except Exception:
             return success, "Cannot parse score into int".format(rubric_scores[i])
 
         if rubric_scores[i] < 0 or rubric_scores[i] > targets[i]:

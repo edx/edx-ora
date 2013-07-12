@@ -37,7 +37,6 @@ def get_single_peer_grading_item(location, grader_id):
 
             if submissions_to_grade is not None:
                 submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
-                #log.debug("Submissions to grade with graders: {0} {1}".format(submission_grader_counts, submissions_to_grade))
 
                 submission_ids = [p['id'] for p in submissions_to_grade]
 
@@ -46,7 +45,6 @@ def get_single_peer_grading_item(location, grader_id):
                 #Also ensures that all submissions are searched through if student has graded the minimum one
                 fallback_sub_id = None
                 for i in xrange(0, len(submission_ids)):
-                    #log.debug("Looping through graders, on {0}".format(i))
                     minimum_index = submission_grader_counts.index(min(submission_grader_counts))
                     grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                     previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
@@ -65,7 +63,6 @@ def get_single_peer_grading_item(location, grader_id):
                             return found, sub_id
                         else:
                             success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
-                            log.debug(similarity_score)
                             if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
                                 initialize_timing(sub_id)
                                 grade_item.state = SubmissionState.being_graded
@@ -175,7 +172,7 @@ def get_flagged_submission_notifications(course_id):
         success = True
         if flagged_submissions.count()>0:
             flagged_submissions_exist = True
-    except:
+    except Exception:
         log.exception("Could not get flagged submissions for course: {0}".format(course_id))
 
     return success, flagged_submissions_exist
@@ -200,7 +197,7 @@ def get_flagged_submissions(course_id):
             }
             flagged_submissions_list.append(loop_dict)
         success = True
-    except:
+    except Exception:
         error_message = "Could not retrieve the flagged submissions for course: {0}".format(course_id)
         log.exception(error_message)
         flagged_submissions_list = error_message
@@ -216,7 +213,7 @@ def get_flagged_submissions(course_id):
 def ban_student_from_peer_grading(course_id, student_id, submission_id):
     try:
         student_profile = StudentProfile.objects.get(student_id=student_id)
-    except:
+    except Exception:
         return False, "Could not find the student: {0}".format(student_id)
 
     student_profile.student_is_staff_banned = True
@@ -224,7 +221,7 @@ def ban_student_from_peer_grading(course_id, student_id, submission_id):
 
     try:
         sub = Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         return False, "Could not find submission with id: {0}".format(submission_id)
 
     sub.state = SubmissionState.finished
@@ -236,7 +233,7 @@ def ban_student_from_peer_grading(course_id, student_id, submission_id):
 def unflag_student_submission(course_id, student_id, submission_id):
     try:
         sub = Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         return False, "Could not find submission with id: {0}".format(submission_id)
 
 
@@ -262,7 +259,7 @@ def take_action_on_flags(course_id, student_id, submission_id, action):
 
     try:
         sub = Submission.objects.get(id=submission_id)
-    except:
+    except Exception:
         error_message = "Could not find a submission with id: {0}".format(submission_id)
         log.exception(error_message)
         return success, error_message

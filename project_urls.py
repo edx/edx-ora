@@ -19,6 +19,8 @@ class PeerGradingURLs():
     show_calibration_essay = peer_grading_base + "show_calibration_essay/"
     save_calibration_essay = peer_grading_base + "save_calibration_essay/"
     peer_grading = peer_grading_base + "peer_grading/"
+    get_problem_list = peer_grading_base + "get_problem_list/"
+    get_peer_grading_data_for_location = peer_grading_base + "get_data_for_location/"
 
 class MLGradingURLs():
     pass

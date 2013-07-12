@@ -4,7 +4,6 @@ import logging
 log=logging.getLogger(__name__)
 
 def create_grader(grader_dict, sub):
-    log.debug("Creating grader with feedback: {0} and type {1}".format(grader_dict['feedback'], grader_dict['grader_type']))
     grade = Grader(
         score=grader_dict['score'],
         feedback=grader_dict['feedback'],

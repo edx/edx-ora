@@ -29,10 +29,13 @@ IS_CALIBRATED= project_urls.PeerGradingURLs.is_student_calibrated
 SAVE_GRADE= project_urls.PeerGradingURLs.save_grade
 SHOW_CALIBRATION= project_urls.PeerGradingURLs.show_calibration_essay
 SAVE_CALIBRATION= project_urls.PeerGradingURLs.save_calibration_essay
+GET_PROBLEM_LIST = project_urls.PeerGradingURLs.get_problem_list
+GET_PEER_GRADING_DATA = project_urls.PeerGradingURLs.get_peer_grading_data_for_location
 
-LOCATION="MITx/6.002x"
+LOCATION="i4x://MITx/6.002x"
 STUDENT_ID="5"
 ALTERNATE_STUDENT="4"
+COURSE_ID = "course_id"
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
     test_subs=[test_util.get_sub("IN",STUDENT_ID,LOCATION) for i in xrange(0,num_to_create)]
@@ -93,6 +96,32 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         self.assertEqual(body['success'], False)
         self.assertEqual(body['error'],u'You have completed all of the existing peer grading or there are no more submissions waiting to be peer graded.')
 
+    def test_get_next_submission_true(self):
+        test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
+        test_sub.save()
+        grader = test_util.get_grader("BC")
+        grader.submission = test_sub
+        grader.grader_id = "2"
+        grader.save()
+
+        for i in xrange(0,settings.MIN_TO_USE_PEER):
+            test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
+            test_sub.save()
+            grader = test_util.get_grader("IN")
+            grader.submission = test_sub
+            grader.save()
+
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        content = self.c.get(
+            GET_NEXT,
+            data={'grader_id' : STUDENT_ID, "location" : LOCATION},
+            )
+
+        body = json.loads(content.content)
+
+        self.assertEqual(body['success'], True)
+
     def test_save_grade_false(self):
         test_dict={
             'location': LOCATION,
@@ -110,8 +139,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             test_dict,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
 
         #Should be false, submission id does not exist right now!
@@ -128,7 +155,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         #Ensure that correct response is received.
         self.assertEqual(body['success'], False)
@@ -155,8 +181,6 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             test_dict,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
         #Should succeed, as we created a submission above that save_grade can use
         self.assertEqual(body['success'], True)
@@ -165,6 +189,27 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         #Ensure that grader object is created
         self.assertEqual(sub.grader_set.all().count(),1)
+
+    def test_get_problem_list(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        request_data = {'course_id' : 'course_id', 'student_id' : STUDENT_ID}
+        content = self.c.get(
+            GET_PROBLEM_LIST,
+            data=request_data,
+        )
+        body=json.loads(content.content)
+        self.assertIsInstance(body['problem_list'], list)
+
+    def test_get_peer_grading_data_for_location(self):
+        request_data = {'student_id' : STUDENT_ID, 'location' : LOCATION}
+        content = self.c.get(
+            GET_PEER_GRADING_DATA,
+            data=request_data,
+            )
+        body=json.loads(content.content)
+        self.assertIsInstance(body['count_required'], int)
+
 
 class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
     def setUp(self):
@@ -183,7 +228,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         #No calibration essays exist, impossible to get any
         self.assertEqual(body['success'], False)
@@ -204,7 +248,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         self.assertEqual(body['success'], should_work)
 
@@ -233,7 +276,6 @@ class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         self.assertEqual(body['success'], should_work)
 
@@ -274,8 +316,6 @@ class IsCalibratedTest(unittest.TestCase):
             data=self.get_data,
         )
 
-        log.debug(content)
-
         body=json.loads(content.content)
 
         #Now one record exists for given problem_id, so calibration check should return False (student is not calibrated)
@@ -306,8 +346,6 @@ class IsCalibratedTest(unittest.TestCase):
             IS_CALIBRATED,
             data=self.get_data,
         )
-
-        log.debug(content)
 
         body=json.loads(content.content)
 
@@ -346,7 +384,6 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.save()
 
         found, grading_item = peer_grading_util.get_single_peer_grading_item(LOCATION, STUDENT_ID)
-        log.info(grading_item)
         self.assertEqual(found, True)
 
         subs_graded = peer_grading_util.peer_grading_submissions_graded_for_location(LOCATION,"1")
@@ -366,9 +403,30 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.is_duplicate = False
         test_sub.save()
 
-        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications("course_id", ALTERNATE_STUDENT)
+        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(COURSE_ID, ALTERNATE_STUDENT)
         self.assertEqual(success, True)
         self.assertEqual(student_needs_to_peer_grade, True)
+    
+    def test_get_flagged_submissions(self):
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.state = SubmissionState.flagged
+        test_sub.save()
+        
+        success, flagged_submission_list = peer_grading_util.get_flagged_submissions(COURSE_ID)
+
+        self.assertTrue(len(flagged_submission_list)==1)
+
+    def test_unflag_student_submission(self):
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.state = SubmissionState.flagged
+        test_sub.save()
+
+        peer_grading_util.unflag_student_submission(COURSE_ID, ALTERNATE_STUDENT, test_sub.id)
+        test_sub = Submission.objects.get(id=test_sub.id)
+
+        self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
+
+        
 
 
 

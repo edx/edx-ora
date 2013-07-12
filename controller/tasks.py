@@ -52,58 +52,58 @@ def expire_submissions_task():
         try:
             expire_submissions.reset_in_subs_to_ml()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not reset in to ml!")
         try:
             expire_submissions.reset_subs_in_basic_check()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could reset subs in basic check!")
 
         try:
             expire_submissions.reset_failed_subs_in_basic_check()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not reset failed subs in basic check!")
 
         try:
             expire_submissions.reset_ml_subs_to_in()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not reset ml to in!")
 
         try:
             #See if duplicate peer grading items have been finished grading
             expire_submissions.add_in_duplicate_ids()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not finish checking for duplicate ids!")
 
         try:
             #See if duplicate peer grading items have been finished grading
             expire_submissions.check_if_grading_finished_for_duplicates()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not finish checking if duplicates are graded!")
 
         try:
             #Mark submissions as duplicates if needed
             expire_submissions.mark_student_duplicate_submissions()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not mark subs as duplicate!")
 
         try:
             generate_student_metrics.regenerate_student_data()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not regenerate student data!")
 
         try:
             #Remove old ML grading models
             expire_submissions.remove_old_model_files()
             transaction.commit()
-        except:
+        except Exception:
             log.exception("Could not remove ml grading models!")
 
         log.debug("Finished looping through.")
@@ -233,7 +233,6 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,
             #Post to grading controller here!
             if  success:
                 #Post to controller
-                log.debug("Trying to post.")
                 post_data = util._http_post(
                     controller_session,
                     urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'],
@@ -241,16 +240,15 @@ def pull_from_single_grading_queue(queue_name,controller_session,xqueue_session,
                     content,
                     settings.REQUESTS_TIMEOUT,
                     )
-                log.debug(post_data)
                 statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
                                  tags=["success:True", "queue_name:{0}".format(queue_name)])
             else:
-                log.info("Error getting queue item or no queue items to get.")
+                log.error("Error getting queue item or no queue items to get.")
                 statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
                                  tags=["success:False", "queue_name:{0}".format(queue_name)])
 
             success, queue_length= get_queue_length(queue_name, xqueue_session)
-    except Exception as err:
-        log.debug("Error getting submission: {0}".format(err))
+    except Exception:
+        log.exception("Error getting submission")
         statsd.increment("open_ended_assessment.grading_controller.pull_from_xqueue",
                          tags=["success:Exception", "queue_name:{0}".format(queue_name)])

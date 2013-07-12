@@ -154,7 +154,7 @@ def save_created_model(model_data, update_model=False, update_id=0):
                                 model_data['model_relative_path'])
             created_model.update(**model_data)
             created_model = created_model[0]
-    except:
+    except Exception:
         log.exception("Could not make ModelCreator object.")
         return False, "Failed to create model!"
 
@@ -210,7 +210,7 @@ def upload_to_s3(string_to_upload, keyname, bucketname):
         public_url = k.generate_url(60*60*24*365) # URL timeout in seconds.
 
         return True, public_url
-    except:
+    except Exception:
         error = "Could not connect to S3."
         log.exception(error)
         return False, error
@@ -266,7 +266,7 @@ def regrade_ml(location):
     """
     success = check_for_all_model_and_rubric_success(location)
     if not success:
-        log.debug("No models trained yet for location {0}, so cannot regrade.".format(location))
+        log.error("No models trained yet for location {0}, so cannot regrade.".format(location))
         return False
 
     subs = Submission.objects.filter(location=location, previous_grader_type="ML")
