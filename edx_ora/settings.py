@@ -9,7 +9,7 @@ ENV_ROOT = REPO_PATH.dirname()
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-PRINT_QUERIES = True
+PRINT_QUERIES = False
 
 ADMINS = (
 # ('Your Name', 'your_email@example.com'),

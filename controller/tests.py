@@ -64,7 +64,6 @@ def login_to_controller(session):
         }
     )
     response.raise_for_status()
-    log.debug(response.content)
     return True
 
 class XQueueInterfaceTest(unittest.TestCase):
@@ -131,8 +130,6 @@ class XQueueInterfaceTest(unittest.TestCase):
             content,
         )
 
-        log.debug(content)
-
         body = json.loads(content.content)
 
         self.assertEqual(body['success'], True)
@@ -165,7 +162,6 @@ class XQueueInterfaceTest(unittest.TestCase):
                 SUBMIT_MESSAGE_URL,
                 content
         )
-        log.debug(content)
         body = json.loads(content.content)
         self.assertEqual(body['success'], success)
 
@@ -204,7 +200,6 @@ class GraderInterfaceTest(unittest.TestCase):
         )
 
         body = json.loads(content.content)
-        log.debug(body)
 
         #Make sure that there really isn't anything to grade
         self.assertEqual(body['error'], "Nothing to grade.")
@@ -222,7 +217,6 @@ class GraderInterfaceTest(unittest.TestCase):
             data={}
         )
         body = json.loads(content.content)
-        log.debug(body)
 
         #Ensure that submission is retrieved successfully
         self.assertEqual(body['success'],True)
@@ -274,7 +268,6 @@ class GraderInterfaceTest(unittest.TestCase):
 
         body=json.loads(content.content)
 
-        log.debug(body)
         return_code=body['success']
 
         #Male sure that function returns true

@@ -98,10 +98,18 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
     def test_get_next_submission_true(self):
         test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
         test_sub.save()
-        grader = test_util.get_grader("BC", status_code = GraderStatus.failure)
+        grader = test_util.get_grader("BC")
         grader.submission = test_sub
         grader.grader_id = "2"
         grader.save()
+
+        for i in xrange(0,settings.MIN_TO_USE_PEER):
+            test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
+            test_sub.save()
+            grader = test_util.get_grader("IN")
+            grader.submission = test_sub
+            grader.save()
+
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
         test_sub.save()
         content = self.c.get(
