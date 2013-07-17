@@ -128,7 +128,8 @@ def get_calibration_essay(location, student_id):
         calibration_submission_count = calibration_submissions.count()
 
     if calibration_submission_count < settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
-        return False, "Not enough calibration essays."
+        # return False, "Not enough calibration essays."
+        return False, "The course staff has not graded enough calibration essays yet, please check back later."
 
     #Get all student calibration done on current problem
     student_calibration_history, success = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
