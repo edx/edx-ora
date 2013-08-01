@@ -48,7 +48,7 @@ Update the xqueue users::
 Update the edx-ora users::
 
     $ cd path/to/edx-ora
-    $ python manage.py update_users --settings=xqueue.settings --pythonpath=`pwd`
+    $ python manage.py update_users --settings=edx_ora.settings --pythonpath=`pwd`
 
 
 Execution
