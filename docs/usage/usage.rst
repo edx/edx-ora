@@ -51,8 +51,104 @@ Update the edx-ora users::
     $ python manage.py update_users --settings=edx_ora.settings --pythonpath=`pwd`
 
 
-Execution
----------------------------------------------------------
+Automated execution using Supervisor
+------------------------------------
+
+In order to fully use edx-ora, you need to have many processes running:
+
+* edx-ora 
+* edx-ora Celery
+* xqueue
+* RabbitMQ
+* MongoDB
+* LMS
+* CMS
+
+Starting up all of these services manually can be tiresome, so we can use Supervisor_ to automatically handle the starting and stopping of these processes.
+
+To start up all of the processes, you simply run this command::
+
+    $ sudo supervisord -c supervisor.conf
+
+You can then see that all the processes started up properly with::
+
+    $ sudo supervisorctl
+    celeryd                          RUNNING    pid 29669, uptime 1:00:37
+    cms                              RUNNING    pid 29678, uptime 1:00:37
+    edx-ora                          RUNNING    pid 29671, uptime 1:00:37
+    lms                              RUNNING    pid 29672, uptime 1:00:37
+    mongod                           RUNNING    pid 30013, uptime 0:59:08
+    rabbitmq                         RUNNING    pid 3688, uptime 0:00:16
+    xqueue                           RUNNING    pid 29675, uptime 1:00:37
+    supervisor>
+
+URLs for LMS and CMS (Studio)
+-----------------------------
+
+From your host machine, you now can access the LMS at:
+
+    * http://192.168.20.40:8000
+
+And the CMS (Studio) can be accessed at:
+
+    * http://192.168.20.40:8001
+    
+
+Start/stop processes with web interface
+---------------------------------------
+
+Supervisor also runs a web interface that is accessible at: 
+
+    * http://192.168.20.40:9001
+    
+.. image:: supervisor.png
+   :width: 800px
+   :alt: Supervisor screenshot
+
+
+Start/stop processes with command line
+--------------------------------------
+
+You can start individual processes with::
+
+    $ sudo supervisorctl start edx-ora
+
+And stop individual processes with::
+
+    $ sudo supervisorctl stop edx-ora
+
+You can also restart all processes with::
+
+    $ sudo supervisorctl restart all
+
+All of the log files are stored in ``logs/supervisor``::
+
+    $ ls supervisor/logs
+    celeryd_stderr.log  cms_stderr.log  edx-ora_stderr.log  lms_stderr.log  mongod_stderr.log  rabbitmq_stderr.log  supervisord.log    xqueue_stdout.log
+    celeryd_stdout.log  cms_stdout.log  edx-ora_stdout.log  lms_stdout.log  mongod_stdout.log  rabbitmq_stdout.log  xqueue_stderr.log
+
+
+Virtualenvs and directory structure
+-----------------------------------
+
+Supervisor expects you to have created virtualenvs for each project in the ``/home/vagrant/.virtualenvs`` dir:
+
+* /home/vagrant/.virtualenvs/edx-ora
+* /home/vagrant/.virtualenvs/edx-platform
+* /home/vagrant/.virtualenvs/xqueue
+
+And the project directories are all located in ``/opt/edx``:
+
+* /opt/edx/edx-ora
+* /opt/edx/edx-platform
+* /opt/edx/xqueue
+
+.. _Supervisor: http://supervisord.org
+
+Manual execution
+----------------
+
+If you want to run everything manually rather than using Supervisor, here are the instructions.
 
 Run the edx-platform::
 
