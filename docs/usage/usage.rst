@@ -56,8 +56,8 @@ Automated execution using Supervisor
 
 In order to fully use edx-ora, you need to have many processes running:
 
-* edx-ora 
-* edx-ora Celery
+* Grading controller (edx-ora)
+* Celery
 * xqueue
 * RabbitMQ
 * MongoDB
