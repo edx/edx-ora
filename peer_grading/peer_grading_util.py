@@ -6,6 +6,7 @@ from metrics.timing_functions import initialize_timing
 from django.conf import settings
 from metrics import utilize_student_metrics
 from metrics.models import StudentProfile
+from controller import control_util
 
 log = logging.getLogger(__name__)
 
@@ -223,9 +224,10 @@ def unflag_student_submission(course_id, student_id, submission_id):
 
 
     if sub.preferred_grader_type == "PE":
+        control = control_util.SubmissionControl(sub)
         successful_peer_grader_count = sub.get_successful_peer_graders().count()
         #If number of successful peer graders equals the needed count, finalize submission.
-        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+        if successful_peer_grader_count >= control.peer_grader_count:
             sub.state = SubmissionState.finished
         else:
             sub.state = SubmissionState.waiting_to_be_graded
