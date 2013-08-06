@@ -50,7 +50,16 @@ def simple_quality_check(string, initial_display, student_id, skip_basic_checks)
     #Minimum characters per word needed in a response (below is rejected)
     CHARS_PER_WORD_MINIMUM = 3
 
-    quality_dict = {'feedback': {}, 'score': 1, 'grader_type': 'BC', 'status': GraderStatus.success}
+    quality_dict = {
+        'feedback': json.dumps({
+            'spelling' : "Ok.",
+            'grammar' : "Ok.",
+            'markup_text' : "NA"
+        }),
+        'score': 1,
+        'grader_type': 'BC',
+        'status': GraderStatus.success
+    }
     if not skip_basic_checks:
         try:
             basic_check, e_set = perform_spelling_and_grammar_checks(string)
