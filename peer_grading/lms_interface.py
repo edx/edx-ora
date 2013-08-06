@@ -417,17 +417,6 @@ def get_peer_grading_data_for_location(request):
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
     submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
 
-    ##Check to see if submissions were available to grade in the past week
-    notification_seen_recently = NotificationsSeen.check_for_recent_notifications(
-        student_id = student_id,
-        location = location,
-        notification_type=NotificationTypes.peer_grading,
-        recent_notification_interval=settings.PEER_GRADING_TIMEOUT_INTERVAL
-    )
-
-    if not notification_seen_recently:
-        submissions_required = submissions_graded
-
     peer_data = {
         'count_graded' : submissions_graded,
         'count_required' : submissions_required,

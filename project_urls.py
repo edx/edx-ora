@@ -21,6 +21,7 @@ class PeerGradingURLs():
     peer_grading = peer_grading_base + "peer_grading/"
     get_problem_list = peer_grading_base + "get_problem_list/"
     get_peer_grading_data_for_location = peer_grading_base + "get_data_for_location/"
+    get_notifications = peer_grading_base + "get_notifications/"
 
 class MLGradingURLs():
     pass
