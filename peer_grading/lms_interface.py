@@ -13,6 +13,7 @@ from controller import util
 from controller import rubric_functions
 import calibration
 import peer_grading_util
+from controller import control_util
 
 from statsd import statsd
 
@@ -356,14 +357,15 @@ def get_problem_list(request):
 
     location_info=[]
     for location in locations_for_course:
-        student_sub_count= peer_grading_util.get_required_peer_grading_for_location({'student_id' : student_id, 'location' : location, 'preferred_grader_type' : "PE"})
+        student_subs= Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE")
+        student_sub_count = student_subs.count()
         if student_sub_count>0:
+
             problem_name = Submission.objects.filter(location=location)[0].problem_id
             submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location, student_id).count()
             submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
-            submissions_required = max([0,(settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count)-submissions_graded])
+            submissions_required = max([0,peer_grading_util.get_required(student_subs)-submissions_graded])
 
-            problem_name_from_location=location.split("://")[1]
             if submissions_graded>0 or submissions_pending>0:
                 location_dict={
                     'location' : location,
@@ -413,9 +415,11 @@ def get_peer_grading_data_for_location(request):
     location = request.GET.get('location')
     student_id = request.GET.get('student_id')
 
-    student_sub_count= peer_grading_util.get_required_peer_grading_for_location({'student_id' : student_id, 'location' : location, 'preferred_grader_type' : "PE"})
+    student_subs = Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE")
+    student_sub_count = student_subs.count()
+
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
-    submissions_required = settings.REQUIRED_PEER_GRADING_PER_STUDENT*student_sub_count
+    submissions_required = peer_grading_util.get_required(student_subs)
 
     peer_data = {
         'count_graded' : submissions_graded,
