@@ -33,7 +33,7 @@ def get_single_peer_grading_item(location, grader_id):
                                     .exclude(grader__grader_id=grader_id)
                                     .annotate(num_graders=Count('grader'))
                                     .values("num_graders", "id")
-                                    .order_by("num_graders")[:50])
+                                    .order_by("date_created")[:50])
 
             if submissions_to_grade is not None:
                 submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
