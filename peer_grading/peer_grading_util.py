@@ -33,7 +33,7 @@ def get_single_peer_grading_item(location, grader_id):
                                     .exclude(grader__grader_id=grader_id)
                                     .annotate(num_graders=Count('grader'))
                                     .values("num_graders", "id")
-                                    .order_by("num_graders")[:50])
+                                    .order_by("date_created")[:50])
 
             if submissions_to_grade is not None:
                 submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
@@ -146,21 +146,6 @@ def get_peer_grading_notifications(course_id, student_id):
 
         if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
             student_needs_to_peer_grade = True
-            notification_created_recently = NotificationsSeen.check_for_recent_notifications(
-                student_id = student_id,
-                location = location,
-                notification_type=NotificationTypes.peer_grading,
-                recent_notification_interval=settings.RECENT_NOTIFICATION_CHECK_INTERVAL
-            )
-
-            if not notification_created_recently:
-                notification_seen = NotificationsSeen(
-                    student_id = student_id,
-                    course_id = course_id,
-                    location = location,
-                    notification_type = NotificationTypes.peer_grading
-                )
-                notification_seen.save()
 
     return success, student_needs_to_peer_grade
 
