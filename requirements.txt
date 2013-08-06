@@ -7,3 +7,4 @@ matplotlib==1.2.0
 gunicorn
 wsgiref
 ipython
+supervisor==3.0
