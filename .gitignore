@@ -18,3 +18,4 @@ django_cache/*
 tmpfile
 celerybeat-schedule
 docs/_build
+logs/supervisor/*.log
