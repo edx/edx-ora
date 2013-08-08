@@ -83,7 +83,7 @@ def submit(request):
                 submission_time_string = util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
 
-                control_fields = body['grader_payload'].get('grader_control',{})
+                control_fields = body['grader_payload'].get('control',{})
                 try:
                     control_fields = json.loads(control_fields)
                 except Exception:
