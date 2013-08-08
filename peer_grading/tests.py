@@ -7,6 +7,7 @@ import unittest
 from datetime import datetime
 import logging
 import urlparse
+from mock import Mock, patch
 
 from django.contrib.auth.models import User
 from django.test.client import Client
@@ -19,6 +20,7 @@ from django.utils import timezone
 import project_urls
 from controller.xqueue_interface import handle_submission
 import peer_grading_util
+from views import create_and_save_calibration_record
 
 log = logging.getLogger(__name__)
 
@@ -351,6 +353,21 @@ class IsCalibratedTest(unittest.TestCase):
 
         #Now records exist and error is 0, so student should be calibrated
         self.assertEqual(body['calibrated'], calibration_val)
+
+    @patch('peer_grading.models.CalibrationHistory.save', Mock(side_effect=Exception()))
+    def test_calibration_history_exception(self):
+
+        calibration_data = {
+                            'submission_id': 1234,
+                            'score': 56,
+                            'feedback': 'feedback',
+                            'student_id': '789',
+                            'location': '0123',
+                            }
+
+        success, data = create_and_save_calibration_record(calibration_data)
+        self.assertRaises(Exception)
+        
 
 class PeerGradingUtilTest(unittest.TestCase):
     def setUp(self):

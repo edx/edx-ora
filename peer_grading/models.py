@@ -11,6 +11,9 @@ class CalibrationHistory(models.Model):
     #Currently use location instead of problem_id
     problem_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     location = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="", db_index = True)
+    
+    class Meta:
+        unique_together = ("student_id", "location")
 
     def __unicode__(self):
         history_row = ("Calibration history for student {0} on problem {1} at location {2}").format(

@@ -28,6 +28,13 @@ def create_and_save_calibration_record(calibration_data):
             student_id=calibration_data['student_id'],
             location=calibration_data['location'],
         )
+    except DatabaseError:
+        error_msg = "get_or_create failed with DatabaseError "
+        "student id {0} and location {1}.".format(calibration_data['student_id'],
+                                                  calibration_data['location'])
+        log.exception(error_msg)
+        return False, (error_msg)
+        
     except Exception:
         error_msg = "Cannot get or create CalibrationRecord with "
         "student id {0} and location {1}.".format(calibration_data['student_id'],
@@ -132,7 +139,15 @@ def get_calibration_essay(location, student_id):
         return False, "The course staff has not graded enough calibration essays yet, please check back later."
 
     #Get all student calibration done on current problem
-    student_calibration_history, success = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
+    try:
+        student_calibration_history, success = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
+    except DatabaseError:
+        error_msg = "get_or_create failed with DatabaseError "
+        "student id {0} and location {1}.".format(student_id,
+                                                  location)
+        log.exception(error_msg)
+        return False, (error_msg)
+        
     student_calibration_records = student_calibration_history.get_all_calibration_records()
     student_calibration_ids = [cr.submission.id for cr in list(student_calibration_records)]
     calibration_essay_ids = [cr.id for cr in list(calibration_submissions)]
@@ -169,7 +184,15 @@ def check_calibration_status(location,student_id):
         return False, "Invalid problem id specified: {0}".format(location)
 
     #Get student calibration history and count number of records associated with it
-    calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
+    try:
+        calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)
+    except DatabaseError:
+        error_msg = "get_or_create failed with DatabaseError "
+        "student id {0} and location {1}.".format(student_id,
+                                                  location)
+        log.exception(error_msg)
+        return False, (error_msg)
+    
     max_score = matching_submissions[0].max_score
     calibration_record_count = calibration_history.get_calibration_record_count()
 
