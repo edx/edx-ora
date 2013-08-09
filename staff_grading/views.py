@@ -106,8 +106,8 @@ def get_next_submission(request):
 
     ml_error_message="Machine learning error information: " + ml_error_message
 
-    sl = staff_grading_util.StaffLocation(location)
-    if submission.state != SubmissionState.waiting_to_be_graded:
+    sl = staff_grading_util.StaffLocation(submission.location)
+    if submission.state != SubmissionState.being_graded:
         log.error("Instructor grading got submission {0} in an invalid state {1} ".format(sid, submission.state))
         return util._error_response('wrong_internal_state',
                                     _INTERFACE_VERSION,

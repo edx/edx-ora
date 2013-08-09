@@ -36,7 +36,7 @@ def handle_single_location(location):
         transaction.commit()
         gc.collect()
         sl = staff_grading_util.StaffLocation(location)
-        subs_graded_by_instructor = sl.graded_count
+        subs_graded_by_instructor = sl.graded
         log.info("Checking location {0} to see if essay count {1} greater than min {2}".format(
             location,
             subs_graded_by_instructor.count(),
