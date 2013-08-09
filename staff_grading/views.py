@@ -78,7 +78,8 @@ def get_next_submission(request):
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if location:
-        (found, id) = staff_grading_util.get_single_instructor_grading_item_for_location(location)
+        sl = staff_grading_util.StaffLocation(location)
+        (found, id) = sl.next_item
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
@@ -106,15 +107,14 @@ def get_next_submission(request):
 
     ml_error_message="Machine learning error information: " + ml_error_message
 
-    if submission.state != 'C':
+    sl = staff_grading_util.StaffLocation(location)
+    if submission.state != SubmissionState.waiting_to_be_graded:
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
             id, submission.state)
         return util._error_response('wrong_internal_state',
                                     _INTERFACE_VERSION,
                                     data={'submission_id': id,
                                      'submission_state': submission.state})
-
-    num_graded, num_pending = staff_grading_util.count_submissions_graded_and_pending_instructor(submission.location)
 
     response = {'submission_id': id,
                 'submission': submission.student_response,
@@ -123,9 +123,8 @@ def get_next_submission(request):
                 'max_score': submission.max_score,
                 'ml_error_info' : ml_error_message,
                 'problem_name' : submission.problem_id,
-                'num_graded' : staff_grading_util.finished_submissions_graded_by_instructor(submission.location).count(),
-                'num_pending' : staff_grading_util.submissions_pending_instructor(submission.location, 
-                                    state_in=[SubmissionState.waiting_to_be_graded]).count(),
+                'num_graded' : sl.graded_count,
+                'num_pending' : sl.pending_count,
                 'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
@@ -279,9 +278,10 @@ def get_problem_list(request):
 
     location_info=[]
     for location in locations_for_course:
+        sl = staff_grading_util.StaffLocation(location)
         problem_name = Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending = staff_grading_util.submissions_pending_instructor(location, state_in=[SubmissionState.waiting_to_be_graded]).count()
-        finished_instructor_graded = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        submissions_pending = sl.pending_count
+        finished_instructor_graded = sl.graded_count
         min_scored_for_location=settings.MIN_TO_USE_PEER
         location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
         if location_ml_count>0:
