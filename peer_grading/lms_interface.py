@@ -420,11 +420,13 @@ def get_peer_grading_data_for_location(request):
 
     submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
     submissions_required = peer_grading_util.get_required(student_subs)
+    submissions_available = peer_grading_util.peer_grading_submissions_pending_for_location(location,student_id).count()
 
     peer_data = {
         'count_graded' : submissions_graded,
         'count_required' : submissions_required,
         'student_sub_count' : student_sub_count,
+        'count_available' : submissions_available
     }
 
     util.log_connection_data()
