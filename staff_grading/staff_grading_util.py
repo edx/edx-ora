@@ -115,28 +115,6 @@ class StaffLocation(object):
             success, sid = self.item_to_rescore
         return success, sid
 
-def generate_ml_error_message(ml_error_info):
-    """
-    Generates a message to send to the staff grading service from a dictionary returned by ml_grading_util.get_ml_errors
-    Input:
-        Dictionary with keys 'kappa', 'mean_absolute_error', 'date_created', 'number_of_essays'
-    Output:
-        String to send to staff grading service
-    """
-
-    ml_message_template="""
-    Latest model created on {date_created}.  Contains {number_of_essays} essays.
-    Mean absolute error is {mean_absolute_error} and kappa is {kappa}.
-    """
-
-    ml_message=ml_message_template.format(
-        date_created=ml_error_info['date_created'],
-        number_of_essays=ml_error_info['number_of_essays'],
-        mean_absolute_error=ml_error_info['mean_absolute_error'],
-        kappa=ml_error_info['kappa'],
-    )
-
-    return ml_message
 
 class StaffCourse(object):
     def __init__(self, course_id):
@@ -163,24 +141,49 @@ class StaffCourse(object):
 
         return False, 0
 
-def get_single_instructor_grading_item(course_id):
+    @property
+    def notifications(self):
+        staff_needs_to_grade = False
+        success = True
+
+        for location in self.locations:
+            sl = StaffLocation(location)
+            min_scored_for_location=settings.MIN_TO_USE_PEER
+            location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
+            if location_ml_count>0:
+                min_scored_for_location=settings.MIN_TO_USE_ML
+
+            location_scored_count = sl.graded_count
+            submissions_pending = sl.all_pending_count
+
+            if location_scored_count<min_scored_for_location and submissions_pending>0:
+                staff_needs_to_grade= True
+                return success, staff_needs_to_grade
+
+        return success, staff_needs_to_grade
+
+def generate_ml_error_message(ml_error_info):
     """
-    Gets instructor grading for a given course id.
-    Returns one submission id corresponding to the course.
+    Generates a message to send to the staff grading service from a dictionary returned by ml_grading_util.get_ml_errors
     Input:
-        course_id - Id of a course.
-    Returns:
-        found - Boolean indicating whether or not something to grade was found
-        sub_id - If found, the id of a submission to grade
+        Dictionary with keys 'kappa', 'mean_absolute_error', 'date_created', 'number_of_essays'
+    Output:
+        String to send to staff grading service
     """
-    found = False
-    sub_id = 0
-    locations_for_course =
 
-    #Looks through first all submissions that are marked for instructor grading and are pending, then looks
-    #through submissions that are marked for instructor or ML grading and are pending, then finally
-    #looks through submisisons that have been marked finished and have been graded already by ML.
+    ml_message_template="""
+    Latest model created on {date_created}.  Contains {number_of_essays} essays.
+    Mean absolute error is {mean_absolute_error} and kappa is {kappa}.
+    """
 
+    ml_message=ml_message_template.format(
+        date_created=ml_error_info['date_created'],
+        number_of_essays=ml_error_info['number_of_essays'],
+        mean_absolute_error=ml_error_info['mean_absolute_error'],
+        kappa=ml_error_info['kappa'],
+    )
+
+    return ml_message
 
 def set_instructor_grading_item_back_to_ml(submission_id):
     """
@@ -244,25 +247,3 @@ def set_ml_grading_item_back_to_instructor(submission_id):
     sub.save()
 
     return True, sub
-
-def get_staff_grading_notifications(course_id):
-    staff_needs_to_grade = False
-    success = True
-
-    unique_course_locations = [x['location'] for x in
-                               Submission.objects.filter(course_id = course_id).values('location').distinct()]
-    for location in unique_course_locations:
-        sl = StaffLocation(location)
-        min_scored_for_location=settings.MIN_TO_USE_PEER
-        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
-        if location_ml_count>0:
-            min_scored_for_location=settings.MIN_TO_USE_ML
-
-        location_scored_count = sl.graded_count
-        submissions_pending = sl.all_pending_count
-
-        if location_scored_count<min_scored_for_location and submissions_pending>0:
-            staff_needs_to_grade= True
-            return success, staff_needs_to_grade
-
-    return success, staff_needs_to_grade

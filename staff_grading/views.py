@@ -71,32 +71,31 @@ def get_next_submission(request):
     course_id = request.GET.get('course_id')
     grader_id = request.GET.get('grader_id')
     location = request.GET.get('location')
-
+    found = False
 
     if not (course_id or location) or not grader_id:
-   
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if location:
         sl = staff_grading_util.StaffLocation(location)
-        (found, id) = sl.next_item
+        (found, sid) = sl.next_item
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
     if not location:
-        (found, id) = staff_grading_util.get_single_instructor_grading_item(course_id)
+        sc = staff_grading_util.StaffCourse(course_id)
+        (found, sid) = sc.next_item
 
     if not found:
         return util._success_response({'message': 'No more submissions to grade.'},
                                       _INTERFACE_VERSION)
-
     try:
-        submission = Submission.objects.get(id=int(id))
+        submission = Submission.objects.get(id=int(sid))
     except Submission.DoesNotExist:
-        log.error("Couldn't find submission %s for instructor grading", id)
+        log.error("Couldn't find submission %s for instructor grading", sid)
         return util._error_response('failed_to_load_submission',
                                     _INTERFACE_VERSION,
-                                    data={'submission_id': id})
+                                    data={'submission_id': sid})
 
     #Get error metrics from ml grading, and get into dictionary form to pass down to staff grading view
     success, ml_error_info=ml_grading_util.get_ml_errors(submission.location)
@@ -110,13 +109,13 @@ def get_next_submission(request):
     sl = staff_grading_util.StaffLocation(location)
     if submission.state != SubmissionState.waiting_to_be_graded:
         log.error("Instructor grading got a submission (%s) in an invalid state: ",
-            id, submission.state)
+            sid, submission.state)
         return util._error_response('wrong_internal_state',
                                     _INTERFACE_VERSION,
-                                    data={'submission_id': id,
+                                    data={'submission_id': sid,
                                      'submission_state': submission.state})
 
-    response = {'submission_id': id,
+    response = {'submission_id': sid,
                 'submission': submission.student_response,
                 'rubric': submission.rubric,
                 'prompt': submission.prompt,
@@ -321,7 +320,8 @@ def get_notifications(request):
         log.error(error_message)
         return util._error_response(error_message, _INTERFACE_VERSION)
 
-    success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
+    sc = staff_grading_util.StaffCourse(course_id)
+    success, staff_needs_to_grade = sc.notifications
     if not success:
         return util._error_response(staff_needs_to_grade, _INTERFACE_VERSION)
 

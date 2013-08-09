@@ -98,7 +98,8 @@ def get_submission_instructor(request):
     except Exception:
         return util._error_response("'get_submission' requires parameter 'course_id'", _INTERFACE_VERSION)
 
-    found, sub_id = staff_grading_util.get_single_instructor_grading_item(course_id)
+    sc = staff_grading_util.StaffCourse(course_id)
+    found, sub_id = sc.next_item
 
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
