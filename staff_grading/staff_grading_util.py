@@ -11,31 +11,52 @@ from ml_grading import ml_grading_util
 log = logging.getLogger(__name__)
 
 class StaffLocation(object):
+    """
+    Encapsulates student submissions that need staff action for a particular location.
+    """
     def __init__(self,location):
         self.location = location
 
     @property
     def location_submissions(self):
+        """
+        Gets all submissions for a particular location.
+        """
         return Submission.objects.filter(location=self.location)
 
     @property
     def all_pending(self):
+        """
+        Gets all submissions for the location that are waiting to be graded.
+        """
         return self.location_submissions.filter(state=SubmissionState.waiting_to_be_graded)
 
     @property
     def all_pending_count(self):
+        """
+        Counts all pending submissions.
+        """
         return self.all_pending.count()
 
     @property
     def graded(self):
+        """
+        Finds all submissions that have been instructor graded, and are now complete.
+        """
         return self.location_submissions.filter(previous_grader_type="IN", state=SubmissionState.finished)
 
     @property
     def graded_count(self):
+        """
+        Counts graded submissions.
+        """
         return self.graded.count()
 
     @property
     def pending(self):
+        """
+        Gets all non-duplicate submissions that are pending instructor grading.
+        """
         return self.location_submissions.filter(
             next_grader_type="IN",
             state=SubmissionState.waiting_to_be_graded,
@@ -45,19 +66,24 @@ class StaffLocation(object):
 
     @property
     def pending_count(self):
+        """
+        Counts pending submissions.
+        """
         return self.pending.count()
 
     @property
-    def pending_and_graded_count(self):
-        return self.pending_count + self.graded_count
-
-    @property
     def graded_submission_text(self):
+        """
+        Gets the text for all submissions that have been instructor scored.
+        """
         sub_text=self.graded.values('student_response').distinct()
         return [s['student_response'] for s in sub_text]
 
     @property
     def item_to_score(self):
+        """
+        Gets an item for an instructor to score.
+        """
         subs_graded = self.graded_count
         success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
 
@@ -85,6 +111,9 @@ class StaffLocation(object):
     
     @property
     def item_to_rescore(self):
+        """
+        Gets an item for an instructor to rescore (items have already been machine scored, ML)
+        """
         success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
         
         if success:
@@ -110,6 +139,9 @@ class StaffLocation(object):
 
     @property
     def next_item(self):
+        """
+        Looks for submissions to score.  If nothing exists, look for something to rescore.
+        """
         success, sid = self.item_to_score
         if not success:
             success, sid = self.item_to_rescore
@@ -117,16 +149,25 @@ class StaffLocation(object):
 
 
 class StaffCourse(object):
+    """
+    Encapsulates information that staff may want about a course.
+    """
     def __init__(self, course_id):
         self.course_id = course_id
 
     @property
     def locations(self):
+        """
+        Gets all locations in a course.
+        """
         return [x['location'] for x in
                 list(Submission.objects.filter(course_id=self.course_id).values('location').distinct())]
 
     @property
     def next_item(self):
+        """
+        Gets the next item that a staff member needs to grade in the course.
+        """
         for location in self.locations:
             sl = StaffLocation(location)
             success, sub_id = sl.item_to_score
@@ -143,6 +184,9 @@ class StaffCourse(object):
 
     @property
     def notifications(self):
+        """
+        Checks to see if the staff member needs to be shown a notification (ie, needs to grade something)
+        """
         staff_needs_to_grade = False
         success = True
 
@@ -216,7 +260,6 @@ def set_instructor_grading_item_back_to_ml(submission_id):
     return True, sub
 
 def check_submission_id(submission_id):
-
     if not isinstance(submission_id,Submission):
         try:
             sub=Submission.objects.get(id=submission_id)

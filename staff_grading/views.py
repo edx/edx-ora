@@ -108,8 +108,7 @@ def get_next_submission(request):
 
     sl = staff_grading_util.StaffLocation(location)
     if submission.state != SubmissionState.waiting_to_be_graded:
-        log.error("Instructor grading got a submission (%s) in an invalid state: ",
-            sid, submission.state)
+        log.error("Instructor grading got submission {0} in an invalid state {1} ".format(sid, submission.state))
         return util._error_response('wrong_internal_state',
                                     _INTERFACE_VERSION,
                                     data={'submission_id': sid,
