@@ -209,6 +209,7 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
             )
         body=json.loads(content.content)
         self.assertIsInstance(body['count_required'], int)
+        self.assertIsInstance(body['count_available'], int)
 
 
 class LMSInterfaceCalibrationEssayTest(unittest.TestCase):
@@ -425,6 +426,18 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub = Submission.objects.get(id=test_sub.id)
 
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
+
+    def test_get_required(self):
+        student_required = peer_grading_util.get_required(Submission.objects.all())
+        test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
+        test_sub.save()
+
+        self.assertEqual(peer_grading_util.get_required(Submission.objects.all()), settings.REQUIRED_PEER_GRADING_PER_STUDENT + student_required)
+
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+
+        self.assertEqual(peer_grading_util.get_required(Submission.objects.all()), settings.REQUIRED_PEER_GRADING_PER_STUDENT*2 + student_required)
 
         
 

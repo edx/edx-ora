@@ -15,6 +15,7 @@ from peer_grading import peer_grading_util
 import rubric_functions
 from metrics.models import StudentProfile
 import re
+import control_util
 
 log = logging.getLogger(__name__)
 
@@ -126,6 +127,7 @@ def create_and_handle_grader_object(grader_dict):
     else:
         #TODO: Some kind of logic to decide when sub is finished grading.
 
+        control = control_util.SubmissionControl(sub)
         #If we are calling this after a basic check and the score is 0, that means that the submission is bad, so mark as finished
         if(grade.status_code == GraderStatus.success and grade.grader_type in ["BC"] and grade.score==0):
             sub.state = SubmissionState.finished
@@ -136,7 +138,7 @@ def create_and_handle_grader_object(grader_dict):
             #If grading type is Peer, and was successful, check to see how many other times peer grading has succeeded.
             successful_peer_grader_count = sub.get_successful_peer_graders().count()
             #If number of successful peer graders equals the needed count, finalize submission.
-            if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+            if successful_peer_grader_count >= control.peer_grader_count:
                 sub.state = SubmissionState.finished
             else:
                 sub.state = SubmissionState.waiting_to_be_graded
