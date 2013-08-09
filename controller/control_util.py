@@ -1,4 +1,3 @@
-from controller.models import Submission
 import json
 from django.conf import settings
 
