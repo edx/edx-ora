@@ -21,6 +21,8 @@ import grader_util
 
 from xqueue_interface import handle_submission
 from tasks import expire_submissions_task, pull_from_xqueue
+from control_util import SubmissionControl
+from copy import deepcopy
 
 import datetime
 
@@ -39,6 +41,7 @@ ETA_URL=project_urls.ControllerURLs.get_eta_for_submission
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
+
 
 def parse_xreply(xreply):
 
@@ -67,6 +70,17 @@ def login_to_controller(session):
     return True
 
 class XQueueInterfaceTest(unittest.TestCase):
+    grader_payload = {
+        'location': LOCATION,
+        'course_id': u'MITx/6.002x',
+        'problem_id': u'6.002x/Welcome/OETest',
+        'grader': "temp",
+        'prompt' : 'This is a prompt',
+        'rubric' : 'This is a rubric.',
+        'grader_settings' : "ml_grading.conf",
+        'skip_basic_checks': False
+    }
+
     def setUp(self):
         test_util.create_user()
 
@@ -101,39 +115,65 @@ class XQueueInterfaceTest(unittest.TestCase):
         (error, _) = parse_xreply(response.content)
         self.assertEqual(error, True)
 
-    def test_xqueue_submit(self):
-        grader_payload = {
-            'location': LOCATION,
-            'course_id': u'MITx/6.002x',
-            'problem_id': u'6.002x/Welcome/OETest',
-            'grader': "temp",
-            'prompt' : 'This is a prompt',
-            'rubric' : 'This is a rubric.',
-            'grader_settings' : "ml_grading.conf",
-            'skip_basic_checks': False
-        }
+    def get_content(self, grader_payload):
         xqueue_body = {
             'grader_payload': json.dumps(grader_payload),
             'student_info': test_util.get_student_info(STUDENT_ID),
             'student_response': "Test! And longer now so tests pass.",
             'max_score': 1,
-        }
+            }
         content = {
             'xqueue_header': test_util.get_xqueue_header(),
             'xqueue_body': json.dumps(xqueue_body),
-        }
+            }
+        return content
 
+    def test_xqueue_submit(self):
+        Submission.objects.all().delete()
         response = self.c.login(username='test', password='CambridgeMA')
 
         content = self.c.post(
             SUBMIT_URL,
-            content,
+            self.get_content(self.grader_payload),
         )
 
         body = json.loads(content.content)
 
         self.assertEqual(body['success'], True)
 
+        sub = Submission.objects.all()[0]
+        control = SubmissionControl(sub)
+        self.assertEqual(control.min_to_calibrate, settings.PEER_GRADER_MINIMUM_TO_CALIBRATE)
+        self.assertEqual(control.max_to_calibrate, settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE)
+        self.assertEqual(control.peer_grader_count, settings.PEER_GRADER_COUNT)
+        self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
+
+    def test_xqueue_control_submit(self):
+        Submission.objects.all().delete()
+        response = self.c.login(username='test', password='CambridgeMA')
+        gp = deepcopy(self.grader_payload)
+        gp['control'] = json.dumps({
+            'min_to_calibrate' : 1,
+            'max_to_calibrate' : 1,
+            'peer_grader_count': 1,
+            'required_peer_grading': 1,
+        }
+        )
+
+        content = self.c.post(
+            SUBMIT_URL,
+            self.get_content(gp),
+        )
+        body = json.loads(content.content)
+
+        self.assertEqual(body['success'], True)
+
+        sub = Submission.objects.all()[0]
+        control = SubmissionControl(sub)
+        self.assertEqual(control.min_to_calibrate, 1)
+        self.assertEqual(control.max_to_calibrate, 1)
+        self.assertEqual(control.peer_grader_count, 1)
+        self.assertEqual(control.required_peer_grading_per_student, 1)
 
     def _message_submission(self, success, score=None, submission_id=None):
         sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
@@ -174,8 +214,6 @@ class XQueueInterfaceTest(unittest.TestCase):
 
     def test_message_submission_without_base_submission_fail(self):
         self._message_submission(False, submission_id=5)
-
-
 
 
 class GraderInterfaceTest(unittest.TestCase):
@@ -535,6 +573,30 @@ class UtilTest(unittest.TestCase):
         xqueue_header, xqueue_body = util.create_xqueue_header_and_body(test_sub)
         self.assertIsInstance(xqueue_header, dict)
         self.assertIsInstance(xqueue_body, dict)
+
+class TestControl(unittest.TestCase):
+    def test_control_create(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.control_fields = json.dumps({'min_to_calibrate' : 1, 'max_to_calibrate' : 1, 'peer_grader_count' : 1, 'required_peer_grading' : 1})
+        test_sub.save()
+
+        control = SubmissionControl(test_sub)
+
+        self.assertEqual(control.min_to_calibrate, 1)
+        self.assertEqual(control.max_to_calibrate, 1)
+        self.assertEqual(control.peer_grader_count, 1)
+        self.assertEqual(control.required_peer_grading_per_student, 1)
+
+    def test_control_default(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+
+        control = SubmissionControl(test_sub)
+
+        self.assertEqual(control.min_to_calibrate, settings.PEER_GRADER_MINIMUM_TO_CALIBRATE)
+        self.assertEqual(control.max_to_calibrate, settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE)
+        self.assertEqual(control.peer_grader_count, settings.PEER_GRADER_COUNT)
+        self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
 
 
 

@@ -83,6 +83,12 @@ def submit(request):
                 submission_time_string = util._value_or_default(body['student_info']['submission_time'])
                 student_submission_time = datetime.strptime(submission_time_string, "%Y%m%d%H%M%S")
 
+                control_fields = body['grader_payload'].get('control',{})
+                try:
+                    control_fields = json.loads(control_fields)
+                except Exception:
+                    pass
+
                 skip_basic_checks = util._value_or_default(body['grader_payload']['skip_basic_checks'], False)
                 if isinstance(skip_basic_checks, basestring):
                     skip_basic_checks = (skip_basic_checks.lower() == "true")
@@ -147,6 +153,7 @@ def submit(request):
                     initial_display=initial_display,
                     answer=answer,
                     skip_basic_checks = skip_basic_checks,
+                    control_fields = json.dumps(control_fields)
                 )
                 transaction.commit_unless_managed()
 

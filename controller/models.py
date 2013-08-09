@@ -88,7 +88,7 @@ class Submission(models.Model):
 
     #Control logic passed from the LMS
     skip_basic_checks = models.BooleanField(default = False)
-
+    control_fields = models.TextField(default="")
 
     def __unicode__(self):
         sub_row = "Essay to be graded from student {0}, in course {1}, and problem {2}.  ".format(

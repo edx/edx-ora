@@ -6,6 +6,7 @@ from metrics.timing_functions import initialize_timing
 from django.conf import settings
 from metrics import utilize_student_metrics
 from metrics.models import StudentProfile
+from controller import control_util
 
 log = logging.getLogger(__name__)
 
@@ -120,16 +121,12 @@ def peer_grading_submissions_graded_for_location(location, student_id):
 
     return subs_graded
 
-def get_required_peer_grading_for_location(query_params):
-    duplicate_params = query_params.copy()
-    duplicate_params.update({'is_duplicate' : False})
-
-    plagiarized_params = query_params.copy()
-    plagiarized_params.update({'is_duplicate' : True, 'is_plagiarized' : True})
-
-    student_sub_count = Submission.objects.filter(**duplicate_params).count() + Submission.objects.filter(**plagiarized_params).count()
-
-    return student_sub_count
+def get_required(subs):
+    required_list = []
+    for sub in subs:
+        control = control_util.SubmissionControl(sub)
+        required_list.append(control.required_peer_grading_per_student)
+    return sum(required_list)
 
 def get_peer_grading_notifications(course_id, student_id):
     student_needs_to_peer_grade = False
@@ -139,8 +136,8 @@ def get_peer_grading_notifications(course_id, student_id):
     unique_student_locations = [x['location'] for x in
                                 student_responses_for_course.values('location').distinct()]
     for location in unique_student_locations:
-        location_response_count = get_required_peer_grading_for_location({'student_id' : student_id, 'preferred_grader_type' : "PE", 'location' : location})
-        required_peer_grading_for_location = location_response_count * settings.REQUIRED_PEER_GRADING_PER_STUDENT
+        location_responses = Submission.objects.filter(student_id=student_id, preferred_grader_type="PE", location=location)
+        required_peer_grading_for_location = get_required(location_responses)
         completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
         submissions_pending = peer_grading_submissions_pending_for_location(location, student_id).count()
 
@@ -223,9 +220,10 @@ def unflag_student_submission(course_id, student_id, submission_id):
 
 
     if sub.preferred_grader_type == "PE":
+        control = control_util.SubmissionControl(sub)
         successful_peer_grader_count = sub.get_successful_peer_graders().count()
         #If number of successful peer graders equals the needed count, finalize submission.
-        if successful_peer_grader_count >= settings.PEER_GRADER_COUNT:
+        if successful_peer_grader_count >= control.peer_grader_count:
             sub.state = SubmissionState.finished
         else:
             sub.state = SubmissionState.waiting_to_be_graded

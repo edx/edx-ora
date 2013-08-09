@@ -4,6 +4,7 @@ from controller.models import Submission, GraderStatus
 import logging
 from peer_grading.models import CalibrationHistory, CalibrationRecord
 import json
+from controller import control_util
 
 log = logging.getLogger(__name__)
 
@@ -99,7 +100,6 @@ def get_calibration_essay_data(calibration_essay_id):
 
     return response
 
-
 def get_calibration_essay(location, student_id):
     """
     Gets a calibration essay for a particular student and location (problem id).
@@ -117,9 +117,18 @@ def get_calibration_essay(location, student_id):
         grader__status_code=GraderStatus.success,
     )
 
+    sub = Submission.objects.filter(
+        location=location,
+        student_id=student_id
+    )
+    if sub.count()==0:
+        return False, "Student does not have any submissions for this location."
+    sub = sub[0]
+    control = control_util.SubmissionControl(sub)
+
     #Check to ensure sufficient calibration essays exists
     calibration_submission_count = calibration_submissions.count()
-    if calibration_submission_count < settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+    if calibration_submission_count < control.min_to_calibrate:
         calibration_submissions = Submission.objects.filter(
             location=location,
             grader__grader_type="IN",
@@ -127,7 +136,7 @@ def get_calibration_essay(location, student_id):
         )
         calibration_submission_count = calibration_submissions.count()
 
-    if calibration_submission_count < settings.PEER_GRADER_MINIMUM_TO_CALIBRATE:
+    if calibration_submission_count < control.min_to_calibrate:
         # return False, "Not enough calibration essays."
         return False, "The course staff has not graded enough calibration essays yet, please check back later."
 
@@ -163,7 +172,7 @@ def check_calibration_status(location,student_id):
           data is a dict containing key 'calibrated', which is a boolean showing whether or not student is calibrated.
     """
 
-    matching_submissions = Submission.objects.filter(location=location)
+    matching_submissions = Submission.objects.filter(location=location, student_id=student_id)
 
     if matching_submissions.count() < 1:
         return False, "Invalid problem id specified: {0}".format(location)
@@ -173,11 +182,14 @@ def check_calibration_status(location,student_id):
     max_score = matching_submissions[0].max_score
     calibration_record_count = calibration_history.get_calibration_record_count()
 
+    sub = matching_submissions[0]
+    control = control_util.SubmissionControl(sub)
+
     calibration_dict={'total_calibrated_on_so_far' : calibration_record_count}
     #If student has calibrated more than the minimum and less than the max, check if error is higher than specified
     #Threshold.  Send another calibration essay if so.
-    if (calibration_record_count >= settings.PEER_GRADER_MINIMUM_TO_CALIBRATE and
-        calibration_record_count < settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE):
+    if (calibration_record_count >= control.min_to_calibrate and
+        calibration_record_count < control.max_to_calibrate):
         #Get average student error on the calibration records.
         calibration_error = calibration_history.get_average_calibration_error()
         if max_score>0:
@@ -191,7 +203,7 @@ def check_calibration_status(location,student_id):
         else:
             calibration_dict.update({'calibrated': True})
             return True, calibration_dict     #If student has seen too many calibration essays, just say that they are calibrated.
-    elif calibration_record_count >= settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE:
+    elif calibration_record_count >= control.max_to_calibrate:
         calibration_dict.update({'calibrated': True})
         return True, calibration_dict 
     #If they have not already calibrated the minimum number of essays, they are not calibrated
