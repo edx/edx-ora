@@ -28,6 +28,41 @@ class LocationCapsule(object):
         """
         return self.all_pending.count()
 
+    @property
+    def graded(self):
+        """
+        Finds all submissions that have been graded, and are now complete.
+        """
+        raise NotImplementedError()
+
+    @property
+    def graded_count(self):
+        """
+        Counts graded submissions.
+        """
+        raise NotImplementedError()
+
+    @property
+    def pending(self):
+        """
+        Gets all non-duplicate submissions that are pending instructor grading.
+        """
+        raise NotImplementedError()
+
+    @property
+    def pending_count(self):
+        """
+        Counts pending submissions.
+        """
+        raise NotImplementedError()
+
+    @property
+    def next_item(self):
+        """
+        Looks for submissions to score.  If nothing exists, look for something to rescore.
+        """
+        raise NotImplementedError()
+
 class CourseCapsule(object):
     """
     Encapsulates information that graders may want about a course.
@@ -41,3 +76,17 @@ class CourseCapsule(object):
         Gets all locations in a course.
         """
         return [x['location'] for x in Submission.objects.filter(course_id=self.course_id).values('location').distinct()]
+
+    @property
+    def next_item(self):
+        """
+        Gets the next item to grade in the course.
+        """
+        raise NotImplementedError()
+
+    @property
+    def notifications(self):
+        """
+        Checks to see if  a notification needs to be shown
+        """
+        raise NotImplementedError()
