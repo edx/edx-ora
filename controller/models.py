@@ -138,6 +138,7 @@ class Submission(models.Model):
     def get_all_successful_scores_and_feedback(self):
         rubric_scores_complete = False
         all_graders = list(self.get_successful_graders().order_by("-date_modified"))
+        all_graders_types = [g.grader_type for g in all_graders]
         #If no graders succeeded, send back the feedback from the last unsuccessful submission (which should be an error message).
         if len(all_graders) == 0:
             last_grader=self.get_unsuccessful_graders().order_by("-date_modified")[0]
@@ -147,7 +148,8 @@ class Submission(models.Model):
             return_dict.update(last_grader.get_latest_rubric_headers_and_scores())
             return return_dict
         #If grader is ML or instructor, only send back last successful submission
-        elif all_graders[0].grader_type in ["IN", "ML", "BC"]:
+        elif all_graders[0].grader_type in ["IN", "ML"] or \
+             all_graders[0].grader_type == "BC" and "PE" not in all_graders_types:
             return_dict =  {'score': all_graders[0].score, 'feedback': all_graders[0].feedback,
                     'grader_type' : all_graders[0].grader_type, 'success' : True,
                     'grader_id' : all_graders[0].id , 'submission_id' : self.id , 'student_id' : self.student_id}
@@ -155,7 +157,8 @@ class Submission(models.Model):
             return_dict.update(all_graders[0].get_latest_rubric_headers_and_scores())
             return return_dict
         #If grader is peer, send back all peer judgements
-        elif self.previous_grader_type == "PE":
+        elif self.previous_grader_type == "PE" or \
+             all_graders[0].grader_type == "BC" and "PE" in all_graders_types:
             peer_graders = [p for p in all_graders if p.grader_type == "PE"]
             combined_rubrics = [p.check_for_and_return_latest_rubric() for p in peer_graders]
             rubric_headers = [p.get_latest_rubric_headers_and_scores().get("rubric_headers", []) for p in peer_graders]
