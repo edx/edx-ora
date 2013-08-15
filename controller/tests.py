@@ -413,6 +413,47 @@ class ExpireSubmissionsTests(unittest.TestCase):
 
         self.assertEqual(len(expired_submissions),1)
 
+    def test_get_duplicate_scores_and_feedback(self):
+        """
+        Want to test that a submission with a single BC grade returns that grade, but
+        a submission with BCs and multiple PEs returns the PE grade set
+        (this situation happens with duplicates)
+        """
+        sub1 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        sub1.save()
+
+        sub1_bc = test_util.get_grader("BC", score=1)
+        sub1_bc.submission = sub1
+        sub1_bc.save()
+
+        sub2 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        sub2.is_duplicate_checked = True
+        sub2.state = "F"
+        sub2.save()
+
+        sub2_bc = test_util.get_grader("BC", score=1)
+        sub2_bc.submission = sub2
+        sub2_bc.save()
+
+        for pe_score in [2, 3, 4]:
+            pe = test_util.get_grader("PE", score=pe_score)
+            pe.submission = sub2
+            pe.save()
+
+        dup2 = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        dup2.is_duplicate = True
+        dup2.duplicate_submission_id = sub2.id
+        dup2.save()
+
+        expire_submissions.check_if_grading_finished_for_duplicates()
+
+        fb1 = sub1.get_all_successful_scores_and_feedback()
+        fb2 = sub2.get_all_successful_scores_and_feedback()
+        fb_dup2 = dup2.get_all_successful_scores_and_feedback()
+        self.assertEquals(fb1['score'], 1)
+        self.assertEquals(set(fb2['score']), set([2,3,4]))
+        self.assertEquals(set(fb_dup2['score']), set([2,3,4]))
+
     def test_finalize_expired_submissions(self):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
