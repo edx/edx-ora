@@ -387,7 +387,8 @@ class PeerGradingUtilTest(unittest.TestCase):
         found, grading_item = peer_grading_util.get_single_peer_grading_item(LOCATION, STUDENT_ID)
         self.assertEqual(found, True)
 
-        subs_graded = peer_grading_util.peer_grading_submissions_graded_for_location(LOCATION,"1")
+        pl = peer_grading_util.PeerLocation(LOCATION,"1")
+        subs_graded = pl.graded
 
     def test_get_peer_grading_notifications(self):
         test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")

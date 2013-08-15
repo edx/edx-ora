@@ -362,8 +362,9 @@ def get_problem_list(request):
         if student_sub_count>0:
 
             problem_name = Submission.objects.filter(location=location)[0].problem_id
-            submissions_pending = peer_grading_util.peer_grading_submissions_pending_for_location(location, student_id).count()
-            submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
+            pl = peer_grading_util.PeerLocation(location,student_id)
+            submissions_pending = pl.pending_count
+            submissions_graded = pl.graded_count
             submissions_required = max([0,peer_grading_util.get_required(student_subs)-submissions_graded])
 
             if submissions_graded>0 or submissions_pending>0:
@@ -418,9 +419,10 @@ def get_peer_grading_data_for_location(request):
     student_subs = Submission.objects.filter(student_id=student_id, location=location, preferred_grader_type="PE")
     student_sub_count = student_subs.count()
 
-    submissions_graded = peer_grading_util.peer_grading_submissions_graded_for_location(location,student_id).count()
+    pl = peer_grading_util.PeerLocation(location,student_id)
+    submissions_graded = pl.graded_count
     submissions_required = peer_grading_util.get_required(student_subs)
-    submissions_available = peer_grading_util.peer_grading_submissions_pending_for_location(location,student_id).count()
+    submissions_available = pl.pending_count
 
     peer_data = {
         'count_graded' : submissions_graded,

@@ -7,8 +7,84 @@ from django.conf import settings
 from metrics import utilize_student_metrics
 from metrics.models import StudentProfile
 from controller import control_util
+from controller.capsules import CourseCapsule, LocationCapsule
 
 log = logging.getLogger(__name__)
+
+class PeerLocation(LocationCapsule):
+    """
+    Ecapsulates information that graders may want about a location.
+    """
+    def __init__(self, location, student_id):
+        self.student_id = student_id
+        super(PeerLocation, self).__init__(location)
+
+    @property
+    def graded(self):
+        """
+        Finds all submissions that have been graded, and are now complete.
+        """
+        return Submission.objects.filter(
+            location= self.location,
+            grader__status_code= GraderStatus.success,
+            grader__grader_id = self.student_id,
+            )
+
+    @property
+    def graded_count(self):
+        """
+        Counts graded submissions.
+        """
+        return self.graded.count()
+
+    @property
+    def pending(self):
+        """
+        Gets all non-duplicate submissions that are pending instructor grading.
+        """
+        return Submission.objects.filter(
+            location= self.location,
+            state=SubmissionState.waiting_to_be_graded,
+            next_grader_type="PE",
+            is_duplicate=False,
+            ).exclude(student_id=self.student_id)
+
+    @property
+    def pending_count(self):
+        """
+        Counts pending submissions.
+        """
+        return self.pending.count()
+
+    @property
+    def next_item(self):
+        """
+        Looks for submissions to score.  If nothing exists, look for something to rescore.
+        """
+        raise NotImplementedError()
+
+class PeerCourse(CourseCapsule):
+    """
+    Encapsulates information that graders may want about a course.
+    """
+
+    def __init__(self, course_id, student_id):
+        self.student_id = student_id
+        super(PeerCourse, self).__init__(course_id)
+
+    @property
+    def next_item(self):
+        """
+        Gets the next item to grade in the course.
+        """
+        raise NotImplementedError()
+
+    @property
+    def notifications(self):
+        """
+        Checks to see if  a notification needs to be shown
+        """
+        raise NotImplementedError()
 
 def get_single_peer_grading_item(location, grader_id):
     """
@@ -23,7 +99,8 @@ def get_single_peer_grading_item(location, grader_id):
     """
     found = False
     sub_id = 0
-    to_be_graded = peer_grading_submissions_pending_for_location(location, grader_id) 
+    pl = PeerLocation(location, grader_id)
+    to_be_graded = pl.pending
     #Do some checks to ensure that there are actually items to grade
     if to_be_graded is not None:
         to_be_graded_length = to_be_graded.count()
@@ -82,45 +159,6 @@ def get_single_peer_grading_item(location, grader_id):
 
     return found, sub_id
 
-
-def is_peer_grading_finished_for_submission(submission_id):
-    """
-    Checks to see whether there are enough reliable peer evaluations of submission to ensure that grading is done.
-    Input:
-        submission id
-    Output:
-        Boolean indicating whether or not there are enough reliable evaluations.
-    """
-    pass
-
-
-def peer_grading_submissions_pending_for_location(location, grader_id):
-    """
-    Get submissions that are to graded be graded by the student
-    """
-    to_be_graded = Submission.objects.filter(
-        location=location,
-        state=SubmissionState.waiting_to_be_graded,
-        next_grader_type="PE",
-        is_duplicate=False,
-    ).exclude(student_id=grader_id)
-
-    log.debug("Looking for grading for student {0}, found {1}".format(grader_id, to_be_graded))
-    #Do some checks to ensure that there are actually items to grade
-    return to_be_graded
-
-def peer_grading_submissions_graded_for_location(location, student_id):
-    """
-    Get submissions that are graded by instructor
-    """
-    subs_graded = Submission.objects.filter(
-        location=location,
-        grader__status_code=GraderStatus.success,
-        grader__grader_id = student_id,
-    )
-
-    return subs_graded
-
 def get_required(subs):
     required_list = []
     for sub in subs:
@@ -136,10 +174,11 @@ def get_peer_grading_notifications(course_id, student_id):
     unique_student_locations = [x['location'] for x in
                                 student_responses_for_course.values('location').distinct()]
     for location in unique_student_locations:
+        pl = PeerLocation(location,student_id)
         location_responses = Submission.objects.filter(student_id=student_id, preferred_grader_type="PE", location=location)
         required_peer_grading_for_location = get_required(location_responses)
         completed_peer_grading_for_location = Grader.objects.filter(grader_id = student_id, submission__location = location).count()
-        submissions_pending = peer_grading_submissions_pending_for_location(location, student_id).count()
+        submissions_pending = pl.pending_count
 
         if completed_peer_grading_for_location<required_peer_grading_for_location and submissions_pending>0:
             student_needs_to_peer_grade = True
