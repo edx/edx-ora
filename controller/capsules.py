@@ -40,5 +40,4 @@ class CourseCapsule(object):
         """
         Gets all locations in a course.
         """
-        return [x['location'] for x in
-                list(Submission.objects.filter(course_id=self.course_id).values('location').distinct())]
+        return [x['location'] for x in Submission.objects.filter(course_id=self.course_id).values('location').distinct()]

@@ -17,6 +17,7 @@ from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
 import project_urls
+from staff_grading_util import StaffLocation, StaffCourse
 
 log = logging.getLogger(__name__)
 
@@ -24,10 +25,9 @@ GET_NEXT= project_urls.StaffGradingURLs.get_next_submission
 SAVE_GRADE= project_urls.StaffGradingURLs.save_grade
 GET_PROBLEM_LIST=project_urls.StaffGradingURLs.get_problem_list
 
-LOCATION="idx://MITx/6.002x/OETest"
+LOCATION="i4x://MITx/6.002x/OETest"
 STUDENT_ID="5"
 COURSE_ID="course_id"
-
 
 
 class StaffGradingViewTest(unittest.TestCase):
@@ -53,7 +53,7 @@ class StaffGradingViewTest(unittest.TestCase):
         self.assertEqual(body['success'], True)
 
     def test_get_next_submission_true(self):
-        test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID)
+        test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
         test_sub.save()
 
         content = self.c.get(
@@ -87,7 +87,7 @@ class StaffGradingViewTest(unittest.TestCase):
         self.save_grade(False, False)
 
     def test_save_grade_true(self):
-        test_sub=test_util.get_sub("IN",LOCATION,STUDENT_ID)
+        test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
         test_sub.save()
 
         #Should work because submission was just created
@@ -158,4 +158,41 @@ class StaffGradingViewTest(unittest.TestCase):
         self.save_grade(True, True)
         test_sub = Submission.objects.get(id=test_sub.id)
         self.assertEqual(test_sub.next_grader_type,"ML")
+
+    def test_submission_location(self):
+        Submission.objects.all().delete()
+        test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        test_sub2=test_util.get_sub("IN",STUDENT_ID, LOCATION)
+        test_sub2.state = SubmissionState.finished
+        test_sub2.previous_grader_type = "IN"
+        test_sub2.save()
+
+        sl = StaffLocation(LOCATION)
+        self.assertEqual(sl.location_submissions.count(),2)
+        self.assertEqual(sl.all_pending_count,1)
+        self.assertEqual(sl.graded_count,1)
+        self.assertEqual(sl.pending_count,1)
+        self.assertEqual(len(sl.graded_submission_text),1)
+        test_sub2.delete()
+        log.info(sl.location_submissions)
+        log.info([i.id for i in sl.location_submissions])
+        next_item_id = sl.item_to_score[1]
+        self.assertEqual(next_item_id ,test_sub.id)
+        log.info(test_sub)
+        test_sub = Submission.objects.get(id=next_item_id)
+        self.assertEqual(test_sub.state,SubmissionState.being_graded)
+        test_sub.state = SubmissionState.waiting_to_be_graded
+        test_sub.save()
+        self.assertEqual(sl.next_item[1],test_sub.id)
+
+    def test_submission_course(self):
+        test_sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        test_sub.save()
+
+        sc = StaffCourse(COURSE_ID)
+        self.assertEqual(len(sc.locations),1)
+        self.assertEqual(sc.notifications[1],True)
+        self.assertEqual(sc.next_item[1],test_sub.id)
 
