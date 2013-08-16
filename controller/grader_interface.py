@@ -37,7 +37,8 @@ def get_submission_ml(request):
     """
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
-        subs_graded_by_instructor = staff_grading_util.finished_submissions_graded_by_instructor(location).count()
+        sl = staff_grading_util.StaffLocation(location)
+        subs_graded_by_instructor = sl.graded_count()
         success = ml_grading_util.check_for_all_model_and_rubric_success(location)
         if subs_graded_by_instructor >= settings.MIN_TO_USE_ML and success:
             to_be_graded = Submission.objects.filter(
@@ -97,7 +98,8 @@ def get_submission_instructor(request):
     except Exception:
         return util._error_response("'get_submission' requires parameter 'course_id'", _INTERFACE_VERSION)
 
-    found, sub_id = staff_grading_util.get_single_instructor_grading_item(course_id)
+    sc = staff_grading_util.StaffCourse(course_id)
+    found, sub_id = sc.next_item()
 
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)

@@ -405,7 +405,8 @@ def check_for_combined_notifications(notification_dict):
             overall_need_to_check=True
 
     if user_is_staff==True:
-        success, staff_needs_to_grade = staff_grading_util.get_staff_grading_notifications(course_id)
+        sc = staff_grading_util.StaffCourse(course_id)
+        success, staff_needs_to_grade = sc.notifications()
         if success:
             combined_notifications.update({NotificationTypes.staff_grading : staff_needs_to_grade})
             if staff_needs_to_grade==True:
