@@ -147,7 +147,9 @@ def get_calibration_essay(location, student_id):
     calibration_essay_ids = [cr.id for cr in list(calibration_submissions)]
 
     #Ensure that student only gets calibration essays that they have not seen before
-    for i in xrange(0, len(calibration_essay_ids)):
+    cal_range = range(0, len(calibration_essay_ids))
+    random.shuffle(cal_range)
+    for i in cal_range:
         if calibration_essay_ids[i] not in student_calibration_ids:
             calibration_data = get_calibration_essay_data(calibration_essay_ids[i])
             return True, calibration_data

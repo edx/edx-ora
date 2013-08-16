@@ -24,6 +24,8 @@ from tasks import expire_submissions_task, pull_from_xqueue
 from control_util import SubmissionControl
 from copy import deepcopy
 
+from staff_grading import staff_grading_util
+
 import datetime
 
 import project_urls
@@ -263,7 +265,9 @@ class GraderInterfaceTest(unittest.TestCase):
         self.assertEqual(sub.prompt,"prompt")
 
     def test_get_sub_in(self):
+        Submission.objects.all().delete()
         sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        sub.state = SubmissionState.waiting_to_be_graded
         sub.save()
 
         content = self.c.get(
