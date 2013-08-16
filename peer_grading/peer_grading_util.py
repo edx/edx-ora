@@ -2,7 +2,6 @@ from django.db.models import Count
 from controller.models import SubmissionState, GraderStatus, Grader, Submission, NotificationTypes, NotificationsSeen
 import logging
 from metrics import metrics_util
-from metrics.timing_functions import initialize_timing
 from django.conf import settings
 from metrics import utilize_student_metrics
 from metrics.models import StudentProfile
@@ -103,19 +102,16 @@ class PeerLocation(LocationCapsule):
                     found = True
                     sub_id = grade_item.id
 
-                    #Insert timing initialization code
                     if fallback_sub_id is None:
                         fallback_sub_id = grade_item.id
 
                     if not student_profile_success:
-                        initialize_timing(sub_id)
                         grade_item.state = SubmissionState.being_graded
                         grade_item.save()
                         return found, sub_id
                     else:
                         success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
                         if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
-                            initialize_timing(sub_id)
                             grade_item.state = SubmissionState.being_graded
                             grade_item.save()
                             return found, sub_id
@@ -124,7 +120,6 @@ class PeerLocation(LocationCapsule):
                         submission_ids.pop(minimum_index)
                         submission_grader_counts.pop(minimum_index)
             if found:
-                initialize_timing(fallback_sub_id)
                 grade_item = Submission.objects.get(id=fallback_sub_id)
                 grade_item.state = SubmissionState.being_graded
                 grade_item.save()

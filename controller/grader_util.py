@@ -1,7 +1,6 @@
 import ConfigParser
 from django.conf import settings
 from create_grader import create_grader
-from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
 from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
@@ -165,9 +164,6 @@ def create_and_handle_grader_object(grader_dict):
     )
 
     sub.save()
-
-    #Insert timing finalization code
-    finalize_timing(sub, grade)
 
     return True, {'submission_id': sub.xqueue_submission_id, 'submission_key': sub.xqueue_submission_key}
 
