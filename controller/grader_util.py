@@ -297,7 +297,7 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
 
 def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
     success=False
-    if rubric_scores_complete!="True":
+    if rubric_scores_complete not in ["True", True, "true"]:
         return success, "Rubric scores complete is not true: {0}".format(rubric_scores_complete)
 
     success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
