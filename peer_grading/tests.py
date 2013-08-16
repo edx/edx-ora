@@ -470,6 +470,9 @@ class PeerGradingUtilTest(unittest.TestCase):
 
         self.assertEqual(next_item_id, test_sub2.id)
 
+        test_sub2 = Submission.objects.get(id=next_item_id)
+        self.assertEqual(SubmissionState.being_graded, test_sub2.state)
+
         test_grader3 = test_util.get_grader("PE")
         test_grader3.submission = test_sub2
         test_grader3.grader_id = STUDENT_ID
