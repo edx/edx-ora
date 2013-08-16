@@ -124,7 +124,8 @@ def get_submission_peer(request):
     except KeyError:
         return util._error_response("'get_submission' requires parameters 'location', 'grader_id'", _INTERFACE_VERSION)
 
-    found, sub_id = peer_grading_util.get_single_peer_grading_item(location, grader_id)
+    pl = peer_grading_util.PeerLocation(location, grader_id)
+    found, sub_id = pl.next_item()
 
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)

@@ -398,7 +398,8 @@ def check_for_combined_notifications(notification_dict):
     overall_need_to_check=False
 
     combined_notifications = {}
-    success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
+    pc = peer_grading_util.PeerCourse(course_id, student_id)
+    success, student_needs_to_peer_grade = pc.notifications()
     if success:
         combined_notifications.update({NotificationTypes.peer_grading : student_needs_to_peer_grade})
         if student_needs_to_peer_grade==True:
