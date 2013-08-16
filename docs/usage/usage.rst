@@ -175,3 +175,48 @@ Run the edx-ora celery tasks::
     $ python manage.py celeryd -B --settings=edx_ora.settings --pythonpath=.
 
 The LMS/CMS will now be able to interact with edX-ORA.
+
+
+Troubleshooting
+---------------
+
+If you get this error::
+
+    DatabaseError: no such table: auth_user
+
+You need to wipe out your SQLite database and re-run syncdb without creating a superuser. This can be done with the ``--noinput`` flag::
+
+    $ python manage.py syncdb --noinput --settings=edx_ora.settings --pythonpath=.
+
+
+If you need to delete the problems from the database, this command should be useful::
+
+    $ sqlite3 /opt/edx/db/mitx.db 
+    SQLite version 3.7.9 2011-11-01 00:52:41
+    Enter ".help" for instructions
+    Enter SQL statements terminated with a ";"
+    sqlite> delete from courseware_studentmodule where module_id like "%combinedopenended%";
+    sqlite> 
+
+Other helpful SQLite inspection commands::
+
+    sqlite> .headeron
+    sqlite> select * from controller_submission;
+    sqlite> select student_id from controller_submission;
+    sqlite> select * from controller_submission where student_id="5afe5d9bb03796557ee2614f5c9611fb";
+    sqlite> select state,previous_grader_type,posted_results_back_to_queue from controller_submission where student_id="5afe5d9bb03796557ee2614f5c9611fb";
+
+If you get this error::
+
+    [2013-08-09 15:01:03,089: ERROR/MainProcess] Could not parse xreply.
+    [2013-08-09 15:01:03,089: ERROR/MainProcess] Error getting submission: string indices must be integers, not str
+    Traceback (most recent call last):
+      File "./ml_grading/tasks.py", line 56, in grade_essays
+        success, pending_count=ml_grader.get_pending_length_from_controller(controller_session)
+      File "./ml_grading/ml_grader.py", line 162, in get_pending_length_from_controller
+        return success, content['to_be_graded_count']
+    TypeError: string indices must be integers, not str
+
+It means that the edx-ora server is not able to talk to Celery. 
+Check to make sure that Celery is running and you have the correct ports, 
+and that you've run the update_users script.
