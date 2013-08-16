@@ -17,48 +17,42 @@ class StaffLocation(LocationCapsule):
     Encapsulates student submissions that need staff action for a particular location.
     """
 
-    @property
     def graded(self):
         """
         Finds all submissions that have been instructor graded, and are now complete.
         """
-        return self.location_submissions.filter(previous_grader_type="IN", state=SubmissionState.finished)
+        return self.location_submissions().filter(previous_grader_type="IN", state=SubmissionState.finished)
 
-    @property
     def graded_count(self):
         """
         Counts graded submissions.
         """
-        return self.graded.count()
+        return self.graded().count()
 
-    @property
     def pending(self):
         """
         Gets all non-duplicate submissions that are pending instructor grading.
         """
-        return self.location_submissions.filter(
+        return self.location_submissions().filter(
             next_grader_type="IN",
             state=SubmissionState.waiting_to_be_graded,
             is_duplicate=False,
             is_plagiarized=False
         )
 
-    @property
     def pending_count(self):
         """
         Counts pending submissions.
         """
-        return self.pending.count()
+        return self.pending().count()
 
-    @property
     def graded_submission_text(self):
         """
         Gets the text for all submissions that have been instructor scored.
         """
-        sub_text=self.graded.values('student_response').distinct()
+        sub_text=self.graded().values('student_response').distinct()
         return [s['student_response'] for s in sub_text]
 
-    @property
     def item_to_score(self):
         """
         Gets an item for an instructor to score.
@@ -67,9 +61,9 @@ class StaffLocation(LocationCapsule):
         success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
 
         if subs_graded < settings.MIN_TO_USE_ML or not success:
-            to_be_graded = self.pending
+            to_be_graded = self.pending()
 
-            finished_submission_text=self.graded_submission_text
+            finished_submission_text=self.graded_submission_text()
 
             for tbg in to_be_graded:
                 #In some cases, this causes a model query error without the try/except block due to the checked out state
@@ -87,8 +81,7 @@ class StaffLocation(LocationCapsule):
 
         #If nothing is found, return false
         return False, 0
-    
-    @property
+
     def item_to_rescore(self):
         """
         Gets an item for an instructor to rescore (items have already been machine scored, ML)
@@ -97,8 +90,8 @@ class StaffLocation(LocationCapsule):
         
         if success:
             #Order by confidence if we are looking for finished ML submissions
-            finished_submission_text=self.graded_submission_text
-            to_be_graded = self.pending.filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
+            finished_submission_text=self.graded_submission_text()
+            to_be_graded = self.pending().filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
     
             for tbg in to_be_graded:
                 if tbg is not None and tbg.student_response not in finished_submission_text:
@@ -116,14 +109,13 @@ class StaffLocation(LocationCapsule):
                     #If nothing is found, return false
         return False, 0
 
-    @property
     def next_item(self):
         """
         Looks for submissions to score.  If nothing exists, look for something to rescore.
         """
-        success, sid = self.item_to_score
+        success, sid = self.item_to_score()
         if not success:
-            success, sid = self.item_to_rescore
+            success, sid = self.item_to_rescore()
         return success, sid
 
 
@@ -132,26 +124,24 @@ class StaffCourse(CourseCapsule):
     Encapsulates information that staff may want about a course.
     """
 
-    @property
     def next_item(self):
         """
         Gets the next item that a staff member needs to grade in the course.
         """
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
-            success, sub_id = sl.item_to_score
+            success, sub_id = sl.item_to_score()
             if success:
                 return success, sub_id
 
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
-            success, sub_id = sl.item_to_rescore
+            success, sub_id = sl.item_to_rescore()
             if success:
                 return success, sub_id
 
         return False, 0
 
-    @property
     def notifications(self):
         """
         Checks to see if the staff member needs to be shown a notification (ie, needs to grade something)
@@ -159,15 +149,15 @@ class StaffCourse(CourseCapsule):
         staff_needs_to_grade = False
         success = True
 
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
             min_scored_for_location=settings.MIN_TO_USE_PEER
             location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
             if location_ml_count>0:
                 min_scored_for_location=settings.MIN_TO_USE_ML
 
-            location_scored_count = sl.graded_count
-            submissions_pending = sl.all_pending_count
+            location_scored_count = sl.graded_count()
+            submissions_pending = sl.all_pending_count()
 
             if location_scored_count<min_scored_for_location and submissions_pending>0:
                 staff_needs_to_grade= True

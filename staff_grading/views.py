@@ -78,13 +78,13 @@ def get_next_submission(request):
 
     if location:
         sl = staff_grading_util.StaffLocation(location)
-        (found, sid) = sl.next_item
+        (found, sid) = sl.next_item()
 
     # TODO: save the grader id and match it in save_grade to make sure things
     # are consistent.
     if not location:
         sc = staff_grading_util.StaffCourse(course_id)
-        (found, sid) = sc.next_item
+        (found, sid) = sc.next_item()
 
     if not found:
         return util._success_response({'message': 'No more submissions to grade.'},
@@ -121,8 +121,8 @@ def get_next_submission(request):
                 'max_score': submission.max_score,
                 'ml_error_info' : ml_error_message,
                 'problem_name' : submission.problem_id,
-                'num_graded' : sl.graded_count,
-                'num_pending' : sl.pending_count,
+                'num_graded' : sl.graded_count(),
+                'num_pending' : sl.pending_count(),
                 'min_for_ml' : settings.MIN_TO_USE_ML,
                 }
 
@@ -278,8 +278,8 @@ def get_problem_list(request):
     for location in locations_for_course:
         sl = staff_grading_util.StaffLocation(location)
         problem_name = Submission.objects.filter(location=location)[0].problem_id
-        submissions_pending = sl.pending_count
-        finished_instructor_graded = sl.graded_count
+        submissions_pending = sl.pending_count()
+        finished_instructor_graded = sl.graded_count()
         min_scored_for_location=settings.MIN_TO_USE_PEER
         location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
         if location_ml_count>0:
@@ -320,7 +320,7 @@ def get_notifications(request):
         return util._error_response(error_message, _INTERFACE_VERSION)
 
     sc = staff_grading_util.StaffCourse(course_id)
-    success, staff_needs_to_grade = sc.notifications
+    success, staff_needs_to_grade = sc.notifications()
     if not success:
         return util._error_response(staff_needs_to_grade, _INTERFACE_VERSION)
 

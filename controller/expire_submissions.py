@@ -27,7 +27,7 @@ def reset_ml_subs_to_in():
     unique_locations=[x['location'] for x in Submission.objects.all().values('location').distinct()]
     for location in unique_locations:
         sl = staff_grading_util.StaffLocation(location)
-        subs_graded, subs_pending = sl.graded_count, sl.pending_count
+        subs_graded, subs_pending = sl.graded_count(), sl.pending_count()
         subs_pending_total= Submission.objects.filter(
             location=location,
             state=SubmissionState.waiting_to_be_graded,
