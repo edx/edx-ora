@@ -61,9 +61,9 @@ class StaffLocation(LocationCapsule):
         success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
 
         if subs_graded < settings.MIN_TO_USE_ML or not success:
-            to_be_graded = self.pending
+            to_be_graded = self.pending()
 
-            finished_submission_text=self.graded_submission_text
+            finished_submission_text=self.graded_submission_text()
 
             for tbg in to_be_graded:
                 #In some cases, this causes a model query error without the try/except block due to the checked out state
@@ -90,7 +90,7 @@ class StaffLocation(LocationCapsule):
         
         if success:
             #Order by confidence if we are looking for finished ML submissions
-            finished_submission_text=self.graded_submission_text
+            finished_submission_text=self.graded_submission_text()
             to_be_graded = self.pending().filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
     
             for tbg in to_be_graded:
@@ -113,9 +113,9 @@ class StaffLocation(LocationCapsule):
         """
         Looks for submissions to score.  If nothing exists, look for something to rescore.
         """
-        success, sid = self.item_to_score
+        success, sid = self.item_to_score()
         if not success:
-            success, sid = self.item_to_rescore
+            success, sid = self.item_to_rescore()
         return success, sid
 
 
@@ -128,13 +128,13 @@ class StaffCourse(CourseCapsule):
         """
         Gets the next item that a staff member needs to grade in the course.
         """
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
             success, sub_id = sl.item_to_score()
             if success:
                 return success, sub_id
 
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
             success, sub_id = sl.item_to_rescore()
             if success:
@@ -149,7 +149,7 @@ class StaffCourse(CourseCapsule):
         staff_needs_to_grade = False
         success = True
 
-        for location in self.locations:
+        for location in self.locations():
             sl = StaffLocation(location)
             min_scored_for_location=settings.MIN_TO_USE_PEER
             location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()

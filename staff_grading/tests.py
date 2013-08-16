@@ -18,6 +18,7 @@ from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
 import project_urls
 from staff_grading_util import StaffLocation, StaffCourse
+import mock
 
 log = logging.getLogger(__name__)
 
@@ -176,16 +177,15 @@ class StaffGradingViewTest(unittest.TestCase):
         self.assertEqual(sl.pending_count(),1)
         self.assertEqual(len(sl.graded_submission_text()),1)
         test_sub2.delete()
-        log.info(sl.location_submissions())
-        log.info([i.id for i in sl.location_submissions()])
         next_item_id = sl.item_to_score()[1]
         self.assertEqual(next_item_id ,test_sub.id)
-        log.info(test_sub)
+
         test_sub = Submission.objects.get(id=next_item_id)
         self.assertEqual(test_sub.state,SubmissionState.being_graded)
         test_sub.state = SubmissionState.waiting_to_be_graded
         test_sub.save()
         self.assertEqual(sl.next_item()[1],test_sub.id)
+
 
     def test_submission_course(self):
         test_sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
@@ -195,4 +195,27 @@ class StaffGradingViewTest(unittest.TestCase):
         self.assertEqual(len(sc.locations()),1)
         self.assertEqual(sc.notifications()[1],True)
         self.assertEqual(sc.next_item()[1],test_sub.id)
+
+    @mock.patch('ml_grading.ml_grading_util.check_for_all_model_and_rubric_success', new=mock.Mock(return_value=True))
+    def test_submission_location_rescore(self):
+        Submission.objects.all().delete()
+        test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
+        test_sub.save()
+
+        test_grader = test_util.get_grader("BC")
+        test_grader.submission = test_sub
+        test_grader.save()
+
+        test_grader = test_util.get_grader("ML")
+        test_grader.submission = test_sub
+        test_grader.save()
+
+        sl = StaffLocation(LOCATION)
+
+        rescore = sl.item_to_rescore()[1]
+
+        self.assertEqual(rescore,test_sub.id)
+
+
+
 
