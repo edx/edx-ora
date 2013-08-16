@@ -57,7 +57,7 @@ class StaffLocation(LocationCapsule):
         """
         Gets an item for an instructor to score.
         """
-        subs_graded = self.graded_count
+        subs_graded = self.graded_count()
         success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
 
         if subs_graded < settings.MIN_TO_USE_ML or not success:
@@ -66,7 +66,6 @@ class StaffLocation(LocationCapsule):
             finished_submission_text=self.graded_submission_text()
 
             for tbg in to_be_graded:
-                #In some cases, this causes a model query error without the try/except block due to the checked out state
                 if tbg is not None and tbg.student_response not in finished_submission_text:
                     tbg.state = SubmissionState.being_graded
                     tbg.next_grader_type="IN"
