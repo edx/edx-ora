@@ -232,7 +232,7 @@ def handle_submission(sub):
 
         sl = staff_grading_util.StaffLocation(sub.location)
         #Assign whether grader should be ML or IN based on number of graded examples.
-        subs_graded_by_instructor, subs_pending_instructor = sl.graded_count, sl.pending_count
+        subs_graded_by_instructor, subs_pending_instructor = sl.graded_count(), sl.pending_count()
 
         #TODO: abstract out logic for assigning which grader to go with.
         grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
