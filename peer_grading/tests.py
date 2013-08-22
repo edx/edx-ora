@@ -384,10 +384,12 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.is_duplicate = False
         test_sub.save()
 
-        found, grading_item = peer_grading_util.get_single_peer_grading_item(LOCATION, STUDENT_ID)
+        pl = peer_grading_util.PeerLocation(LOCATION, STUDENT_ID)
+        found, grading_item = pl.next_item()
         self.assertEqual(found, True)
 
-        subs_graded = peer_grading_util.peer_grading_submissions_graded_for_location(LOCATION,"1")
+        pl = peer_grading_util.PeerLocation(LOCATION,"1")
+        subs_graded = pl.graded()
 
     def test_get_peer_grading_notifications(self):
         test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
@@ -404,7 +406,8 @@ class PeerGradingUtilTest(unittest.TestCase):
         test_sub.is_duplicate = False
         test_sub.save()
 
-        success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(COURSE_ID, ALTERNATE_STUDENT)
+        pc = peer_grading_util.PeerCourse(COURSE_ID, ALTERNATE_STUDENT)
+        success, student_needs_to_peer_grade = pc.notifications()
         self.assertEqual(success, True)
         self.assertEqual(student_needs_to_peer_grade, True)
     
@@ -428,17 +431,76 @@ class PeerGradingUtilTest(unittest.TestCase):
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 
     def test_get_required(self):
-        student_required = peer_grading_util.get_required(Submission.objects.all())
+        pl = peer_grading_util.PeerLocation(LOCATION, STUDENT_ID)
+        student_required = pl.required_count()
         test_sub = test_util.get_sub("PE", ALTERNATE_STUDENT, LOCATION, "PE")
         test_sub.save()
 
-        self.assertEqual(peer_grading_util.get_required(Submission.objects.all()), settings.REQUIRED_PEER_GRADING_PER_STUDENT + student_required)
+        self.assertEqual(pl.required_count(), student_required)
 
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
         test_sub.save()
 
-        self.assertEqual(peer_grading_util.get_required(Submission.objects.all()), settings.REQUIRED_PEER_GRADING_PER_STUDENT*2 + student_required)
+        self.assertEqual(pl.required_count(), settings.REQUIRED_PEER_GRADING_PER_STUDENT + student_required)
 
+    def test_submission_location(self):
+        Submission.objects.all().delete()
+        test_sub=test_util.get_sub("PE",STUDENT_ID, LOCATION, preferred_grader_type="PE")
+        test_sub.save()
+        test_grader = test_util.get_grader("BC")
+        test_grader.submission = test_sub
+        test_grader.save()
+
+        pl = peer_grading_util.PeerLocation(LOCATION,STUDENT_ID)
+
+        self.assertEqual(pl.submitted_count(),1)
+        self.assertEqual(pl.required_count(), settings.REQUIRED_PEER_GRADING_PER_STUDENT)
+
+
+        test_sub2=test_util.get_sub("PE",ALTERNATE_STUDENT, LOCATION, preferred_grader_type="PE")
+        test_sub2.save()
+
+        test_grader2 = test_util.get_grader("BC")
+        test_grader2.submission = test_sub2
+        test_grader2.save()
+
+        self.assertEqual(pl.pending_count(),1)
+
+        found, next_item_id = pl.next_item()
+
+        self.assertEqual(next_item_id, test_sub2.id)
+
+        test_sub2 = Submission.objects.get(id=next_item_id)
+        self.assertEqual(SubmissionState.being_graded, test_sub2.state)
+
+        test_grader3 = test_util.get_grader("PE")
+        test_grader3.submission = test_sub2
+        test_grader3.grader_id = STUDENT_ID
+        test_grader3.save()
+
+        self.assertEqual(pl.graded_count(),1)
+
+        self.assertEqual(pl.pending_count(),0)
+
+    def test_submission_course(self):
+        Submission.objects.all().delete()
+        test_sub=test_util.get_sub("PE",STUDENT_ID, LOCATION, preferred_grader_type="PE")
+        test_sub.save()
+        test_grader = test_util.get_grader("BC")
+        test_grader.submission = test_sub
+        test_grader.save()
+
+        test_sub2=test_util.get_sub("PE",ALTERNATE_STUDENT, LOCATION, preferred_grader_type="PE")
+        test_sub2.save()
+
+        test_grader2 = test_util.get_grader("BC")
+        test_grader2.submission = test_sub2
+        test_grader2.save()
+
+        sc = peer_grading_util.PeerCourse(COURSE_ID, STUDENT_ID)
+        success, needs_to_grade = sc.notifications()
+        self.assertTrue(needs_to_grade)
+        self.assertEqual(sc.submitted().count(),1)
         
 
 

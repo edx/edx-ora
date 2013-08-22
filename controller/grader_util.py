@@ -1,7 +1,6 @@
 import ConfigParser
 from django.conf import settings
 from create_grader import create_grader
-from metrics.timing_functions import finalize_timing
 from models import Submission
 import logging
 from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
@@ -166,9 +165,6 @@ def create_and_handle_grader_object(grader_dict):
 
     sub.save()
 
-    #Insert timing finalization code
-    finalize_timing(sub, grade)
-
     return True, {'submission_id': sub.xqueue_submission_id, 'submission_key': sub.xqueue_submission_key}
 
 
@@ -301,7 +297,7 @@ def check_is_duplicate_and_plagiarized(submission_text,location, student_id, pre
 
 def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
     success=False
-    if rubric_scores_complete!="True":
+    if rubric_scores_complete not in ["True", True, "true"]:
         return success, "Rubric scores complete is not true: {0}".format(rubric_scores_complete)
 
     success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
@@ -398,7 +394,8 @@ def check_for_combined_notifications(notification_dict):
     overall_need_to_check=False
 
     combined_notifications = {}
-    success, student_needs_to_peer_grade = peer_grading_util.get_peer_grading_notifications(course_id, student_id)
+    pc = peer_grading_util.PeerCourse(course_id, student_id)
+    success, student_needs_to_peer_grade = pc.notifications()
     if success:
         combined_notifications.update({NotificationTypes.peer_grading : student_needs_to_peer_grade})
         if student_needs_to_peer_grade==True:
