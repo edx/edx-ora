@@ -4,7 +4,6 @@ from controller.models import Submission
 import logging
 from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
-from metrics.timing_functions import initialize_timing
 from controller import util
 from ml_grading import ml_grading_util
 
@@ -73,9 +72,6 @@ class StaffLocation(LocationCapsule):
                     found = True
                     sub_id = tbg.id
 
-                    #Insert timing initialization code
-                    initialize_timing(sub_id)
-
                     return found, sub_id
 
         #If nothing is found, return false
@@ -99,9 +95,6 @@ class StaffLocation(LocationCapsule):
                     tbg.save()
                     found = True
                     sub_id = tbg.id
-    
-                    #Insert timing initialization code
-                    initialize_timing(sub_id)
     
                     return found, sub_id
     

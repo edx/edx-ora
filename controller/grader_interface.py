@@ -9,7 +9,6 @@ import json
 import logging
 import requests
 import urlparse
-from metrics.timing_functions import initialize_timing
 
 from models import Submission, GRADER_TYPE, Grader, STATUS_CODES, SubmissionState, GraderStatus
 import util
@@ -51,9 +50,6 @@ def get_submission_ml(request):
                 if to_be_graded is not None:
                     to_be_graded.state = SubmissionState.being_graded
                     to_be_graded.save()
-
-                    #Insert timing initialization code
-                    initialize_timing(to_be_graded)
 
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
 
@@ -104,9 +100,6 @@ def get_submission_instructor(request):
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
-    #Insert timing initialization code
-    initialize_timing(sub_id)
-
     util.log_connection_data()
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)
 
@@ -124,13 +117,11 @@ def get_submission_peer(request):
     except KeyError:
         return util._error_response("'get_submission' requires parameters 'location', 'grader_id'", _INTERFACE_VERSION)
 
-    found, sub_id = peer_grading_util.get_single_peer_grading_item(location, grader_id)
+    pl = peer_grading_util.PeerLocation(location, grader_id)
+    found, sub_id = pl.next_item()
 
     if not found:
         return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
-
-    #Insert timing initialization code
-    initialize_timing(sub_id)
 
     util.log_connection_data()
     return util._success_response({'submission_id' : sub_id}, _INTERFACE_VERSION)

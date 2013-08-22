@@ -15,7 +15,6 @@ import util
 import grader_util
 from staff_grading import staff_grading_util
 from basic_check import basic_check_util
-from metrics import timing_functions
 import message_util
 from ml_grading import ml_grading_util
 import rubric_functions
@@ -206,7 +205,6 @@ def handle_submission(sub):
         sub.next_grader_type = "BC"
         sub.save()
         transaction.commit_unless_managed()
-        timing_functions.initialize_timing(sub.id)
         success, check_dict = basic_check_util.simple_quality_check(sub.student_response,
             sub.initial_display, sub.student_id, sub.skip_basic_checks)
         if not success:
