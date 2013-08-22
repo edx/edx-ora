@@ -164,6 +164,7 @@ def save_grade(request):
 
     success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
     if not success:
+        log.info(error_message)
         return util._error_response(
             "grade_save_error",
             _INTERFACE_VERSION,
@@ -190,9 +191,6 @@ def save_grade(request):
     (success, header) = grader_util.create_and_handle_grader_object(d)
     if not success:
         return util._error_response("There was a problem saving the grade.  Contact support.", _INTERFACE_VERSION)
-
-    #xqueue_session=util.xqueue_login()
-    #error,msg = util.post_results_to_xqueue(xqueue_session,json.dumps(header),json.dumps(post_data))
 
     util.log_connection_data()
     return util._success_response({'msg': "Posted to queue."}, _INTERFACE_VERSION)
@@ -354,7 +352,7 @@ def get_problem_list(request):
         return util._error_response(error_message, _INTERFACE_VERSION)
 
     locations_for_course = [x['location'] for x in
-                            list(Submission.objects.filter(course_id=course_id).values('location').distinct())]
+                            Submission.objects.filter(course_id=course_id).values('location').distinct()]
 
     location_info=[]
     for location in locations_for_course:

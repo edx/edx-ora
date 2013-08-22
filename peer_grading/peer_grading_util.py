@@ -94,7 +94,7 @@ class PeerLocation(LocationCapsule):
             #Ensure that student hasn't graded this submission before!
             #Also ensures that all submissions are searched through if student has graded the minimum one
             fallback_sub_id = None
-            for i in xrange(0, len(submission_ids)):
+            for i in xrange(len(submission_ids)):
                 minimum_index = submission_grader_counts.index(min(submission_grader_counts))
                 grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
                 previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
