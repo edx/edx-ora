@@ -82,6 +82,67 @@ You can then see that all the processes started up properly with::
     xqueue                           RUNNING    pid 29675, uptime 1:00:37
     supervisor>
 
+Optionally you can run it without sudo, and start MongoDB and RabbitMQ manually. 
+
+To start MongoDB::
+
+    $ sudo mongod --fork --logpath /opt/edx/edx-platform/edx-ora/logs/mongodb.log
+
+Check to make sure that MongoDB is running::
+
+    $ mongo
+    MongoDB shell version: 2.0.4
+    connecting to: test
+    > 
+
+If you see this error in the mongodb.log::
+
+    Thu Aug 29 16:26:06 dbexit: 
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: going to close listening sockets...
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: going to flush diaglog...
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: going to close sockets...
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: waiting for fs preallocator...
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: closing all files...
+    Thu Aug 29 16:26:06 [initandlisten] closeAllFiles() finished
+    Thu Aug 29 16:26:06 [initandlisten] shutdown: removing fs lock...
+    Thu Aug 29 16:26:06 [initandlisten] couldn't remove fs lock errno:9 Bad file descriptor
+    Thu Aug 29 16:26:06 dbexit: really exiting now
+
+Then you need to delete this file::
+
+    $ sudo rm /data/db/mongod.lock
+
+To start RabbitMQ::
+
+    $ sudo /usr/sbin/rabbitmq-server
+
+Check to make sure that RabbitMQ is running::
+
+    $ sudo /usr/sbin/rabbitmqctl status
+    Status of node rabbit@precise32 ...
+    [{pid,916},
+     {running_applications,[{rabbit,"RabbitMQ","2.7.1"},
+                            {os_mon,"CPO  CXC 138 46","2.2.7"},
+                            {sasl,"SASL  CXC 138 11","2.1.10"},
+                            {mnesia,"MNESIA  CXC 138 12","4.5"},
+                            {stdlib,"ERTS  CXC 138 10","1.17.5"},
+                            {kernel,"ERTS  CXC 138 10","2.14.5"}]},
+     {os,{unix,linux}},
+     {erlang_version,"Erlang R14B04 (erts-5.8.5) [source] [rq:1] [async-threads:30] [kernel-poll:true]\n"},
+     {memory,[{total,12757456},
+              {processes,5016912},
+              {processes_used,5007784},
+              {system,7740544},
+              {atom,742369},
+              {atom_used,738500},
+              {binary,88760},
+              {code,5861149},
+              {ets,365692}]},
+     {vm_memory_high_watermark,0.3999999998095018},
+     {vm_memory_limit,419951411}]
+    ...done.
+
+
 URLs for LMS and CMS (Studio)
 -----------------------------
 
