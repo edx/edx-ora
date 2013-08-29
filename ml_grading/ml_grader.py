@@ -44,8 +44,6 @@ def handle_single_item(controller_session):
         sl = staff_grading_util.StaffLocation(sub.location)
         subs_graded_by_instructor = sl.graded()
         first_sub = subs_graded_by_instructor.order_by('date_created')[0]
-        parsed_rubric=rubric_functions.parse_rubric(first_sub.rubric)
-
 
         #strip out unicode and other characters in student response
         #Needed, or grader may potentially fail

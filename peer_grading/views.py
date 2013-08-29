@@ -158,7 +158,8 @@ def save_grade(request):
 
     #Patch to handle rubric scores in the case of "I don't know" or flagging if scores aren't filled out
     if is_answer_unknown or is_submission_flagged and len(rubric_scores)==0:
-        success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
+        parser = rubric_functions.RubricParser(sub.rubric)
+        targets = parser.generate_targets()
         rubric_scores = [0 for l in targets]
         rubric_scores_complete = True
 

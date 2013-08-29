@@ -47,7 +47,7 @@ def handle_single_location(location):
         #check to see if there are enough instructor graded essays for location
         if graded_sub_count >= settings.MIN_TO_USE_ML:
 
-            location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
+            location_suffixes = ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
 
             if settings.MAX_TO_USE_ML<graded_sub_count:
                 graded_sub_count = settings.MAX_TO_USE_ML

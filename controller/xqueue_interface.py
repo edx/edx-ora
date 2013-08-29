@@ -213,10 +213,13 @@ def handle_submission(sub):
         #add additional tags needed to create a grader object
         check_dict = grader_util.add_additional_tags_to_dict(check_dict, sub.id)
         if check_dict['score']==0:
-            success, max_rubric_scores = rubric_functions.generate_targets_from_rubric(sub.rubric)
-            if success:
+            parser = rubric_functions.RubricParser(sub.rubric)
+            try:
+                max_rubric_scores = parser.generate_targets()
                 check_dict['rubric_scores_complete'] = True
-                check_dict['rubric_scores'] = [0 for i in xrange(0,len(max_rubric_scores))]
+                check_dict['rubric_scores'] = [0 for i in xrange(0, len(max_rubric_scores))]
+            except rubric_functions.RubricParsingError:
+                log.exception("Could not parse submitted rubric.")
 
         #Create and handle the grader, and return
         grader_util.create_and_handle_grader_object(check_dict)

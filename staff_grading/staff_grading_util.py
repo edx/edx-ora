@@ -149,7 +149,7 @@ class StaffCourse(CourseCapsule):
                 min_scored_for_location=settings.MIN_TO_USE_ML
 
             location_scored_count = sl.graded_count()
-            submissions_pending = sl.all_pending_count()
+            submissions_pending = sl.pending_count()
 
             if location_scored_count<min_scored_for_location and submissions_pending>0:
                 staff_needs_to_grade= True

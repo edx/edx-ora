@@ -121,8 +121,8 @@ class Command(BaseCommand):
                 grade.submission = sub
                 grade.save()
 
-
-                success, rubric_targets=controller.rubric_functions.generate_targets_from_rubric(sub.rubric)
+                parser = controller.rubric_functions.RubricParser(sub.rubric)
+                rubric_targets = parser.generate_targets()
                 scores=[]
                 for z in xrange(0,len(rubric_targets)):
                     scores.append(random.randint(0,rubric_targets[z]))

@@ -300,9 +300,11 @@ def validate_rubric_scores(rubric_scores, rubric_scores_complete, sub):
     if rubric_scores_complete not in ["True", True, "true"]:
         return success, "Rubric scores complete is not true: {0}".format(rubric_scores_complete)
 
-    success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
-    if not success:
-        return success, "Cannot generate targets from rubric xml: {0}".format(sub.rubric)
+    try:
+        parser = rubric_functions.RubricParser(sub.rubric)
+        targets = parser.generate_targets()
+    except rubric_functions.RubricParsingError:
+        return False, "Cannot generate targets from rubric xml: {0}".format(sub.rubric)
 
     if not isinstance(rubric_scores,list):
         return success, "Rubric Scores is not a list: {0}".format(rubric_scores)

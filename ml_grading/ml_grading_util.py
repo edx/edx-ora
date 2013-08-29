@@ -81,9 +81,10 @@ def check_if_model_started(location):
     return True, model_started, created_model
 
 def check_for_all_model_and_rubric_success(location):
-    subs_graded_by_instructor = Submission.objects.filter(location=location,
+    subs_graded_by_instructor = Submission.objects.filter(
+        location=location,
         previous_grader_type="IN",
-        state=SubmissionState.finished,
+        state=SubmissionState.finished
     )
 
     location_suffixes=generate_rubric_location_suffixes(subs_graded_by_instructor, grading = True)
@@ -235,29 +236,31 @@ def generate_rubric_location_suffixes(subs, grading=False):
     first_graded_subs=list(subs.order_by('date_created'))
     if len(first_graded_subs)>0:
         first_graded_sub=first_graded_subs[0]
-        success, rubric_targets = controller.rubric_functions.generate_targets_from_rubric(first_graded_sub.rubric)
-        if success:
-            min_to_check = len(first_graded_subs)
-            if grading:
-                min_to_check = min(2,len(first_graded_subs))
+        parser = controller.rubric_functions.RubricParser(first_graded_sub.rubric)
+        try:
+            rubric_targets = parser.generate_targets()
+        except controller.rubric_functions.RubricParsingError:
+            return location_suffixes
+        min_to_check = len(first_graded_subs)
+        if grading:
+            min_to_check = min(2,len(first_graded_subs))
 
-            for m in xrange(0,min_to_check):
-                sub=first_graded_subs[m]
-                scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
-                if not scores_match_target:
-                    return location_suffixes
+        for m in xrange(0,min_to_check):
+            sub=first_graded_subs[m]
+            scores_match_target=check_if_sub_scores_match_targets(sub, rubric_targets)
+            if not scores_match_target:
+                return location_suffixes
 
-            for i in xrange(0,len(rubric_targets)):
-                location_suffixes.append("_rubricitem_{0}".format(i))
+        for i in xrange(0,len(rubric_targets)):
+            location_suffixes.append("_rubricitem_{0}".format(i))
     return location_suffixes
 
 def check_if_sub_scores_match_targets(sub, targets):
-    success, sub_scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
-    if success:
-        if len(sub_scores)==len(targets):
-            success=True
-        else:
-            success=False
+    sub_scores = controller.rubric_functions.get_submission_rubric_instructor_scores(sub)
+    if len(sub_scores)==len(targets):
+        success=True
+    else:
+        success=False
     return success
 
 def regrade_ml(location):

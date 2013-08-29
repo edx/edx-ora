@@ -200,16 +200,23 @@ def save_grade(request):
 
     first_sub_for_location=Submission.objects.filter(location=sub.location).order_by('date_created')[0]
     rubric= first_sub_for_location.rubric
-    rubric_success, parsed_rubric =  rubric_functions.parse_rubric(rubric)
+    try:
+        parser = rubric_functions.RubricParser(rubric)
+        parsed_rubric = parser.parse()
+    except rubric_functions.RubricParsingError:
+        return util._error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": "Could not parse the rubric."}
+        )
 
-    if rubric_success:
-        success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
-        if not success:
-            return util._error_response(
-                "grade_save_error",
-                _INTERFACE_VERSION,
-                data={"msg": error_message}
-            )
+    success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
+    if not success:
+        return util._error_response(
+            "grade_save_error",
+            _INTERFACE_VERSION,
+            data={"msg": error_message}
+        )
 
     d = {'submission_id': submission_id,
          'score': score,
