@@ -30,7 +30,10 @@ class RubricParser(object):
         self.rubric_xml = rubric_xml
 
     def parse(self):
-        self.parse_xml()
+        try:
+            self.parse_xml()
+        except RubricParsingError:
+            return ""
         parsed_items=[self.parse_item(pc) for pc in self.categories]
         return parsed_items
 
@@ -94,7 +97,10 @@ class RubricParser(object):
         return u''.join(filter(None, parts))
 
     def generate_targets(self):
-        parsed_rubric = self.parse()
+        try:
+            parsed_rubric = self.parse()
+        except RubricParsingError:
+            return []
         max_scores=[]
         for category in parsed_rubric:
             max_score=len(category['options'])-1
