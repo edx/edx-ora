@@ -15,6 +15,7 @@ import util
 import grader_util
 from staff_grading import staff_grading_util
 from peer_grading import peer_grading_util
+from django.core.cache import cache
 
 from metrics import metrics_util
 from ml_grading import ml_grading_util
@@ -36,6 +37,11 @@ def get_submission_ml(request):
     """
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
+        # Go to the next location if we have recently determined that a location
+        # has no ML grading ready.
+        if cache.get('no_ml_grading{0}'.format(location)):
+            continue
+
         sl = staff_grading_util.StaffLocation(location)
         subs_graded_by_instructor = sl.graded_count()
         success = ml_grading_util.check_for_all_model_and_rubric_success(location)
@@ -52,8 +58,14 @@ def get_submission_ml(request):
                     to_be_graded.save()
 
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
+        # If we don't get a submission to return, then there is no ML grading for this location.
+        # Cache this boolean to avoid an expensive loop iteration.
+        cache.set('no_ml_grading{0}'.format(location), True, settings.NO_ML_GRADING_TIMEOUT)
 
     util.log_connection_data()
+
+    # Set this cache key to ensure that this expensive function isn't repeatedly called when not needed.
+    cache.set('no_ml_grading', True, settings.NO_ML_GRADING_TIMEOUT)
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 @login_required
@@ -78,6 +90,12 @@ def get_pending_count(request):
         state=SubmissionState.waiting_to_be_graded,
         next_grader_type=grader_type,
     ).count()
+
+    # If get_submission_ml resulted in no ml grading being found, then return pending count as 0.
+    # When cache timeout expires, it will check again.  This saves us from excessive calls to
+    # get_submission_ml.
+    if cache.get('no_ml_grading'):
+        to_be_graded_count = 0
 
     util.log_connection_data()
     return util._success_response({'to_be_graded_count' : to_be_graded_count}, _INTERFACE_VERSION)
