@@ -17,7 +17,13 @@ class LocationCapsule(object):
         """
         Gets all submissions for the location that are waiting to be graded.
         """
-        return self.location_submissions().filter(state=SubmissionState.waiting_to_be_graded)
+        # Filter out duplicates and plagiarized submissions, because they are not pending, and will be
+        # automatically scored.
+        return self.location_submissions().filter(
+            state=SubmissionState.waiting_to_be_graded,
+            is_duplicate=False,
+            is_plagiarized=False
+        )
 
     def all_pending_count(self):
         """
