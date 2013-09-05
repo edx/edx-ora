@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 import controller.grader_util as grader_util
 from django.views.decorators.csrf import csrf_exempt
 
-from controller.models import Submission, Grader, NotificationsSeen
+from controller.models import Submission, Grader
 from controller.models import SubmissionState, GraderStatus, NotificationTypes
 from controller import util
 

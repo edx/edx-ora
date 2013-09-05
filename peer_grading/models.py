@@ -40,6 +40,9 @@ class CalibrationHistory(models.Model):
         average_error = total_error / float(len(errors))
         return average_error
 
+    class Meta(object):
+        unique_together = ("student_id", "location")
+
 
 class CalibrationRecord(models.Model):
     calibration_history = models.ForeignKey("CalibrationHistory", db_index = True)

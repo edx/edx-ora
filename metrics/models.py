@@ -68,7 +68,7 @@ class Timing(models.Model):
     grader_id=models.IntegerField(blank=True,null=True)
 
 class StudentProfile(models.Model):
-    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
+    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True, unique=True)
 
     #Message data
     messages_sent = models.DecimalField(max_digits=MAX_DECIMAL_DIGITS, decimal_places=DECIMAL_PLACES, default=0)
@@ -117,6 +117,9 @@ class StudentCourseProfile(models.Model):
     #Submission data
     average_submission_length = models.DecimalField(max_digits=MAX_DECIMAL_DIGITS, decimal_places=DECIMAL_PLACES, default=DEFAULT_VALUE)
     stdev_submission_length = models.DecimalField(max_digits=MAX_DECIMAL_DIGITS, decimal_places=DECIMAL_PLACES, default=DEFAULT_VALUE)
+
+    class Meta(object):
+        unique_together = ("student_profile", "course_id")
 
 
 
