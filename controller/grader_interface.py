@@ -41,7 +41,7 @@ def get_submission_ml(request):
     for location in unique_locations:
         # Go to the next location if we have recently determined that a location
         # has no ML grading ready.
-        if cache.get(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location)):
+        if cache.get(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location=location)):
             continue
 
         sl = staff_grading_util.StaffLocation(location)
@@ -62,7 +62,7 @@ def get_submission_ml(request):
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
         # If we don't get a submission to return, then there is no ML grading for this location.
         # Cache this boolean to avoid an expensive loop iteration.
-        cache.set(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location), True, settings.NO_ML_GRADING_TIMEOUT)
+        cache.set(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location=location), True, settings.NO_ML_GRADING_TIMEOUT)
 
     util.log_connection_data()
 
