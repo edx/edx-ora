@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 import datetime
+from django.conf import settings
 
 class GraderStatus():
     failure="F"
@@ -159,7 +160,7 @@ class Submission(models.Model):
         #If grader is peer, send back all peer judgements
         elif (self.previous_grader_type == "PE" or 
               all_graders[0].grader_type == "BC" and "PE" in all_graders_types):
-            peer_graders = [p for p in all_graders if p.grader_type == "PE"]
+            peer_graders = [p for p in all_graders if p.grader_type == "PE"][:settings.MAX_GRADER_COUNT]
             combined_rubrics = [p.check_for_and_return_latest_rubric() for p in peer_graders]
             rubric_headers = [p.get_latest_rubric_headers_and_scores().get("rubric_headers", []) for p in peer_graders]
             rubric_scores = [p.get_latest_rubric_headers_and_scores().get("rubric_scores", []) for p in peer_graders]
@@ -319,7 +320,7 @@ class RubricItem(models.Model):
     def format_rubric_item(self):
         formatted_item=""
         formatted_item+="<category>"
-        formatted_item+="<description>{0}</description>".format(self.text)
+        formatted_item+="<description>{0}</description>".format(self.text.encode('ascii', 'ignore'))
         formatted_item+="<score>{0}</score>".format(int(self.score))
         for option in self.rubricoption_set.all().order_by('item_number'):
             formatted_item+=option.format_rubric_option()
@@ -335,7 +336,7 @@ class RubricOption(models.Model):
     item_number = models.IntegerField()
 
     def format_rubric_option(self):
-        formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
+        formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text.encode('ascii', 'ignore'))
         return formatted_item
 
 class NotificationsSeen(models.Model):
