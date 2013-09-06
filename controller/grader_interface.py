@@ -25,8 +25,8 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
-RECHECK_LOCATION_CACHE_KEY = 'no_ml_grading:{location}'
-RECHECK_CACHE_KEY = "no_ml_grading"
+NOTHING_TO_ML_GRADE_LOCATION_CACHE_KEY = 'nothing_to_ml_grade:{location}'
+NOTHING_TO_ML_GRADE_CACHE_KEY = "nothing_to_ml_grade"
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_ml'])
@@ -39,10 +39,10 @@ def get_submission_ml(request):
     """
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
-        no_grading_for_location_key = RECHECK_LOCATION_CACHE_KEY.format(location=location)
+        nothing_to_ml_grade_for_location_key = NOTHING_TO_ML_GRADE_LOCATION_CACHE_KEY.format(location=location)
         # Go to the next location if we have recently determined that a location
         # has no ML grading ready.
-        if cache.get(no_grading_for_location_key):
+        if cache.get(nothing_to_ml_grade_for_location_key):
             continue
 
         sl = staff_grading_util.StaffLocation(location)
@@ -63,12 +63,12 @@ def get_submission_ml(request):
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
         # If we don't get a submission to return, then there is no ML grading for this location.
         # Cache this boolean to avoid an expensive loop iteration.
-        cache.set(no_grading_for_location_key, True, settings.RECHECK_DELAY)
+        cache.set(nothing_to_ml_grade_for_location_key, True, settings.RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY)
 
     util.log_connection_data()
 
     # Set this cache key to ensure that this expensive function isn't repeatedly called when not needed.
-    cache.set(RECHECK_CACHE_KEY, True, settings.RECHECK_DELAY)
+    cache.set(NOTHING_TO_ML_GRADE_CACHE_KEY, True, settings.RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY)
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 @login_required
@@ -78,7 +78,12 @@ def get_pending_count(request):
     """
     Returns the number of submissions pending grading
     """
-    if not cache.get(RECHECK_CACHE_KEY):
+    if cache.get(NOTHING_TO_ML_GRADE_CACHE_KEY):
+        # If get_submission_ml resulted in no ml grading being found, then return pending count as 0.
+        # When cache timeout expires, it will check again.  This saves us from excessive calls to
+        # get_submission_ml.
+        to_be_graded_count = 0
+    else:
         if request.method != 'GET':
             return util._error_response("'get_pending_count' must use HTTP GET", _INTERFACE_VERSION)
 
@@ -93,12 +98,7 @@ def get_pending_count(request):
         to_be_graded_count = Submission.objects.filter(
             state=SubmissionState.waiting_to_be_graded,
             next_grader_type=grader_type,
-        ).count()
-    else:
-        # If get_submission_ml resulted in no ml grading being found, then return pending count as 0.
-        # When cache timeout expires, it will check again.  This saves us from excessive calls to
-        # get_submission_ml.
-        to_be_graded_count = 0
+            ).count()
 
     util.log_connection_data()
     return util._success_response({'to_be_graded_count' : to_be_graded_count}, _INTERFACE_VERSION)

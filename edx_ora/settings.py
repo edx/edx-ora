@@ -232,4 +232,4 @@ BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
 
 # Cache settings for ml grading pending counts.  See controller/grader_interface.py
-RECHECK_DELAY = 60
+RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY = 60
