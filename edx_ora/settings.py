@@ -230,3 +230,6 @@ AWS_SECRET_ACCESS_KEY= ""
 BROKER_URL = 'redis://localhost:6379/6'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
+
+# Cache settings for ml grading pending counts.  See controller/grader_interface.py
+RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY = 60
