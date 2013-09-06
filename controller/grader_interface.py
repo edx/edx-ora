@@ -25,8 +25,8 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION=1
-NO_GRADING_PER_LOCATION_CACHE_KEY = 'no_ml_grading:{location}'
-NO_GRADING_CACHE_KEY = "no_ml_grading"
+RECHECK_LOCATION_CACHE_KEY = 'no_ml_grading:{location}'
+RECHECK_CACHE_KEY = "no_ml_grading"
 
 @login_required
 @statsd.timed('open_ended_assessment.grading_controller.controller.grader_interface.time', tags=['function:get_submission_ml'])
@@ -39,9 +39,10 @@ def get_submission_ml(request):
     """
     unique_locations = [x['location'] for x in list(Submission.objects.values('location').distinct())]
     for location in unique_locations:
+        no_grading_for_location_key = RECHECK_LOCATION_CACHE_KEY.format(location=location)
         # Go to the next location if we have recently determined that a location
         # has no ML grading ready.
-        if cache.get(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location=location)):
+        if cache.get(no_grading_for_location_key):
             continue
 
         sl = staff_grading_util.StaffLocation(location)
@@ -62,12 +63,12 @@ def get_submission_ml(request):
                     return util._success_response({'submission_id' : to_be_graded.id}, _INTERFACE_VERSION)
         # If we don't get a submission to return, then there is no ML grading for this location.
         # Cache this boolean to avoid an expensive loop iteration.
-        cache.set(NO_GRADING_PER_LOCATION_CACHE_KEY.format(location=location), True, settings.NO_ML_GRADING_TIMEOUT)
+        cache.set(no_grading_for_location_key, True, settings.RECHECK_DELAY)
 
     util.log_connection_data()
 
     # Set this cache key to ensure that this expensive function isn't repeatedly called when not needed.
-    cache.set(NO_GRADING_CACHE_KEY, True, settings.NO_ML_GRADING_TIMEOUT)
+    cache.set(RECHECK_CACHE_KEY, True, settings.RECHECK_DELAY)
     return util._error_response("Nothing to grade.", _INTERFACE_VERSION)
 
 @login_required
@@ -77,7 +78,7 @@ def get_pending_count(request):
     """
     Returns the number of submissions pending grading
     """
-    if not cache.get(NO_GRADING_CACHE_KEY):
+    if not cache.get(RECHECK_CACHE_KEY):
         if request.method != 'GET':
             return util._error_response("'get_pending_count' must use HTTP GET", _INTERFACE_VERSION)
 
