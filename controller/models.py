@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 import datetime
 from django.conf import settings
+from south.modelsinspector import add_introspection_rules
 
 class GraderStatus():
     failure="F"
@@ -303,7 +305,7 @@ class RubricItem(models.Model):
     """
 
     rubric=models.ForeignKey('Rubric', db_index = True)
-    text=models.TextField()
+    text = models.TextField()
     short_text=models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     comment = models.TextField(default="")
     score=models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -320,7 +322,7 @@ class RubricItem(models.Model):
     def format_rubric_item(self):
         formatted_item=""
         formatted_item+="<category>"
-        formatted_item+="<description>{0}</description>".format(self.text.encode('ascii', 'ignore'))
+        formatted_item+="<description>{0}</description>".format(self.text)
         formatted_item+="<score>{0}</score>".format(int(self.score))
         for option in self.rubricoption_set.all().order_by('item_number'):
             formatted_item+=option.format_rubric_option()
@@ -336,7 +338,7 @@ class RubricOption(models.Model):
     item_number = models.IntegerField()
 
     def format_rubric_option(self):
-        formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text.encode('ascii', 'ignore'))
+        formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
         return formatted_item
 
 class NotificationsSeen(models.Model):
@@ -353,5 +355,4 @@ class NotificationsSeen(models.Model):
         recent_check_time = now - datetime.timedelta(seconds=recent_notification_interval)
         seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__gt=recent_check_time).count()
         return seen > 0
-
 

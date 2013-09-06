@@ -162,10 +162,14 @@ def get_pending_length_from_controller(controller_session):
     success,content=query_controller(controller_session,project_urls.ControllerURLs.get_pending_count, data={'grader_type' : "ML"})
     return success, content['to_be_graded_count']
 
-def query_controller(controller_session,end_path,data={}):
+def query_controller(controller_session,end_path,data=None):
     """
     Get a single submission from grading controller
     """
+
+    if data is None:
+        data = {}
+
     try:
         success, content = util._http_get(
             controller_session,

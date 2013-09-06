@@ -23,6 +23,7 @@ from xqueue_interface import handle_submission
 from tasks import expire_submissions_task, pull_from_xqueue
 from control_util import SubmissionControl
 from copy import deepcopy
+import rubric_functions
 
 from staff_grading import staff_grading_util
 
@@ -43,6 +44,21 @@ ETA_URL=project_urls.ControllerURLs.get_eta_for_submission
 
 LOCATION="MITx/6.002x"
 STUDENT_ID="5"
+
+UNICODE_RUBRIC_XML = u"""
+<rubric>
+    <category>
+        <description>\u2655One</description>
+        <option>\u26550</option>
+        <option>\u26551</option>
+    </category>
+    <category>
+        <description>\u2655Two</description>
+        <option>\u26550</option>
+        <option>\u26551</option>
+    </category>
+</rubric>
+            """
 
 
 def parse_xreply(xreply):
@@ -642,6 +658,32 @@ class TestControl(unittest.TestCase):
         self.assertEqual(control.max_to_calibrate, settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE)
         self.assertEqual(control.peer_grader_count, settings.PEER_GRADER_COUNT)
         self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
+
+class RubricTest(unittest.TestCase):
+    def test_unicode_rubric(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE", rubric=UNICODE_RUBRIC_XML)
+        test_sub.save()
+        scores = [0,1]
+
+        for i in xrange(0, settings.PEER_GRADER_COUNT):
+            grader = test_util.get_grader("PE")
+            grader.submission = test_sub
+            grader.save()
+
+            success, rubric = rubric_functions.generate_rubric_object(grader, scores, UNICODE_RUBRIC_XML)
+            self.assertEqual(success, True)
+
+            rubric.save()
+
+        test_sub.state = "F"
+        test_sub.previous_grader_type = "PE"
+        test_sub.save()
+
+        all_graders = test_sub.get_all_successful_scores_and_feedback()
+
+        self.assertEqual(all_graders['grader_type'], "PE")
+
+
 
 
 

@@ -178,35 +178,35 @@ def finalize_grade_for_duplicate_peer_grader_submissions(sub, original_sub):
     if existing_grader_count < settings.MAX_GRADER_COUNT:
         original_grader_set = original_sub.grader_set.filter(grader_type__in=["PE", "IN", "ML"])[:(settings.MAX_GRADER_COUNT - existing_grader_count)]
 
-        #Need to trickle through all layers to copy the info
-        for i in xrange(0,len(original_grader_set)):
-            grade = original_grader_set[i]
-            rubric_set = list(grade.rubric_set.all())
-            grade.pk = None
-            grade.id = None
-            grade.submission = sub
-            grade.save()
+    #Need to trickle through all layers to copy the info
+    for i in xrange(0,len(original_grader_set)):
+        grade = original_grader_set[i]
+        rubric_set = list(grade.rubric_set.all())
+        grade.pk = None
+        grade.id = None
+        grade.submission = sub
+        grade.save()
+        transaction.commit()
+        for rubric in rubric_set:
+            rubricitem_set = list(rubric.rubricitem_set.all())
+            rubric.pk = None
+            rubric.id = None
+            rubric.grader = grade
+            rubric.save()
             transaction.commit()
-            for rubric in rubric_set:
-                rubricitem_set = list(rubric.rubricitem_set.all())
-                rubric.pk = None
-                rubric.id = None
-                rubric.grader = grade
-                rubric.save()
+            for rubric_item in rubricitem_set:
+                rubricoption_set = list(rubric_item.rubricoption_set.all())
+                rubric_item.pk = None
+                rubric_item.id = None
+                rubric_item.rubric = rubric
+                rubric_item.save()
                 transaction.commit()
-                for rubric_item in rubricitem_set:
-                    rubricoption_set = list(rubric_item.rubricoption_set.all())
-                    rubric_item.pk = None
-                    rubric_item.id = None
-                    rubric_item.rubric = rubric
-                    rubric_item.save()
+                for rubric_option in rubricoption_set:
+                    rubric_option.pk = None
+                    rubric_option.id = None
+                    rubric_option.rubric_item = rubric_item
+                    rubric_option.save()
                     transaction.commit()
-                    for rubric_option in rubricoption_set:
-                        rubric_option.pk = None
-                        rubric_option.id = None
-                        rubric_option.rubric_item = rubric_item
-                        rubric_option.save()
-                        transaction.commit()
 
     sub.state=SubmissionState.finished
     sub.previous_grader_type="PE"
