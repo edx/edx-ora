@@ -202,7 +202,6 @@ class Submission(models.Model):
     class Meta(object):
         unique_together = ("student_response", "student_id", "location", "xqueue_submission_id")
 
-# TODO: what's a better name for this?  GraderResult?
 class Grader(models.Model):
     submission = models.ForeignKey('Submission', db_index = True)
     score = models.IntegerField()

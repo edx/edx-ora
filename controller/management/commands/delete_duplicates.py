@@ -57,7 +57,7 @@ class DuplicateDeleter(object):
 
         log.info("Deleting the duplicate submissions....")
 
-        #Get all duplicates
+        # Get all duplicates.
         duplicates = []
         for val in self.unique:
             duplicate = self.model_cls.objects.filter(**val)[1:]
@@ -65,9 +65,11 @@ class DuplicateDeleter(object):
         duplicates = list(chain.from_iterable(duplicates))
 
         # If the number of duplicates does not equal the duplicate count calculated in get_unique,
-        # something is wrong.
+        # something is wrong.  This is not an expected case, but better to be cautious with deleting
+        # records.
         if len(duplicates) != self.duplicate_count:
-            error_msg = "More duplicates found than should exist for {0}.  Please delete manually.".format(self.name)
+            error_msg = ("Number of duplicates {0} differs from the count that should exist {1} for {2}.  "
+                         "Please delete manually.").format(len(duplicates), self.duplicate_count, self.name)
             log.error(error_msg)
             raise ValueError(error_msg)
 
