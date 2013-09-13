@@ -11,19 +11,16 @@ class Migration(SchemaMigration):
         # Deleting model 'NotificationsSeen'
         db.delete_table('controller_notificationsseen')
 
-        # Adding unique constraint on 'Message', fields ['originator', 'date_created', 'grader']
-        db.create_unique('controller_message', ['originator', 'date_created', 'grader_id'])
 
-        # Adding unique constraint on 'Submission', fields ['xqueue_submission_id', 'student_id', 'location']
-        db.create_unique('controller_submission', ['xqueue_submission_id', 'student_id', 'location'])
+        # Changing field 'Submission.xqueue_submission_id'
+        db.alter_column('controller_submission', 'xqueue_submission_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128))
+        # Adding unique constraint on 'Submission', fields ['xqueue_submission_id']
+        db.create_unique('controller_submission', ['xqueue_submission_id'])
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Submission', fields ['xqueue_submission_id', 'student_id', 'location']
-        db.delete_unique('controller_submission', ['xqueue_submission_id', 'student_id', 'location'])
-
-        # Removing unique constraint on 'Message', fields ['originator', 'date_created', 'grader']
-        db.delete_unique('controller_message', ['originator', 'date_created', 'grader_id'])
+        # Removing unique constraint on 'Submission', fields ['xqueue_submission_id']
+        db.delete_unique('controller_submission', ['xqueue_submission_id'])
 
         # Adding model 'NotificationsSeen'
         db.create_table('controller_notificationsseen', (
@@ -37,6 +34,9 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('controller', ['NotificationsSeen'])
 
+
+        # Changing field 'Submission.xqueue_submission_id'
+        db.alter_column('controller_submission', 'xqueue_submission_id', self.gf('django.db.models.fields.CharField')(max_length=1024))
 
     models = {
         'controller.grader': {
@@ -54,7 +54,7 @@ class Migration(SchemaMigration):
             'submission': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['controller.Submission']"})
         },
         'controller.message': {
-            'Meta': {'unique_together': "((u'grader', u'date_created', u'originator'),)", 'object_name': 'Message'},
+            'Meta': {'object_name': 'Message'},
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'grader': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['controller.Grader']"}),
@@ -98,7 +98,7 @@ class Migration(SchemaMigration):
             'text': ('django.db.models.fields.TextField', [], {})
         },
         'controller.submission': {
-            'Meta': {'unique_together': "((u'student_id', u'location', u'xqueue_submission_id'),)", 'object_name': 'Submission'},
+            'Meta': {'object_name': 'Submission'},
             'answer': ('django.db.models.fields.TextField', [], {'default': "u''"}),
             'control_fields': ('django.db.models.fields.TextField', [], {'default': "u''"}),
             'course_id': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
@@ -126,7 +126,7 @@ class Migration(SchemaMigration):
             'student_response': ('django.db.models.fields.TextField', [], {'default': "u''"}),
             'student_submission_time': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'xqueue_queue_name': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '128'}),
-            'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '1024'}),
+            'xqueue_submission_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
             'xqueue_submission_key': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '1024'})
         }
     }
