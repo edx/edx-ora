@@ -66,15 +66,7 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         prefix = "peer"
 
     # Get all existing xqueue ids
-    xqueue_ids = [i['xqueue_submission_id'] for i in Submission.objects.all().values('xqueue_submission_id')]
-
-    # Xqueue id needs to be unique, so ensure you generate a unique value.
-    xqueue_id = 'a'
-    while xqueue_id in xqueue_ids:
-        id_length = random.randint(1,10)
-        xqueue_id = 'a'
-        for i in xrange(0, id_length):
-            xqueue_id += random.choice(string.ascii_letters)
+    xqueue_id = generate_new_xqueue_id()
 
     test_sub = Submission(
         prompt="prompt",
@@ -119,9 +111,21 @@ def get_student_info(student_id):
     }
     return json.dumps(student_info)
 
+def generate_new_xqueue_id():
+    xqueue_ids = [i['xqueue_submission_id'] for i in Submission.objects.all().values('xqueue_submission_id')]
+
+    # Xqueue id needs to be unique, so ensure you generate a unique value.
+    xqueue_id = 'a'
+    while xqueue_id in xqueue_ids:
+        id_length = random.randint(1,10)
+        xqueue_id = 'a'
+        for i in xrange(0, id_length):
+            xqueue_id += random.choice(string.ascii_letters)
+    return xqueue_id
+
 def get_xqueue_header():
     xqueue_header = {
-        'submission_id': 1,
+        'submission_id': generate_new_xqueue_id(),
         'submission_key': 1,
         'queue_name': "MITx-6.002x",
     }
