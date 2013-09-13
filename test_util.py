@@ -11,6 +11,12 @@ from peer_grading.models import CalibrationHistory,CalibrationRecord
 import random
 import json
 from ml_grading import ml_model_creation
+from django.db.models import Max
+import string
+import random
+
+import logging
+log = logging.getLogger(__name__)
 
 MAX_SCORE = 3
 
@@ -58,6 +64,18 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
     prefix = "ml"
     if preferred_grader_type=="PE":
         prefix = "peer"
+
+    # Get all existing xqueue ids
+    xqueue_ids = [i['xqueue_submission_id'] for i in Submission.objects.all().values('xqueue_submission_id')]
+
+    # Xqueue id needs to be unique, so ensure you generate a unique value.
+    xqueue_id = 'a'
+    while xqueue_id in xqueue_ids:
+        id_length = random.randint(1,10)
+        xqueue_id = 'a'
+        for i in xrange(0, id_length):
+            xqueue_id += random.choice(string.ascii_letters)
+
     test_sub = Submission(
         prompt="prompt",
         student_id=student_id,
@@ -65,7 +83,7 @@ def get_sub(grader_type,student_id,location, preferred_grader_type="ML", course_
         state=SubmissionState.waiting_to_be_graded,
         student_response= student_response,
         student_submission_time=timezone.now(),
-        xqueue_submission_id="id",
+        xqueue_submission_id=xqueue_id,
         xqueue_submission_key="key",
         xqueue_queue_name="MITx-6.002x",
         location=location,

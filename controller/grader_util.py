@@ -3,7 +3,7 @@ from django.conf import settings
 from create_grader import create_grader
 from models import Submission
 import logging
-from models import GraderStatus, SubmissionState, STATE_CODES, NotificationsSeen, NotificationTypes
+from models import GraderStatus, SubmissionState, STATE_CODES, NotificationTypes
 from statsd import statsd
 import json
 import os

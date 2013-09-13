@@ -38,11 +38,10 @@ ALTERNATE_STUDENT="4"
 COURSE_ID = "course_id"
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
-    test_subs=[test_util.get_sub("IN",STUDENT_ID,LOCATION) for i in xrange(0,num_to_create)]
     sub_ids=[]
 
-    for i in xrange(0,len(test_subs)):
-        sub=test_subs[i]
+    for i in xrange(0,num_to_create):
+        sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
         sub.save()
         grade=Grader(
             submission=sub,
