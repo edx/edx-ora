@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import ConfigParser
 from django.conf import settings
 from create_grader import create_grader

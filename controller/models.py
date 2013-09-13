@@ -1,6 +1,9 @@
+from __future__ import unicode_literals
 from django.db import models
 from django.utils import timezone
 import datetime
+from django.conf import settings
+from south.modelsinspector import add_introspection_rules
 
 class GraderStatus():
     failure="F"
@@ -159,7 +162,7 @@ class Submission(models.Model):
         #If grader is peer, send back all peer judgements
         elif (self.previous_grader_type == "PE" or 
               all_graders[0].grader_type == "BC" and "PE" in all_graders_types):
-            peer_graders = [p for p in all_graders if p.grader_type == "PE"]
+            peer_graders = [p for p in all_graders if p.grader_type == "PE"][:settings.MAX_GRADER_COUNT]
             combined_rubrics = [p.check_for_and_return_latest_rubric() for p in peer_graders]
             rubric_headers = [p.get_latest_rubric_headers_and_scores().get("rubric_headers", []) for p in peer_graders]
             rubric_scores = [p.get_latest_rubric_headers_and_scores().get("rubric_scores", []) for p in peer_graders]
@@ -307,7 +310,7 @@ class RubricItem(models.Model):
     """
 
     rubric=models.ForeignKey('Rubric', db_index = True)
-    text=models.TextField()
+    text = models.TextField()
     short_text=models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     comment = models.TextField(default="")
     score=models.DecimalField(max_digits=10, decimal_places=2, default=0)

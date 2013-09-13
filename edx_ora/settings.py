@@ -234,3 +234,6 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
 
 # Cache settings for ml grading pending counts.  See controller/grader_interface.py
 RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY = 60
+
+# Maximum number of graders for any single submission.
+MAX_GRADER_COUNT = 10
