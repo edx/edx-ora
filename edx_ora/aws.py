@@ -11,11 +11,14 @@ import logging
 ######################################################################
 #General config
 
-
-
 ######################################################################
+#Allow to specify a prefix for env/auth configuration files
+SERVICE_VARIANT = os.environ.get('SERVICE_VARIANT', '')
+if SERVICE_VARIANT:
+    CONFIG_PREFIX = SERVICE_VARIANT + "."
+
 #Read config from json file
-with open(ENV_ROOT / "env.json") as env_file:
+with open(ENV_ROOT / CONFIG_PREFIX + "env.json") as env_file:
     ENV_TOKENS = json.load(env_file)
 
 #Debug
@@ -68,7 +71,7 @@ LOGGING = get_logger_config(debug=DEBUG)
 
 ######################################################################
 # Read secure config
-with open(ENV_ROOT / "auth.json") as auth_file:
+with open(ENV_ROOT / CONFIG_PREFIX + "auth.json") as auth_file:
     AUTH_TOKENS = json.load(auth_file)
 
 XQUEUE_INTERFACE = AUTH_TOKENS['XQUEUE_INTERFACE']
