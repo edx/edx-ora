@@ -177,7 +177,7 @@ def check_calibration_status(location,student_id):
     matching_submissions = Submission.objects.filter(location=location, student_id=student_id)
 
     if matching_submissions.count() < 1:
-        return False, "Invalid problem id specified: {0}".format(location)
+        return False, "Invalid problem id specified: {0} . Have you made any submissions for that problem?  If you haven't, please try making one.".format(location)
 
     #Get student calibration history and count number of records associated with it
     calibration_history, created = CalibrationHistory.objects.get_or_create(student_id=student_id, location=location)

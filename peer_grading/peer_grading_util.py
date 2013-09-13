@@ -1,5 +1,5 @@
 from django.db.models import Count
-from controller.models import SubmissionState, GraderStatus, Grader, Submission, NotificationTypes, NotificationsSeen
+from controller.models import SubmissionState, GraderStatus, Grader, Submission, NotificationTypes
 import logging
 from metrics import metrics_util
 from django.conf import settings

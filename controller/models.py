@@ -202,7 +202,9 @@ class Submission(models.Model):
 
         return True, all_timing[0]
 
-# TODO: what's a better name for this?  GraderResult?
+    class Meta(object):
+        unique_together = ("student_response", "student_id", "location", "xqueue_submission_id")
+
 class Grader(models.Model):
     submission = models.ForeignKey('Submission', db_index = True)
     score = models.IntegerField()
@@ -265,6 +267,9 @@ class Message(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+
+    class Meta(object):
+        unique_together = ("grader", "message", "originator")
 
 class Rubric(models.Model):
     """
@@ -341,18 +346,4 @@ class RubricOption(models.Model):
         formatted_item="<option points='{0}'>{1}</option>".format(int(self.points), self.text)
         return formatted_item
 
-class NotificationsSeen(models.Model):
-    student_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
-    location = models.CharField(max_length=CHARFIELD_LEN_SMALL, db_index = True)
-    course_id = models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    notification_type = models.CharField(max_length=CHARFIELD_LEN_SMALL)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_modified = models.DateTimeField(auto_now=True)
-
-    @staticmethod
-    def check_for_recent_notifications(student_id,location, notification_type, recent_notification_interval):
-        now = timezone.now()
-        recent_check_time = now - datetime.timedelta(seconds=recent_notification_interval)
-        seen = NotificationsSeen.objects.filter(student_id = student_id, location=location, notification_type = notification_type, date_modified__gt=recent_check_time).count()
-        return seen > 0
 

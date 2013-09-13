@@ -340,7 +340,7 @@ def _success_response(data, version):
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 def update_users_from_file():
-    auth_path = settings.ENV_ROOT / "auth.json"
+    auth_path = settings.ENV_ROOT / settings.CONFIG_PREFIX + "auth.json"
     log.info(' [*] reading {0}'.format(auth_path))
 
     with open(auth_path) as auth_file:
