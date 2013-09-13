@@ -78,7 +78,7 @@ class Submission(models.Model):
     student_submission_time = models.DateTimeField(default=timezone.now)
 
     # xqueue details
-    xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
+    xqueue_submission_id = models.CharField(max_length=CHARFIELD_LEN_SMALL, unique=True)
     xqueue_submission_key = models.CharField(max_length=CHARFIELD_LEN_LONG, default="")
     xqueue_queue_name = models.CharField(max_length=CHARFIELD_LEN_SMALL, default="")
     posted_results_back_to_queue = models.BooleanField(default=False)
@@ -202,9 +202,6 @@ class Submission(models.Model):
 
         return True, all_timing[0]
 
-    class Meta(object):
-        unique_together = ("student_id", "location", "xqueue_submission_id")
-
 class Grader(models.Model):
     submission = models.ForeignKey('Submission', db_index = True)
     score = models.IntegerField()
@@ -267,9 +264,6 @@ class Message(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-
-    class Meta(object):
-        unique_together = ("grader", "date_created", "originator")
 
 class Rubric(models.Model):
     """
