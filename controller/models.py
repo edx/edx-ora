@@ -203,7 +203,7 @@ class Submission(models.Model):
         return True, all_timing[0]
 
     class Meta(object):
-        unique_together = ("student_response", "student_id", "location", "xqueue_submission_id")
+        unique_together = ("student_id", "location", "xqueue_submission_id")
 
 class Grader(models.Model):
     submission = models.ForeignKey('Submission', db_index = True)
@@ -269,7 +269,7 @@ class Message(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     class Meta(object):
-        unique_together = ("grader", "message", "originator")
+        unique_together = ("grader", "date_created", "originator")
 
 class Rubric(models.Model):
     """

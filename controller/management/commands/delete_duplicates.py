@@ -17,8 +17,8 @@ UniqueModel = namedtuple('UniqueModel', ['cls', 'name', 'fields'])
 
 # Make a list of models and fields that we would like to make unique.
 UNIQUE_MODELS = [
-    UniqueModel(Submission, "submission", ("student_response", "student_id", "location", "xqueue_submission_id")),
-    UniqueModel(Message, "message", ("grader", "message", "originator")),
+    UniqueModel(Submission, "submission", ("student_id", "location", "xqueue_submission_id")),
+    UniqueModel(Message, "message", ("grader", "date_created", "originator")),
     UniqueModel(StudentProfile, "student_profile", ("student_id",)),
     UniqueModel(StudentCourseProfile, "student_course_profile", ("student_profile", "course_id")),
     UniqueModel(CalibrationHistory, "calibration_history", ("student_id", "location")),
