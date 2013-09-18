@@ -8,6 +8,7 @@ import datetime
 from django.utils import timezone
 import logging
 import urlparse
+import time
 
 from django.test.client import Client
 from django.conf import settings
@@ -463,12 +464,29 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = Submission.objects.all()[0]
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 
+    def test_reset_timed_out_submissions_finished(self):
+        test_sub_f = test_util.get_sub("PE", STUDENT_ID, LOCATION)
+        test_sub_f.state = SubmissionState.being_graded
+        test_sub_f.save()
+
+        graders = ["8", "9", "10"]
+        for grader in graders:
+            test_grader = test_util.get_grader("PE")
+            test_grader.grader_id = grader
+            test_grader.submission = test_sub_f
+            test_grader.save()
+
+        success = expire_submissions.reset_timed_out_submissions()
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+        self.assertEqual(test_sub.state, SubmissionState.finished)
+
     def test_get_submissions_that_have_expired(self):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
 
         expired_submissions = expire_submissions.get_submissions_that_have_expired()
-
         self.assertEqual(len(expired_submissions),1)
 
     def test_get_duplicate_scores_and_feedback(self):

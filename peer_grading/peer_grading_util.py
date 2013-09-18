@@ -46,6 +46,17 @@ class PeerLocation(LocationCapsule):
         """
         return self.graded().count()
 
+    def submissions_completed_peer_grading(self):
+        """
+        Gets all non-duplicate submissions that have "completed" the peer evaluation process.
+        @return:
+        """
+        return self.location_submissions().exclude(student_id=self.student_id).filter(
+            state=SubmissionState.finished,
+            is_duplicate=False,
+            next_grader_type="PE",
+            ).exclude(grader__grader_id=self.student_id)
+
     def pending(self):
         """
         Gets all non-duplicate submissions that are pending instructor grading.
@@ -63,6 +74,7 @@ class PeerLocation(LocationCapsule):
         Counts pending submissions.
         """
         return self.pending().count()
+
 
     def next_item(self):
         """
@@ -85,47 +97,80 @@ class PeerLocation(LocationCapsule):
                                     .annotate(num_graders=Count('grader'))
                                     .values("num_graders", "id")
                                     .order_by("date_created")[:50])
+            return self._determine_next_submission_to_grade(submissions_to_grade, course_id)
 
-            submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
+        # In the case where we set the number of peer assessments that a student must give
+        # to a number higher than the number that each submission is expected to get receive,
+        # we might starve a peer grader because all submissions have received the requisite number of grades.
+        # In this case, we want to give the waiting peer grader an already "complete" submission, so s/he can
+        # add a grade to that one.
+        already_completed = self.submissions_completed_peer_grading()
+        if already_completed.count() > 0:
+            log.info("location {}: finding completed submission to give to peer grader {}".format(self.location,
+                                                                                                  self.student_id))
+            course_id = already_completed[0].course_id
+            submissions_to_grade = (already_completed
+                                    .annotate(num_graders=Count('grader'))
+                                    .values("num_graders", "id")
+                                    .order_by("date_created")[:50])
+            found, sub_id = self._determine_next_submission_to_grade(submissions_to_grade, course_id)
+            if found:
+                sub = Submission.objects.get(id=sub_id)
+                sub.posted_results_back_to_queue = False
+                sub.save()
+        return found, sub_id
 
-            submission_ids = [p['id'] for p in submissions_to_grade]
+    def _determine_next_submission_to_grade(self, submissions_to_grade, course_id):
+        """
+        Helper function that
+        #Ensure that student hasn't graded this submission before!
+        #Also ensures that all submissions are searched through if student has graded the minimum one
+        @param submissions_to_grade:
+        @param course_id:
+        @return:
+        """
+        found = False
+        sub_id = 0
 
-            student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(self.student_id, course_id)
-            #Ensure that student hasn't graded this submission before!
-            #Also ensures that all submissions are searched through if student has graded the minimum one
-            fallback_sub_id = None
-            for i in xrange(len(submission_ids)):
-                minimum_index = submission_grader_counts.index(min(submission_grader_counts))
-                grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
-                previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
-                if self.student_id not in previous_graders:
-                    found = True
-                    sub_id = grade_item.id
+        submission_grader_counts = [p['num_graders'] for p in submissions_to_grade]
 
-                    if fallback_sub_id is None:
-                        fallback_sub_id = grade_item.id
+        submission_ids = [p['id'] for p in submissions_to_grade]
 
-                    if not student_profile_success:
+        student_profile_success, profile_dict = utilize_student_metrics.get_student_profile(self.student_id, course_id)
+        fallback_sub_id = None
+        for i in xrange(len(submission_ids)):
+            minimum_index = submission_grader_counts.index(min(submission_grader_counts))
+            grade_item = Submission.objects.get(id=int(submission_ids[minimum_index]))
+            previous_graders = [p.grader_id for p in grade_item.get_successful_peer_graders()]
+            if self.student_id not in previous_graders:
+                found = True
+                sub_id = grade_item.id
+
+                if fallback_sub_id is None:
+                    fallback_sub_id = grade_item.id
+
+                if not student_profile_success:
+                    grade_item.state = SubmissionState.being_graded
+                    grade_item.save()
+                    return found, sub_id
+                else:
+                    success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
+                    if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
                         grade_item.state = SubmissionState.being_graded
                         grade_item.save()
                         return found, sub_id
-                    else:
-                        success, similarity_score = utilize_student_metrics.get_similarity_score(profile_dict, grade_item.student_id, course_id)
-                        if similarity_score <= settings.PEER_GRADER_MIN_SIMILARITY_FOR_MATCHING:
-                            grade_item.state = SubmissionState.being_graded
-                            grade_item.save()
-                            return found, sub_id
-                else:
-                    if len(submission_ids) > 1:
-                        submission_ids.pop(minimum_index)
-                        submission_grader_counts.pop(minimum_index)
-            if found:
-                grade_item = Submission.objects.get(id=fallback_sub_id)
-                grade_item.state = SubmissionState.being_graded
-                grade_item.save()
-                return found, fallback_sub_id
+            else:
+                if len(submission_ids) > 1:
+                    submission_ids.pop(minimum_index)
+                    submission_grader_counts.pop(minimum_index)
+        if found:
+            grade_item = Submission.objects.get(id=fallback_sub_id)
+            grade_item.state = SubmissionState.being_graded
+            grade_item.save()
+            return found, fallback_sub_id
 
         return found, sub_id
+
 
 class PeerCourse(CourseCapsule):
     """
@@ -157,7 +202,7 @@ class PeerCourse(CourseCapsule):
         for location in unique_student_locations:
             pl = PeerLocation(location, self.student_id)
 
-            if pl.graded_count()<pl.required_count() and pl.pending_count()>0:
+            if pl.graded_count()<pl.required_count():
                 student_needs_to_peer_grade = True
                 break
 

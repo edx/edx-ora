@@ -362,16 +362,14 @@ def get_problem_list(request):
             submissions_pending = pl.pending_count()
             submissions_graded = pl.graded_count()
             submissions_required = max([0,pl.required_count() - submissions_graded])
-
-            if submissions_graded>0 or submissions_pending>0:
-                location_dict={
-                    'location' : location,
-                    'problem_name' : problem_name,
-                    'num_graded' : submissions_graded,
-                    'num_required' : submissions_required,
-                    'num_pending' : submissions_pending,
-                    }
-                location_info.append(location_dict)
+            location_dict={
+                'location' : location,
+                'problem_name' : problem_name,
+                'num_graded' : submissions_graded,
+                'num_required' : submissions_required,
+                'num_pending' : submissions_pending,
+                }
+            location_info.append(location_dict)
 
     util.log_connection_data()
     return util._success_response({'problem_list' : location_info},
