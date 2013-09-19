@@ -64,6 +64,9 @@ def grade_essays():
                          tags=["success:Exception"])
 
     db.reset_queries()
+
+    # Log out of the controller session, which deletes the database row.
+    util.controller_logout(controller_session)
     transaction.commit()
 
 
