@@ -2,6 +2,8 @@ import datetime
 import json
 from django.conf import settings
 from django.utils import timezone
+from django.db import transaction
+from django.db.models import Count
 from create_grader import create_grader
 import grader_util
 import util
@@ -11,7 +13,6 @@ from staff_grading import staff_grading_util
 from xqueue_interface import handle_submission
 from ml_grading import ml_grading_util
 from ml_grading.models import CreatedModel
-from django.db import transaction
 import os
 
 from statsd import statsd
@@ -116,12 +117,28 @@ def reset_timed_out_submissions():
     """
     now = timezone.now()
     min_time = datetime.timedelta(seconds=settings.RESET_SUBMISSIONS_AFTER)
-    reset_count = Submission.objects.filter(date_modified__lt=now-min_time, state=SubmissionState.being_graded).update(state=SubmissionState.waiting_to_be_graded)
 
+    # have to split into 2 queries now, because we are giving some finished submissions to peer graders when
+    # there's nothing to grade
+
+    reset_waiting_count = (Submission.objects
+                           .filter(date_modified__lt=now-min_time,
+                                   state=SubmissionState.being_graded,
+                                   posted_results_back_to_queue=False)
+                           .update(state=SubmissionState.waiting_to_be_graded))
+
+    reset_finished_count = (Submission.objects
+                            .filter(date_modified__lt=now-min_time,
+                                    state=SubmissionState.being_graded,
+                                    posted_results_back_to_queue=True)
+                            .update(state=SubmissionState.finished))
+
+    reset_count = reset_waiting_count + reset_finished_count
     if reset_count>0:
         statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_timed_out_submissions",
             tags=["counter:{0}".format(reset_count)])
-        log.debug("Reset {0} submissions that had timed out in their current grader.".format(reset_count))
+        log.debug("Reset {0} submissions that had timed out in their current grader.  {1}->W {2}->F"
+                  .format(reset_count, reset_waiting_count, reset_finished_count))
 
     return True
 

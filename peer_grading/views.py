@@ -363,7 +363,9 @@ def get_problem_list(request):
             submissions_graded = pl.graded_count()
             submissions_required = max([0,pl.required_count() - submissions_graded])
 
-            if submissions_graded>0 or submissions_pending>0:
+            if (submissions_graded > 0 or
+                submissions_pending > 0 or
+                control_util.SubmissionControl.peer_grade_finished_subs(pl)):
                 location_dict={
                     'location' : location,
                     'problem_name' : problem_name,
