@@ -55,7 +55,7 @@ class PeerLocation(LocationCapsule):
             state=SubmissionState.finished,
             posted_results_back_to_queue=True,
             is_duplicate=False,
-            next_grader_type="PE",
+            preferred_grader_type="PE",
             ).exclude(grader__grader_id=self.student_id)
 
     def pending(self):

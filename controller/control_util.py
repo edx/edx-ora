@@ -46,5 +46,5 @@ class SubmissionControl():
         # When there are no subs, return default
         if not peer_location.submitted_count():
             return settings.PEER_GRADE_FINISHED_SUBMISSIONS_WHEN_NONE_PENDING
-        sub = peer_location.submitted()[:1].get()
+        sub = peer_location.submitted().order_by('-date_modified')[:1].get()
         return cls(sub).peer_grade_finished_submissions_when_none_pending
