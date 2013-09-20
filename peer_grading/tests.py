@@ -506,14 +506,15 @@ class PeerGradingUtilTest(unittest.TestCase):
                 test_grader.save()
         for sub in submissions:
             sub.state = SubmissionState.finished
+            sub.posted_results_back_to_queue = True
             sub.save()
 
-        pl1 = peer_grading_util.PeerLocation(LOCATION, STUDENT_ID)
-        pl2 = peer_grading_util.PeerLocation(LOCATION, ALTERNATE_STUDENT)
-        pl3 = peer_grading_util.PeerLocation(LOCATION, STUDENT3)
+        pls = []
+        for student in all_students:
+            pls.append(peer_grading_util.PeerLocation(LOCATION, student))
 
         # check that each student graded 2, and so no submissions are pending
-        for pl in [pl1, pl2, pl3]:
+        for pl in pls:
             self.assertEqual(pl.graded_count(),2)
             self.assertEqual(pl.pending_count(),0)
             # check that next_item() cannot returns a submission because each of these students
@@ -521,16 +522,21 @@ class PeerGradingUtilTest(unittest.TestCase):
             found, _ = pl.next_item()
             self.assertFalse(found)
 
-        # now a 4th student comes along.  They should get something to grade despite nothing pending
+        # now a 4th student comes along and submits.  They should get something to grade despite nothing pending
         student4 = "10"
+        test_sub = test_util.get_sub("PE", student4, LOCATION, preferred_grader_type="PE")
+        test_sub.next_grader_type="PE"
+        test_sub.is_duplicate=False
+        test_sub.control_fields=json.dumps({'peer_grade_finished_submissions_when_none_pending': True})
+        test_sub.save()
+
         pl4 = peer_grading_util.PeerLocation(LOCATION, student4)
-        self.assertEqual(pl.pending_count(),0)
+        self.assertEqual(pl4.pending_count(),0)
         found, next_sub_id = pl4.next_item()
-        student4_sub_to_grade = Submission.objects.get(id=next_sub_id)
         self.assertTrue(found)
+        student4_sub_to_grade = Submission.objects.get(id=next_sub_id)
         self.assertIn(student4_sub_to_grade, submissions)
         self.assertEqual(student4_sub_to_grade.state, SubmissionState.being_graded)
-        self.assertFalse(student4_sub_to_grade.posted_results_back_to_queue)
 
     def test_submission_course(self):
         Submission.objects.all().delete()

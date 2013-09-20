@@ -122,19 +122,15 @@ def reset_timed_out_submissions():
     # there's nothing to grade
 
     reset_waiting_count = (Submission.objects
-                           .annotate(num_graders=Count('grader'))
                            .filter(date_modified__lt=now-min_time,
                                    state=SubmissionState.being_graded,
-                                   num_graders__lt=settings.PEER_GRADER_COUNT)
-                           .values('id')
+                                   posted_results_back_to_queue=False)
                            .update(state=SubmissionState.waiting_to_be_graded))
 
     reset_finished_count = (Submission.objects
-                            .annotate(num_graders=Count('grader'))
                             .filter(date_modified__lt=now-min_time,
                                     state=SubmissionState.being_graded,
-                                    num_graders__gte=settings.PEER_GRADER_COUNT)
-                            .values('id')
+                                    posted_results_back_to_queue=True)
                             .update(state=SubmissionState.finished))
 
     reset_count = reset_waiting_count + reset_finished_count

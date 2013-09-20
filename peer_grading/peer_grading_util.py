@@ -53,6 +53,7 @@ class PeerLocation(LocationCapsule):
         """
         return self.location_submissions().exclude(student_id=self.student_id).filter(
             state=SubmissionState.finished,
+            posted_results_back_to_queue=True,
             is_duplicate=False,
             next_grader_type="PE",
             ).exclude(grader__grader_id=self.student_id)
@@ -104,20 +105,17 @@ class PeerLocation(LocationCapsule):
         # we might starve a peer grader because all submissions have received the requisite number of grades.
         # In this case, we want to give the waiting peer grader an already "complete" submission, so s/he can
         # add a grade to that one.
-        already_completed = self.submissions_completed_peer_grading()
-        if already_completed.count() > 0:
-            log.info("location {}: finding completed submission to give to peer grader {}".format(self.location,
-                                                                                                  self.student_id))
-            course_id = already_completed[0].course_id
-            submissions_to_grade = (already_completed
-                                    .annotate(num_graders=Count('grader'))
-                                    .values("num_graders", "id")
-                                    .order_by("date_created")[:50])
-            found, sub_id = self._determine_next_submission_to_grade(submissions_to_grade, course_id)
-            if found:
-                sub = Submission.objects.get(id=sub_id)
-                sub.posted_results_back_to_queue = False
-                sub.save()
+        if control_util.SubmissionControl.peer_grade_finished_subs(self):
+            already_completed = self.submissions_completed_peer_grading()
+            if already_completed.count() > 0 and self.graded_count() < self.required_count():
+                log.info("location {}: finding completed submission to give to peer grader {}".format(self.location,
+                                                                                                      self.student_id))
+                course_id = already_completed[0].course_id
+                submissions_to_grade = (already_completed
+                                        .annotate(num_graders=Count('grader'))
+                                        .values("num_graders", "id")
+                                        .order_by("num_graders")[:50])
+                return self._determine_next_submission_to_grade(submissions_to_grade, course_id)
         return found, sub_id
 
     def _determine_next_submission_to_grade(self, submissions_to_grade, course_id):
@@ -202,7 +200,9 @@ class PeerCourse(CourseCapsule):
         for location in unique_student_locations:
             pl = PeerLocation(location, self.student_id)
 
-            if pl.graded_count()<pl.required_count():
+            if (pl.graded_count()<pl.required_count() and
+                    (pl.pending_count()>0 or
+                     control_util.SubmissionControl.peer_grade_finished_subs(pl))):
                 student_needs_to_peer_grade = True
                 break
 
