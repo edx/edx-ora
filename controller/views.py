@@ -48,7 +48,7 @@ def log_in(request):
     else:
         return util._error_response('login_required', _INTERFACE_VERSION)
 
-
+@csrf_exempt
 def log_out(request):
     """
     Uses django auth to handle a logout request
