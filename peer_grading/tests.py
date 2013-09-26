@@ -35,6 +35,7 @@ GET_PEER_GRADING_DATA = project_urls.PeerGradingURLs.get_peer_grading_data_for_l
 LOCATION="i4x://MITx/6.002x"
 STUDENT_ID="5"
 ALTERNATE_STUDENT="4"
+STUDENT3="6"
 COURSE_ID = "course_id"
 
 def create_calibration_essays(num_to_create,scores,is_calibration):
@@ -480,6 +481,62 @@ class PeerGradingUtilTest(unittest.TestCase):
         self.assertEqual(pl.graded_count(),1)
 
         self.assertEqual(pl.pending_count(),0)
+
+    def test_get_next_get_finished_subs(self):
+        Submission.objects.all().delete()
+        all_students = [STUDENT_ID, ALTERNATE_STUDENT, STUDENT3]
+        # setup 3 submissions from 3 students, passed basic check
+        submissions = []
+        for student in all_students:
+            test_sub = test_util.get_sub("PE", student, LOCATION, preferred_grader_type="PE")
+            test_sub.next_grader_type="PE"
+            test_sub.is_duplicate=False
+            test_sub.save()
+            submissions.append(test_sub)
+            bc_grader = test_util.get_grader("BC")
+            bc_grader.submission = test_sub
+            bc_grader.save()
+
+        # have them each grade the other two and call that finished
+        for student in all_students:
+            for submission in Submission.objects.all().exclude(student_id=student):
+                test_grader = test_util.get_grader("PE")
+                test_grader.grader_id = student
+                test_grader.submission = submission
+                test_grader.save()
+        for sub in submissions:
+            sub.state = SubmissionState.finished
+            sub.posted_results_back_to_queue = True
+            sub.save()
+
+        pls = []
+        for student in all_students:
+            pls.append(peer_grading_util.PeerLocation(LOCATION, student))
+
+        # check that each student graded 2, and so no submissions are pending
+        for pl in pls:
+            self.assertEqual(pl.graded_count(),2)
+            self.assertEqual(pl.pending_count(),0)
+            # check that next_item() cannot returns a submission because each of these students
+            # has graded the submissions by the other 2 students
+            found, _ = pl.next_item()
+            self.assertFalse(found)
+
+        # now a 4th student comes along and submits.  They should get something to grade despite nothing pending
+        student4 = "10"
+        test_sub = test_util.get_sub("PE", student4, LOCATION, preferred_grader_type="PE")
+        test_sub.next_grader_type="PE"
+        test_sub.is_duplicate=False
+        test_sub.control_fields=json.dumps({'peer_grade_finished_submissions_when_none_pending': True})
+        test_sub.save()
+
+        pl4 = peer_grading_util.PeerLocation(LOCATION, student4)
+        self.assertEqual(pl4.pending_count(),0)
+        found, next_sub_id = pl4.next_item()
+        self.assertTrue(found)
+        student4_sub_to_grade = Submission.objects.get(id=next_sub_id)
+        self.assertIn(student4_sub_to_grade, submissions)
+        self.assertEqual(student4_sub_to_grade.state, SubmissionState.being_graded)
 
     def test_submission_course(self):
         Submission.objects.all().delete()

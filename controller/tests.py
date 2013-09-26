@@ -8,6 +8,7 @@ import datetime
 from django.utils import timezone
 import logging
 import urlparse
+import time
 
 from django.test.client import Client
 from django.conf import settings
@@ -463,12 +464,24 @@ class ExpireSubmissionsTests(unittest.TestCase):
         test_sub = Submission.objects.all()[0]
         self.assertEqual(test_sub.state, SubmissionState.waiting_to_be_graded)
 
+    def test_reset_timed_out_submissions_finished(self):
+        test_sub_f = test_util.get_sub("PE", STUDENT_ID, LOCATION)
+        test_sub_f.state = SubmissionState.being_graded
+        test_sub_f.control_fields = json.dumps({'peer_grade_finished_submissions_when_none_pending': True})
+        test_sub_f.posted_results_back_to_queue = True
+        test_sub_f.save()
+
+        success = expire_submissions.reset_timed_out_submissions()
+        self.assertEqual(success, True)
+
+        test_sub = Submission.objects.all()[0]
+        self.assertEqual(test_sub.state, SubmissionState.finished)
+
     def test_get_submissions_that_have_expired(self):
         test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
         test_sub.save()
 
         expired_submissions = expire_submissions.get_submissions_that_have_expired()
-
         self.assertEqual(len(expired_submissions),1)
 
     def test_get_duplicate_scores_and_feedback(self):
@@ -638,7 +651,11 @@ class UtilTest(unittest.TestCase):
 class TestControl(unittest.TestCase):
     def test_control_create(self):
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
-        test_sub.control_fields = json.dumps({'min_to_calibrate' : 1, 'max_to_calibrate' : 1, 'peer_grader_count' : 1, 'required_peer_grading' : 1})
+        test_sub.control_fields = json.dumps({'min_to_calibrate' : 1,
+                                              'max_to_calibrate' : 1,
+                                              'peer_grader_count' : 1,
+                                              'required_peer_grading' : 1,
+                                              'peer_grade_finished_submissions_when_none_pending' : True})
         test_sub.save()
 
         control = SubmissionControl(test_sub)
@@ -647,6 +664,7 @@ class TestControl(unittest.TestCase):
         self.assertEqual(control.max_to_calibrate, 1)
         self.assertEqual(control.peer_grader_count, 1)
         self.assertEqual(control.required_peer_grading_per_student, 1)
+        self.assertEqual(control.peer_grade_finished_submissions_when_none_pending, True)
 
     def test_control_default(self):
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
@@ -658,6 +676,8 @@ class TestControl(unittest.TestCase):
         self.assertEqual(control.max_to_calibrate, settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE)
         self.assertEqual(control.peer_grader_count, settings.PEER_GRADER_COUNT)
         self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
+        self.assertEqual(control.peer_grade_finished_submissions_when_none_pending,
+                         settings.PEER_GRADE_FINISHED_SUBMISSIONS_WHEN_NONE_PENDING)
 
 class RubricTest(unittest.TestCase):
     def test_unicode_rubric(self):
