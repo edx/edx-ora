@@ -138,7 +138,6 @@ def parse_xobject(xobject, queue_name):
 
     return True, content
 
-
 def login(session, url, username, password):
     """
     Login to given url with given username and password.
@@ -257,7 +256,6 @@ def post_results_to_xqueue(session, header, body):
 
     return success, msg
 
-
 def xqueue_login():
     session = requests.session()
     xqueue_login_url = urlparse.urljoin(settings.XQUEUE_INTERFACE['url'], project_urls.XqueueURLs.log_in)
@@ -270,7 +268,6 @@ def xqueue_login():
 
     return session
 
-
 def controller_login():
     session = requests.session()
     controller_login_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], project_urls.ControllerURLs.log_in)
@@ -282,6 +279,13 @@ def controller_login():
     )
     return session
 
+def controller_logout(session):
+    """
+    Log out of the grading controller.
+    Logging out removes a row in the session database.
+    """
+    controller_logout_url = urlparse.urljoin(settings.GRADING_CONTROLLER_INTERFACE['url'], project_urls.ControllerURLs.log_out)
+    session.post(controller_logout_url)
 
 def create_xqueue_header_and_body(submission):
     xqueue_header = {

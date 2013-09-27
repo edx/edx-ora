@@ -148,6 +148,8 @@ def pull_from_xqueue():
     for submission in list(submissions_to_post):
         post_one_submission_back_to_queue(submission, xqueue_session)
 
+    # Log out of the controller session, which deletes the database row.
+    util.controller_logout(controller_session)
     transaction.commit()
 
 
