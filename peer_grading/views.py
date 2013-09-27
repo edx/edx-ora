@@ -358,7 +358,7 @@ def get_problem_list(request):
     for location in locations_for_course:
         pl = peer_grading_util.PeerLocation(location,student_id)
         if pl.submitted_count()>0:
-            problem_name = Submission.objects.filter(location=location)[0].problem_id
+            problem_name = pl.problem_name()
             submissions_pending = pl.pending_count()
             submissions_graded = pl.graded_count()
             submissions_required = max([0,pl.required_count() - submissions_graded])
