@@ -61,6 +61,15 @@ class LocationCapsule(object):
         """
         raise NotImplementedError()
 
+    def problem_name(self):
+        """
+        Get the problem name for this location.
+        """
+
+        # Get the last problem submitted and read its name.
+        # Do this to support course staff changing problem names.
+        return self.location_submissions().order_by("-date_modified")[0].problem_id
+
 class CourseCapsule(object):
     """
     Encapsulates information that graders may want about a course.

@@ -216,6 +216,26 @@ class StaffGradingViewTest(unittest.TestCase):
 
         self.assertEqual(rescore,test_sub.id)
 
+    def test_get_problem_name(self):
+        """
+        Test to see if the correct problem name is returned by a location capsule.
+        Saves two submissions, and tests to see if the problem name is updated.
+        """
+        problem_id_one = "Problem One"
+        problem_id_two = "Problem Two"
+
+        test_sub=test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        test_sub.problem_id = problem_id_one
+        test_sub.save()
+
+        sl = StaffLocation(LOCATION)
+        self.assertEqual(sl.problem_name(), problem_id_one)
+
+        test_sub2=test_util.get_sub("IN",STUDENT_ID,LOCATION)
+        test_sub2.problem_id = problem_id_two
+        test_sub2.save()
+
+        self.assertEqual(sl.problem_name(), problem_id_two)
 
 
 

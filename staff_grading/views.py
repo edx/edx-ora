@@ -277,7 +277,7 @@ def get_problem_list(request):
     location_info=[]
     for location in locations_for_course:
         sl = staff_grading_util.StaffLocation(location)
-        problem_name = Submission.objects.filter(location=location)[0].problem_id
+        problem_name = sl.problem_name()
         submissions_pending = sl.pending_count()
         finished_instructor_graded = sl.graded_count()
         min_scored_for_location=settings.MIN_TO_USE_PEER
