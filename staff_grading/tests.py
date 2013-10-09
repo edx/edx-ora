@@ -165,10 +165,19 @@ class StaffGradingViewTest(unittest.TestCase):
         test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
         test_sub.save()
 
-        test_sub2=test_util.get_sub("IN",STUDENT_ID, LOCATION)
+        test_sub2=test_util.get_sub("PE",STUDENT_ID, LOCATION)
         test_sub2.state = SubmissionState.finished
-        test_sub2.previous_grader_type = "IN"
+        test_sub2.previous_grader_type = "PE"
         test_sub2.save()
+
+        test_grader_in=test_util.get_grader("IN")
+        test_grader_in.submission=test_sub2
+        test_grader_in.save()
+
+        test_grader_pe=test_util.get_grader("PE")
+        test_grader_pe.submission=test_sub2
+        test_grader_pe.save()
+
 
         sl = StaffLocation(LOCATION)
         self.assertEqual(sl.location_submissions().count(),2)

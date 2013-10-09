@@ -20,7 +20,7 @@ class StaffLocation(LocationCapsule):
         """
         Finds all submissions that have been instructor graded, and are now complete.
         """
-        return self.location_submissions().filter(previous_grader_type="IN", state=SubmissionState.finished)
+        return self.location_submissions().filter(grader__grader_type="IN", state=SubmissionState.finished)
 
     def graded_count(self):
         """
