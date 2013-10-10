@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from statsd import statsd
+from control_util import SubmissionControl
 
 import json
 import logging
@@ -46,9 +47,11 @@ def get_submission_ml(request):
             continue
 
         sl = staff_grading_util.StaffLocation(location)
+        control = SubmissionControl(sl.latest_submission())
+
         subs_graded_by_instructor = sl.graded_count()
         success = ml_grading_util.check_for_all_model_and_rubric_success(location)
-        if subs_graded_by_instructor >= settings.MIN_TO_USE_ML and success:
+        if subs_graded_by_instructor >= control.minimum_to_use_ai and success:
             to_be_graded = Submission.objects.filter(
                 location=location,
                 state=SubmissionState.waiting_to_be_graded,

@@ -1,6 +1,5 @@
 import json
 from django.conf import settings
-import peer_grading.peer_grading_util
 
 class SubmissionControl():
     """
@@ -40,6 +39,14 @@ class SubmissionControl():
     def peer_grade_finished_submissions_when_none_pending(self):
         return self.cd.get('peer_grade_finished_submissions_when_none_pending',
                            settings.PEER_GRADE_FINISHED_SUBMISSIONS_WHEN_NONE_PENDING)
+
+    @property
+    def minimum_to_use_peer(self):
+        return self.cd.get('staff_minimum_for_peer_grading', settings.MIN_TO_USE_PEER)
+
+    @property
+    def minimum_to_use_ai(self):
+        return self.cd.get('staff_minimum_for_ai_grading', settings.MIN_TO_USE_ML)
 
     @classmethod
     def peer_grade_finished_subs(cls, peer_location):

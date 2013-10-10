@@ -19,6 +19,7 @@ from controller import util
 
 from controller.models import Submission
 from staff_grading import staff_grading_util
+from controller.control_util import SubmissionControl
 
 from ml_grading.models import CreatedModel
 import ml_grading.ml_grading_util as ml_grading_util
@@ -36,16 +37,18 @@ def handle_single_location(location):
         transaction.commit()
         gc.collect()
         sl = staff_grading_util.StaffLocation(location)
+        control = SubmissionControl(sl.latest_submission())
+
         subs_graded_by_instructor = sl.graded()
         log.info("Checking location {0} to see if essay count {1} greater than min {2}".format(
             location,
             subs_graded_by_instructor.count(),
-            settings.MIN_TO_USE_ML,
+            control.minimum_to_use_ai,
         ))
         graded_sub_count=subs_graded_by_instructor.count()
 
         #check to see if there are enough instructor graded essays for location
-        if graded_sub_count >= settings.MIN_TO_USE_ML:
+        if graded_sub_count >= control.minimum_to_use_ai:
 
             location_suffixes=ml_grading_util.generate_rubric_location_suffixes(subs_graded_by_instructor, grading=False)
 
