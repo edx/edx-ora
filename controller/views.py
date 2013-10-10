@@ -19,6 +19,8 @@ from peer_grading import peer_grading_util
 from models import Submission
 
 from statsd import statsd
+from boto.s3.connection import S3Connection
+from metrics.tasks import get_course_data_filename
 
 from django.db import connection
 
@@ -245,6 +247,32 @@ def take_action_on_flags(request):
     return util._success_response(submission_dict, _INTERFACE_VERSION)
 
 
+@csrf_exempt
+@util.error_if_not_logged_in
+@util.is_submitter
+def get_course_data(request):
+    """
+    Get the course data for a given course.
+    """
+
+    if request.method != "GET":
+        return util._error_response("Request type must be GET", _INTERFACE_VERSION)
+
+    course = request.GET.get('course')
+
+    # Throw an error if user does not specify a course.
+    if course is None:
+        return util._error_response("You must specify a course.", _INTERFACE_VERSION)
+
+    # Generate a data filename for the course.
+    filename = get_course_data_filename(course)
+
+    # Get the data file from S3.  There is a periodic task that puts the files here.
+    s3 = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY, is_secure=False)
+    file_url = s3.generate_url(settings.S3_FILE_TIMEOUT, 'GET', bucket=settings.S3_BUCKETNAME.lower(), key=filename)
+
+    # Return a temporary url.
+    return util._success_response({'file_url': file_url}, _INTERFACE_VERSION)
 
 
 

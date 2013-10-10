@@ -35,11 +35,12 @@ CONFIG_PREFIX = '' # To append at the beginning of the config file name
 #ML
 MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use machine learning
 MAX_TO_USE_ML = 300 #Maximum number of instructor graded essays to use for ml model creation
-ML_MODEL_PATH=os.path.join(ENV_ROOT,"ml_models/") #Path to save and retrieve ML models from
+ML_MODEL_PATH=os.path.join(REPO_PATH,"ml_models/") # Path to save and retrieve ML models from.
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
 TIME_BETWEEN_ML_GRADER_CHECKS= 10 # seconds.  Time between ML grader checking to see if models need to be made.
 USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 S3_BUCKETNAME="OpenEnded"
+S3_FILE_TIMEOUT = 10 * 60 # 10 minutes.
 ML_ESTIMATED_GRADING_TIME= 5 * 60 #Estimated grading time for machine learning in seconds
 TIME_BEFORE_REMOVING_STARTED_MODEL = 10 * 60 * 60 # in seconds, time before removing an ml model that was started (assume it wont finish)
 
@@ -66,6 +67,9 @@ RESET_SUBMISSIONS_AFTER = 5 * 60 #Seconds.  This will make submissions that are 
 
 EDIT_SUBMISSIONS_PERMISSION = "change_submission"
 SUBMITTERS_GROUP = "submitters"
+
+GENERATE_COURSE_DATA_EVERY = 5 * 60 # Generate data about courses.  In seconds.  See metrics/tasks for more details.
+COURSE_DATA_PATH = os.path.join(REPO_PATH, "data/course/")
 
 #SQLite settings
 DATABASES = {
