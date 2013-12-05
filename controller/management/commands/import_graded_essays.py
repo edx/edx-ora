@@ -13,9 +13,9 @@ import time
 import json
 import logging
 import sys
+from uuid import uuid4
 from ConfigParser import SafeConfigParser
 from datetime import datetime
-import test_util
 
 from controller.models import Submission, Grader
 from controller.models import GraderStatus, SubmissionState
@@ -92,7 +92,7 @@ class Command(BaseCommand):
                 state=state,
                 student_response=text[i],
                 student_submission_time=timezone.now(),
-                xqueue_submission_id=test_util.generate_new_xqueue_id(),
+                xqueue_submission_id=uuid4().hex,
                 xqueue_submission_key="",
                 xqueue_queue_name="",
                 location=location,
