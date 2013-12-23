@@ -6,8 +6,6 @@ from django.db.models import Count
 from metrics.models import Timing, FIELDS_TO_EVALUATE, StudentCourseProfile
 from controller.models import  Submission, SubmissionState, Grader, GraderStatus, Message
 import logging
-import matplotlib.pyplot as plt
-from matplotlib import numpy as np
 from metrics import tasks
 import json
 
@@ -372,7 +370,6 @@ def dump_form(request, type):
             rendered=render_data_dump_form("metrics/{0}/".format(type),unique_courses)
 
         return HttpResponse(rendered)
-
 
 AVAILABLE_METRICS={
     'timing' : generate_timing_response,

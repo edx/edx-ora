@@ -40,3 +40,10 @@ urlpatterns += patterns('controller.views',
     url(r'^get_flagged_problem_list/$', 'get_flagged_problem_list'),
     url(r'^take_action_on_flags/$', 'take_action_on_flags'),
 )
+
+# Course staff data download
+#------------------------------------------------------------
+urlpatterns += patterns('controller.views',
+    url(r'^get_course_data/$', 'get_course_data')
+)
+

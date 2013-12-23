@@ -192,6 +192,17 @@ def get_ml_errors(location):
 
     return True, data_dict
 
+def get_s3_temporary_url(keyname, bucketname):
+    """
+    Get a temporary public url for a given file in a bucket.
+    keyname - a string keyname in a bucket. (similar to a filename in the bucket)
+    bucketname - a string S3 bucket name
+    returns: a url to a the public file.
+    """
+    s3 = S3Connection(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY, is_secure=False)
+    file_url = s3.generate_url(settings.S3_FILE_TIMEOUT, 'GET', bucket=bucketname.lower(), key=keyname)
+    return file_url
+
 def upload_to_s3(string_to_upload, keyname, bucketname):
     '''
     Upload file to S3 using provided keyname.

@@ -19,3 +19,5 @@ celerybeat-schedule
 docs/_build
 logs/supervisor/*.log
 ml_models/*
+data/course/*
+data/*

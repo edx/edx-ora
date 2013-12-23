@@ -3,13 +3,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from controller import util
-from metrics.charting import render_image
 import metrics_util
-from django.template.loader import render_to_string
 
-from controller.models import Submission
-
-from models import Timing
 import logging
 
 from statsd import statsd

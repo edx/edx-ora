@@ -196,7 +196,9 @@ def load_model_file(created_model,use_full_path):
         pass
 
     try:
-        r = requests.get(created_model.s3_public_url, timeout=2)
+        # Generate a temporary public URL to the model.
+        public_url = ml_grading_util.get_s3_temporary_url(created_model.model_relative_path, settings.S3_BUCKETNAME)
+        r = requests.get(public_url, timeout=30)
         grader_data=pickle.loads(r.text)
     except Exception:
         log.exception("Problem with S3 connection.")
