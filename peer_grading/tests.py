@@ -19,6 +19,7 @@ from django.utils import timezone
 import project_urls
 from controller.xqueue_interface import handle_submission
 import peer_grading_util
+from controller.control_util import SubmissionControl
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +105,10 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
         grader.grader_id = "2"
         grader.save()
 
-        for i in xrange(0,settings.MIN_TO_USE_PEER):
+        pl = peer_grading_util.PeerLocation(LOCATION, "1")
+        control = SubmissionControl(pl.latest_submission())
+
+        for i in xrange(0, control.minimum_to_use_peer):
             test_sub = test_util.get_sub("PE", "1", LOCATION, "PE")
             test_sub.save()
             grader = test_util.get_grader("IN")
@@ -365,7 +369,14 @@ class PeerGradingUtilTest(unittest.TestCase):
             }
 
     def test_get_single_peer_grading_item(self):
-        for i in xrange(0,settings.MIN_TO_USE_PEER):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        handle_submission(test_sub)
+
+        pl = peer_grading_util.PeerLocation(LOCATION, STUDENT_ID)
+        control = SubmissionControl(pl.latest_submission())
+
+        for i in xrange(0, control.minimum_to_use_peer):
             test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
             test_sub.save()
             handle_submission(test_sub)

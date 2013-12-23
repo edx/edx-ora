@@ -6,6 +6,7 @@ from controller.models import SubmissionState, GraderStatus
 from metrics import metrics_util
 from controller import util
 from ml_grading import ml_grading_util
+from controller.control_util import SubmissionControl
 
 from controller.capsules import LocationCapsule, CourseCapsule
 
@@ -57,9 +58,10 @@ class StaffLocation(LocationCapsule):
         Gets an item for an instructor to score.
         """
         subs_graded = self.graded_count()
-        success= ml_grading_util.check_for_all_model_and_rubric_success(self.location)
+        success = ml_grading_util.check_for_all_model_and_rubric_success(self.location)
+        control = SubmissionControl(self.latest_submission())
 
-        if subs_graded < settings.MIN_TO_USE_ML or not success:
+        if subs_graded < control.minimum_to_use_ai or not success:
             to_be_graded = self.pending()
 
             finished_submission_text=self.graded_submission_text()
@@ -110,6 +112,22 @@ class StaffLocation(LocationCapsule):
             success, sid = self.item_to_rescore()
         return success, sid
 
+    def minimum_to_score(self):
+        """
+        Find how many submissions need to be instructor scored in a given location.
+        """
+        control = SubmissionControl(self.latest_submission())
+
+        # First, assume that peer grading is being used.
+        # This function is only called if there is something to grade, so this is reasonable.
+        min_to_score_for_location = control.minimum_to_use_peer
+        location_ml_count = self.location_submissions().filter(preferred_grader_type="ML").count()
+
+        # If there are any AI graded submissions for the location, use the AI minimum instead of the peer minimum.
+        if location_ml_count > 0:
+            min_to_score_for_location = control.minimum_to_use_ai
+        return min_to_score_for_location
+
 
 class StaffCourse(CourseCapsule):
     """
@@ -143,16 +161,12 @@ class StaffCourse(CourseCapsule):
 
         for location in self.locations():
             sl = StaffLocation(location)
-            min_scored_for_location=settings.MIN_TO_USE_PEER
-            location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
-            if location_ml_count>0:
-                min_scored_for_location=settings.MIN_TO_USE_ML
 
             location_scored_count = sl.graded_count()
             submissions_pending = sl.all_pending_count()
 
-            if location_scored_count<min_scored_for_location and submissions_pending>0:
-                staff_needs_to_grade= True
+            if location_scored_count < sl.minimum_to_score() and submissions_pending > 0:
+                staff_needs_to_grade = True
                 return success, staff_needs_to_grade
 
         return success, staff_needs_to_grade

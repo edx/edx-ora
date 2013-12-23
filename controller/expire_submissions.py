@@ -14,6 +14,7 @@ from xqueue_interface import handle_submission
 from ml_grading import ml_grading_util
 from ml_grading.models import CreatedModel
 import os
+from control_util import SubmissionControl
 
 from statsd import statsd
 
@@ -29,17 +30,21 @@ def reset_ml_subs_to_in():
     for location in unique_locations:
         sl = staff_grading_util.StaffLocation(location)
         subs_graded, subs_pending = sl.graded_count(), sl.pending_count()
-        subs_pending_total= Submission.objects.filter(
+
+        control = SubmissionControl(sl.latest_submission())
+
+        subs_pending_total = Submission.objects.filter(
             location=location,
             state=SubmissionState.waiting_to_be_graded,
             preferred_grader_type="ML"
-        ).order_by('-date_created')[:settings.MIN_TO_USE_ML]
-        if ((subs_graded+subs_pending) < settings.MIN_TO_USE_ML and subs_pending_total.count() > subs_pending):
+        ).order_by('-date_created')[:control.minimum_to_use_ai]
+
+        if (subs_graded + subs_pending) < control.minimum_to_use_ai and subs_pending_total.count() > subs_pending:
             for sub in subs_pending_total:
-                if sub.next_grader_type=="ML" and sub.get_unsuccessful_graders().count()==0:
+                if sub.next_grader_type == "ML" and sub.get_unsuccessful_graders().count() == 0:
                     staff_grading_util.set_ml_grading_item_back_to_instructor(sub)
-                    counter+=1
-                if (counter+subs_graded + subs_pending)> settings.MIN_TO_USE_ML:
+                    counter += 1
+                if (counter + subs_graded + subs_pending) > control.minimum_to_use_ai:
                     break
     if counter>0:
         statsd.increment("open_ended_assessment.grading_controller.expire_submissions.reset_ml_subs_to_in",
@@ -245,7 +250,7 @@ def remove_old_model_files():
             grader_path = latest_model.model_relative_path
             path_whitelist.append(str(grader_path))
     onlyfiles = [ f for f in os.listdir(settings.ML_MODEL_PATH) if os.path.isfile(os.path.join(settings.ML_MODEL_PATH,f)) ]
-    files_to_delete = [f for f in onlyfiles if f not in path_whitelist]
+    files_to_delete = [f for f in onlyfiles if f not in path_whitelist and not f.startswith(".")]
     could_not_delete_list=[]
     for i in xrange(0,len(files_to_delete)):
         mfile = files_to_delete[i]

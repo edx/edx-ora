@@ -25,6 +25,7 @@ from tasks import expire_submissions_task, pull_from_xqueue
 from control_util import SubmissionControl
 from copy import deepcopy
 import rubric_functions
+from staff_grading.staff_grading_util import StaffLocation
 
 from staff_grading import staff_grading_util
 
@@ -166,6 +167,8 @@ class XQueueInterfaceTest(unittest.TestCase):
         self.assertEqual(control.max_to_calibrate, settings.PEER_GRADER_MAXIMUM_TO_CALIBRATE)
         self.assertEqual(control.peer_grader_count, settings.PEER_GRADER_COUNT)
         self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
+        self.assertEqual(control.minimum_to_use_ai, settings.MIN_TO_USE_ML)
+        self.assertEqual(control.minimum_to_use_peer, settings.MIN_TO_USE_PEER)
 
     def test_xqueue_control_submit(self):
         Submission.objects.all().delete()
@@ -176,8 +179,9 @@ class XQueueInterfaceTest(unittest.TestCase):
             'max_to_calibrate' : 1,
             'peer_grader_count': 1,
             'required_peer_grading': 1,
-        }
-        )
+            'staff_minimum_for_peer_grading': 1,
+            'staff_minimum_for_ai_grading': 1,
+        })
 
         content = self.c.post(
             SUBMIT_URL,
@@ -193,6 +197,8 @@ class XQueueInterfaceTest(unittest.TestCase):
         self.assertEqual(control.max_to_calibrate, 1)
         self.assertEqual(control.peer_grader_count, 1)
         self.assertEqual(control.required_peer_grading_per_student, 1)
+        self.assertEqual(control.minimum_to_use_ai, 1)
+        self.assertEqual(control.minimum_to_use_peer, 1)
 
     def _message_submission(self, success, score=None, submission_id=None):
         sub = test_util.get_sub("IN",STUDENT_ID,LOCATION)
@@ -537,8 +543,14 @@ class ExpireSubmissionsTests(unittest.TestCase):
         self.assertEqual(test_sub.state, SubmissionState.finished)
 
     def test_check_if_grading_finished_for_duplicates(self):
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
+        test_sub.save()
+        handle_submission(test_sub)
 
-        for i in xrange(0,settings.MIN_TO_USE_PEER):
+        sl = StaffLocation(LOCATION)
+        control = SubmissionControl(sl.latest_submission())
+
+        for i in xrange(0, control.minimum_to_use_peer):
             test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
             test_sub.save()
             handle_submission(test_sub)
@@ -655,7 +667,10 @@ class TestControl(unittest.TestCase):
                                               'max_to_calibrate' : 1,
                                               'peer_grader_count' : 1,
                                               'required_peer_grading' : 1,
-                                              'peer_grade_finished_submissions_when_none_pending' : True})
+                                              'peer_grade_finished_submissions_when_none_pending' : True,
+                                              'staff_minimum_for_peer_grading': 1,
+                                              'staff_minimum_for_ai_grading': 1,
+        })
         test_sub.save()
 
         control = SubmissionControl(test_sub)
@@ -665,6 +680,8 @@ class TestControl(unittest.TestCase):
         self.assertEqual(control.peer_grader_count, 1)
         self.assertEqual(control.required_peer_grading_per_student, 1)
         self.assertEqual(control.peer_grade_finished_submissions_when_none_pending, True)
+        self.assertEqual(control.minimum_to_use_peer, 1)
+        self.assertEqual(control.minimum_to_use_ai, 1)
 
     def test_control_default(self):
         test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION, "PE")
@@ -678,6 +695,8 @@ class TestControl(unittest.TestCase):
         self.assertEqual(control.required_peer_grading_per_student, settings.REQUIRED_PEER_GRADING_PER_STUDENT)
         self.assertEqual(control.peer_grade_finished_submissions_when_none_pending,
                          settings.PEER_GRADE_FINISHED_SUBMISSIONS_WHEN_NONE_PENDING)
+        self.assertEqual(control.minimum_to_use_ai, settings.MIN_TO_USE_ML)
+        self.assertEqual(control.minimum_to_use_peer, settings.MIN_TO_USE_PEER)
 
 class RubricTest(unittest.TestCase):
     def test_unicode_rubric(self):
