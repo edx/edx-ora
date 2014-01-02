@@ -161,6 +161,7 @@ def save_grade(request):
         success, targets=rubric_functions.generate_targets_from_rubric(sub.rubric)
         rubric_scores = [0 for l in targets]
         rubric_scores_complete = True
+        score = 0
 
     success, error_message = grader_util.validate_rubric_scores(rubric_scores, rubric_scores_complete, sub)
     if not success:

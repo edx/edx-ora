@@ -126,6 +126,75 @@ class LMSInterfacePeerGradingTest(unittest.TestCase):
 
         self.assertEqual(body['success'], True)
 
+    def test_save_grade_with_no_rubrics_and_submission_flagged(self):
+        """
+        Test save grade when submission is flagged and rubric score are not provided.
+        """
+
+        test_sub = test_util.get_sub("PE", "blah", LOCATION, "PE")
+        test_sub.save()
+
+        test_dict = {
+            'location': LOCATION,
+            'grader_id': STUDENT_ID,
+            'submission_id': 1,
+            'score': 5,
+            'feedback': 'feedback',
+            'submission_key': 'string',
+            'submission_flagged': True,
+            'rubric_scores_complete': False,
+            'rubric_scores': [],
+            }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            test_dict,
+        )
+
+        body = json.loads(content.content)
+        #Should succeed, as we created a submission above that save_grade can use
+        self.assertEqual(body["success"], True)
+
+        sub = Submission.objects.get(id=1)
+
+        #Score should be 0.
+        self.assertEqual(sub.get_last_grader().score, 0)
+
+    def test_save_grade_with_no_rubrics_and_submission_unknown(self):
+        """
+        Test save grade when submission is mark as unknown and rubric score are not provided.
+        """
+
+        test_sub = test_util.get_sub("PE", "blah", LOCATION, "PE")
+        test_sub.save()
+
+        test_dict = {
+            'location': LOCATION,
+            'grader_id': STUDENT_ID,
+            'submission_id': 1,
+            'score': 5,
+            'feedback': 'feedback',
+            'submission_key': 'string',
+            'submission_flagged': False,
+            'answer_unknown': True,
+            'rubric_scores_complete': False,
+            'rubric_scores': [],
+            }
+
+        content = self.c.post(
+            SAVE_GRADE,
+            test_dict,
+        )
+
+        body = json.loads(content.content)
+        #Should succeed, as we created a submission above that save_grade can use
+        self.assertEqual(body["success"], True)
+
+        sub = Submission.objects.get(id=1)
+
+        #Score should be 0.
+        self.assertEqual(sub.get_last_grader().score, 0)
+
     def test_save_grade_false(self):
         test_dict={
             'location': LOCATION,
