@@ -12,10 +12,14 @@ class Command(BaseCommand):
            "       Passes basic check for all problems in course."
 
     option_list = BaseCommand.option_list + (
-        make_option('-n', '--dry-run',
-                    action='store_true', dest='dry_run', default=False,
-                    help="Do everything except updating failed basic "
-                         "check submissions."),
+        make_option(
+            '-n',
+            '--dry-run',
+            action='store_true',
+            dest='dry_run',
+            default=False,
+            help="Do everything except updating failed basic check submissions"
+        ),
     )
 
     def handle(self, *args, **options):
@@ -30,9 +34,7 @@ class Command(BaseCommand):
             print self.help
             return
         try:
-            reset_and_divert_submissions_for_location(course_id,
-                                                      location,
-                                                      dry_run=dry_run)
+            reset_and_divert_submissions_for_location(course_id, location, dry_run=dry_run)
         except Exception as ex:
             print "ERROR: {0}".format(ex.message)
 
