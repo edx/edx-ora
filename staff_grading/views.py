@@ -30,6 +30,7 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
+MAX_FEEDBACK_LENGTH = 102400
 
 
 @csrf_exempt
@@ -174,6 +175,10 @@ def save_grade(request):
         # These have to be non-None
         score is None or feedback is None):
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
+
+    feed_back_length = len(feedback)
+    if feed_back_length > MAX_FEEDBACK_LENGTH:
+        return util._error_response("Feedback is too long.", _INTERFACE_VERSION)
 
     if skipped:
         success, sub = staff_grading_util.set_instructor_grading_item_back_to_preferred_grader(submission_id)

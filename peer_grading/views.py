@@ -22,6 +22,7 @@ from django.db import connection
 log = logging.getLogger(__name__)
 
 _INTERFACE_VERSION = 1
+MAX_FEEDBACK_LENGTH = 102400
 
 @csrf_exempt
 @statsd.timed('open_ended_assessment.grading_controller.peer_grading.views.time',
@@ -119,6 +120,10 @@ def save_grade(request):
 
     #This is done to ensure that response is properly formatted on the lms side.
     feedback_dict = post_data['feedback']
+    feed_back_length = len(feedback_dict)
+
+    if feed_back_length > MAX_FEEDBACK_LENGTH:
+        return util._error_response("Feedback is too long.", _INTERFACE_VERSION)
 
     rubric_scores_complete = request.POST.get('rubric_scores_complete', False)
     rubric_scores = request.POST.getlist('rubric_scores', [])
