@@ -6,7 +6,7 @@ from peer_grading.peer_grading_util import PeerLocation
 from controller.xqueue_interface import handle_submission
 from controller.models import SubmissionState, Submission
 from controller.management.commands.allow_skipped_subs_to_peer_grade import update_subs_skipped_by_instructor
-from staff_grading.staff_grading_util import set_instructor_grading_item_back_to_preferred_grader
+from staff_grading.staff_grading_util import set_instructor_grading_item_back_to_ml
 
 LOCATION = "MITx/6.002x"
 STUDENT_ID = "5"
@@ -51,7 +51,7 @@ class AllowSkippedToPeerCommandTest(unittest.TestCase):
         self.assertEqual(submission.next_grader_type, "IN")
 
         # Skipping submission from instructor to ML.
-        set_instructor_grading_item_back_to_preferred_grader(submission.id)
+        set_instructor_grading_item_back_to_ml(submission.id)
         submission = Submission.objects.get(id=submission.id)
         submission.next_grader_type = "ML"
         submission.save()
