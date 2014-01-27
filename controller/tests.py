@@ -395,6 +395,15 @@ class ControllerUtilTests(unittest.TestCase):
         self.assertEqual(body['success'], True)
         self.assertEqual(body['eta'], settings.DEFAULT_ESTIMATED_GRADING_TIME)
 
+    def test_sanitize_html(self):
+        feedback = "This is a sample feedback. <img src='abc' onerror=alert(1)>"
+
+        sanitized_feedback = util.sanitize_html(feedback)
+
+        # Sanitized feedback should not contain onerror attribute.
+        self.assertFalse("onerror" in sanitized_feedback)
+
+
 class ExpireSubmissionsTests(unittest.TestCase):
     fixtures = ['/controller/test_data.json']
     def setUp(self):
