@@ -396,7 +396,15 @@ def log_connection_data():
 
 def sanitize_html(text):
     try:
-        cleaner = Cleaner(style=True, links=True, add_nofollow=False, page_structure=True, safe_attrs_only=False, allow_tags = ["img", "a"])
+        cleaner = Cleaner(
+            style=True,
+            links=True,
+            add_nofollow=False,
+            page_structure=True,
+            safe_attrs_only=False,
+            remove_unknown_tags=False,
+            allow_tags=["img", "a"]
+        )
         clean_html = cleaner.clean_html(text)
         clean_html = re.sub(r'</p>$', '', re.sub(r'^<p>', '', clean_html))
     except Exception:
