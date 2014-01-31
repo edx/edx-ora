@@ -14,6 +14,8 @@ from ml_grading import ml_model_creation
 from django.db.models import Max
 import string
 import random
+from controller.control_util import SubmissionControl
+from peer_grading.peer_grading_util import PeerLocation
 
 import logging
 log = logging.getLogger(__name__)
@@ -132,14 +134,21 @@ def get_xqueue_header():
     return json.dumps(xqueue_header)
 
 def create_ml_model(student_id, location):
-    #Create enough instructor graded submissions that ML will work
-    for i in xrange(0,settings.MIN_TO_USE_ML):
-        sub=get_sub("IN",student_id,location, "ML")
-        sub.state=SubmissionState.finished
+    sub = get_sub("IN",student_id,location, "ML")
+    sub.state = SubmissionState.finished
+    sub.save()
+
+    pl = PeerLocation(location, student_id)
+    control = SubmissionControl(pl.latest_submission())
+
+    # Create enough instructor graded submissions that ML will work.
+    for i in xrange(0, control.minimum_to_use_ai):
+        sub = get_sub("IN", student_id, location, "ML")
+        sub.state = SubmissionState.finished
         sub.save()
 
-        grade=get_grader("IN")
-        grade.submission=sub
+        grade = get_grader("IN")
+        grade.submission = sub
         grade.save()
 
     # Create ML Model

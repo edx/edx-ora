@@ -23,6 +23,7 @@ from controller import grader_util
 from controller import rubric_functions
 import staff_grading_util
 from ml_grading import ml_grading_util
+from controller.control_util import SubmissionControl
 
 from django.db import connection
 
@@ -107,6 +108,7 @@ def get_next_submission(request):
     ml_error_message="Machine learning error information: " + ml_error_message
 
     sl = staff_grading_util.StaffLocation(submission.location)
+    control = SubmissionControl(sl.latest_submission())
     if submission.state != SubmissionState.being_graded:
         log.error("Instructor grading got submission {0} in an invalid state {1} ".format(sid, submission.state))
         return util._error_response('wrong_internal_state',
@@ -119,11 +121,11 @@ def get_next_submission(request):
                 'rubric': submission.rubric,
                 'prompt': submission.prompt,
                 'max_score': submission.max_score,
-                'ml_error_info' : ml_error_message,
-                'problem_name' : submission.problem_id,
-                'num_graded' : sl.graded_count(),
-                'num_pending' : sl.pending_count(),
-                'min_for_ml' : settings.MIN_TO_USE_ML,
+                'ml_error_info': ml_error_message,
+                'problem_name': submission.problem_id,
+                'num_graded': sl.graded_count(),
+                'num_pending': sl.pending_count(),
+                'min_for_ml': control.minimum_to_use_ai,
                 }
 
     util.log_connection_data()
@@ -277,25 +279,22 @@ def get_problem_list(request):
     location_info=[]
     for location in locations_for_course:
         sl = staff_grading_util.StaffLocation(location)
+        control = SubmissionControl(sl.latest_submission())
         problem_name = sl.problem_name()
         submissions_pending = sl.pending_count()
         finished_instructor_graded = sl.graded_count()
-        min_scored_for_location=settings.MIN_TO_USE_PEER
-        location_ml_count = Submission.objects.filter(location=location, preferred_grader_type="ML").count()
-        if location_ml_count>0:
-            min_scored_for_location=settings.MIN_TO_USE_ML
 
-        submissions_required = max([0,min_scored_for_location-finished_instructor_graded])
+        submissions_required = max([0, sl.minimum_to_score() - finished_instructor_graded])
 
         problem_name_from_location=location.split("://")[1]
         location_dict={
-            'location' : location,
-            'problem_name' : problem_name,
-            'problem_name_from_location' : problem_name_from_location,
-            'num_graded' : finished_instructor_graded,
-            'num_pending' : submissions_pending,
-            'num_required' : submissions_required,
-            'min_for_ml' : settings.MIN_TO_USE_ML,
+            'location': location,
+            'problem_name': problem_name,
+            'problem_name_from_location': problem_name_from_location,
+            'num_graded': finished_instructor_graded,
+            'num_pending': submissions_pending,
+            'num_required': submissions_required,
+            'min_for_ml': control.minimum_to_use_ai,
             }
         location_info.append(location_dict)
 

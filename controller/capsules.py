@@ -68,7 +68,13 @@ class LocationCapsule(object):
 
         # Get the last problem submitted and read its name.
         # Do this to support course staff changing problem names.
-        return self.location_submissions().order_by("-date_modified")[0].problem_id
+        return self.latest_submission().problem_id
+
+    def latest_submission(self):
+        """
+        Get the latest submission for this location.
+        """
+        return self.location_submissions().order_by("-date_modified")[0]
 
 class CourseCapsule(object):
     """

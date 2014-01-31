@@ -21,6 +21,7 @@ import rubric_functions
 from django.db import transaction
 import time
 import random
+from control_util import SubmissionControl
 
 from django.db import connection
 
@@ -151,8 +152,8 @@ def submit(request):
                     grader_settings=grader_settings,
                     initial_display=initial_display,
                     answer=answer,
-                    skip_basic_checks = skip_basic_checks,
-                    control_fields = json.dumps(control_fields)
+                    skip_basic_checks=skip_basic_checks,
+                    control_fields=json.dumps(control_fields)
                 )
                 transaction.commit_unless_managed()
 
@@ -236,17 +237,18 @@ def handle_submission(sub):
         grader_settings_path = os.path.join(settings.GRADER_SETTINGS_DIRECTORY, sub.grader_settings)
         grader_settings = grader_util.get_grader_settings(grader_settings_path)
 
+        control = SubmissionControl(sl.latest_submission())
 
         if grader_settings['grader_type'] == "ML":
             success= ml_grading_util.check_for_all_model_and_rubric_success(sub.location)
-            if(((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_ML) and success):
+            if ((subs_graded_by_instructor + subs_pending_instructor) >= control.minimum_to_use_ai) and success:
                 sub.next_grader_type = "ML"
             else:
                 sub.next_grader_type = "IN"
         elif grader_settings['grader_type'] == "PE":
             #Ensures that there will be some calibration essays before peer grading begins!
             #Calibration essays can be added using command line utility, or through normal instructor grading.
-            if((subs_graded_by_instructor + subs_pending_instructor) >= settings.MIN_TO_USE_PEER):
+            if((subs_graded_by_instructor + subs_pending_instructor) >= control.minimum_to_use_peer):
                 sub.next_grader_type = "PE"
             else:
                 sub.next_grader_type = "IN"
