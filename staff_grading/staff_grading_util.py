@@ -194,35 +194,35 @@ def generate_ml_error_message(ml_error_info):
 
     return ml_message
 
-def set_instructor_grading_item_back_to_ml(submission_id):
+def set_instructor_grading_item_back_to_preferred_grader(submission_id):
     """
-    Sets a submission from instructor grading to ML.
+    Sets a submission from instructor grading to preferred_grader_type.
     Input:
         Submission id
     Output:
         Boolean success, submission or error message
     """
-    success, sub=check_submission_id(submission_id)
+    success, submission = check_submission_id(submission_id)
 
     if not success:
-        return success, sub
+        return success, submission
 
-    grader_dict={
-        'feedback' : 'Instructor skipped',
-        'status' : GraderStatus.failure,
-        'grader_id' : 1,
-        'grader_type' : "IN",
-        'confidence' : 1,
-        'score' : 0,
-        'errors' : "Instructor skipped the submission."
+    grader_dict = {
+        'feedback': 'Instructor skipped',
+        'status': GraderStatus.failure,
+        'grader_id': 1,
+        'grader_type': "IN",
+        'confidence': 1,
+        'score': 0,
+        'errors': "Instructor skipped the submission."
     }
 
-    sub.next_grader_type="ML"
-    sub.state=SubmissionState.waiting_to_be_graded
-    sub.save()
-    create_grader(grader_dict,sub)
+    submission.next_grader_type = submission.preferred_grader_type
+    submission.state = SubmissionState.waiting_to_be_graded
+    submission.save()
+    create_grader(grader_dict, submission)
 
-    return True, sub
+    return True, submission
 
 def check_submission_id(submission_id):
     if not isinstance(submission_id,Submission):

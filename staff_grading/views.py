@@ -176,7 +176,7 @@ def save_grade(request):
         return util._error_response("required_parameter_missing", _INTERFACE_VERSION)
 
     if skipped:
-        success, sub=staff_grading_util.set_instructor_grading_item_back_to_ml(submission_id)
+        success, sub = staff_grading_util.set_instructor_grading_item_back_to_preferred_grader(submission_id)
 
         if not success:
             return util._error_response(sub, _INTERFACE_VERSION)

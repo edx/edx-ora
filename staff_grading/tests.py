@@ -160,6 +160,22 @@ class StaffGradingViewTest(unittest.TestCase):
         test_sub = Submission.objects.get(id=test_sub.id)
         self.assertEqual(test_sub.next_grader_type,"ML")
 
+    def test_skip_problem_next_grader_type_pe(self):
+        """Next grader type should be PE."""
+        test_sub = test_util.get_sub("IN", LOCATION, STUDENT_ID, course_id=COURSE_ID, preferred_grader_type="PE")
+        test_sub.save()
+        self.save_grade(True, True)
+        test_sub = Submission.objects.get(id=test_sub.id)
+        self.assertEqual(test_sub.next_grader_type, "PE")
+
+    def test_skip_problem_next_grader_type_ml(self):
+        """Next grader type should be ML."""
+        test_sub = test_util.get_sub("IN", LOCATION, STUDENT_ID, course_id=COURSE_ID, preferred_grader_type="ML")
+        test_sub.save()
+        self.save_grade(True, True)
+        test_sub = Submission.objects.get(id=test_sub.id)
+        self.assertEqual(test_sub.next_grader_type, "ML")
+
     def test_submission_location(self):
         Submission.objects.all().delete()
         test_sub=test_util.get_sub("IN",STUDENT_ID, LOCATION)
