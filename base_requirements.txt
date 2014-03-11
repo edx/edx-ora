@@ -9,7 +9,8 @@ pytz==2012h
 MySQL-python==1.2.4
 boto==2.6.0
 lxml==3.0.1
+celery==3.0.19
 django-celery==3.0.11
 celery-with-redis==3.0
 django-nose==1.1
--e git+https://github.com/edx/ease.git@965a61b0701bb93bebdcd7173c3538008a1ea009#egg=ease
+-e git+https://github.com/edx/ease.git@5dbcad331f2c672f0a2dfe6e40e37573ca1c3052#egg=ease
