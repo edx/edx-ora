@@ -4,7 +4,7 @@ import sys
 from logging.handlers import SysLogHandler
 
 
-def get_logger_config(debug=False,):
+def get_logger_config(debug=False, dev_env=False):
     """
 
     Return the appropriate logging config dictionary. You should assign the
@@ -20,7 +20,9 @@ def get_logger_config(debug=False,):
 
     """
 
-    handlers = ['console']
+    handlers = ['console', 'local'] if debug else [
+        'console', 'syslogger-remote', 'local'
+    ]
 
     logger_config = {
         'version': 1,
@@ -62,5 +64,28 @@ def get_logger_config(debug=False,):
             },
         }
     }
+
+    if dev_env:
+        edx_file_loc = os.path.join(log_dir, edx_filename)
+        logger_config['handlers'].update({
+            'local': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': local_loglevel,
+                'formatter': 'standard',
+                'filename': edx_file_loc,
+                'maxBytes': 1024 * 1024 * 2,
+                'backupCount': 5,
+            },
+        })
+    else:
+        logger_config['handlers'].update({
+            'local': {
+                'level': local_loglevel,
+                'class': 'logging.handlers.SysLogHandler',
+                'address': '/dev/log',
+                'formatter': 'syslog_format',
+                'facility': SysLogHandler.LOG_LOCAL0,
+            },
+        })
 
     return logger_config
