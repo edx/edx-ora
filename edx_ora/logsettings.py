@@ -3,8 +3,9 @@ import platform
 import sys
 from logging.handlers import SysLogHandler
 
+LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
-def get_logger_config(debug=False, dev_env=False):
+def get_logger_config(log_dir, debug=False, dev_env=False, local_loglevel='INFO'):
     """
 
     Return the appropriate logging config dictionary. You should assign the
@@ -19,6 +20,12 @@ def get_logger_config(debug=False, dev_env=False):
     "edx_filename" is ignored unless dev_env is set to true since otherwise logging is handled by rsyslogd.
 
     """
+
+    # Revert to INFO if an invalid string is passed in
+    if local_loglevel not in LOG_LEVELS:
+        local_loglevel = 'INFO'
+
+    edx_filename = "edx.log"
 
     handlers = ['console', 'local'] if debug else [
         'console', 'syslogger-remote', 'local'
@@ -70,7 +77,7 @@ def get_logger_config(debug=False, dev_env=False):
         logger_config['handlers'].update({
             'local': {
                 'class': 'logging.handlers.RotatingFileHandler',
-                'level': local_loglevel,
+                'level': 'DEBUG',
                 'formatter': 'standard',
                 'filename': edx_file_loc,
                 'maxBytes': 1024 * 1024 * 2,
