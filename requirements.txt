@@ -3,7 +3,7 @@ scipy==0.11.0
 coverage==3.5.3   # coverage breaks travis, so move it out of base-requirements
 sphinx==1.1.3
 django-sphinx-autodoc==0.2
-matplotlib==1.2.0
+matplotlib==1.3.1
 gunicorn
 wsgiref
 ipython
