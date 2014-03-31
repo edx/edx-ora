@@ -68,8 +68,16 @@ TIME_ZONE = ENV_TOKENS.get('TIME_ZONE', TIME_ZONE)
 
 local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')
 LOG_DIR = ENV_TOKENS.get("LOG_DIR", ENV_ROOT / "log")
-
-LOGGING = get_logger_config(LOG_DIR, debug=DEBUG, dev_env=False, local_loglevel=local_loglevel)
+LOGGING_ENV = ENV_TOKENS.get('LOGGING_ENV', 'no_env')
+LOGGING = get_logger_config(
+    LOG_DIR,
+    logging_env=LOGGING_ENV,
+    syslog_addr=(ENV_TOKENS['SYSLOG_SERVER'], 514),
+    debug=DEBUG,
+    dev_env=False,
+    local_loglevel=local_loglevel,
+    service_variant=SERVICE_VARIANT
+)
 
 ######################################################################
 # Read secure config
