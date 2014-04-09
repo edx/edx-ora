@@ -17,6 +17,7 @@ from controller.models import Submission, SubmissionState, Grader, GraderStatus
 from peer_grading.models import CalibrationHistory,CalibrationRecord
 from django.utils import timezone
 import project_urls
+from peer_grading.peer_grading_util import PeerLocation
 from staff_grading_util import StaffLocation, StaffCourse
 import mock
 
@@ -246,5 +247,49 @@ class StaffGradingViewTest(unittest.TestCase):
 
         self.assertEqual(sl.problem_name(), problem_id_two)
 
+    def test_graded_count(self):
+        Submission.objects.all().delete()
 
+        # Creating peer submission.
+        test_sub = test_util.get_sub("PE", STUDENT_ID, LOCATION)
+        test_sub.state = SubmissionState.finished
+        test_sub.save()
 
+        # Creating second peer submission.
+        test_sub2 = test_util.get_sub("PE", STUDENT_ID, LOCATION)
+        test_sub2.state = SubmissionState.finished
+        test_sub2.save()
+
+        # Creating IN grader for submission 1.
+        test_grader_1 = test_util.get_grader("IN")
+        test_grader_1.submission = test_sub
+        test_grader_1.save()
+
+        # Creating IN grader for submission 2.
+        test_grader_2 = test_util.get_grader("IN")
+        test_grader_2.submission = test_sub2
+        test_grader_2.save()
+
+        sl = StaffLocation(LOCATION)
+        # Staff graded count should be 2.
+        self.assertEqual(sl.graded_count(), 2)
+
+        pl = PeerLocation(LOCATION, STUDENT_ID)
+        # Peer graded count for STUDENT_ID should be 0.
+        self.assertEqual(pl.graded_count(), 0)
+
+        # Creating PE grader for submission 2.
+        test_grader_pe = test_util.get_grader("PE")
+        test_grader_pe.grader_id = STUDENT_ID
+        test_grader_pe.submission = test_sub2
+        test_grader_pe.save()
+
+        # Peer graded count should be 1.
+        self.assertEqual(pl.graded_count(), 1)
+
+        # Submission 2 state marked as waiting because peer grading is not completed for this submission.
+        test_sub2.state = SubmissionState.waiting_to_be_graded
+        test_sub2.save()
+
+        # Staff graded count should be 2 even after second submission is graded by a peer.
+        self.assertEqual(sl.graded_count(), 2)
