@@ -1,5 +1,4 @@
 from settings import *
-from logsettings import get_logger_config
 
 import logging
 south_logger=logging.getLogger('south')
@@ -11,8 +10,6 @@ try:
     os.makedirs(log_dir)
 except Exception:
     pass
-
-LOGGING = get_logger_config(debug=True)
 
 DATABASES = {
     'default': {

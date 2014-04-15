@@ -3,8 +3,15 @@ import platform
 import sys
 from logging.handlers import SysLogHandler
 
+LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
 
-def get_logger_config(debug=False,):
+def get_logger_config(log_dir,
+                      logging_env="no_env",
+                      syslog_addr=None,
+                      debug=False,
+                      dev_env=False,
+                      local_loglevel='INFO',
+                      service_variant=None):
     """
 
     Return the appropriate logging config dictionary. You should assign the
@@ -20,7 +27,26 @@ def get_logger_config(debug=False,):
 
     """
 
-    handlers = ['console']
+    # Revert to INFO if an invalid string is passed in
+    if local_loglevel not in LOG_LEVELS:
+        local_loglevel = 'INFO'
+
+    edx_filename = "edx.log"
+
+    if service_variant is None:
+        # default to a blank string so that if SERVICE_VARIANT is not
+        # set we will not log to a sub directory
+        service_variant = ''
+
+    hostname = platform.node().split(".")[0]
+    syslog_format = ("[service_variant={service_variant}]"
+                     "[%(name)s][env:{logging_env}] %(levelname)s "
+                     "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
+                     "- %(message)s").format(service_variant=service_variant,
+                                             logging_env=logging_env,
+                                             hostname=hostname)
+
+    handlers = ['console', 'local'] if debug else ['console', 'syslogger-remote', 'local']
 
     logger_config = {
         'version': 1,
@@ -29,7 +55,8 @@ def get_logger_config(debug=False,):
             'standard': {
                 'format': '%(asctime)s %(levelname)s %(process)d '
                           '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
-            }
+            },
+            'syslog_format': {'format': syslog_format}
         },
         'handlers': {
             'console': {
@@ -38,6 +65,12 @@ def get_logger_config(debug=False,):
                 'formatter': 'standard',
                 'stream': sys.stdout,
             },
+            'syslogger-remote': {
+                'level': 'INFO',
+                'class': 'logging.handlers.SysLogHandler',
+                'address': syslog_addr,
+                'formatter': 'syslog_format',
+            }
         },
         'loggers': {
             'django': {
@@ -62,5 +95,28 @@ def get_logger_config(debug=False,):
             },
         }
     }
+
+    if dev_env:
+        edx_file_loc = os.path.join(log_dir, edx_filename)
+        logger_config['handlers'].update({
+            'local': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'level': 'DEBUG',
+                'formatter': 'standard',
+                'filename': edx_file_loc,
+                'maxBytes': 1024 * 1024 * 2,
+                'backupCount': 5,
+            },
+        })
+    else:
+        logger_config['handlers'].update({
+            'local': {
+                'level': local_loglevel,
+                'class': 'logging.handlers.SysLogHandler',
+                'address': '/dev/log',
+                'formatter': 'syslog_format',
+                'facility': SysLogHandler.LOG_LOCAL0,
+            },
+        })
 
     return logger_config
