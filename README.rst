@@ -7,6 +7,16 @@ edx ORA (Open Response Assessor)
 
 The ORA will take a submission from an xqueue installation, pass it through machine learning grading, peer grading, and staff grading as appropriate, and return a result to LMS.  This is to be used with the edx-platform and xqueue.  It allows for the assessment of open response problems on the edx platform.
 
+DEPRECATED
+------------------------
+
+The edX team has officially transitioned all support for the Open Response Assessor (ORA) project to its second iteration (ORA2). The original ORA project will remain open on github, but the edX team will no longer be supporting new features on the old version of the product. 
+
+To get started using ORA2, update to the latest version of the edX platform. To learn how to author new ORA2 problems, see the latest course authoring documentation.
+
+http://www.github.com/edx/edx-ora2
+
+
 Overview
 ------------------------
 
