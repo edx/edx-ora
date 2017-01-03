@@ -10,7 +10,9 @@ The ORA will take a submission from an xqueue installation, pass it through mach
 DEPRECATED
 ------------------------
 
-The edX team has officially transitioned all support for the Open Response Assessor (ORA) project to its second iteration (ORA2). The original ORA project will remain open on github, but the edX team will no longer be supporting new features on the old version of the product. 
+The edX team has officially transitioned all support for the Open Response Assessor (ORA) project to its second iteration (ORA2). The original ORA project will remain open on github, but the edX team will no longer be supporting new features on the old version of the product.
+
+Note that this repository uses out-of-date versions of libraries that have known security issues. If this repository were to be used, the first step would be to update libraries in the various requirements files to pick up security updates.
 
 To get started using ORA2, update to the latest version of the edX platform. To learn how to author new ORA2 problems, see the latest course authoring documentation.
 
