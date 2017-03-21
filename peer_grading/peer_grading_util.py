@@ -107,7 +107,7 @@ class PeerLocation(LocationCapsule):
         # add a grade to that one.
         if control_util.SubmissionControl.peer_grade_finished_subs(self):
             already_completed = self.submissions_completed_peer_grading()
-            if already_completed.count() > 0 and self.graded_count() < self.required_count():
+            if already_completed.count() > 0:
                 log.info("location {}: finding completed submission to give to peer grader {}".format(self.location,
                                                                                                       self.student_id))
                 course_id = already_completed[0].course_id
