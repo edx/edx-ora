@@ -262,5 +262,32 @@ class StaffGradingViewTest(unittest.TestCase):
 
         self.assertEqual(sl.problem_name(), problem_id_two)
 
+    def test_save_grade_with_large_feedback(self):
+        test_sub = test_util.get_sub("IN", STUDENT_ID, LOCATION)
+        test_sub.save()
 
+        feedback = ""
+        for i in range(0, 3800):
+            feedback += "This is very long feedback."
 
+        post_data = {
+            'course_id': COURSE_ID,
+            'grader_id': STUDENT_ID,
+            'submission_id': 1,
+            'score': 0,
+            'feedback': feedback,
+            'skipped': False,
+            'rubric_scores_complete': True,
+            'rubric_scores': [1, 1]
+        }
+
+        response = self.c.post(
+            SAVE_GRADE,
+            post_data,
+        )
+
+        body = json.loads(response.content)
+
+        # Should not succeed.
+        self.assertEqual(body['success'], False)
+        self.assertEqual(body['error'], "Feedback is too long.")
